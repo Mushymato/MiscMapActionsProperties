@@ -1,0 +1,3 @@
+# MiscMapActionsProperties
+
+New mod.
