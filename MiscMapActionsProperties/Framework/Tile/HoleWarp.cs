@@ -3,6 +3,13 @@ using StardewValley;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
+/// <summary>
+/// Add new tile action and touch action mushymato.MMAP_HoleWarp. Warp the player in a style similar to skull cavern holes.
+/// Usage:
+/// - mushymato.MMAP_HoleWarp <location> <X> <Y> [mailflag]
+/// Arguments are identical to vanilla warp tile actions.
+/// When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
+/// </summary>
 internal static class HoleWarp
 {
     internal static readonly string TileAction_HoleWarp = $"{ModEntry.ModId}_HoleWarp";
