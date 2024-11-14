@@ -22,18 +22,11 @@ public class ModEntry : Mod
         Harmony harmony = new(ModId);
 
         Framework.Buildings.ChestLight.Register(helper);
-
-        Framework.Map.BuildingEntry.Patch(harmony);
-
         Framework.Terrain.HoeDirtOverride.Register(helper);
-
         Framework.Tile.ShowConstruct.Register();
-
         Framework.Tile.AnimalSpot.Patch(harmony);
         Framework.Tile.AnimalSpot.Register(helper);
-
         Framework.Tile.HoleWarp.Register();
-
         Framework.Tile.LightSpot.Patch(harmony);
     }
 

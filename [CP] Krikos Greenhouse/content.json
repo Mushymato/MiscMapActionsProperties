@@ -24,6 +24,10 @@
         "CanHaveGreenRainSpawns": false,
         "MinDailyWeeds": 0,
         "MaxDailyWeeds": 0,
+        "FirstDayWeedMultiplier": 0,
+        "MinDailyForageSpawn": 0,
+        "MaxDailyForageSpawn": 0,
+        "MaxSpawnedForageAtOnce": 0,
         "FishAreas": {
           "Ocean": {
             "DisplayName": null,
@@ -136,14 +140,16 @@
       "Action": "Include",
       "FromFile": "data/construct.json",
       "When": {
-        "HasMod": "mushymato.MMAP",
-        "EnableConstructionMenu": true
+        "HasMod": "mushymato.MMAP"
       }
     },
     // <><
     {
       "Action": "Include",
-      "FromFile": "data/fishpondtest.json"
+      "FromFile": "data/fishpondsize.json",
+      "When": {
+        "HasMod": "mushymato.MMAP"
+      }
     },
   ]
 }

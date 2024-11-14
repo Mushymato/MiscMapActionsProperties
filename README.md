@@ -4,13 +4,6 @@ Adds a few map related features, no strong design theme just whatever I happen t
 
 See `[CP] MMAP Examples` for samples.
 
-## Map Property
-
-#### mushymato.MMAP_BuildingEntry \<x\> \<y\>
-
-- For use in building maps.
-- Changes where the player arrives on entry, away from the default 1 tile above first warp.
-
 ## Tile Data
 
 #### Back layer: mushymato.MMAP_AnimalSpot T
@@ -70,3 +63,15 @@ See `[CP] MMAP Examples` for samples.
 - Colors are inverted before being passed to light, so that "Red" will give red light.
 - type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use offsetX and offsetY to further adjust the position of the light.
+
+
+### DEPRECATED
+
+If you need something from here ask me about it and I'll try to think of better implementation.
+
+## Map Property
+
+#### mushymato.MMAP_BuildingEntry \<x\> \<y\>
+
+- For use in building maps.
+- Changes where the player arrives on entry, away from the default 1 tile above first warp.
