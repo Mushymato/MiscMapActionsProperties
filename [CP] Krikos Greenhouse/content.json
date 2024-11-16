@@ -142,14 +142,6 @@
       "When": {
         "HasMod": "mushymato.MMAP"
       }
-    },
-    // <><
-    {
-      "Action": "Include",
-      "FromFile": "data/fishpondsize.json",
-      "When": {
-        "HasMod": "mushymato.MMAP"
-      }
-    },
+    }
   ]
 }

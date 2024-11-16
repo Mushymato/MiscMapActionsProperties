@@ -4,6 +4,7 @@
   <property name="IsFarm" value="T"/>
   <property name="IsGreenhouse" value="T"/>
   <property name="Outdoors" value="T"/>
+  <property name="SeasonOverride" value="Winter"/>
   <property name="Warp" value="21 39 Farm 28 16 22 39 Farm 28 16 23 39 Farm 28 16"/>
  </properties>
  <tileset firstgid="1" name="paths" tilewidth="16" tileheight="16" tilecount="64" columns="4">

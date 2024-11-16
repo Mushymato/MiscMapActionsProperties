@@ -22,6 +22,7 @@ public class ModEntry : Mod
         Harmony harmony = new(ModId);
 
         Framework.Buildings.ChestLight.Register(helper);
+        Framework.Buildings.SeasonOverrideFix.Patch(harmony);
         Framework.Terrain.HoeDirtOverride.Register(helper);
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.AnimalSpot.Patch(harmony);
