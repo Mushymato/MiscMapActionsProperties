@@ -1,0 +1,6 @@
+{
+    "PIFRoom.DisplayName": "圆台半岛",
+    // configs
+    "config.EnableConstructionMenu.name": "建造菜单",
+    "config.EnableConstructionMenu.description": "添加一个用于打开木匠建筑菜单的画架，和一个用于打开巫师建筑菜单的书架，需前置模组MMAP (Nexus 28423)"
+}

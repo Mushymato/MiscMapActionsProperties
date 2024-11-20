@@ -25,6 +25,10 @@
       ],
       "Entries": {
         "DisplayName": "[LocationName Farm]{{i18n:Greenhouse.DisplayName}}",
+        "DefaultArrivalTile": {
+          "X": 22,
+          "Y": 39
+        },
         "CanHaveGreenRainSpawns": false,
         "MinDailyWeeds": 0,
         "MaxDailyWeeds": 0,

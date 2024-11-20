@@ -2,7 +2,7 @@
     "Greenhouse.DisplayName": " Greenhouse",
     // configs
     "config.EnableConstructionMenu.name": "Construction Menu",
-    "config.EnableConstructionMenu.description": "Make greenhouse buildable, adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Requires MMAP (Nexus 28423).",
+    "config.EnableConstructionMenu.description": "Adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Requires MMAP (Nexus 28423).",
     "config.SeasonOverride.name": "Season Override",
     "config.SeasonOverride.description": "Changes the seasonal appearance of the greenhouse, must reload the save to update.",
     "config.SeasonOverride.values.none": "None",

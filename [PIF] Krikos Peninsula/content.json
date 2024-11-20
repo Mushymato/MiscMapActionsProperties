@@ -1,0 +1,203 @@
+{
+  "Format": "2.4.0",
+  "ConfigSchema": {
+    "EnableConstructionMenu": {
+      "AllowValues": "true, false",
+      "Default": true,
+    },
+  },
+  "Changes": [
+    // PIF
+    {
+      "Action": "Load",
+      "Target": "{{ModID}}/Greenhouse",
+      "FromFile": "assets/{{TargetWithoutPath}}.tmx"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "{{ModID}}/Greenhouse",
+      "MapProperties": {
+        "Warp": null,
+      },
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 21,
+            "Y": 38
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "TouchAction": "DLX.PIF_WarpToFarmHouse"
+          },
+        },
+        {
+          "Position": {
+            "X": 22,
+            "Y": 38
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "TouchAction": "DLX.PIF_WarpToFarmHouse"
+          },
+        },
+        {
+          "Position": {
+            "X": 23,
+            "Y": 38
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "TouchAction": "DLX.PIF_WarpToFarmHouse"
+          },
+        },
+      ]
+    },
+    {
+      "Action": "Load",
+      "Target": "{{ModID}}/GreenhousePreview",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "DLX.PIF/Farms",
+      "Entries": {
+        "{{ModId}}": {
+          "Preview": "{{ModID}}/GreenhousePreview",
+          "DisplayName": "{{i18n:PIFRoom.DisplayName}}",
+          "ArrivalTile_T0": {
+            "X": 22,
+            "Y": 37
+          },
+          "MapAsset_T0": "{{ModID}}/Greenhouse",
+          "CreateOnLoad": {
+            "AlwaysActive": true
+          },
+          "DefaultArrivalTile": {
+            "X": 22,
+            "Y": 37
+          },
+          "CanHaveGreenRainSpawns": false,
+          "MinDailyWeeds": 0,
+          "MaxDailyWeeds": 0,
+          "FirstDayWeedMultiplier": 0,
+          "MinDailyForageSpawn": 0,
+          "MaxDailyForageSpawn": 0,
+          "MaxSpawnedForageAtOnce": 0,
+          "FishAreas": {
+            "Ocean": {
+              "DisplayName": null,
+              "Position": null,
+              "CrabPotFishTypes": [
+                "ocean"
+              ],
+              "CrabPotJunkChance": 0.5
+            }
+          },
+          "Fish": [
+            {
+              "Chance": 0.25,
+              "Season": null,
+              "FishAreaId": "Ocean",
+              "BobberPosition": null,
+              "PlayerPosition": null,
+              "MinFishingLevel": 0,
+              "MinDistanceFromShore": 0,
+              "MaxDistanceFromShore": -1,
+              "ApplyDailyLuck": false,
+              "CuriosityLureBuff": -1.0,
+              "SpecificBaitBuff": 0.0,
+              "SpecificBaitMultiplier": 1.66,
+              "CatchLimit": -1,
+              "CanUseTrainingRod": null,
+              "IsBossFish": false,
+              "SetFlagOnCatch": null,
+              "RequireMagicBait": false,
+              "Precedence": -20,
+              "IgnoreFishDataRequirements": false,
+              "CanBeInherited": true,
+              "ChanceModifiers": null,
+              "ChanceModifierMode": "Stack",
+              "ChanceBoostPerLuckLevel": 0.0,
+              "UseFishCaughtSeededRandom": false,
+              "Condition": null,
+              "Id": "(O)152",
+              "ItemId": "(O)152",
+              "RandomItemId": null,
+              "MaxItems": null,
+              "MinStack": -1,
+              "MaxStack": -1,
+              "Quality": -1,
+              "ObjectInternalName": null,
+              "ObjectDisplayName": null,
+              "ObjectColor": null,
+              "ToolUpgradeLevel": -1,
+              "IsRecipe": false,
+              "StackModifiers": null,
+              "StackModifierMode": "Stack",
+              "QualityModifiers": null,
+              "QualityModifierMode": "Stack",
+              "ModData": null,
+              "PerItemCondition": null
+            },
+            {
+              "Chance": 0.25,
+              "Season": null,
+              "FishAreaId": "Ocean",
+              "BobberPosition": null,
+              "PlayerPosition": null,
+              "MinFishingLevel": 0,
+              "MinDistanceFromShore": 0,
+              "MaxDistanceFromShore": -1,
+              "ApplyDailyLuck": false,
+              "CuriosityLureBuff": -1.0,
+              "SpecificBaitBuff": 0.0,
+              "SpecificBaitMultiplier": 1.66,
+              "CatchLimit": -1,
+              "CanUseTrainingRod": null,
+              "IsBossFish": false,
+              "SetFlagOnCatch": null,
+              "RequireMagicBait": false,
+              "Precedence": 0,
+              "IgnoreFishDataRequirements": true,
+              "CanBeInherited": true,
+              "ChanceModifiers": null,
+              "ChanceModifierMode": "Stack",
+              "ChanceBoostPerLuckLevel": 0.0,
+              "UseFishCaughtSeededRandom": false,
+              "Condition": null,
+              "Id": "LOCATION_FISH Beach BOBBER_X BOBBER_Y WATER_DEPTH",
+              "ItemId": "LOCATION_FISH Beach BOBBER_X BOBBER_Y WATER_DEPTH",
+              "RandomItemId": null,
+              "MaxItems": null,
+              "MinStack": -1,
+              "MaxStack": -1,
+              "Quality": -1,
+              "ObjectInternalName": null,
+              "ObjectDisplayName": null,
+              "ObjectColor": null,
+              "ToolUpgradeLevel": -1,
+              "IsRecipe": false,
+              "StackModifiers": null,
+              "StackModifierMode": "Stack",
+              "QualityModifiers": null,
+              "QualityModifierMode": "Stack",
+              "ModData": null,
+              "PerItemCondition": null
+            }
+          ],
+          "CustomFields": {
+            "{{ModID}}": "T"
+          },
+        },
+      }
+    },
+    // Optional: Make location buildable via MMAP tile actions
+    {
+      "Action": "Include",
+      "FromFile": "data/construct.json",
+      "When": {
+        "HasMod": "mushymato.MMAP"
+      }
+    },
+  ]
+}

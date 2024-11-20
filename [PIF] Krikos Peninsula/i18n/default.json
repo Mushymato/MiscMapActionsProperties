@@ -1,0 +1,6 @@
+{
+    "PIFRoom.DisplayName": "Krikos Peninsula",
+    // configs
+    "config.EnableConstructionMenu.name": "Construction Menu",
+    "config.EnableConstructionMenu.description": "Adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Requires MMAP (Nexus 28423)."
+}

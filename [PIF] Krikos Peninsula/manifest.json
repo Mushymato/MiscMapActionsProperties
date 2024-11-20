@@ -1,9 +1,9 @@
 {
-  "Name": "[CP] Krikos Greenhouse",
+  "Name": "[PIF] Krikos Peninsula",
   "Author": "mushymato",
   "Version": "1.0.0",
   "Description": "Seaside PIF room.",
-  "UniqueID": "mushymato.KrikosGreenhouse",
+  "UniqueID": "mushymato.KrikosPeninsula.PIF",
   "MinimumApiVersion": "4.1.0",
   "UpdateKeys": [
     "Nexus:???"
@@ -12,6 +12,10 @@
     "UniqueID": "Pathoschild.ContentPatcher"
   },
   "Dependencies": [
+    {
+      "UniqueID": "DLX.PIF",
+      "MinimumVersion": "1.2.0"
+    },
     {
       "UniqueID": "mushymato.MMAP",
       "MinimumVersion": "1.1.2",
