@@ -1,0 +1,13 @@
+{
+    "Greenhouse.DisplayName": "温室",
+    // configs
+    "config.EnableConstructionMenu.name": "建造菜单",
+    "config.EnableConstructionMenu.description": "添加一个用于打开木匠建筑菜单的画架，和一个用于打开巫师建筑菜单的书架，需前置模组MMAP (Nexus 28423)",
+    "config.SeasonOverride.name": "季节覆盖",
+    "config.SeasonOverride.description": "更改温室季节，只更改外观，不影响可种植作物。更改设置后需重新加载存档。",
+    "config.SeasonOverride.values.none": "无",
+    "config.SeasonOverride.values.spring": "春",
+    "config.SeasonOverride.values.summer": "夏",
+    "config.SeasonOverride.values.fall": "秋",
+    "config.SeasonOverride.values.winter": "冬",
+}
