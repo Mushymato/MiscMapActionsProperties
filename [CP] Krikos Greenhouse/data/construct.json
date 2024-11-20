@@ -66,28 +66,28 @@
         "HasFlag": "hasPickedUpMagicInk"
       }
     },
-    // {
-    //   "Action": "Load",
-    //   "Target": "Mods/{{ModId}}/Greenhouse-lights",
-    //   "FromFile": "assets/{{TargetWithoutPath}}.png"
-    // },
-    // {
-    //   "Action": "EditMap",
-    //   "Target": "Maps/Greenhouse",
-    //   "MapTiles": [
-    //     {
-    //       "Position": {
-    //         "X": 22,
-    //         "Y": 19
-    //       },
-    //       "Layer": "Front",
-    //       "SetTilesheet": "paths",
-    //       "SetIndex": 0,
-    //       "SetProperties": {
-    //         "mushymato.MMAP_Light": "4 White Mods/{{ModId}}/Greenhouse-lights"
-    //       },
-    //     },
-    //   ]
-    // },
+    {
+      "Action": "Load",
+      "Target": "Mods/{{ModId}}/Greenhouse-lights",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Greenhouse",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 22,
+            "Y": 19
+          },
+          "Layer": "Front",
+          "SetTilesheet": "paths",
+          "SetIndex": 0,
+          "SetProperties": {
+            "mushymato.MMAP_Light": "4 White Mods/{{ModId}}/Greenhouse-lights"
+          },
+        },
+      ]
+    },
   ]
 }

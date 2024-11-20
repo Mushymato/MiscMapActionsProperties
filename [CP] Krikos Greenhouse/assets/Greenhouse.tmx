@@ -2,9 +2,7 @@
 <map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="45" height="39" tilewidth="16" tileheight="16" infinite="0" nextlayerid="22" nextobjectid="65">
  <properties>
   <property name="IsFarm" value="T"/>
-  <property name="IsGreenhouse" value="T"/>
   <property name="Outdoors" value="T"/>
-  <property name="SeasonOverride" value="Winter"/>
   <property name="Warp" value="21 39 Farm 28 16 22 39 Farm 28 16 23 39 Farm 28 16"/>
  </properties>
  <tileset firstgid="1" name="paths" tilewidth="16" tileheight="16" tilecount="64" columns="4">

@@ -4,7 +4,11 @@
     "EnableConstructionMenu": {
       "AllowValues": "true, false",
       "Default": true,
-    }
+    },
+    "SeasonOverride": {
+      "AllowValues": "none, spring, summer, fall, winter",
+      "Default": "none"
+    },
   },
   "Changes": [
     // Greenhouse
@@ -35,7 +39,7 @@
             "CrabPotFishTypes": [
               "ocean"
             ],
-            "CrabPotJunkChance": 0.2
+            "CrabPotJunkChance": 0.5
           }
         },
         "Fish": [
@@ -85,7 +89,7 @@
             "PerItemCondition": null
           },
           {
-            "Chance": 0.5,
+            "Chance": 0.25,
             "Season": null,
             "FishAreaId": "Ocean",
             "BobberPosition": null,
@@ -135,12 +139,23 @@
         },
       },
     },
-    // Optional: Make location buildable (but only with Carpenter's buildings) via MMAP tile action
+    // Optional: Make location buildable via MMAP tile actions
     {
       "Action": "Include",
       "FromFile": "data/construct.json",
       "When": {
         "HasMod": "mushymato.MMAP"
+      }
+    },
+    // Seasons
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Greenhouse",
+      "MapProperties": {
+        "SeasonOverride": "{{SeasonOverride}}",
+      },
+      "When": {
+        "SeasonOverride |contains=none": false
       }
     }
   ]

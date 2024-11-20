@@ -1,5 +1,13 @@
 {
     "Greenhouse.DisplayName": " Greenhouse",
+    // configs
     "config.EnableConstructionMenu.name": "Construction Menu",
-    "config.EnableConstructionMenu.description": "Add an interactable chest that opens the carpenter menu for building in the farm cave. Requires MMAP (Nexus 28423)."
+    "config.EnableConstructionMenu.description": "Make greenhouse buildable, adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Buildings remain even with this option off, requires MMAP (Nexus 28423).",
+    "config.SeasonOverride.name": "Season Override",
+    "config.SeasonOverride.description": "Changes the seasonal appearance of the greenhouse.",
+    "config.SeasonOverride.values.none": "None",
+    "config.SeasonOverride.values.spring": "Spring",
+    "config.SeasonOverride.values.summer": "Summer",
+    "config.SeasonOverride.values.fall": "Fall",
+    "config.SeasonOverride.values.winter": "Winter",
 }
