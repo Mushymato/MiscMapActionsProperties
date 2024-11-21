@@ -19,7 +19,7 @@ internal static class FruitTreeCosmeticSeason
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(FruitTree), nameof(FruitTree.GetCosmeticSeason)),
-                postfix: new HarmonyMethod(typeof(FruitTree), nameof(FruitTree_GetCosmeticSeason_Postfix))
+                postfix: new HarmonyMethod(typeof(FruitTreeCosmeticSeason), nameof(FruitTree_GetCosmeticSeason_Postfix))
             );
         }
         catch (Exception err)

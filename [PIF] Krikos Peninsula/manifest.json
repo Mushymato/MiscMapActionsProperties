@@ -18,7 +18,7 @@
     },
     {
       "UniqueID": "mushymato.MMAP",
-      "MinimumVersion": "1.1.2",
+      "MinimumVersion": "1.2.0",
       "IsRequired": false
     }
   ],

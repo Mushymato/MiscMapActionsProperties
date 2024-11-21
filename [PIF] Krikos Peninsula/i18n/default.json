@@ -2,5 +2,7 @@
     "PIFRoom.DisplayName": "Krikos Peninsula",
     // configs
     "config.EnableConstructionMenu.name": "Construction Menu",
-    "config.EnableConstructionMenu.description": "Adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Requires MMAP (Nexus 28423)."
+    "config.EnableConstructionMenu.description": "Adds an easel that opens the carpenter menu and a bookstand that opens the wizard building menu (after respective quest is completed). Requires MMAP (Nexus 28423).",
+    "config.IsGreenhouse.name": "Is Greenhouse",
+    "config.IsGreenhouse.description": "Make the PIF room a greenhouse, enabling greenhouse is instant, but disabling requires reload.",
 }

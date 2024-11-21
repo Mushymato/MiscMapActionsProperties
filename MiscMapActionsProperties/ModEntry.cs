@@ -30,17 +30,6 @@ public class ModEntry : Mod
         Framework.Tile.AnimalSpot.Register(helper);
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Patch(harmony);
-
-        helper.ConsoleCommands.Add("is-gh", "check if current loc is greenhouse", ConsoleIsGreenhouse);
-    }
-
-    private void ConsoleIsGreenhouse(string arg1, string[] arg2)
-    {
-        if (Game1.currentLocation != null)
-        {
-            Log($"IsGreenhouse: {Game1.currentLocation.IsGreenhouse}", LogLevel.Info);
-            Log($"Season: {Game1.currentLocation.GetSeason()}", LogLevel.Info);
-        }
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

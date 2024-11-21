@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="45" height="39" tilewidth="16" tileheight="16" infinite="0" nextlayerid="22" nextobjectid="65">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="45" height="39" tilewidth="16" tileheight="16" infinite="0" nextlayerid="22" nextobjectid="92">
  <properties>
   <property name="IsFarm" value="T"/>
   <property name="Outdoors" value="T"/>
@@ -937,6 +937,126 @@
    </properties>
   </object>
   <object id="63" name="TileData" x="336" y="560" width="48" height="64">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="65" name="TileData" x="288" y="512" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="69" name="TileData" x="416" y="512" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="70" name="TileData" x="480" y="512" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="71" name="TileData" x="224" y="512" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="72" name="TileData" x="160" y="448" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="73" name="TileData" x="160" y="384" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="74" name="TileData" x="160" y="256" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="75" name="TileData" x="160" y="192" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="76" name="TileData" x="544" y="256" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="77" name="TileData" x="544" y="192" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="78" name="TileData" x="544" y="448" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="79" name="TileData" x="544" y="384" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="80" name="TileData" x="416" y="128" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="81" name="TileData" x="480" y="128" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="82" name="TileData" x="224" y="128" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="83" name="TileData" x="288" y="128" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="84" name="TileData" x="272" y="272" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="85" name="TileData" x="272" y="368" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="86" name="TileData" x="432" y="272" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="87" name="TileData" x="432" y="368" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="88" name="TileData" x="400" y="240" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="89" name="TileData" x="400" y="400" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="90" name="TileData" x="304" y="240" width="16" height="16">
+   <properties>
+    <property name="Type" value="Stone"/>
+   </properties>
+  </object>
+  <object id="91" name="TileData" x="304" y="400" width="16" height="16">
    <properties>
     <property name="Type" value="Stone"/>
    </properties>

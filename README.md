@@ -4,7 +4,14 @@ Adds a few map related features, no strong design theme just whatever I happen t
 
 See `[CP] MMAP Examples` for samples.
 
-## Tile Data
+### Map Property
+
+#### mushymato.MMAP_FruitTreeCosmeticSeason \<x\> \<y\>
+
+- For use in maps with map property IsGreenhouse T.
+- Make fruit trees use seasonal appearances even in greenhouse.
+
+### Tile Data
 
 #### Back layer: mushymato.MMAP_AnimalSpot T
 
@@ -43,7 +50,7 @@ See `[CP] MMAP Examples` for samples.
 - Arguments are identical to vanilla warp tile actions.
 - When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
 
-## Data/Locations CustomFields
+### Data/Locations CustomFields
 
 #### mushymato.MMAP/HoeDirt.texture: \<texture\>
 
@@ -52,7 +59,7 @@ See `[CP] MMAP Examples` for samples.
 - Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
 - See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
 
-## Data/Buildings Metadata
+### Data/Buildings Metadata
 
 #### mushymato.MMAP/ChestLight.{ChestName} [radius] [color] [type|texture] [offsetX] [offsetY]
 
@@ -65,11 +72,11 @@ See `[CP] MMAP Examples` for samples.
 - Use offsetX and offsetY to further adjust the position of the light.
 
 
-### DEPRECATED
+## DEPRECATED
 
 If you need something from here ask me about it and I'll try to think of better implementation.
 
-## Map Property
+### Map Property
 
 #### mushymato.MMAP_BuildingEntry \<x\> \<y\>
 

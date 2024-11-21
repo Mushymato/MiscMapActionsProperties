@@ -5,6 +5,10 @@
       "AllowValues": "true, false",
       "Default": true,
     },
+    "IsGreenhouse": {
+      "AllowValues": "true, false",
+      "Default": false
+    }
   },
   "Changes": [
     // PIF
@@ -51,6 +55,16 @@
           },
         },
       ]
+    },
+    {
+      "Action": "EditMap",
+      "Target": "{{ModID}}/Greenhouse",
+      "MapProperties": {
+        "IsGreenhouse": "T",
+      },
+      "When": {
+        "IsGreenhouse": true
+      }
     },
     {
       "Action": "Load",
