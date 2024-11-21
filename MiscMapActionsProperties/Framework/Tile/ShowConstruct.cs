@@ -17,18 +17,13 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class ShowConstruct
 {
     internal static readonly string TileAction_ShowConstruct = $"{ModEntry.ModId}_ShowConstruct";
-    internal static readonly string TileAction_ShowConstructForCurrent =
-        $"{ModEntry.ModId}_ShowConstructForCurrent";
+    internal static readonly string TileAction_ShowConstructForCurrent = $"{ModEntry.ModId}_ShowConstructForCurrent";
 
     internal static void Register()
     {
         GameLocation.RegisterTileAction(
             TileAction_ShowConstruct,
-            (location, args, farmer, tile) =>
-                CheckArgsThenShowConstruct(
-                    args,
-                    (builder) => location.ShowConstructOptions(builder)
-                )
+            (location, args, farmer, tile) => CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
         );
 
         GameLocation.RegisterTileAction(
@@ -41,9 +36,7 @@ internal static class ShowConstruct
                         if (location.IsBuildableLocation())
                             Game1.activeClickableMenu = new CarpenterMenu(builder, location);
                         else
-                            Game1.drawObjectDialogue(
-                                Game1.content.LoadString("Strings/UI:Carpenter_CantBuild")
-                            );
+                            Game1.drawObjectDialogue(Game1.content.LoadString("Strings/UI:Carpenter_CantBuild"));
                     }
                 )
         );
@@ -52,22 +45,8 @@ internal static class ShowConstruct
     private static bool CheckArgsThenShowConstruct(string[] args, Action<string> showMenu)
     {
         if (
-            !ArgUtility.TryGet(
-                args,
-                1,
-                out string builder,
-                out string error,
-                allowBlank: true,
-                name: "string builder"
-            )
-            || !ArgUtility.TryGetOptionalBool(
-                args,
-                2,
-                out bool restrict,
-                out error,
-                defaultValue: false,
-                "bool restrict"
-            )
+            !ArgUtility.TryGet(args, 1, out string builder, out string error, allowBlank: true, name: "string builder")
+            || !ArgUtility.TryGetOptionalBool(args, 2, out bool restrict, out error, defaultValue: false, "bool restrict")
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -85,10 +64,7 @@ internal static class ShowConstruct
             }
             catch (DivideByZeroException)
             {
-                ModEntry.Log(
-                    $"Failed to open construct menu, invalid builder {builder}",
-                    LogLevel.Error
-                );
+                ModEntry.Log($"Failed to open construct menu, invalid builder {builder}", LogLevel.Error);
                 return false;
             }
         }

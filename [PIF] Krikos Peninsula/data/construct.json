@@ -2,7 +2,7 @@
   "Changes": [
     {
       "Action": "EditMap",
-      "Target": "Maps/Greenhouse",
+      "Target": "{{ModID}}/Greenhouse",
       "MapProperties": {
         "CanBuildHere": "T",
         "LooserBuildRestrictions": "T",

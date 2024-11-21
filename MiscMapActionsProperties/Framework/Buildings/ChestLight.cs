@@ -74,10 +74,7 @@ internal static class ChestLight
                 string lightName = $"{Metadata_ChestLight_Prefix}{buildingChest.Name}";
                 if (!data.Metadata.TryGetValue(lightName, out string? lightProps))
                     continue;
-                var watch = watchers.GetValue(
-                    buildingChest,
-                    (chest) => new BuildingChestLightWatcher(building, chest, lightName, lightProps)
-                );
+                var watch = watchers.GetValue(buildingChest, (chest) => new BuildingChestLightWatcher(building, chest, lightName, lightProps));
                 watch.Subscribe();
             }
         }
@@ -88,12 +85,7 @@ internal static class ChestLight
 /// Shenanigans for watching building chest changes.
 /// Use with WeakReference or ConditionalWeakTable;
 /// </summary>
-internal sealed class BuildingChestLightWatcher(
-    Building building,
-    Chest chest,
-    string lightName,
-    string lightProps
-) : IDisposable
+internal sealed class BuildingChestLightWatcher(Building building, Chest chest, string lightName, string lightProps) : IDisposable
 {
     private Building building = building;
     private Chest chest = chest;
@@ -141,11 +133,7 @@ internal sealed class BuildingChestLightWatcher(
         {
             if (
                 !Game1.currentLightSources.ContainsKey(lightName)
-                && Light.MakeLightFromProps(
-                    lightProps,
-                    lightName,
-                    new Vector2(building.tileX.Value, building.tileY.Value) * Game1.tileSize
-                )
+                && Light.MakeLightFromProps(lightProps, lightName, new Vector2(building.tileX.Value, building.tileY.Value) * Game1.tileSize)
                     is LightSource light
             )
             {

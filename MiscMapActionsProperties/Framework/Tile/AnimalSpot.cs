@@ -26,14 +26,8 @@ internal static class AnimalSpot
         try
         {
             harmony.Patch(
-                original: AccessTools.Method(
-                    typeof(FarmAnimal),
-                    nameof(FarmAnimal.setRandomPosition)
-                ),
-                prefix: new HarmonyMethod(
-                    typeof(AnimalSpot),
-                    nameof(FarmAnimal_setRandomPosition_Prefix)
-                )
+                original: AccessTools.Method(typeof(FarmAnimal), nameof(FarmAnimal.setRandomPosition)),
+                prefix: new HarmonyMethod(typeof(AnimalSpot), nameof(FarmAnimal_setRandomPosition_Prefix))
             );
         }
         catch (Exception err)
@@ -79,10 +73,7 @@ internal static class AnimalSpot
         return false;
     }
 
-    private static bool FarmAnimal_setRandomPosition_Prefix(
-        FarmAnimal __instance,
-        GameLocation location
-    )
+    private static bool FarmAnimal_setRandomPosition_Prefix(FarmAnimal __instance, GameLocation location)
     {
         try
         {
@@ -95,14 +86,7 @@ internal static class AnimalSpot
                 if (
                     location.Objects.ContainsKey(pos)
                     || HasOtherAnimals(__instance, location, pos)
-                    || location.isCollidingPosition(
-                        _base.GetBoundingBox(),
-                        Game1.viewport,
-                        isFarmer: false,
-                        0,
-                        glider: false,
-                        __instance
-                    )
+                    || location.isCollidingPosition(_base.GetBoundingBox(), Game1.viewport, isFarmer: false, 0, glider: false, __instance)
                 )
                     continue;
                 __instance.SleepIfNecessary();

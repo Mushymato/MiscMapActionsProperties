@@ -16,37 +16,16 @@ internal static class HoleWarp
 
     internal static void Register()
     {
-        GameLocation.RegisterTileAction(
-            TileAction_HoleWarp,
-            (location, args, farmer, tile) => DoHoleWarp(location, args, farmer)
-        );
-        GameLocation.RegisterTouchAction(
-            TileAction_HoleWarp,
-            (location, args, farmer, tile) => DoHoleWarp(location, args, farmer)
-        );
+        GameLocation.RegisterTileAction(TileAction_HoleWarp, (location, args, farmer, tile) => DoHoleWarp(location, args, farmer));
+        GameLocation.RegisterTouchAction(TileAction_HoleWarp, (location, args, farmer, tile) => DoHoleWarp(location, args, farmer));
     }
 
     private static bool DoHoleWarp(GameLocation location, string[] args, Farmer farmer)
     {
         if (
-            !ArgUtility.TryGet(
-                args,
-                1,
-                out var locationToWarp,
-                out string error,
-                allowBlank: true,
-                "string locationToWarp"
-            )
+            !ArgUtility.TryGet(args, 1, out var locationToWarp, out string error, allowBlank: true, "string locationToWarp")
             || !ArgUtility.TryGetPoint(args, 2, out var tile, out error, "Point tile")
-            || !ArgUtility.TryGetOptional(
-                args,
-                4,
-                out var mailflag,
-                out error,
-                null,
-                allowBlank: true,
-                "string mailRequired"
-            )
+            || !ArgUtility.TryGetOptional(args, 4, out var mailflag, out error, null, allowBlank: true, "string mailRequired")
         )
         {
             ModEntry.Log(error, LogLevel.Error);

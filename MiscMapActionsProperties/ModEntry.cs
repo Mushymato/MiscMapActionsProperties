@@ -1,6 +1,7 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
 using HarmonyLib;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace MiscMapActionsProperties;
 
@@ -22,12 +23,24 @@ public class ModEntry : Mod
         Harmony harmony = new(ModId);
 
         Framework.Buildings.ChestLight.Register(helper);
-        Framework.Terrain.HoeDirtOverride.Register(helper);
+        Framework.Location.FruitTreeCosmeticSeason.Patch(harmony);
+        Framework.Location.HoeDirtOverride.Register(helper);
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.AnimalSpot.Patch(harmony);
         Framework.Tile.AnimalSpot.Register(helper);
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Patch(harmony);
+
+        helper.ConsoleCommands.Add("is-gh", "check if current loc is greenhouse", ConsoleIsGreenhouse);
+    }
+
+    private void ConsoleIsGreenhouse(string arg1, string[] arg2)
+    {
+        if (Game1.currentLocation != null)
+        {
+            Log($"IsGreenhouse: {Game1.currentLocation.IsGreenhouse}", LogLevel.Info);
+            Log($"Season: {Game1.currentLocation.GetSeason()}", LogLevel.Info);
+        }
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)
