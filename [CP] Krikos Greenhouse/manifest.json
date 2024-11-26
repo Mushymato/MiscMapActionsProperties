@@ -2,11 +2,11 @@
   "Name": "[CP] Krikos Greenhouse",
   "Author": "mushymato",
   "Version": "1.0.0",
-  "Description": "Seaside PIF room.",
+  "Description": "Seaside greenhouse.",
   "UniqueID": "mushymato.KrikosGreenhouse",
   "MinimumApiVersion": "4.1.0",
   "UpdateKeys": [
-    "Nexus:???"
+    "Nexus:29586"
   ],
   "ContentPackFor": {
     "UniqueID": "Pathoschild.ContentPatcher"
