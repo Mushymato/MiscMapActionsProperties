@@ -16,15 +16,55 @@ internal static class Light
     /// <param name="position"></param>
     /// <param name="mapName"></param>
     /// <returns></returns>
-    internal static LightSource? MakeLightFromProps(string lightProps, string lightName, Vector2 position, string? mapName = null)
+    internal static LightSource? MakeLightFromProps(
+        string lightProps,
+        string lightName,
+        Vector2 position,
+        string? mapName = null
+    )
     {
         string[] args = ArgUtility.SplitBySpace(lightProps ?? "");
         if (
-            !ArgUtility.TryGetOptionalFloat(args, 0, out float radius, out string error, defaultValue: 2f, name: "float radius")
-            || !ArgUtility.TryGetOptional(args, 1, out string colorStr, out error, defaultValue: "White", name: "string color")
-            || !ArgUtility.TryGetOptional(args, 2, out string textureStr, out error, defaultValue: "1", name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(args, 3, out int offsetX, out error, defaultValue: 0, name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(args, 4, out int offsetY, out error, defaultValue: 0, name: "string texture")
+            !ArgUtility.TryGetOptionalFloat(
+                args,
+                0,
+                out float radius,
+                out string error,
+                defaultValue: 2f,
+                name: "float radius"
+            )
+            || !ArgUtility.TryGetOptional(
+                args,
+                1,
+                out string colorStr,
+                out error,
+                defaultValue: "White",
+                name: "string color"
+            )
+            || !ArgUtility.TryGetOptional(
+                args,
+                2,
+                out string textureStr,
+                out error,
+                defaultValue: "1",
+                name: "string texture"
+            )
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                3,
+                out int offsetX,
+                out error,
+                defaultValue: 0,
+                name: "string texture"
+            )
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                4,
+                out int offsetY,
+                out error,
+                defaultValue: 0,
+                name: "string texture"
+            )
         )
         {
             ModEntry.Log(error, LogLevel.Error);

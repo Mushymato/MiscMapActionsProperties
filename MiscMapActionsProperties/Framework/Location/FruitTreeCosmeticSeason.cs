@@ -30,7 +30,10 @@ internal static class FruitTreeCosmeticSeason
 
     private static void FruitTree_GetCosmeticSeason_Postfix(FruitTree __instance, ref Season __result)
     {
-        if (__instance.IgnoresSeasonsHere() && __instance.Location.HasMapPropertyWithValue(TileProp_FruitTreeCosmeticSeason))
+        if (
+            __instance.IgnoresSeasonsHere()
+            && __instance.Location.HasMapPropertyWithValue(TileProp_FruitTreeCosmeticSeason)
+        )
         {
             __result = __instance.Location.GetSeason();
         }

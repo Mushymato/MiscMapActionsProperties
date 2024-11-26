@@ -51,7 +51,10 @@ internal static class LightSpot
                     continue;
                 if (tile.Properties.TryGetValue(TileProp_Light, out string lightProps))
                 {
-                    if (tile.Properties.TryGetValue(TileProp_LightCond, out string lightCond) && !GameStateQuery.CheckConditions(lightCond, location: location))
+                    if (
+                        tile.Properties.TryGetValue(TileProp_LightCond, out string lightCond)
+                        && !GameStateQuery.CheckConditions(lightCond, location: location)
+                    )
                         continue;
                     if (
                         Light.MakeMapLightFromProps(
@@ -89,7 +92,11 @@ internal static class LightSpot
                     continue;
                 string lightProps = btp.Value;
                 if (
-                    Light.MakeMapLightFromProps(lightProps, new Vector2(building.tileX.Value, building.tileY.Value), location.NameOrUniqueName)
+                    Light.MakeMapLightFromProps(
+                        lightProps,
+                        new Vector2(building.tileX.Value, building.tileY.Value),
+                        location.NameOrUniqueName
+                    )
                     is not LightSource baseLight
                 )
                     continue;
@@ -99,10 +106,12 @@ internal static class LightSpot
                     {
                         if (bannedTiles.Contains(new(i, j)))
                             continue;
-                        Vector2 pos = new(building.tileX.Value + btp.TileArea.X + i, building.tileY.Value + btp.TileArea.Y + j);
+                        Vector2 pos =
+                            new(building.tileX.Value + btp.TileArea.X + i, building.tileY.Value + btp.TileArea.Y + j);
                         LightSource light = baseLight.Clone();
                         light.Id = $"{light.Id}+{btp.TileArea.X + i},{btp.TileArea.Y + j}";
-                        light.position.Value = pos * Game1.tileSize + new Vector2(Game1.tileSize / 2, Game1.tileSize / 2);
+                        light.position.Value =
+                            pos * Game1.tileSize + new Vector2(Game1.tileSize / 2, Game1.tileSize / 2);
                         light.lightTexture = baseLight.lightTexture;
                         yield return light;
                     }

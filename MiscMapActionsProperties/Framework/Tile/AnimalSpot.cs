@@ -86,7 +86,14 @@ internal static class AnimalSpot
                 if (
                     location.Objects.ContainsKey(pos)
                     || HasOtherAnimals(__instance, location, pos)
-                    || location.isCollidingPosition(_base.GetBoundingBox(), Game1.viewport, isFarmer: false, 0, glider: false, __instance)
+                    || location.isCollidingPosition(
+                        _base.GetBoundingBox(),
+                        Game1.viewport,
+                        isFarmer: false,
+                        0,
+                        glider: false,
+                        __instance
+                    )
                 )
                     continue;
                 __instance.SleepIfNecessary();

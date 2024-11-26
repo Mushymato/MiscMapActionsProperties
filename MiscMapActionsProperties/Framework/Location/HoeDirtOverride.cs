@@ -17,7 +17,10 @@ namespace MiscMapActionsProperties.Framework.Location;
 internal static class HoeDirtOverride
 {
     internal static readonly string CustomFields_HoeDirtTexture = $"{ModEntry.ModId}/HoeDirt.texture";
-    private static readonly FieldInfo hoeDirtTexture = typeof(HoeDirt).GetField("texture", BindingFlags.NonPublic | BindingFlags.Instance)!;
+    private static readonly FieldInfo hoeDirtTexture = typeof(HoeDirt).GetField(
+        "texture",
+        BindingFlags.NonPublic | BindingFlags.Instance
+    )!;
     private static readonly ConditionalWeakTable<GameLocation, Texture2D> hoeDirtTextureCache = [];
 
     internal static void Register(IModHelper helper)

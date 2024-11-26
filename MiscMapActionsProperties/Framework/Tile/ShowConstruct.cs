@@ -23,7 +23,8 @@ internal static class ShowConstruct
     {
         GameLocation.RegisterTileAction(
             TileAction_ShowConstruct,
-            (location, args, farmer, tile) => CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
+            (location, args, farmer, tile) =>
+                CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
         );
 
         GameLocation.RegisterTileAction(
@@ -46,7 +47,14 @@ internal static class ShowConstruct
     {
         if (
             !ArgUtility.TryGet(args, 1, out string builder, out string error, allowBlank: true, name: "string builder")
-            || !ArgUtility.TryGetOptionalBool(args, 2, out bool restrict, out error, defaultValue: false, "bool restrict")
+            || !ArgUtility.TryGetOptionalBool(
+                args,
+                2,
+                out bool restrict,
+                out error,
+                defaultValue: false,
+                "bool restrict"
+            )
         )
         {
             ModEntry.Log(error, LogLevel.Error);
