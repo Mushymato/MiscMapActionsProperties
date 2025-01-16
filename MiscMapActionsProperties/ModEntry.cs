@@ -30,6 +30,7 @@ public class ModEntry : Mod
         Framework.Tile.AnimalSpot.Register(helper);
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Patch(harmony);
+        Framework.Tile.QuestionDialogue.Register(helper);
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

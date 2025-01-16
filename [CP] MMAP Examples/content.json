@@ -93,6 +93,49 @@
         }
       ]
     },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 13,
+            "Y": 26
+          },
+          "Layer": "Buildings",
+          "SetProperties": {
+            "Action": "mushymato.MMAP_QuestionDialogue {{ModId}}_QD"
+          }
+        }
+      ]
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/QuestionDialogue",
+      "Entries": {
+        "{{ModId}}_QD": {
+          "Question": "QUESTION",
+          "Speaker": "Krobus",
+          "ResponseEntries": {
+            "Horseradish": {
+              "Label": "A wild horseradish!",
+              "Actions": [
+                "AddItem (O)16"
+              ],
+            },
+            "ShadowShop": {
+              "Label": "Krobus shop.",
+              "TileActions": [
+                "OpenShop ShadowShop"
+              ],
+            },
+            "Cancel": {
+              "Condition": "TRUE"
+            }
+          }
+        }
+      }
+    },
     // {
     //   "Action": "EditMap",
     //   "Target": "Maps/BusStop",
