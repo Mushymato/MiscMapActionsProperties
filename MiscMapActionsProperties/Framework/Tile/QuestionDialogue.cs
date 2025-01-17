@@ -64,7 +64,7 @@ internal static class QuestionDialogue
 
         IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context);
         location.createQuestionDialogue(
-            qdData.Question,
+            TokenParser.ParseText(qdData.Question),
             validEntries.Select(MakeResponse).ToArray(),
             (Farmer who, string whichAnswer) => AfterQuestionBehavior(location, point, validEntries, who, whichAnswer),
             speaker: Game1.getCharacterFromName(qdData.Speaker)
@@ -89,14 +89,24 @@ internal static class QuestionDialogue
         {
             if (qde.Actions != null)
             {
+                // Perform all (trigger) actions
                 foreach (string action in qde.Actions)
-                    TriggerActionManager.TryRunAction(action, out string error, out Exception _);
+                {
+                    if (!TriggerActionManager.TryRunAction(action, out string error, out Exception _))
+                    {
+                        ModEntry.Log(error, LogLevel.Error);
+                    }
+                }
             }
             if (qde.TileActions != null)
             {
+                // Return after first successful tile action
                 xTile.Dimensions.Location loc = new(point.X, point.Y);
                 foreach (string action in qde.TileActions)
-                    location.performAction(action, who, loc);
+                {
+                    if (location.performAction(action, who, loc))
+                        return;
+                }
             }
         }
     }

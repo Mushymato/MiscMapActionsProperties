@@ -114,24 +114,36 @@
       "Target": "mushymato.MMAP/QuestionDialogue",
       "Entries": {
         "{{ModId}}_QD": {
-          "Question": "QUESTION",
+          "Question": "[LocalizedText Strings/StringsFromMaps:ArchaeologyHouse.1]",
           "Speaker": "Krobus",
           "ResponseEntries": {
             "Horseradish": {
-              "Label": "A wild horseradish!",
+              "Label": "Wild horseradish!",
+              // both actions run
               "Actions": [
+                "AddItem (O)16",
                 "AddItem (O)16"
               ],
             },
             "ShadowShop": {
               "Label": "Krobus shop.",
               "TileActions": [
-                "OpenShop ShadowShop"
+                "OpenShop ShadowShop",
+                // never runs, since 'OpenShop ShadowShop' always succeeds
+                "OpenShop Casino"
               ],
             },
-            "Cancel": {
-              "Condition": "TRUE"
-            }
+            "Bear": {
+              "Label": "Bear?",
+              "Condition": "!PLAYER_HAS_ITEM Current (F)1669",
+              "Actions": [
+                "AddItem (F)1669"
+              ],
+              "TileActions": [
+                "Message \"AnimalShop.1\""
+              ],
+            },
+            "Cancel": {}
           }
         }
       }
