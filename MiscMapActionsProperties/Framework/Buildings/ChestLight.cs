@@ -57,7 +57,6 @@ internal static class ChestLight
             foreach (var kv in watchers)
                 kv.Value.Dispose();
             watchers.Clear();
-            GC.Collect();
         }
     }
 
