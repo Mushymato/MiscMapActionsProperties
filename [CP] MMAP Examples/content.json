@@ -106,7 +106,17 @@
           "SetProperties": {
             "Action": "mushymato.MMAP_QuestionDialogue {{ModId}}_QD"
           }
-        }
+        },
+        {
+          "Position": {
+            "X": 14,
+            "Y": 23
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "TouchAction": "mushymato.MMAP_QuestionDialogue {{ModId}}_QD_Hole"
+          }
+        },
       ]
     },
     {
@@ -144,6 +154,29 @@
               ],
             },
             "Cancel": {}
+          }
+        },
+        "{{ModId}}_QD_Hole": {
+          "Question": "Jump.",
+          "ResponseEntries": {
+            "Yes1": {
+              "Label": "Yes",
+              "TouchActions": [
+                "mushymato.MMAP_HoleWarp WitchHut 7 15"
+              ]
+            },
+            "Yes2": {
+              "Label": "Yes",
+              // "TouchActions": [
+              //   "mushymato.MMAP_HoleWarp WitchHut 7 15"
+              // ]
+            },
+            "Yes3": {
+              "Label": "Yes",
+              "TouchActions": [
+                "mushymato.MMAP_HoleWarp WitchHut 7 15"
+              ]
+            }
           }
         }
       }

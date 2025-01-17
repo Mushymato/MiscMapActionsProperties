@@ -9,7 +9,8 @@ using StardewValley.Triggers;
 namespace MiscMapActionsProperties.Framework.Tile;
 
 /// <summary>
-/// Add new tile action that gives a dialog box to further actions.
+/// Add new tile action mushymato.MMAP_QuestionDialogue <id>
+/// Opens a dialog on interaction, which can be set to trigger actions/tileactions
 /// </summary>
 internal static class QuestionDialogue
 {
@@ -20,7 +21,8 @@ internal static class QuestionDialogue
     {
         helper.Events.Content.AssetRequested += OnAssetRequested;
         helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        GameLocation.RegisterTileAction(TileAction_QuestionDialogue, ShowQuestionDialogue);
+        GameLocation.RegisterTileAction(TileAction_QuestionDialogue, ShowQuestionDialogueTile);
+        GameLocation.RegisterTouchAction(TileAction_QuestionDialogue, ShowQuestionDialogueTouch);
     }
 
     private static Dictionary<string, QuestionDialogueData>? _qdData = null;
@@ -47,7 +49,33 @@ internal static class QuestionDialogue
             _qdData = null;
     }
 
-    private static bool ShowQuestionDialogue(GameLocation location, string[] args, Farmer farmer, Point point)
+    private static bool ShowQuestionDialogueTile(
+        GameLocation location,
+        string[] args,
+        Farmer farmer,
+        Point tilePosition
+    )
+    {
+        return ShowQuestionDialogue(location, args, farmer, tilePosition, farmer.Tile);
+    }
+
+    private static void ShowQuestionDialogueTouch(
+        GameLocation location,
+        string[] args,
+        Farmer farmer,
+        Vector2 playerStandingPosition
+    )
+    {
+        ShowQuestionDialogue(location, args, farmer, farmer.TilePoint, playerStandingPosition);
+    }
+
+    private static bool ShowQuestionDialogue(
+        GameLocation location,
+        string[] args,
+        Farmer farmer,
+        Point tilePosition,
+        Vector2 playerStandingPosition
+    )
     {
         if (!ArgUtility.TryGet(args, 1, out string qdId, out string error, allowBlank: false, "string qdId"))
         {
@@ -64,9 +92,10 @@ internal static class QuestionDialogue
 
         IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context);
         location.createQuestionDialogue(
-            TokenParser.ParseText(qdData.Question),
+            TokenParser.ParseText(qdData.Question) ?? "",
             validEntries.Select(MakeResponse).ToArray(),
-            (Farmer who, string whichAnswer) => AfterQuestionBehavior(location, point, validEntries, who, whichAnswer),
+            (Farmer who, string whichAnswer) =>
+                AfterQuestionBehavior(location, tilePosition, playerStandingPosition, validEntries, who, whichAnswer),
             speaker: Game1.getCharacterFromName(qdData.Speaker)
         );
 
@@ -80,6 +109,7 @@ internal static class QuestionDialogue
     internal static void AfterQuestionBehavior(
         GameLocation location,
         Point point,
+        Vector2 standing,
         IDictionary<string, QuestionDialogueEntry> validEntries,
         Farmer who,
         string whichAnswer
@@ -108,25 +138,51 @@ internal static class QuestionDialogue
                         return;
                 }
             }
+            if (qde.TouchActions != null)
+            {
+                // Perform all touch tile actions
+                foreach (string action in qde.TouchActions)
+                {
+                    location.performTouchAction(action, standing);
+                }
+            }
         }
     }
 }
 
 public class QuestionDialogueEntry
 {
+    /// <summary>Response label</summary>
     public string Label { get; set; } = "[LocalizedText Strings/UI:Cancel]";
+
+    /// <summary>Response GSQ condition</summary>
     public string? Condition { get; set; } = null;
+
+    /// <summary>List of (trigger) actions</summary>
     public List<string>? Actions { get; set; } = null;
+
+    /// <summary>List of tile actions</summary>
     public List<string>? TileActions { get; set; } = null;
+
+    /// <summary>List of touch actions</summary>
+    public List<string>? TouchActions { get; set; } = null;
 }
 
 public class QuestionDialogueData
 {
-    public string Question { get; set; } = "";
+    /// <summary>Question string</summary>
+    public string? Question { get; set; } = null;
+
+    /// <summary>Speaking NPC (unclear if this does anything)</summary>
     public string? Speaker { get; set; } = null;
+
+    /// <summary>List of responses</summary>
     public Dictionary<string, QuestionDialogueEntry> ResponseEntries { get; set; } = [];
 
-    public IDictionary<string, QuestionDialogueEntry> ValidEntries(GameStateQueryContext context)
+    /// <summary>Get all valid entries per GSQ</summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    internal IDictionary<string, QuestionDialogueEntry> ValidEntries(GameStateQueryContext context)
     {
         return ResponseEntries
             .Where((qde) => GameStateQuery.CheckConditions(qde.Value.Condition, context))

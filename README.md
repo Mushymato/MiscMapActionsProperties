@@ -50,6 +50,31 @@ See `[CP] MMAP Examples` for samples.
 - Arguments are identical to vanilla warp tile actions.
 - When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
 
+#### mushymato.MMAP_QuestionDialogue <question_dialog_id>
+
+- Can be used as either Action or TouchAction
+- Opens a question dialog, as defined by the custom asset `mushymato.MMAP/QuestionDialogue`, string -> QuestionDialogueData.
+- To make a "Cancel" option, have a `ResponseEntries` entry with blank `Actions`/`TileActions`/`TouchActions`. Putting an empty `{}` serves this purpose as `Label` is set to localized `"Cancel"` by default.
+- Similar to game, pressing ESC selects the final item in `ResponseEntries`.
+
+##### QuestionDialogueData
+
+| Property | Type | Default | Notes |
+| -------- | ---- | ------- | ----- |
+| `Question` | string | _empty_ | Question string to display, or none. |
+| `Speaker` | string | _empty_ | NPC name of speaker. |
+| `ResponseEntries` | Dictionary<string, QuestionDialogueEntry> | _empty_ | Response data. |
+
+##### QuestionDialogueEntry
+
+| Property | Type | Default | Notes |
+| -------- | ---- | ------- | ----- |
+| `Label` | string | `"[LocalizedText Strings/UI:Cancel]"` | Response text, default `"Cancel"`. |
+| `Condition` | string | _empty_ | A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this option is enabled. |
+| `Actions` | List<string> | _empty_ | [Trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions), run all actions. |
+| `TileActions` | List<string> | _empty_ | [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true. |
+| `TouchActions` | List<string> | _empty_ | [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions. |
+
 ### Data/Locations CustomFields
 
 #### mushymato.MMAP/HoeDirt.texture: \<texture\>

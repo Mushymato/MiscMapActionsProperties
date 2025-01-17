@@ -57,8 +57,8 @@ internal static class HoleWarp
             return false;
         }
 
-        DelayedAction.playSoundAfterDelay("fallDown", 800, location);
-        DelayedAction.playSoundAfterDelay("clubSmash", 1200);
+        DelayedAction.playSoundAfterDelay("fallDown", 200, location);
+        DelayedAction.playSoundAfterDelay("clubSmash", 900);
         Game1.globalFadeToBlack(
             () =>
             {
