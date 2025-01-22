@@ -13,7 +13,7 @@ using StardewValley.Objects;
 namespace MiscMapActionsProperties.Framework.Buildings;
 
 /// <summary>
-/// Add new BuildingData.Metadata mushymato.MMAP/ChestLight_<ChestId> [radius] [color] [type|texture] [offsetX] [offsetY]
+/// Add new BuildingData.Metadata mushymato.MMAP/ChestLight.<ChestId>: [radius] [color] [type|texture] [offsetX] [offsetY]
 /// Place a light source on a tile, with optional offset
 /// [type|texture] is either a light id (1-10 except for 3) or a texture (must be loaded).
 /// </summary>

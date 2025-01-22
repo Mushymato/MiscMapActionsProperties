@@ -23,6 +23,8 @@ public class ModEntry : Mod
         Harmony harmony = new(ModId);
 
         Framework.Buildings.ChestLight.Register(helper);
+        Framework.Buildings.DrawLayerRotate.Register(helper);
+        Framework.Buildings.DrawLayerRotate.Patch(harmony);
         Framework.Location.FruitTreeCosmeticSeason.Patch(harmony);
         Framework.Location.HoeDirtOverride.Register(helper);
         Framework.Tile.ShowConstruct.Register();

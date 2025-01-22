@@ -86,7 +86,7 @@ See `[CP] MMAP Examples` for samples.
 
 ### Data/Buildings Metadata
 
-#### mushymato.MMAP/ChestLight.{ChestName} [radius] [color] [type|texture] [offsetX] [offsetY]
+#### mushymato.MMAP/ChestLight.{ChestName}: [radius] [color] [type|texture] [offsetX] [offsetY]
 
 - Buildings Metadata, used over CustomFields because Metadata can be set per building skin if desired.
 - Add a light source at the building's tileX/tileY position, only lights up if corresponding building chest has content.
@@ -95,6 +95,12 @@ See `[CP] MMAP Examples` for samples.
 - Colors are inverted before being passed to light, so that "Red" will give red light.
 - type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use offsetX and offsetY to further adjust the position of the light.
+
+#### mushymato.MMAP/DrawLayerRotate.{DrawLayerId}: <rotation> <originX> <originY>
+
+- Buildings Metadata, used over CustomFields because Metadata can be set per building skin if desired.
+- Rotates the specified draw layer layer by rotation every second (rotation/60 every tick) around originX, originY
+- Can be used with regular draw layer things.
 
 
 ## DEPRECATED
