@@ -243,6 +243,10 @@
           "mushymato.MMAP/ChestLight.Output": "1 Red 1 224 0"
         }
       }
-    }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "draw_layers.json"
+    },
   ]
 }

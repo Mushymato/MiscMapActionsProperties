@@ -1,0 +1,51 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Coop",
+        "DrawLayers"
+      ],
+      "Entries": {
+        "{{ModId}}_Chimkin": {
+          "Id": "{{ModId}}_Chimkin",
+          "Texture": "Animals\\White Chicken",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 16
+          },
+          "DrawPosition": "25, 34",
+          // "DrawInBackground": false,
+          // "SortTileOffset": 0.02,
+          // "OnlyDrawIfChestHasContents": null,
+          "FrameDuration": 175,
+          "FrameCount": 4,
+          "FramesPerRow": 4,
+          // "AnimalDoorOffset": {
+          //   "X": 0,
+          //   "Y": -19
+          // }
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Coop",
+        "Metadata"
+      ],
+      "Entries": {
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.alpha": "0.5 1.0",
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.rotate": "0 3.0",
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.rotateRate": 1,
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.origin": "8 8",
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.scale": 16.0,
+        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.effect": "FlipHorizontally"
+      }
+    }
+  ]
+}
