@@ -59,21 +59,17 @@ See `[CP] MMAP Examples` for samples.
 
 ##### QuestionDialogueData
 
-| Property | Type | Default | Notes |
-| -------- | ---- | ------- | ----- |
-| `Question` | string | _empty_ | Question string to display, or none. |
-| `Speaker` | string | _empty_ | NPC name of speaker. |
-| `ResponseEntries` | Dictionary<string, QuestionDialogueEntry> | _empty_ | Response data. |
+- `Question` (`string`, _empty_): Question string to display, or none.
+- `Speaker` (`string`, _empty_): NPC name of speaker.
+- `ResponseEntries` (`Dictionary<string, QuestionDialogueEntry>`, _empty_): Response data.
 
 ##### QuestionDialogueEntry
 
-| Property | Type | Default | Notes |
-| -------- | ---- | ------- | ----- |
-| `Label` | string | `"[LocalizedText Strings/UI:Cancel]"` | Response text, default `"Cancel"`. |
-| `Condition` | string | _empty_ | A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this option is enabled. |
-| `Actions` | List<string> | _empty_ | [Trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions), run all actions. |
-| `TileActions` | List<string> | _empty_ | [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true. |
-| `TouchActions` | List<string> | _empty_ | [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions. |
+- `Label` (`string`, `"[LocalizedText Strings/UI:Cancel]"`): Response text, default `"Cancel"`.
+- `Condition` (`string`, _empty_): A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this option is enabled.
+- `Actions` (`List<string>`, _empty_): [Trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions), run all actions.
+- `TileActions` (`List<string>`, _empty_): [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true.
+- `TouchActions` (`List<string>`, _empty_): [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions.
 
 ### Data/Locations CustomFields
 
@@ -86,9 +82,10 @@ See `[CP] MMAP Examples` for samples.
 
 ### Data/Buildings Metadata
 
+Buildings Metadata are like CustomFields, except they also appear on skins and can be overwritten if needed.
+
 #### mushymato.MMAP/ChestLight.{ChestName}: [radius] [color] [type|texture] [offsetX] [offsetY]
 
-- Buildings Metadata, used over CustomFields because Metadata can be set per building skin if desired.
 - Add a light source at the building's tileX/tileY position, only lights up if corresponding building chest has content.
 - Radius controls size of light.
 - Can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html).
@@ -96,11 +93,34 @@ See `[CP] MMAP Examples` for samples.
 - type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use offsetX and offsetY to further adjust the position of the light.
 
-#### mushymato.MMAP/DrawLayerRotate.{DrawLayerId}: <rotation> <originX> <originY>
+#### mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.{override}
 
-- Buildings Metadata, used over CustomFields because Metadata can be set per building skin if desired.
-- Rotates the specified draw layer layer by rotation every second (rotation/60 every tick) around originX, originY
-- Can be used with regular draw layer things.
+Various draw layer overriding fields, can be used with regular draw layer things.
+
+##### string values
+
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.condition`: A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this layer should draw. Rechecked on time changed (e.g. 10 in game minutes).
+
+##### float values
+
+These are all support passing either `0.1` float, or `"0.1 0.4"` for random value between first and second.
+
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.alpha`: transparency (0 to 1)
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.rotate`: rotation (0 to 6.28318), around the origin.
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.rotateRate`: rotation change per second, positive is clockwise, negative is counter clockwise.
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.scale`: draw scale (default 4f)
+
+##### Vector2 values
+
+These are Vector2 coordinates, takes 2 integers like `"0 0"`.
+
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.origin`: defines the origin of the sprite, relevant if you also use rotate, but can act as a secondary offset if the draw layer 
+
+##### SpriteEffects values
+
+SpriteEffects, one of "None", "FlipHorizontally", "FlipVertically"
+
+- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.effect`: sprite effects for flipping the sprite
 
 
 ## DEPRECATED

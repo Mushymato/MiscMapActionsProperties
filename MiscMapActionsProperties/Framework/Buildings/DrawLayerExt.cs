@@ -9,7 +9,6 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
 using StardewValley.Menus;
-using static StardewValley.Menus.CarpenterMenu;
 
 namespace MiscMapActionsProperties.Framework.Buildings;
 
@@ -23,15 +22,22 @@ internal record DLExtInfo(
     float RotateRate,
     Vector2 Origin,
     float Scale,
-    SpriteEffects Effect
+    SpriteEffects Effect,
+    string? GSQ
 )
 {
+    internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     internal float CurrRotate { get; private set; } = Rotate;
 
-    internal void Update()
+    internal void UpdateTicked()
     {
         if (RotateRate > 0)
             CurrRotate = (CurrRotate + RotateRate / 60f) % MathF.Tau;
+    }
+
+    internal void TimeChanged()
+    {
+        ShouldDraw = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     }
 }
 
@@ -50,6 +56,7 @@ internal static class DrawLayerExt
     {
         helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
+        helper.Events.GameLoop.TimeChanged += OnTimeChanged;
         helper.Events.Player.Warped += OnWarped;
         helper.Events.Display.MenuChanged += OnMenuChanged;
         helper.Events.World.BuildingListChanged += OnBuildingListChanged;
@@ -81,9 +88,17 @@ internal static class DrawLayerExt
     private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
         foreach (DLExtInfo value in dlExtInfoCache.Values)
-            value.Update();
+            value.UpdateTicked();
         foreach (DLExtInfo value in dlExtInfoInMenu.Values)
-            value.Update();
+            value.UpdateTicked();
+    }
+
+    private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
+    {
+        foreach (DLExtInfo value in dlExtInfoCache.Values)
+            value.TimeChanged();
+        foreach (DLExtInfo value in dlExtInfoInMenu.Values)
+            value.TimeChanged();
     }
 
     internal static void AddBuildingDrawLayerRotate(GameLocation location)
@@ -134,12 +149,10 @@ internal static class DrawLayerExt
     {
         dlExtInfo = null;
         string drawRotatePrefix = $"{Metadata_DrawLayerRotate_Prefix}{drawLayer.Id}.";
+
         Vector2 origin = Vector2.Zero;
-        float scale = 0f;
         SpriteEffects effect = SpriteEffects.None;
-        // bool hasChange =
-        //     data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "alpha"), out string? valueStr)
-        //     && float.TryParse(valueStr, out alpha);
+
         bool hasChange = data.Metadata.TryGetFloatOrRandom(
             string.Concat(drawRotatePrefix, "alpha"),
             out float alpha,
@@ -154,17 +167,24 @@ internal static class DrawLayerExt
         if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "origin"), out string? valueStr))
         {
             string[] args = ArgUtility.SplitBySpace(valueStr);
-            hasChange |= ArgUtility.TryGetVector2(args, 0, out origin, out string _, name: "Vector2 origin");
+            hasChange |= ArgUtility.TryGetVector2(
+                args,
+                0,
+                out origin,
+                out string _,
+                integerOnly: true,
+                name: "Vector2 origin"
+            );
         }
-        hasChange |=
-            data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "scale"), out valueStr)
-            && float.TryParse(valueStr, out scale);
+        hasChange |= data.Metadata.TryGetFloatOrRandom(string.Concat(drawRotatePrefix, "scale"), out float scale, 4f);
         hasChange |=
             data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "effect"), out valueStr)
             && SpriteEffects.TryParse(valueStr, out effect);
+        hasChange |= data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "condition"), out string? GSQ);
 
         if (hasChange)
-            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect);
+            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ);
+
         return hasChange;
     }
 
@@ -177,10 +197,6 @@ internal static class DrawLayerExt
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
             );
             harmony.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
-            );
-            harmony.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
             );
@@ -190,10 +206,15 @@ internal static class DrawLayerExt
             );
 
             harmony.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_drawInMenu_Transpiler))
+            );
+
+            harmony.Patch(
                 original: AccessTools.Method(
                     typeof(CarpenterMenu),
                     nameof(CarpenterMenu.SetNewActiveBlueprint),
-                    [typeof(BlueprintEntry)]
+                    [typeof(int)]
                 ),
                 postfix: new HarmonyMethod(typeof(DrawLayerExt), nameof(CarpenterMenu_SetNewActiveBlueprint_Postfix))
             );
@@ -216,7 +237,10 @@ internal static class DrawLayerExt
                 continue;
 
             if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
-                dlExtInfoCache[$"{building.id.Value}/{drawLayer.Id}"] = dlExtInfo;
+            {
+                dlExtInfoInMenu[$"{building.buildingType.Value}+{drawLayer.Id}"] = dlExtInfo;
+                ModEntry.LogOnce($"{building.buildingType.Value}+{drawLayer.Id}");
+            }
         }
     }
 
@@ -237,17 +261,18 @@ internal static class DrawLayerExt
     {
         if (dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
         {
-            b.Draw(
-                texture,
-                position,
-                sourceRectangle,
-                color * value.Alpha,
-                value.CurrRotate,
-                value.Origin,
-                value.Scale,
-                value.Effect,
-                layerDepth
-            );
+            if (value.ShouldDraw)
+                b.Draw(
+                    texture,
+                    position,
+                    sourceRectangle,
+                    color * value.Alpha,
+                    value.CurrRotate,
+                    value.Origin,
+                    value.Scale,
+                    value.Effect,
+                    layerDepth
+                );
             return;
         }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
@@ -268,28 +293,28 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (dlExtInfoInMenu.TryGetValue(drawLayer.Id, out DLExtInfo? value))
+        string key = $"{building.buildingType.Value}+{drawLayer.Id}";
+        ModEntry.LogOnce($"{key}: {dlExtInfoInMenu.ContainsKey(key)}");
+        if (dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
         {
-            b.Draw(
-                texture,
-                position,
-                sourceRectangle,
-                color * value.Alpha,
-                value.CurrRotate,
-                value.Origin,
-                value.Scale,
-                value.Effect,
-                layerDepth
-            );
+            if (value.ShouldDraw)
+                b.Draw(
+                    texture,
+                    position,
+                    sourceRectangle,
+                    color * value.Alpha,
+                    value.CurrRotate,
+                    value.Origin,
+                    value.Scale,
+                    value.Effect,
+                    layerDepth
+                );
             return;
         }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
 
-    private static IEnumerable<CodeInstruction> Building_draw_Transpiler(
-        IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator
-    )
+    private static void Building_draw_Transpiler_shared(CodeMatcher matcher)
     {
         // Targets this block
         // if (drawLayer.Texture != null)
@@ -297,71 +322,92 @@ internal static class DrawLayerExt
         //     texture2D = Game1.content.Load<Texture2D>(drawLayer.Texture);
         // }
         // b.Draw(..., rotate, new Vector2(originX, originY), ...)
+
+        // find drawlayerloc
+        // IL_079d: ldsfld class StardewValley.LocalizedContentManager StardewValley.Game1::content
+        // IL_07a2: ldloc.s 17
+        // IL_07a4: ldfld string [StardewValley.GameData]StardewValley.GameData.Buildings.BuildingDrawLayer::Texture
+        matcher.Start();
+        matcher
+            .MatchStartForward(
+                [
+                    new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.content))),
+                    new((inst) => inst.IsLdloc()),
+                    new(OpCodes.Ldfld, AccessTools.Field(typeof(BuildingDrawLayer), nameof(BuildingDrawLayer.Texture))),
+                ]
+            )
+            .ThrowIfNotMatch("Did not find BuildingDrawLayer local");
+        CodeInstruction drawLayerLoc = matcher.InstructionAt(1);
+
+        // find patch
+        // IL_07fa: ldc.r4 0.0
+        // IL_07ff: ldc.r4 0.0
+        // IL_0804: ldc.r4 0.0
+        // IL_0809: newobj instance void [MonoGame.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
+        matcher
+            .MatchEndForward(
+                [
+                    new(OpCodes.Ldc_R4, 0f),
+                    new(OpCodes.Ldc_R4, 0f),
+                    new(OpCodes.Ldc_R4, 0f),
+                    new(OpCodes.Newobj),
+                    new(OpCodes.Ldc_R4, 4f),
+                    new(OpCodes.Ldc_I4_0),
+                    new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
+                    new(
+                        OpCodes.Callvirt,
+                        AccessTools.Method(
+                            typeof(SpriteBatch),
+                            nameof(SpriteBatch.Draw),
+                            [
+                                typeof(Texture2D),
+                                typeof(Vector2),
+                                typeof(Rectangle?),
+                                typeof(Color),
+                                typeof(float),
+                                typeof(Vector2),
+                                typeof(float),
+                                typeof(SpriteEffects),
+                                typeof(float),
+                            ]
+                        )
+                    ),
+                ]
+            )
+            .ThrowIfNotMatch("Did not find b.Draw(... 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, loc|0f)")
+            .InsertAndAdvance([new(OpCodes.Ldarg_0), new(drawLayerLoc.opcode, drawLayerLoc.operand)]);
+        matcher.Opcode = OpCodes.Call;
+    }
+
+    private static IEnumerable<CodeInstruction> Building_drawInMenu_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
         try
         {
             CodeMatcher matcher = new(instructions, generator);
-            // find drawlayerloc
-            // IL_079d: ldsfld class StardewValley.LocalizedContentManager StardewValley.Game1::content
-            // IL_07a2: ldloc.s 17
-            // IL_07a4: ldfld string [StardewValley.GameData]StardewValley.GameData.Buildings.BuildingDrawLayer::Texture
-            matcher.Start();
-            matcher
-                .MatchStartForward(
-                    [
-                        new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.content))),
-                        new((inst) => inst.IsLdloc()),
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(BuildingDrawLayer), nameof(BuildingDrawLayer.Texture))
-                        ),
-                    ]
-                )
-                .ThrowIfNotMatch("Did not find BuildingDrawLayer local");
-            CodeInstruction drawLayerLoc = matcher.InstructionAt(1);
+            Building_draw_Transpiler_shared(matcher);
+            matcher.Operand = AccessTools.Method(typeof(DrawLayerExt), nameof(DrawLayerOverrideInMenu));
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
+        }
+    }
 
-            // find patch
-            // IL_07fa: ldc.r4 0.0
-            // IL_07ff: ldc.r4 0.0
-            // IL_0804: ldc.r4 0.0
-            // IL_0809: newobj instance void [MonoGame.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
-            matcher
-                .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                        new(OpCodes.Ldc_I4_0),
-                        new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
-                        new(
-                            OpCodes.Callvirt,
-                            AccessTools.Method(
-                                typeof(SpriteBatch),
-                                nameof(SpriteBatch.Draw),
-                                [
-                                    typeof(Texture2D),
-                                    typeof(Vector2),
-                                    typeof(Rectangle?),
-                                    typeof(Color),
-                                    typeof(float),
-                                    typeof(Vector2),
-                                    typeof(float),
-                                    typeof(SpriteEffects),
-                                    typeof(float),
-                                ]
-                            )
-                        ),
-                    ]
-                )
-                .ThrowIfNotMatch("Did not find b.Draw(... 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, loc|0f)")
-                .InsertAndAdvance([new(OpCodes.Ldarg_0), new(drawLayerLoc.opcode, drawLayerLoc.operand)]);
-            matcher.Opcode = OpCodes.Call;
-            if (matcher.InstructionAt(-2).opcode == OpCodes.Ldc_R4)
-                matcher.Operand = AccessTools.Method(typeof(DrawLayerExt), nameof(DrawLayerOverrideInMenu)); // draw in menu case
-            else
-                matcher.Operand = AccessTools.Method(typeof(DrawLayerExt), nameof(DrawLayerOverride)); // other case
-
+    private static IEnumerable<CodeInstruction> Building_draw_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+            Building_draw_Transpiler_shared(matcher);
+            matcher.Operand = AccessTools.Method(typeof(DrawLayerExt), nameof(DrawLayerOverride));
             return matcher.Instructions();
         }
         catch (Exception err)

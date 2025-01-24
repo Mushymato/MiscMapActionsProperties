@@ -28,7 +28,6 @@ internal static class ChestLight
         helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         helper.Events.Player.Warped += OnWarped;
         helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
-        helper.Events.Content.AssetsInvalidated += OnAssetsInvalidated;
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
@@ -48,16 +47,6 @@ internal static class ChestLight
         foreach (var kv in watchers)
             kv.Value.Dispose();
         watchers.Clear();
-    }
-
-    private static void OnAssetsInvalidated(object? sender, AssetsInvalidatedEventArgs e)
-    {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo("Data/Buildings")))
-        {
-            foreach (var kv in watchers)
-                kv.Value.Dispose();
-            watchers.Clear();
-        }
     }
 
     private static void AddBuildingChestLightWatcher(GameLocation location)
