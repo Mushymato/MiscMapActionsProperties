@@ -1,7 +1,6 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
 using HarmonyLib;
 using StardewModdingAPI;
-using StardewValley;
 
 namespace MiscMapActionsProperties;
 

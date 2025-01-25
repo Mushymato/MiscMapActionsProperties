@@ -39,6 +39,36 @@ internal record DLExtInfo(
     {
         ShouldDraw = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     }
+
+    internal bool Draw(
+        SpriteBatch b,
+        Texture2D texture,
+        Vector2 position,
+        Rectangle? sourceRectangle,
+        Color color,
+        float rotation,
+        Vector2 origin,
+        float scale,
+        SpriteEffects effects,
+        float layerDepth
+    )
+    {
+        if (!ShouldDraw)
+            return false;
+        // some kind of flip buildings incompat for custom buildings with draw layers?
+        b.Draw(
+            texture,
+            position,
+            sourceRectangle,
+            color * Alpha,
+            CurrRotate,
+            Origin,
+            Scale,
+            effects ^ Effect,
+            layerDepth
+        );
+        return true;
+    }
 }
 
 /// <summary>
@@ -259,22 +289,12 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
-        {
-            if (value.ShouldDraw)
-                b.Draw(
-                    texture,
-                    position,
-                    sourceRectangle,
-                    color * value.Alpha,
-                    value.CurrRotate,
-                    value.Origin,
-                    value.Scale,
-                    value.Effect,
-                    layerDepth
-                );
+        if (
+            dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value)
+            && value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth)
+        )
             return;
-        }
+
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
 
@@ -293,24 +313,11 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        string key = $"{building.buildingType.Value}+{drawLayer.Id}";
-        ModEntry.LogOnce($"{key}: {dlExtInfoInMenu.ContainsKey(key)}");
-        if (dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
-        {
-            if (value.ShouldDraw)
-                b.Draw(
-                    texture,
-                    position,
-                    sourceRectangle,
-                    color * value.Alpha,
-                    value.CurrRotate,
-                    value.Origin,
-                    value.Scale,
-                    value.Effect,
-                    layerDepth
-                );
+        if (
+            dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value)
+            && value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth)
+        )
             return;
-        }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
 
@@ -344,6 +351,8 @@ internal static class DrawLayerExt
         // IL_07ff: ldc.r4 0.0
         // IL_0804: ldc.r4 0.0
         // IL_0809: newobj instance void [MonoGame.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
+        CodeMatch spriteEffect = new(OpCodes.Ldc_I4_0);
+        spriteEffect.opcodes.Add(OpCodes.Ldc_I4_1); // flip buildings compat
         matcher
             .MatchEndForward(
                 [
@@ -352,7 +361,7 @@ internal static class DrawLayerExt
                     new(OpCodes.Ldc_R4, 0f),
                     new(OpCodes.Newobj),
                     new(OpCodes.Ldc_R4, 4f),
-                    new(OpCodes.Ldc_I4_0),
+                    spriteEffect,
                     new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
                     new(
                         OpCodes.Callvirt,
