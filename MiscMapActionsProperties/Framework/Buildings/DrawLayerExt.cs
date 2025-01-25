@@ -55,7 +55,6 @@ internal record DLExtInfo(
     {
         if (!ShouldDraw)
             return false;
-        // some kind of flip buildings incompat for custom buildings with draw layers?
         b.Draw(
             texture,
             position,
@@ -225,6 +224,9 @@ internal static class DrawLayerExt
             harmony.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.draw)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+                {
+                    after = ["mouahrara.FlipBuildings"],
+                }
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
@@ -233,6 +235,9 @@ internal static class DrawLayerExt
             harmony.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.drawBackground)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+                {
+                    after = ["mouahrara.FlipBuildings"],
+                }
             );
 
             harmony.Patch(
@@ -351,17 +356,9 @@ internal static class DrawLayerExt
         // IL_07ff: ldc.r4 0.0
         // IL_0804: ldc.r4 0.0
         // IL_0809: newobj instance void [MonoGame.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
-        CodeMatch spriteEffect = new(OpCodes.Ldc_I4_0);
-        spriteEffect.opcodes.Add(OpCodes.Ldc_I4_1); // flip buildings compat
         matcher
             .MatchEndForward(
                 [
-                    new(OpCodes.Ldc_R4, 0f),
-                    new(OpCodes.Ldc_R4, 0f),
-                    new(OpCodes.Ldc_R4, 0f),
-                    new(OpCodes.Newobj),
-                    new(OpCodes.Ldc_R4, 4f),
-                    spriteEffect,
                     new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
                     new(
                         OpCodes.Callvirt,
@@ -383,7 +380,6 @@ internal static class DrawLayerExt
                     ),
                 ]
             )
-            .ThrowIfNotMatch("Did not find b.Draw(... 0f, new Vector2(0f, 0f), 4f, SpriteEffects.None, loc|0f)")
             .InsertAndAdvance([new(OpCodes.Ldarg_0), new(drawLayerLoc.opcode, drawLayerLoc.operand)]);
         matcher.Opcode = OpCodes.Call;
     }
@@ -402,7 +398,7 @@ internal static class DrawLayerExt
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in Building_drawInMenu_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
