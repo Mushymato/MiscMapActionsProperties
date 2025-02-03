@@ -40,7 +40,7 @@ internal record DLExtInfo(
         ShouldDraw = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     }
 
-    internal bool Draw(
+    internal void Draw(
         SpriteBatch b,
         Texture2D texture,
         Vector2 position,
@@ -54,7 +54,7 @@ internal record DLExtInfo(
     )
     {
         if (!ShouldDraw)
-            return false;
+            return;
         b.Draw(
             texture,
             position,
@@ -66,7 +66,7 @@ internal record DLExtInfo(
             effects ^ Effect,
             layerDepth
         );
-        return true;
+        return;
     }
 }
 
@@ -294,11 +294,11 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (
-            dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value)
-            && value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth)
-        )
+        if (dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
+        {
+            value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
+        }
 
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
@@ -318,11 +318,11 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (
-            dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value)
-            && value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth)
-        )
+        if (dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
+        {
+            value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
+        }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
 

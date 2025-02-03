@@ -113,9 +113,9 @@
             "Y": 23
           },
           "Layer": "Back",
-          "SetProperties": {
-            "TouchAction": "mushymato.MMAP_QuestionDialogue {{ModId}}_QD_Hole"
-          }
+          // "SetProperties": {
+          //   "TouchAction": "mushymato.MMAP_QuestionDialogue {{ModId}}_QD_Hole"
+          // }
         },
       ]
     },
