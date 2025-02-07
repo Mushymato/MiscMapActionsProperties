@@ -53,6 +53,7 @@ See `[CP] MMAP Examples` for samples.
 #### mushymato.MMAP_QuestionDialogue <question_dialog_id>
 
 - Can be used as either Action or TouchAction
+- Can also be used as trigger Action
 - Opens a question dialog, as defined by the custom asset `mushymato.MMAP/QuestionDialogue`, string -> QuestionDialogueData.
 - To make a "Cancel" option, have a `ResponseEntries` entry with blank `Actions`/`TileActions`/`TouchActions`. Putting an empty `{}` serves this purpose as `Label` is set to localized `"Cancel"` by default.
 - Similar to game, pressing ESC selects the final item in `ResponseEntries`.
@@ -61,6 +62,7 @@ See `[CP] MMAP Examples` for samples.
 
 - `Question` (`string`, _empty_): Question string to display, or none.
 - `Speaker` (`string`, _empty_): NPC name of speaker.
+- `Condition` (`string`, _empty_): A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this option is enabled.
 - `ResponseEntries` (`Dictionary<string, QuestionDialogueEntry>`, _empty_): Response data.
 
 ##### QuestionDialogueEntry

@@ -23,6 +23,7 @@ internal static class QuestionDialogue
         helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         GameLocation.RegisterTileAction(TileAction_QuestionDialogue, ShowQuestionDialogueTile);
         GameLocation.RegisterTouchAction(TileAction_QuestionDialogue, ShowQuestionDialogueTouch);
+        TriggerActionManager.RegisterAction(TileAction_QuestionDialogue, ShowQuestionDialogueAction);
     }
 
     private static Dictionary<string, QuestionDialogueData>? _qdData = null;
@@ -47,6 +48,18 @@ internal static class QuestionDialogue
     {
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_QuestionDialogue)))
             _qdData = null;
+    }
+
+    private static bool ShowQuestionDialogueAction(string[] args, TriggerActionContext context, out string? error)
+    {
+        error = null;
+        return ShowQuestionDialogue(
+            Game1.currentLocation,
+            args,
+            Game1.player,
+            Game1.player.TilePoint,
+            Game1.player.Tile
+        );
     }
 
     private static bool ShowQuestionDialogueTile(
@@ -85,6 +98,10 @@ internal static class QuestionDialogue
         if (!QDData.TryGetValue(qdId, out QuestionDialogueData? qdData))
         {
             ModEntry.Log($"No entry '{qdId}' in asset {Asset_QuestionDialogue}", LogLevel.Error);
+            return false;
+        }
+        if (!GameStateQuery.CheckConditions(qdData.Condition, location, farmer))
+        {
             return false;
         }
 
@@ -170,6 +187,9 @@ public class QuestionDialogueEntry
 
 public class QuestionDialogueData
 {
+    /// <summary>Response GSQ condition</summary>
+    public string? Condition { get; set; } = null;
+
     /// <summary>Question string</summary>
     public string? Question { get; set; } = null;
 
