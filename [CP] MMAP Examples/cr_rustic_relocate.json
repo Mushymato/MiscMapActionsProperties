@@ -1,0 +1,68 @@
+{
+  "Changes": [
+    // Makes MMAP do a skipping prefix on FarmHouse.moveObjectsForHouseUpgrade for you
+    {
+      "Action": "EditMap",
+      "Target": "Maps/FarmHouse, Maps/FarmHouse1, Maps/FarmHouse2",
+      "MapProperties": {
+        "mushymato.MMAP_SkipMoveObjectsForHouseUpgrade": "T"
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/TriggerActions",
+      "Entries": {
+        // Makes MMAP do a skipping prefix on FarmHouse.moveObjectsForHouseUpgrade for you
+        // mushymato.MMAP_SkipMoveObjectsForHouseUpgrade
+        "{{ModId}}_House0To1": {
+          "Id": "{{ModId}}_House0To1",
+          // when house upgrade=0, and about to upgrade
+          "Condition": "PLAYER_FARMHOUSE_UPGRADE Current 0 0",
+          "Trigger": "mushymato.MMAP_MoveObjectsForHouseUpgrade",
+          // bunch of actions that moves the stuff
+          "Actions": [
+            // mushymato.MMAP_ShiftContents SourceX SourceY TargetX TargetY AreaWidth AreaHeight
+            // Living Room + Some of Kitchen
+            "mushymato.MMAP_ShiftContents 2 1 20 26 14 13",
+            // Rest of the Kitchen
+            "mushymato.MMAP_ShiftContents 16 1 35 26 4 12",
+            // Attic
+            "mushymato.MMAP_ShiftContents 8 23 31 54 6 11"
+          ],
+          // only do this once
+          "MarkActionApplied": true
+        },
+        "{{ModId}}_House1To2": {
+          "Id": "{{ModId}}_House1To2",
+          // when house upgrade=1, and about to upgrade
+          "Condition": "PLAYER_FARMHOUSE_UPGRADE Current 1 1",
+          "Trigger": "mushymato.MMAP_MoveObjectsForHouseUpgrade",
+          // bunch of actions that moves the stuff
+          "Actions": [
+            // Living Room + Kitchen + Bottom Half of the Hallway, no shift
+            // "mushymato.MMAP_ShiftContents 20 24 20 24 20 15",
+            // Crib Room
+            "mushymato.MMAP_ShiftContents 23 13 23 11 10 7",
+            // Crib Room bottom wall, shift stuff on crib？
+            // "mushymato.MMAP_ShiftContents 30 13 20 17 3 5",
+            // Left End of Hall (3 pieces)
+            "mushymato.MMAP_ShiftContents 20 21 18 19 1 5",
+            "mushymato.MMAP_ShiftContents 21 21 21 19 1 5",
+            "mushymato.MMAP_ShiftContents 22 21 20 19 1 5",
+            // New bedroom
+            "mushymato.MMAP_ShiftContents 34 17 34 11 6 7",
+            // To Balcony
+            "mushymato.MMAP_ShiftContents 40 21 41 21 1 5",
+            "mushymato.MMAP_ShiftContents 41 16 48 16 8 11",
+            // Attic, no need to shift
+            // "mushymato.MMAP_ShiftContents 28 51 28 51 12 11",
+            // Balcony, no need to shift
+            // "mushymato.MMAP_ShiftContents 27 89 27 89 14 9",
+          ],
+          // only do this once
+          "MarkActionApplied": true
+        },
+      },
+    }
+  ]
+}

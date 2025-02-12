@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4]
+
+### Added
+
+- Add stuff to make custom farmhouse upgrading less of a pain
+    - special mailflag mushymato.MMAP_SkipMoveObjectsForHouseUpgrade
+    - action mushymato.MMAP_ShiftContents
+    - trigger mushymato.MMAP_MoveObjectsForHouseUpgrade
+
 ## [1.4.3]
 
 ### Added

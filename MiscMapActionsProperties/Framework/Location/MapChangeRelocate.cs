@@ -9,11 +9,12 @@ using StardewValley.Triggers;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-/// Add a new custom asset to relocate stuff when you upgrade farmhouse.
+/// Add various things to help relocate stuff on farmhouse upgrade.
+/// Can be used for other maps ofc.
 /// </summary>
 internal static class MapChangeRelocate
 {
-    internal static readonly string Mail_SkipMoveObjectsForHouseUpgrade =
+    internal static readonly string MapProp_SkipMoveObjectsForHouseUpgrade =
         $"{ModEntry.ModId}_SkipMoveObjectsForHouseUpgrade";
     internal static readonly string Trigger_MoveObjectsForHouseUpgrade = $"{ModEntry.ModId}_MoveObjectsForHouseUpgrade";
     internal static readonly string Action_ShiftContents = $"{ModEntry.ModId}_ShiftContents";
@@ -41,12 +42,13 @@ internal static class MapChangeRelocate
     private static bool FarmHouse_moveObjectsForHouseUpgrade_Prefix(FarmHouse __instance)
     {
         TriggerActionManager.Raise(Trigger_MoveObjectsForHouseUpgrade);
-        if (Game1.player.mailReceived.Contains(Mail_SkipMoveObjectsForHouseUpgrade))
+        if (__instance.HasMapPropertyWithValue(MapProp_SkipMoveObjectsForHouseUpgrade))
         {
+            ModEntry.Log("Skipping FarmHouse.moveObjectsForHouseUpgrade");
             __instance.overlayObjects.Clear();
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private static bool MapChangeRelocateAction(string[] args, TriggerActionContext context, out string error)

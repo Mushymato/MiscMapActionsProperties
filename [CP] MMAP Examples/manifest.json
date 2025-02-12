@@ -13,6 +13,10 @@
     {
       "UniqueID": "mushymato.MMAP",
       "MinimumVersion": "1.0.0"
+    },
+    {
+      "UniqueID": "crystalinerose.RusticFarmhouse",
+      "IsRequired": false
     }
   ]
 }

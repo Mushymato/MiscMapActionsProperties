@@ -124,6 +124,25 @@ SpriteEffects, one of "None", "FlipHorizontally", "FlipVertically"
 
 - `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.effect`: sprite effects for flipping the sprite
 
+### Farmhouse Upgrade Relocation Solution
+
+The following features combined make it possible for content mod authors to relocate things when farmhouse is upgrade, see `[CP] MMAP Examples/cr_rustic_relocate.json` for a full example.
+
+#### Map Property mushymato.MMAP_SkipMoveObjectsForHouseUpgrade
+
+This map property disables the vanilla farmhouse object relocation logic, set it to any non empty value (e.g. `"T"`) on at least the first 2 farmhouse maps.
+
+#### Trigger mushymato.MMAP_MoveObjectsForHouseUpgrade
+
+This trigger is raised when house is upgraded and game attempts to move farmhouse objects. It lets you perform the following action at the same timing as vanilla game.
+
+#### TriggerAction mushymato.MMAP_ShiftContents: \<SourceX\> \<SourceY\> \<TargetX\> \<TargetY\> \<AreaWidth\> \<AreaHeight\>
+
+This trigger action shifts things on map from one area to another area of the same shape, this is the same thing used by game for house upgrades, but it is more targeted. To properly relocate everything, slice up the farmhouse into matching rectangles and call this action as many time as needed in the trigger action.
+
+- `SourceX`, `SourceY`: This is the top left corner of the area to move, on the previous level
+- `TargetY`, `TargetX`: This is the top left corner of the area to move to, on the new level
+- `AreaWidth`, `AreaHeight`: This is the size of the area to move.
 
 ## DEPRECATED
 

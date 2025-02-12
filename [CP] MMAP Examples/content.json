@@ -1,5 +1,5 @@
 {
-  "Format": "2.0.0",
+  "Format": "2.5.0",
   "Changes": [
     // {
     //   "Action": "EditMap",
@@ -246,6 +246,13 @@
     {
       "Action": "Include",
       "FromFile": "draw_layers.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "cr_rustic_relocate.json",
+      "When": {
+        "HasMod": "crystalinerose.RusticFarmhouse"
+      }
     },
   ]
 }
