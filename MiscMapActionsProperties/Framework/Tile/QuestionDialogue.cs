@@ -17,10 +17,10 @@ internal static class QuestionDialogue
     internal static readonly string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
     internal static readonly string Asset_QuestionDialogue = $"{ModEntry.ModId}/QuestionDialogue";
 
-    internal static void Register(IModHelper helper)
+    internal static void Register()
     {
-        helper.Events.Content.AssetRequested += OnAssetRequested;
-        helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         GameLocation.RegisterTileAction(TileAction_QuestionDialogue, ShowQuestionDialogueTile);
         GameLocation.RegisterTouchAction(TileAction_QuestionDialogue, ShowQuestionDialogueTouch);
         TriggerActionManager.RegisterAction(TileAction_QuestionDialogue, ShowQuestionDialogueAction);
@@ -41,7 +41,7 @@ internal static class QuestionDialogue
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(Asset_QuestionDialogue))
-            e.LoadFrom(() => new Dictionary<string, QuestionDialogueData>(), AssetLoadPriority.Exclusive);
+            e.LoadFrom(() => new Dictionary<string, QuestionDialogueData>(), AssetLoadPriority.Low);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)

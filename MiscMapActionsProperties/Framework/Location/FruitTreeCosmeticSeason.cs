@@ -13,11 +13,11 @@ internal static class FruitTreeCosmeticSeason
 {
     internal static readonly string TileProp_FruitTreeCosmeticSeason = $"{ModEntry.ModId}_FruitTreeCosmeticSeason";
 
-    internal static void Patch(Harmony harmony)
+    internal static void Register()
     {
         try
         {
-            harmony.Patch(
+            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(FruitTree), nameof(FruitTree.GetCosmeticSeason)),
                 postfix: new HarmonyMethod(typeof(FruitTreeCosmeticSeason), nameof(FruitTree_GetCosmeticSeason_Postfix))
             );

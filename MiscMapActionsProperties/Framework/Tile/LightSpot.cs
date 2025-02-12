@@ -20,11 +20,11 @@ internal static class LightSpot
     internal static readonly string TileProp_Light = $"{ModEntry.ModId}_Light";
     internal static readonly string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
 
-    internal static void Patch(Harmony harmony)
+    internal static void Register()
     {
         try
         {
-            harmony.Patch(
+            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
                 postfix: new HarmonyMethod(typeof(LightSpot), nameof(GameLocation_resetLocalState_Postfix))
             );

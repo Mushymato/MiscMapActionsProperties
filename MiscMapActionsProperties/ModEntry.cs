@@ -1,4 +1,5 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
+using System.Reflection;
 using HarmonyLib;
 using StardewModdingAPI;
 
@@ -11,36 +12,39 @@ public class ModEntry : Mod
 #else
     private const LogLevel DEFAULT_LOG_LEVEL = LogLevel.Trace;
 #endif
-    private static IMonitor? mon;
-    internal static IManifest? manifest = null;
+    private static IMonitor mon = null!;
+    internal static IManifest manifest = null!;
+    internal static IModHelper help = null!;
+    internal static Harmony harm = null!;
+
     internal static string ModId => manifest?.UniqueID ?? "ERROR";
 
     public override void Entry(IModHelper helper)
     {
         mon = Monitor;
         manifest = ModManifest;
-        Harmony harmony = new(ModId);
+        help = helper;
+        harm = new(ModId);
 
-        Framework.Buildings.ChestLight.Register(helper);
-        Framework.Buildings.DrawLayerExt.Register(helper);
-        Framework.Buildings.DrawLayerExt.Patch(harmony);
-        Framework.Location.FruitTreeCosmeticSeason.Patch(harmony);
-        Framework.Location.HoeDirtOverride.Register(helper);
+        Framework.Buildings.ChestLight.Register();
+        Framework.Buildings.DrawLayerExt.Register();
+        Framework.Location.FruitTreeCosmeticSeason.Register();
+        Framework.Location.HoeDirtOverride.Register();
+        Framework.Location.MapChangeRelocate.Register();
         Framework.Tile.ShowConstruct.Register();
-        Framework.Tile.AnimalSpot.Patch(harmony);
-        Framework.Tile.AnimalSpot.Register(helper);
+        Framework.Tile.AnimalSpot.Register();
         Framework.Tile.HoleWarp.Register();
-        Framework.Tile.LightSpot.Patch(harmony);
-        Framework.Tile.QuestionDialogue.Register(helper);
+        Framework.Tile.LightSpot.Register();
+        Framework.Tile.QuestionDialogue.Register();
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)
     {
-        mon!.Log(msg, level);
+        mon.Log(msg, level);
     }
 
     internal static void LogOnce(string msg, LogLevel level = DEFAULT_LOG_LEVEL)
     {
-        mon!.LogOnce(msg, level);
+        mon.LogOnce(msg, level);
     }
 }

@@ -81,14 +81,54 @@ internal static class DrawLayerExt
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoCache = [];
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoInMenu = [];
 
-    internal static void Register(IModHelper helper)
+    internal static void Register()
     {
-        helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
-        helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
-        helper.Events.GameLoop.TimeChanged += OnTimeChanged;
-        helper.Events.Player.Warped += OnWarped;
-        helper.Events.Display.MenuChanged += OnMenuChanged;
-        helper.Events.World.BuildingListChanged += OnBuildingListChanged;
+        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
+        ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+        ModEntry.help.Events.Player.Warped += OnWarped;
+        ModEntry.help.Events.Display.MenuChanged += OnMenuChanged;
+        ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
+
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.draw)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+                {
+                    after = ["mouahrara.FlipBuildings"],
+                }
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.drawBackground)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+                {
+                    after = ["mouahrara.FlipBuildings"],
+                }
+            );
+
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_drawInMenu_Transpiler))
+            );
+
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(
+                    typeof(CarpenterMenu),
+                    nameof(CarpenterMenu.SetNewActiveBlueprint),
+                    [typeof(int)]
+                ),
+                postfix: new HarmonyMethod(typeof(DrawLayerExt), nameof(CarpenterMenu_SetNewActiveBlueprint_Postfix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch DrawLayerRotate:\n{err}", LogLevel.Error);
+        }
     }
 
     private static void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
@@ -215,49 +255,6 @@ internal static class DrawLayerExt
             dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ);
 
         return hasChange;
-    }
-
-    internal static void Patch(Harmony harmony)
-    {
-        try
-        {
-            harmony.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.draw)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
-                {
-                    after = ["mouahrara.FlipBuildings"],
-                }
-            );
-            harmony.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
-            );
-            harmony.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawBackground)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
-                {
-                    after = ["mouahrara.FlipBuildings"],
-                }
-            );
-
-            harmony.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_drawInMenu_Transpiler))
-            );
-
-            harmony.Patch(
-                original: AccessTools.Method(
-                    typeof(CarpenterMenu),
-                    nameof(CarpenterMenu.SetNewActiveBlueprint),
-                    [typeof(int)]
-                ),
-                postfix: new HarmonyMethod(typeof(DrawLayerExt), nameof(CarpenterMenu_SetNewActiveBlueprint_Postfix))
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch DrawLayerRotate:\n{err}", LogLevel.Error);
-        }
     }
 
     private static void CarpenterMenu_SetNewActiveBlueprint_Postfix(CarpenterMenu __instance)

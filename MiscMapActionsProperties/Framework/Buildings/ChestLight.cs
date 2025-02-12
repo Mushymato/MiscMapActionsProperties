@@ -23,11 +23,11 @@ internal static class ChestLight
 
     private static readonly ConditionalWeakTable<Chest, BuildingChestLightWatcher> watchers = [];
 
-    internal static void Register(IModHelper helper)
+    internal static void Register()
     {
-        helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
-        helper.Events.Player.Warped += OnWarped;
-        helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
+        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        ModEntry.help.Events.Player.Warped += OnWarped;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)

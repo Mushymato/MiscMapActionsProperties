@@ -16,16 +16,12 @@ internal static class AnimalSpot
     internal static readonly string TileProp_AnimalSpot = $"{ModEntry.ModId}_AnimalSpot";
     private static readonly ConditionalWeakTable<xTile.Map, List<Vector2>> animalSpotsCache = [];
 
-    internal static void Register(IModHelper helper)
+    internal static void Register()
     {
-        helper.Events.GameLoop.SaveLoaded += ClearAnimalSpotsCache;
-    }
-
-    internal static void Patch(Harmony harmony)
-    {
+        ModEntry.help.Events.GameLoop.SaveLoaded += ClearAnimalSpotsCache;
         try
         {
-            harmony.Patch(
+            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(FarmAnimal), nameof(FarmAnimal.setRandomPosition)),
                 prefix: new HarmonyMethod(typeof(AnimalSpot), nameof(FarmAnimal_setRandomPosition_Prefix))
             );
