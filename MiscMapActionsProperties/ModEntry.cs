@@ -31,11 +31,12 @@ public class ModEntry : Mod
         Framework.Location.FruitTreeCosmeticSeason.Register();
         Framework.Location.HoeDirtOverride.Register();
         Framework.Location.MapChangeRelocate.Register();
-        Framework.Tile.ShowConstruct.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Register();
         Framework.Tile.QuestionDialogue.Register();
+        Framework.Tile.ShowConstruct.Register();
+        Framework.Tile.TASSpot.Register();
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

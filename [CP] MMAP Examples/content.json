@@ -254,5 +254,9 @@
         "HasMod": "crystalinerose.RusticFarmhouse"
       }
     },
+    {
+      "Action": "Include",
+      "FromFile": "tas_spot.json"
+    },
   ]
 }

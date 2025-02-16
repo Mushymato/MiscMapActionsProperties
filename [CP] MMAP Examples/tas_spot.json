@@ -1,0 +1,42 @@
+{
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 25,
+            "Y": 21
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_TAS": "{{ModId}}_StarDrop"
+          }
+        }
+      ]
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/TAS",
+      "Entries": {
+        "{{ModId}}_StarDrop": {
+          "Id": "{{ModId}}_StarDrop",
+          "Texture": "LooseSprites/Cursors",
+          "SourceRect": {
+            "X": 368,
+            "Y": 16,
+            "Width": 16,
+            "Height": 16
+          },
+          "Interval": 100,
+          "Frames": 8,
+          "Loops": 9999,
+          "Scale": 1,
+          "ScaleChange": 0.02,
+          "RotationChange": 0.02,
+        }
+      }
+    }
+  ]
+}

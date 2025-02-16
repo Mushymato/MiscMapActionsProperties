@@ -19,6 +19,7 @@ internal static class AnimalSpot
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.SaveLoaded += ClearAnimalSpotsCache;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearAnimalSpotsCache;
         try
         {
             ModEntry.harm.Patch(
