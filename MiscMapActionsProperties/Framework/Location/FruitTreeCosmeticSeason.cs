@@ -11,7 +11,7 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class FruitTreeCosmeticSeason
 {
-    internal static readonly string TileProp_FruitTreeCosmeticSeason = $"{ModEntry.ModId}_FruitTreeCosmeticSeason";
+    internal static readonly string MapProp_FruitTreeCosmeticSeason = $"{ModEntry.ModId}_FruitTreeCosmeticSeason";
 
     internal static void Register()
     {
@@ -32,7 +32,7 @@ internal static class FruitTreeCosmeticSeason
     {
         if (
             __instance.IgnoresSeasonsHere()
-            && __instance.Location.HasMapPropertyWithValue(TileProp_FruitTreeCosmeticSeason)
+            && __instance.Location.HasMapPropertyWithValue(MapProp_FruitTreeCosmeticSeason)
         )
         {
             __result = __instance.Location.GetSeason();

@@ -11,7 +11,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_TAS": "{{ModId}}_StarDrop"
+            "mushymato.MMAP_TAS": "{{ModId}}_Swirly"
           }
         }
       ]
@@ -20,21 +20,20 @@
       "Action": "EditData",
       "Target": "mushymato.MMAP/TAS",
       "Entries": {
-        "{{ModId}}_StarDrop": {
-          "Id": "{{ModId}}_StarDrop",
+        "{{ModId}}_Swirly": {
+          "Id": "{{ModId}}_Swirly",
           "Texture": "LooseSprites/Cursors",
           "SourceRect": {
-            "X": 368,
-            "Y": 16,
-            "Width": 16,
-            "Height": 16
+            "X": 553,
+            "Y": 333,
+            "Width": 13,
+            "Height": 13
           },
           "Interval": 100,
-          "Frames": 8,
+          "Frames": 1,
           "Loops": 9999,
-          "Scale": 1,
-          "ScaleChange": 0.02,
-          "RotationChange": 0.02,
+          "Scale": 2,
+          "RotationChange": 0.05
         }
       }
     }

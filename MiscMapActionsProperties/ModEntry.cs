@@ -30,7 +30,9 @@ public class ModEntry : Mod
         Framework.Buildings.DrawLayerExt.Register();
         Framework.Location.FruitTreeCosmeticSeason.Register();
         Framework.Location.HoeDirtOverride.Register();
+        Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
+        Framework.Location.WoodsLighting.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Register();

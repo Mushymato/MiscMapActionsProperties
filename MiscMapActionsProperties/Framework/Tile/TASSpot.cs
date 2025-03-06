@@ -110,27 +110,4 @@ internal static class TASSpot
     }
 }
 
-internal sealed record TileTAS(TemporaryAnimatedSpriteDefinition Def, Vector2 Tile)
-{
-    // internal TemporaryAnimatedSprite GetTAS()
-    // {
-    //     TemporaryAnimatedSprite.GetTemporaryAnimatedSprite(
-    //         Def.Texture,
-    //         Def.SourceRect,
-    //         Def.Interval,
-    //         Def.Frames,
-    //         // (duration != null) ? (int)(duration / (Def.Frames * Def.Interval)) : Def.Loops,
-    //         Def.Loops,
-    //         Tile * Game1.tileSize + Def.PositionOffset * 4f,
-    //         Def.Flicker,
-    //         Def.Flip,
-    //         Def.SortOffset,
-    //         Def.AlphaFade,
-    //         Utility.StringToColor(Def.Color) ?? Color.White,
-    //         Def.Scale * 4f,
-    //         Def.ScaleChange,
-    //         Def.Rotation,
-    //         Def.RotationChange
-    //     );
-    // }
-}
+internal sealed record TileTAS(TemporaryAnimatedSpriteDefinition Def, Vector2 Tile);
