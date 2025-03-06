@@ -73,6 +73,21 @@ See `[CP] MMAP Examples` for samples.
 - `TileActions` (`List<string>`, _empty_): [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true.
 - `TouchActions` (`List<string>`, _empty_): [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions.
 
+### Map Property
+
+#### mushymato.MMAP_WoodsLighting: \<T|color\>
+
+- Changes the map's ambiant lighting
+- `T` uses the default value as seen in woods/island forest maps
+- Otherwise, can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html).
+- Colors are inverted before being passed to light, so that "Red" will give red light.
+
+#### mushymato.MMAP_LightRays: \<T|texture\>
+
+- Add some light rays to the map
+- `T` uses `LooseSprites/LightRays`, as seen in island forest
+- Otherwise, supply a valid texture asset name
+
 ### Data/Locations CustomFields
 
 #### mushymato.MMAP/HoeDirt.texture: \<texture\>

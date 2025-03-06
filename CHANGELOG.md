@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] WIP
+
+### Added
+
+- Map Prop mushymato.MMAP_WoodsLighting change ambiant lighting of current map
+- Map Prop mushymato.MMAP_LightRays add god rays to current map
+- Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map, WIP
+
 ## [1.4.4]
 
 ### Added

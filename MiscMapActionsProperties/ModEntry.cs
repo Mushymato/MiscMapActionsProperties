@@ -2,6 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace MiscMapActionsProperties;
 
@@ -18,6 +19,8 @@ public class ModEntry : Mod
     internal static Harmony harm = null!;
 
     internal static string ModId => manifest?.UniqueID ?? "ERROR";
+
+    public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
 
     public override void Entry(IModHelper helper)
     {
@@ -39,6 +42,16 @@ public class ModEntry : Mod
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.TASSpot.Register();
+
+        harm.Patch(
+            original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
+            postfix: new HarmonyMethod(typeof(ModEntry), nameof(GameLocation_resetLocalState_Postfix))
+        );
+    }
+
+    private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
+    {
+        GameLocation_resetLocalState?.Invoke(null, __instance);
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

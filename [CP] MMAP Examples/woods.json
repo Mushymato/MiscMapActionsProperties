@@ -1,0 +1,12 @@
+{
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Farm",
+      "MapProperties": {
+        "mushymato.MMAP_WoodsLighting": "T",
+        "mushymato.MMAP_LightRays": "Buildings/Junimo Hut"
+      }
+    }
+  ]
+}

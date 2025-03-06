@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
@@ -10,7 +9,9 @@ using StardewValley.Locations;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-///
+/// Add new map property mushymato.MMAP_LightRays T|TextureName
+/// If set to T, light rays use LooseSprites\\LightRays
+/// Otherwise uses the TextureName if given
 /// </summary>
 internal static class LightRays
 {
@@ -32,13 +33,10 @@ internal static class LightRays
                 )
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
-                postfix: new HarmonyMethod(typeof(LightRays), nameof(GameLocation_resetLocalState_Postfix))
-            );
-            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.drawAboveAlwaysFrontLayer)),
                 postfix: new HarmonyMethod(typeof(LightRays), nameof(GameLocation_drawAboveAlwaysFrontLayer_Postfix))
             );
+            ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
         {
@@ -79,7 +77,7 @@ internal static class LightRays
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
     {
         if (
             __instance.TryGetMapProperty(MapProp_LightRays, out string? rayTexture)

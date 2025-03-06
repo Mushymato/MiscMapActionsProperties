@@ -9,7 +9,9 @@ using StardewValley.Locations;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-///
+/// Add new map property mushymato.MMAP_WoodsLighting T|Color
+/// If set to T, uses the default ambiant lighting (equiv to setting #6987cd, and thus has actual value #967832)
+/// Otherwise, pass in an ambiant light color, which is inverted
 /// </summary>
 internal static class WoodsLighting
 {
@@ -30,16 +32,13 @@ internal static class WoodsLighting
                 )
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
-                postfix: new HarmonyMethod(typeof(WoodsLighting), nameof(GameLocation_resetLocalState_Postfix))
-            );
-            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), "UpdateWhenCurrentLocation"),
                 postfix: new HarmonyMethod(
                     typeof(WoodsLighting),
                     nameof(GameLocation_UpdateWhenCurrentLocation_Postfix)
                 )
             );
+            ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
         {
@@ -65,7 +64,7 @@ internal static class WoodsLighting
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
     {
         if (
             __instance.TryGetMapProperty(MapProp_WoodsLighting, out string? colorValue)

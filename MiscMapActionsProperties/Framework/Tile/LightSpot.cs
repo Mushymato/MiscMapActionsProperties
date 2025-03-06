@@ -23,17 +23,7 @@ internal static class LightSpot
 
     internal static void Register()
     {
-        try
-        {
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
-                postfix: new HarmonyMethod(typeof(LightSpot), nameof(GameLocation_resetLocalState_Postfix))
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch LightSpot:\n{err}", LogLevel.Error);
-        }
+        ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
     private static IEnumerable<LightSource> GetMapTileLights(GameLocation location, string layerName)
@@ -121,7 +111,7 @@ internal static class LightSpot
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
     {
         if (__instance.ignoreLights.Value)
             return;
