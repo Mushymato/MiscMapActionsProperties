@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 
@@ -10,13 +11,15 @@ namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
 /// Add new map property mushymato.MMAP_WoodsLighting T|Color
-/// If set to T, uses the default ambiant lighting (equiv to setting #6987cd, and thus has actual value #967832)
+/// If set to T, uses the default ambiant lighting (equiv to setting #6987cd, and thus has actual appearance of  #967832)
 /// Otherwise, pass in an ambiant light color, which is inverted
 /// </summary>
 internal static class WoodsLighting
 {
+    internal sealed record WoodsLightingCtx(Color Color);
+
     internal static readonly string MapProp_WoodsLighting = $"{ModEntry.ModId}_WoodsLighting";
-    private static bool _enableWoodsLighting = false;
+    private static readonly PerScreen<WoodsLightingCtx?> woodsLightingCtx = new();
     private static Color _ambientLightColor = Color.White;
 
     internal static void Register()
@@ -81,24 +84,23 @@ internal static class WoodsLighting
             }
             else
             {
-                _enableWoodsLighting = false;
+                woodsLightingCtx.Value = null;
                 return;
             }
-            _enableWoodsLighting = true;
+            woodsLightingCtx.Value = new(_ambientLightColor);
             Woods_updateWoodsLighting_RevesePatch(__instance);
+            return;
         }
-        else
-        {
-            _enableWoodsLighting = false;
-            _ambientLightColor = Color.White;
-        }
+        woodsLightingCtx.Value = null;
     }
 
     private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance)
     {
-        if (_enableWoodsLighting)
+        ModEntry.LogOnce($"woodsLightingCtx {woodsLightingCtx}");
+        if (woodsLightingCtx.Value != null)
         {
-            ModEntry.LogOnce($"{__instance.NameOrUniqueName}: {_ambientLightColor}");
+            _ambientLightColor = woodsLightingCtx.Value.Color;
+            ModEntry.LogOnce($"_ambientLightColor {_ambientLightColor}");
             Woods_updateWoodsLighting_RevesePatch(__instance);
         }
     }

@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 
@@ -15,8 +16,10 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class LightRays
 {
+    internal sealed record LightRaysCtx(int Seed, Texture2D Texture);
+
     internal static readonly string MapProp_LightRays = $"{ModEntry.ModId}_LightRays";
-    private static bool _enableLightRays = false;
+    private static readonly PerScreen<LightRaysCtx?> lightRaysCtx = new();
     private static int _raySeed = 0;
     private static Texture2D _rayTexture = null!;
 
@@ -51,11 +54,10 @@ internal static class LightRays
         IEnumerable<CodeInstruction> instructions
     )
     {
-        CodeInstruction ldfld_rayTexture =
-            new(OpCodes.Ldfld, AccessTools.Field(typeof(LightRays), nameof(_rayTexture)));
+        CodeInstruction call_rayTexture = new(OpCodes.Ldfld, AccessTools.Field(typeof(LightRays), nameof(_rayTexture)));
         FieldInfo rayTx = AccessTools.Field(typeof(IslandForestLocation), "_rayTexture");
 
-        CodeInstruction ldfld_raySeed = new(OpCodes.Ldfld, AccessTools.Field(typeof(LightRays), nameof(_raySeed)));
+        CodeInstruction call_raySeed = new(OpCodes.Ldfld, AccessTools.Field(typeof(LightRays), nameof(_raySeed)));
         FieldInfo raySeed = AccessTools.Field(typeof(IslandForestLocation), "_raySeed");
 
         foreach (CodeInstruction inst in instructions)
@@ -64,12 +66,12 @@ internal static class LightRays
             {
                 if ((FieldInfo)inst.operand == rayTx)
                 {
-                    yield return ldfld_rayTexture;
+                    yield return call_rayTexture;
                     continue;
                 }
                 else if ((FieldInfo)inst.operand == raySeed)
                 {
-                    yield return ldfld_raySeed;
+                    yield return call_raySeed;
                     continue;
                 }
             }
@@ -84,36 +86,27 @@ internal static class LightRays
             && !string.IsNullOrWhiteSpace(rayTexture)
         )
         {
+            int raySeed = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
             if (rayTexture == "T")
             {
-                _rayTexture = Game1.temporaryContent.Load<Texture2D>("LooseSprites\\LightRays");
+                lightRaysCtx.Value = new(raySeed, Game1.temporaryContent.Load<Texture2D>("LooseSprites\\LightRays"));
+                return;
             }
             else if (Game1.temporaryContent.DoesAssetExist<Texture2D>(rayTexture))
             {
-                _rayTexture = Game1.temporaryContent.Load<Texture2D>(rayTexture);
-            }
-            else
-            {
-                _enableLightRays = false;
-                _rayTexture = null!;
-                _raySeed = 0;
+                lightRaysCtx.Value = new(raySeed, Game1.temporaryContent.Load<Texture2D>(rayTexture));
                 return;
             }
-            _raySeed = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
-            _enableLightRays = true;
         }
-        else
-        {
-            _enableLightRays = false;
-            _rayTexture = null!;
-            _raySeed = 0;
-        }
+        lightRaysCtx.Value = null;
     }
 
     private static void GameLocation_drawAboveAlwaysFrontLayer_Postfix(GameLocation __instance, SpriteBatch b)
     {
-        if (_enableLightRays)
+        if (lightRaysCtx.Value != null)
         {
+            _raySeed = lightRaysCtx.Value.Seed;
+            _rayTexture = lightRaysCtx.Value.Texture;
             IslandForestLocation_DrawRays_RevesePatch(__instance, b);
         }
     }
