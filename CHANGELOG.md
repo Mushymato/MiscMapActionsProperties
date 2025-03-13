@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Map Prop mushymato.MMAP_LightRays add god rays to current map
 - Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map, WIP
 
+### Changed
+
+- QuestionDialogue now return if there are no valid entries, or if Cancel is the only entry
+
 ## [1.4.4]
 
 ### Added
