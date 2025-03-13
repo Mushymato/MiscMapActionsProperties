@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -204,7 +205,7 @@ internal static class DrawLayerExt
             else
                 return false;
             if (ArgUtility.TryGetFloat(args, 1, out float randMax, out _, name: "float randMax"))
-                value = Random.Shared.NextSingle() * (randMax - randMin) + randMin;
+                value = Random.Shared.NextSingle(randMin, randMax);
             return true;
         }
         return false;

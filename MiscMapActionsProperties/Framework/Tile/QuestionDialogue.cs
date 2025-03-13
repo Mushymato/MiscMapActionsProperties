@@ -108,6 +108,14 @@ internal static class QuestionDialogue
         GameStateQueryContext context = new(location, farmer, null, null, null, null, null);
 
         IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context);
+        if (validEntries.Count == 0)
+            return false;
+        if (validEntries.Count == 1)
+        {
+            QuestionDialogueEntry qde = validEntries.Values.First();
+            if (qde.Actions == null && qde.TileActions == null && qde.TouchActions == null)
+                return false;
+        }
         location.createQuestionDialogue(
             TokenParser.ParseText(qdData.Question) ?? "",
             validEntries.Select(MakeResponse).ToArray(),

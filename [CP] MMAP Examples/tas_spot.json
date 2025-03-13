@@ -13,6 +13,16 @@
           "SetProperties": {
             "mushymato.MMAP_TAS": "{{ModId}}_Swirly"
           }
+        },
+        {
+          "Position": {
+            "X": 14,
+            "Y": 23
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_TAS": "{{ModId}}_CauldronSmoke"
+          }
         }
       ]
     },
@@ -33,7 +43,61 @@
           "Frames": 1,
           "Loops": 9999,
           "Scale": 2,
-          "RotationChange": 0.05
+          "RotationChange": 0.05,
+          "LayerDepth": 0,
+        },
+        "{{ModId}}_StarDrop": {
+          "Id": "{{ModId}}_StarDrop",
+          "Texture": "LooseSprites/Cursors",
+          "SourceRect": {
+            "X": 368,
+            "Y": 16,
+            "Width": 16,
+            "Height": 16
+          },
+          "Interval": 50,
+          "Frames": 8,
+          "Loops": 9999,
+          "Scale": 1,
+          "ScaleChange": 0.02,
+          "RotationChange": 0.02,
+          "SpawnInterval": 500,
+          "RandMin": {
+            "Motion": "-4,-4"
+          },
+          "RandMax": {
+            "Motion": "4,4"
+          }
+        },
+        "{{ModId}}_CauldronSmoke": {
+          "Id": "{{ModId}}_CauldronSmoke",
+          "Texture": "LooseSprites/Cursors",
+          "SourceRect": {
+            "X": 372,
+            "Y": 1956,
+            "Width": 10,
+            "Height": 10
+          },
+          "Alpha": 0.75,
+          "AlphaFade": 0.002,
+          "Motion": "0,-0.5",
+          "Acceleration": "-0.002,0",
+          "Interval": 99999,
+          "LayerDepth": 0.144,
+          "Scale": 0.75,
+          "ScaleChange": 0.01,
+          "Color": "Lime",
+          "SpawnInterval": 100,
+          "RandMin": {
+            "PositionOffset": "-8,0",
+            "LayerDepth": 0,
+            "RotationChange": -0.0613592315155
+          },
+          "RandMax": {
+            "PositionOffset": "16,4",
+            "LayerDepth": 0.01,
+            "RotationChange": 0.0736310778185
+          }
         }
       }
     }

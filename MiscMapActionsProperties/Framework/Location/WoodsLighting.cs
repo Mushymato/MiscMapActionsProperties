@@ -96,11 +96,9 @@ internal static class WoodsLighting
 
     private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance)
     {
-        ModEntry.LogOnce($"woodsLightingCtx {woodsLightingCtx}");
         if (woodsLightingCtx.Value != null)
         {
             _ambientLightColor = woodsLightingCtx.Value.Color;
-            ModEntry.LogOnce($"_ambientLightColor {_ambientLightColor}");
             Woods_updateWoodsLighting_RevesePatch(__instance);
         }
     }

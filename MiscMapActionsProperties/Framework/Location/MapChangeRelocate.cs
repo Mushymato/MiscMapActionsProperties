@@ -57,12 +57,18 @@ internal static class MapChangeRelocate
             !ArgUtility.TryGetPoint(args, 1, out Point source, out error, name: "Point source")
             || !ArgUtility.TryGetPoint(args, 3, out Point target, out error, name: "Point target")
             || !ArgUtility.TryGetPoint(args, 5, out Point area, out error, name: "Point area")
+            || !ArgUtility.TryGetOptional(args, 7, out string? locationName, out error, name: "string? locationName")
         )
         {
             return false;
         }
+        GameLocation? gameLocation = null;
+        if (locationName != null)
+            gameLocation = Utility.fuzzyLocationSearch(locationName);
+        if ((gameLocation ??= Utility.getHomeOfFarmer(Game1.player)) == null)
+            return false;
         ModEntry.Log($"{args[0]}: {source} -> {target} ({area})");
-        DoRelocate(Utility.getHomeOfFarmer(Game1.player), source, target, area);
+        DoRelocate(gameLocation, source, target, area);
         return true;
     }
 
