@@ -23,7 +23,7 @@ internal static class Light
         string? mapName = null
     )
     {
-        string[] args = ArgUtility.SplitBySpace(lightProps ?? "");
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(lightProps ?? "");
         if (
             !ArgUtility.TryGetOptionalFloat(
                 args,
@@ -49,22 +49,8 @@ internal static class Light
                 defaultValue: "1",
                 name: "string texture"
             )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                3,
-                out int offsetX,
-                out error,
-                defaultValue: 0,
-                name: "string texture"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                4,
-                out int offsetY,
-                out error,
-                defaultValue: 0,
-                name: "string texture"
-            )
+            || !ArgUtility.TryGetOptionalInt(args, 3, out int offsetX, out error, defaultValue: 0, name: "int offsetX")
+            || !ArgUtility.TryGetOptionalInt(args, 4, out int offsetY, out error, defaultValue: 0, name: "int offsetY")
         )
         {
             ModEntry.Log(error, LogLevel.Error);

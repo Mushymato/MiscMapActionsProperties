@@ -261,6 +261,10 @@
     {
       "Action": "Include",
       "FromFile": "woods.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "panaroma.json"
     }
   ]
 }

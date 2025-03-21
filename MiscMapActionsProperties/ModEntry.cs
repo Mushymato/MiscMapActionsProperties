@@ -35,6 +35,7 @@ public class ModEntry : Mod
         Framework.Location.HoeDirtOverride.Register();
         Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
+        Framework.Location.Panorama.Register();
         Framework.Location.WoodsLighting.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.HoleWarp.Register();
@@ -42,6 +43,7 @@ public class ModEntry : Mod
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.TASSpot.Register();
+        Framework.Wheels.TASAssetManager.Register();
 
         harm.Patch(
             original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),

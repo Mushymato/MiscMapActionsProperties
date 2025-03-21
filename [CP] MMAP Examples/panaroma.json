@@ -1,0 +1,70 @@
+{
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}/panaroma_test",
+      "FromFile": "assets/{{TargetWithoutPath}}.tmx"
+    },
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/goose480",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Locations",
+      "Entries": {
+        "panaroma_test": {
+          "DisplayName": "panaroma_test",
+          "DefaultArrivalTile": {
+            "X": 10,
+            "Y": 29
+          },
+          "CreateOnLoad": {
+            "MapPath": "Maps/{{ModId}}/panaroma_test",
+            "Type": null,
+            "AlwaysActive": false
+          },
+          "CustomFields": {
+            "mushymato.MMAP_Background": "{{ModId}}/goose480 #abb2b9",
+            // "mushymato.MMAP_Background/TAS": "{{ModId}}/goose480 White 4"
+            "mushymato.MMAP_Background/TAS": "{{ModId}}_Steam"
+          }
+        },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/TAS",
+      "Entries": {
+        "{{ModId}}_Steam": {
+          "Id": "{{ModId}}_Steam",
+          "Texture": "LooseSprites/steamAnimation",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 64,
+            "Height": 64
+          },
+          "Alpha": 0.75,
+          "AlphaFade": 0.002,
+          "Motion": "0,-0.5",
+          "Acceleration": "-0.002,0",
+          "Interval": 99999,
+          "Scale": 1,
+          "ScaleChange": 0.02,
+          "Color": "White",
+          "SpawnInterval": 10,
+          "RandMin": {
+            "LayerDepth": 0,
+            "RotationChange": -0.0613592315155
+          },
+          "RandMax": {
+            "LayerDepth": 0.01,
+            "RotationChange": 0.0736310778185
+          }
+        }
+      }
+    }
+  ]
+}
