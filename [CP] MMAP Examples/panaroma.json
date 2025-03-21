@@ -27,7 +27,6 @@
           },
           "CustomFields": {
             "mushymato.MMAP_Background": "{{ModId}}/goose480 #abb2b9",
-            // "mushymato.MMAP_Background/TAS": "{{ModId}}/goose480 White 4"
             "mushymato.MMAP_Background/TAS": "{{ModId}}_Steam"
           }
         },
@@ -39,29 +38,29 @@
       "Entries": {
         "{{ModId}}_Steam": {
           "Id": "{{ModId}}_Steam",
-          "Texture": "LooseSprites/steamAnimation",
+          "Texture": "Minigames/Clouds",
           "SourceRect": {
-            "X": 0,
-            "Y": 0,
-            "Width": 64,
-            "Height": 64
+            "X": 152,
+            "Y": 447,
+            "Width": 123,
+            "Height": 55
           },
           "Alpha": 0.75,
           "AlphaFade": 0.002,
-          "Motion": "0,-0.5",
+          "Motion": "0.,-0.5",
           "Acceleration": "-0.002,0",
           "Interval": 99999,
-          "Scale": 1,
+          "Scale": 0.5,
           "ScaleChange": 0.02,
           "Color": "White",
           "SpawnInterval": 10,
           "RandMin": {
             "LayerDepth": 0,
-            "RotationChange": -0.0613592315155
+            "RotationChange": -0.001
           },
           "RandMax": {
             "LayerDepth": 0.01,
-            "RotationChange": 0.0736310778185
+            "RotationChange": 0.001
           }
         }
       }

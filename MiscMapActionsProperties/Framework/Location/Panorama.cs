@@ -194,6 +194,8 @@ internal sealed class PanoramaBackground : Background
             GameStateQueryContext context = new(location, null, null, null, Game1.random);
             foreach (TileTAS tileTAS in respawningTAS)
             {
+                tileTAS.Def.RandMin!.PositionOffset =
+                    new Vector2(tileTAS.Def.SourceRect.Width, tileTAS.Def.SourceRect.Height) * tileTAS.Def.Scale * -4;
                 tileTAS.Def.RandMax!.PositionOffset = new(viewport.Width, viewport.Height);
                 if (tileTAS.TryCreateRespawning(Game1.currentGameTime, context, out TemporaryAnimatedSprite? tas))
                     tempSprites.Insert(0, tas);
