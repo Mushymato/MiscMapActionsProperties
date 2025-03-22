@@ -10,11 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Map Prop mushymato.MMAP_WoodsLighting change ambiant lighting of current map
 - Map Prop mushymato.MMAP_LightRays add god rays to current map
-- Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map, WIP
+- Map Prop mushymato.MMAP_SteamOverlay add a repeating texture overlay to map
+- Map Prop mushymato.MMAP_Background add a repeating texture overlay to map
+- Map Prop mushymato.MMAP_Background/TAS add a repeating texture overlay to map
+- Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map
 
 ### Changed
 
 - QuestionDialogue now return if there are no valid entries, or if Cancel is the only entry
+- HoeDirt.texture is now also a map property
 
 ## [1.4.4]
 

@@ -6,10 +6,24 @@ See `[CP] MMAP Examples` for samples.
 
 ### Map Property
 
+All map properties are also Data/Location custom fields. In the case where both map property and Data/Location custom fields exist, custom fields are prioritized.
+
 #### mushymato.MMAP_FruitTreeCosmeticSeason \<x\> \<y\>
 
 - For use in maps with map property IsGreenhouse T.
 - Make fruit trees use seasonal appearances even in greenhouse.
+
+#### mushymato.MMAP/HoeDirt.texture: \<texture\>
+
+- For use in places with tillable soil.
+- Changes the appearance of tilled soil in that location.
+- Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
+- See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
+
+#### mushymato.MMAP_WoodsLighting T|Color
+
+- Forces a certain ambiant lighting color, identical logic to 
+- 
 
 ### Tile Data
 
@@ -30,6 +44,8 @@ See `[CP] MMAP Examples` for samples.
 - type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use offsetX and offsetY to further adjust the position of the light.
 - Works in building TileProperties too.
+
+#### Back Layer: mushymato.MMAP_TAS
 
 ### Action
 
@@ -87,15 +103,6 @@ See `[CP] MMAP Examples` for samples.
 - Add some light rays to the map
 - `T` uses `LooseSprites/LightRays`, as seen in island forest
 - Otherwise, supply a valid texture asset name
-
-### Data/Locations CustomFields
-
-#### mushymato.MMAP/HoeDirt.texture: \<texture\>
-
-- Location CustomFields, for use in places with tillable soil.
-- Changes the appearance of tilled soil in that location.
-- Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
-- See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
 
 ### Data/Buildings Metadata
 

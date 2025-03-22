@@ -1,4 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Emit;
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -6,6 +7,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
+using StardewValley.Locations;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -251,6 +253,49 @@ internal static class Panorama
     {
         ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+
+        ModEntry.harm.Patch(
+            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.updateWeather)),
+            transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
+        );
+    }
+
+    private static IEnumerable<CodeInstruction> Game1_updateWeather_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+
+            // IL_0141: call class StardewValley.GameLocation StardewValley.Game1::get_currentLocation()
+            // IL_0146: isinst StardewValley.Locations.IslandNorth
+            // IL_014b: brtrue.s IL_015c
+            matcher.MatchEndForward(
+                [
+                    new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Game1), nameof(Game1.currentLocation))),
+                    new(OpCodes.Isinst, typeof(IslandNorth)),
+                    new(OpCodes.Brtrue_S),
+                ]
+            );
+            Label lbl = (Label)matcher.Operand;
+            matcher
+                .Advance(1)
+                .InsertAndAdvance(
+                    [
+                        new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.background))),
+                        new(OpCodes.Brtrue_S, lbl),
+                    ]
+                );
+
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in Game1_updateWeather_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
+        }
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
