@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.GameData.Locations;
@@ -16,18 +16,16 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class HoeDirtOverride
 {
-    internal static readonly string CustomFields_HoeDirtTexture = $"{ModEntry.ModId}/HoeDirt.texture";
+    internal static readonly string MapProp_HoeDirtTexture = $"{ModEntry.ModId}/HoeDirt.texture";
     private static readonly FieldInfo hoeDirtTexture = typeof(HoeDirt).GetField(
         "texture",
         BindingFlags.NonPublic | BindingFlags.Instance
     )!;
-    private static readonly ConditionalWeakTable<GameLocation, Texture2D> hoeDirtTextureCache = [];
 
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         ModEntry.help.Events.Player.Warped += OnWarped;
-        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetsInvalidated;
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
@@ -53,18 +51,9 @@ internal static class HoeDirtOverride
     {
         return (
             location != null
-            && location.GetData() is LocationData locData
-            && locData.CustomFields is Dictionary<string, string> customFields
-            && customFields.ContainsKey(CustomFields_HoeDirtTexture)
+            && CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_HoeDirtTexture, out string? hoeDirtTexture)
+            && Game1.content.DoesAssetExist<Texture2D>(hoeDirtTexture)
         );
-    }
-
-    private static void OnAssetsInvalidated(object? sender, AssetsInvalidatedEventArgs e)
-    {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo("Data/Locations")))
-        {
-            hoeDirtTextureCache.Clear();
-        }
     }
 
     private static bool ModifyHoeDirtTextureForLocation(GameLocation location)
@@ -78,15 +67,17 @@ internal static class HoeDirtOverride
 
     private static void ModifyHoeDirtTexture(Vector2 tile, TerrainFeature feature)
     {
-        if (feature is HoeDirt hoeDirt)
+        if (
+            feature is HoeDirt hoeDirt
+            && CommonPatch.TryGetCustomFieldsOrMapProperty(
+                hoeDirt.Location,
+                MapProp_HoeDirtTexture,
+                out string? hoeDirtTx2D
+            )
+        )
         {
-            Texture2D hoeDirtOverride = hoeDirtTextureCache.GetValue(hoeDirt.Location, LoadHoeDirtTexture);
+            Texture2D hoeDirtOverride = Game1.content.Load<Texture2D>(hoeDirtTx2D);
             hoeDirtTexture.SetValue(hoeDirt, hoeDirtOverride);
         }
-    }
-
-    private static Texture2D LoadHoeDirtTexture(GameLocation location)
-    {
-        return Game1.content.Load<Texture2D>(location.GetData().CustomFields[CustomFields_HoeDirtTexture]);
     }
 }

@@ -72,9 +72,9 @@ internal sealed class PanoramaBackground : Background
         int chunkHeight = 1;
         int numChunksInSheet = 1;
         float chanceForDeviation = 1f;
-        if (Game1.content.DoesAssetExist<Texture2D>(bgImageStr))
+        if (Game1.temporaryContent.DoesAssetExist<Texture2D>(bgImageStr))
         {
-            bgImage = Game1.content.Load<Texture2D>(bgImageStr);
+            bgImage = Game1.temporaryContent.Load<Texture2D>(bgImageStr);
             if (
                 !ArgUtility.TryGetOptionalFloat(args, 2, out zoom, out error, defaultValue: zoom, name: "float zoom")
                 || !ArgUtility.TryGetOptionalInt(
@@ -240,9 +240,7 @@ internal sealed class PanoramaBackground : Background
 }
 
 /// <summary>
-/// Add new map property mushymato.MMAP_LightRays T|TextureName
-/// If set to T, light rays use LooseSprites\\LightRays
-/// Otherwise uses the TextureName if given
+/// Add new map property mushymato.MMAP_Background <bgImage> <color> [scale] [chunksWide] [chunksHigh] [chunkWidth] [chunkHeight] [numChunksInSheet] [chanceForDeviation]
 /// </summary>
 internal static class Panorama
 {
@@ -252,38 +250,33 @@ internal static class Panorama
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
-        ModEntry.GameLocation_resetLocalState += ApplyPanoramaBackground;
-    }
-
-    private static bool TryGetCustomFieldsOrMapProperty(
-        GameLocation location,
-        string propKey,
-        [NotNullWhen(true)] out string? prop
-    )
-    {
-        prop = null;
-        if (
-            (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
-            || location.TryGetMapProperty(propKey, out prop)
-            || false
-        )
-            return true;
-        return false;
+        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
     {
         if (Game1.currentLocation != null)
-            ApplyPanoramaBackground(sender, Game1.currentLocation);
+            ApplyPanoramaBackground(Game1.currentLocation);
     }
 
-    private static void ApplyPanoramaBackground(object? sender, GameLocation location)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
-        if (TryGetCustomFieldsOrMapProperty(location, MapProp_Background, out string? backgroundProp))
+        ApplyPanoramaBackground(e.Location);
+    }
+
+    private static void ApplyPanoramaBackground(GameLocation location)
+    {
+        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_Background, out string? backgroundProp))
         {
             string[] args = ArgUtility.SplitBySpaceQuoteAware(backgroundProp);
             string[]? tas = null;
-            if (TryGetCustomFieldsOrMapProperty(location, MapProp_BackgroundTAS, out string? backgroundTASProp))
+            if (
+                CommonPatch.TryGetCustomFieldsOrMapProperty(
+                    location,
+                    MapProp_BackgroundTAS,
+                    out string? backgroundTASProp
+                )
+            )
             {
                 tas = ArgUtility.SplitBySpaceQuoteAware(backgroundTASProp);
             }

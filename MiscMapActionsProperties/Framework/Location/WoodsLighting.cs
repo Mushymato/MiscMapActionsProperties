@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -34,14 +35,8 @@ internal static class WoodsLighting
                     nameof(Woods_updateWoodsLighting_RevesePatchTranspiler)
                 )
             );
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(GameLocation), "UpdateWhenCurrentLocation"),
-                postfix: new HarmonyMethod(
-                    typeof(WoodsLighting),
-                    nameof(GameLocation_UpdateWhenCurrentLocation_Postfix)
-                )
-            );
-            ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+            CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Postfix;
+            CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
         {
@@ -67,10 +62,10 @@ internal static class WoodsLighting
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
         if (
-            __instance.TryGetMapProperty(MapProp_WoodsLighting, out string? colorValue)
+            CommonPatch.TryGetCustomFieldsOrMapProperty(e.Location, MapProp_WoodsLighting, out string? colorValue)
             && !string.IsNullOrWhiteSpace(colorValue)
         )
         {
@@ -88,18 +83,21 @@ internal static class WoodsLighting
                 return;
             }
             woodsLightingCtx.Value = new(_ambientLightColor);
-            Woods_updateWoodsLighting_RevesePatch(__instance);
+            Woods_updateWoodsLighting_RevesePatch(e.Location);
             return;
         }
         woodsLightingCtx.Value = null;
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance)
+    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(
+        object? sender,
+        CommonPatch.UpdateWhenCurrentLocationArgs e
+    )
     {
         if (woodsLightingCtx.Value != null)
         {
             _ambientLightColor = woodsLightingCtx.Value.Color;
-            Woods_updateWoodsLighting_RevesePatch(__instance);
+            Woods_updateWoodsLighting_RevesePatch(e.Location);
         }
     }
 }

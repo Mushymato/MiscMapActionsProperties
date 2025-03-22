@@ -20,8 +20,6 @@ public class ModEntry : Mod
 
     internal static string ModId => manifest?.UniqueID ?? "ERROR";
 
-    public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
-
     public override void Entry(IModHelper helper)
     {
         mon = Monitor;
@@ -36,6 +34,7 @@ public class ModEntry : Mod
         Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
         Framework.Location.Panorama.Register();
+        Framework.Location.SteamOverlay.Register();
         Framework.Location.WoodsLighting.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.HoleWarp.Register();
@@ -43,17 +42,9 @@ public class ModEntry : Mod
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.TASSpot.Register();
+
+        Framework.Wheels.CommonPatch.Register();
         Framework.Wheels.TASAssetManager.Register();
-
-        harm.Patch(
-            original: AccessTools.Method(typeof(GameLocation), "resetLocalState"),
-            postfix: new HarmonyMethod(typeof(ModEntry), nameof(GameLocation_resetLocalState_Postfix))
-        );
-    }
-
-    private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
-    {
-        GameLocation_resetLocalState?.Invoke(null, __instance);
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

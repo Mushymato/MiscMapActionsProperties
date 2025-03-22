@@ -4,8 +4,9 @@
       "Action": "EditMap",
       "Target": "Maps/Farm",
       "MapProperties": {
-        "mushymato.MMAP_WoodsLighting": "T",
-        "mushymato.MMAP_LightRays": "Buildings/Junimo Hut"
+        // "mushymato.MMAP_WoodsLighting": "T",
+        // "mushymato.MMAP_LightRays": "Buildings/Junimo Hut"
+        "mushymato.MMAP_SteamOverlay": "T #cccccc80 4 -0.1 -0.1"
       }
     }
   ]

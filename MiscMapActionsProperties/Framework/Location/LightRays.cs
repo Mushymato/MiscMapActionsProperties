@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -35,11 +36,8 @@ internal static class LightRays
                     nameof(IslandForestLocation_DrawRays_RevesePatchTranspiler)
                 )
             );
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.drawAboveAlwaysFrontLayer)),
-                postfix: new HarmonyMethod(typeof(LightRays), nameof(GameLocation_drawAboveAlwaysFrontLayer_Postfix))
-            );
-            ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+            CommonPatch.GameLocation_DrawAboveAlwaysFrontLayer += GameLocation_drawAboveAlwaysFrontLayer_Postfix;
+            CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
         {
@@ -79,10 +77,10 @@ internal static class LightRays
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
         if (
-            __instance.TryGetMapProperty(MapProp_LightRays, out string? rayTexture)
+            CommonPatch.TryGetCustomFieldsOrMapProperty(e.Location, MapProp_LightRays, out string? rayTexture)
             && !string.IsNullOrWhiteSpace(rayTexture)
         )
         {
@@ -101,13 +99,16 @@ internal static class LightRays
         lightRaysCtx.Value = null;
     }
 
-    private static void GameLocation_drawAboveAlwaysFrontLayer_Postfix(GameLocation __instance, SpriteBatch b)
+    private static void GameLocation_drawAboveAlwaysFrontLayer_Postfix(
+        object? sender,
+        CommonPatch.DrawAboveAlwaysFrontLayerArgs e
+    )
     {
         if (lightRaysCtx.Value != null)
         {
             _raySeed = lightRaysCtx.Value.Seed;
             _rayTexture = lightRaysCtx.Value.Texture;
-            IslandForestLocation_DrawRays_RevesePatch(__instance, b);
+            IslandForestLocation_DrawRays_RevesePatch(e.Location, e.B);
         }
     }
 }

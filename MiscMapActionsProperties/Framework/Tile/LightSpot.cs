@@ -23,7 +23,7 @@ internal static class LightSpot
 
     internal static void Register()
     {
-        ModEntry.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
     private static IEnumerable<LightSource> GetMapTileLights(GameLocation location, string layerName)
@@ -111,14 +111,14 @@ internal static class LightSpot
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation __instance)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
-        if (__instance.ignoreLights.Value)
+        if (e.Location.ignoreLights.Value)
             return;
 
         foreach (string layerName in LayerNames)
         {
-            foreach (LightSource light in GetMapTileLights(__instance, layerName))
+            foreach (LightSource light in GetMapTileLights(e.Location, layerName))
             {
                 Game1.currentLightSources.Add(light);
             }
