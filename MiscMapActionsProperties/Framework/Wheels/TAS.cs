@@ -15,13 +15,15 @@ public class TASExtSub : TemporaryAnimatedSpriteDefinition
     public Vector2 Acceleration { get; set; } = Vector2.Zero;
     public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
     public float? LayerDepth { get; set; } = null;
-    public float Alpha { get; set; } = 0f;
+
+    // actually opacity
+    public float Alpha { get; set; } = 1f;
 }
 
 public class TASExtRand
 {
     public float SortOffset { get; set; } = 0f;
-    public float Alpha { get; set; } = 0f;
+    public float Alpha { get; set; } = 1f;
     public float AlphaFade { get; set; } = 0f;
     public float Scale { get; set; } = 0f;
     public float ScaleChange { get; set; } = 0f;
@@ -50,7 +52,7 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
     internal TemporaryAnimatedSprite Create()
     {
         // csharpier-ignore
-        return new(
+        TemporaryAnimatedSprite tas = TemporaryAnimatedSprite.GetTemporaryAnimatedSprite(
             Def.Texture,
             Def.SourceRect,
             Def.Interval,
@@ -66,16 +68,31 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
             Def.ScaleChange + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.ScaleChange, Def.RandMax!.ScaleChange) : 0),
             Def.Rotation + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.Rotation, Def.RandMax!.Rotation) : 0),
             Def.RotationChange + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.RotationChange, Def.RandMax!.RotationChange) : 0)
-        )
-        {
-            scaleChangeChange = Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.ScaleChangeChange, Def.RandMax!.ScaleChangeChange) : 0,
-            pingPong = Def.PingPong,
-            alpha = Def.Alpha + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.Alpha, Def.RandMax!.Alpha) : 0),
-            layerDepth = Def.LayerDepth ?? (Pos.Y + 0.66f * Game1.tileSize) / 10000f + Pos.X / Game1.tileSize * 1E-05f,
-            motion = Def.Motion + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Motion, Def.RandMax!.Motion) : Vector2.Zero),
-            acceleration = Def.Acceleration + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Acceleration, Def.RandMax!.Acceleration) : Vector2.Zero),
-            accelerationChange = Def.AccelerationChange + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.AccelerationChange, Def.RandMax!.AccelerationChange) : Vector2.Zero),
-        };
+        );
+        tas.scaleChangeChange = Def.HasRand
+            ? Random.Shared.NextSingle(Def.RandMin!.ScaleChangeChange, Def.RandMax!.ScaleChangeChange)
+            : 0;
+        tas.pingPong = Def.PingPong;
+        tas.alpha = Def.Alpha + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.Alpha, Def.RandMax!.Alpha) : 0);
+        tas.layerDepth = Def.LayerDepth ?? (Pos.Y + 0.66f * Game1.tileSize) / 10000f + Pos.X / Game1.tileSize * 1E-05f;
+        tas.motion =
+            Def.Motion
+            + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Motion, Def.RandMax!.Motion) : Vector2.Zero);
+        tas.acceleration =
+            Def.Acceleration
+            + (
+                Def.HasRand
+                    ? Random.Shared.NextVector2(Def.RandMin!.Acceleration, Def.RandMax!.Acceleration)
+                    : Vector2.Zero
+            );
+        tas.accelerationChange =
+            Def.AccelerationChange
+            + (
+                Def.HasRand
+                    ? Random.Shared.NextVector2(Def.RandMin!.AccelerationChange, Def.RandMax!.AccelerationChange)
+                    : Vector2.Zero
+            );
+        return tas;
     }
 
     internal bool TryCreate(GameStateQueryContext context, [NotNullWhen(true)] out TemporaryAnimatedSprite? tas)

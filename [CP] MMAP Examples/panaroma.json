@@ -26,8 +26,10 @@
             "AlwaysActive": false
           },
           "CustomFields": {
-            "mushymato.MMAP_Background": "{{ModId}}/goose480 #abb2b9",
-            "mushymato.MMAP_Background/TAS": "{{ModId}}_Steam"
+            "mushymato.MMAP_BgStatic": "CornflowerBlue",
+            // "mushymato.MMAP_Background.0": "{{ModId}}/goose480 #abb2b9",
+            "mushymato.MMAP_BgTAS/Once": "Everywhere@1x0.4 1000 {{ModId}}_Clouds",
+            // "mushymato.MMAP_BgTAS/Respawning": "Left@0.5 1 {{ModId}}_Clouds"
           }
         },
       }
@@ -47,7 +49,7 @@
           },
           "Alpha": 0.75,
           "AlphaFade": 0.002,
-          "Motion": "0.,-0.5",
+          "Motion": "0,-0.5",
           "Acceleration": "-0.002,0",
           "Interval": 99999,
           "Scale": 0.5,
@@ -61,6 +63,33 @@
           "RandMax": {
             "LayerDepth": 0.01,
             "RotationChange": 0.001
+          }
+        },
+        "{{ModId}}_Clouds": {
+          "Id": "{{ModId}}_Clouds",
+          "Texture": "Minigames/Clouds",
+          "SourceRect": {
+            "X": 152,
+            "Y": 447,
+            "Width": 123,
+            "Height": 55
+          },
+          "Alpha": 1.00,
+          // "AlphaFade": 0.002,
+          "Motion": "1,0",
+          "PositionOffset": "0,-500",
+          "Interval": 99999,
+          "Color": "White",
+          "SpawnInterval": 10000,
+          "RandMin": {
+            "LayerDepth": 0,
+            "Motion": "-0.1,0",
+            "Scale": -0.5
+          },
+          "RandMax": {
+            "LayerDepth": 0.02,
+            "Motion": "0.1,0",
+            "Scale": 0.5
           }
         }
       }
