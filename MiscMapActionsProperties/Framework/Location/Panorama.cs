@@ -94,7 +94,7 @@ internal sealed record PanoramaTASSpawnModeDef(
     }
 }
 
-internal sealed record PanoramaBgStaticDef(Color Clr, Texture2D? BgImage)
+internal sealed record PanoramaBgStaticDef(Color Clr, Texture2D? BgImage, Rectangle? SourceRect)
 {
     internal static PanoramaBgStaticDef FromProp(string[] args)
     {
@@ -104,19 +104,26 @@ internal sealed record PanoramaBgStaticDef(Color Clr, Texture2D? BgImage)
         )
         {
             ModEntry.Log(error, LogLevel.Error);
-            return new(Color.Black, null);
+            return new(Color.Black, null, null);
         }
         Color? c = Utility.StringToColor(colorStr);
         if (!string.IsNullOrEmpty(bgImageStr) && Game1.temporaryContent.DoesAssetExist<Texture2D>(bgImageStr))
         {
-            return new(c ?? Color.White, Game1.temporaryContent.Load<Texture2D>(bgImageStr));
+            Texture2D bgImage = Game1.temporaryContent.Load<Texture2D>(bgImageStr);
+            if (!ArgUtility.TryGetRectangle(args, 2, out Rectangle sourceRect, out error, "Rectangle sourceRect"))
+            {
+                sourceRect = bgImage.Bounds;
+            }
+            return new(c ?? Color.White, bgImage, sourceRect);
         }
-        return new(c ?? Color.Black, null);
+        return new(c ?? Color.Black, null, null);
     }
 }
 
 internal sealed record PanoramaBgParallaxDef(
     Texture2D BgImage,
+    int XSource,
+    int YSource,
     int ChunksWide,
     int ChunksHigh,
     int ChunkWidth,
@@ -167,17 +174,7 @@ internal sealed record PanoramaBgParallaxDef(
 
     internal static PanoramaBgParallaxDef? FromProp(string[] args)
     {
-        if (
-            !ArgUtility.TryGet(args, 0, out string bgImageStr, out string error, allowBlank: false, "string bgImage")
-            || !ArgUtility.TryGetOptional(
-                args,
-                1,
-                out string colorStr,
-                out error,
-                defaultValue: "White",
-                name: "string color"
-            )
-        )
+        if (!ArgUtility.TryGet(args, 0, out string bgImageStr, out string error, allowBlank: false, "string bgImage"))
         {
             ModEntry.Log(error, LogLevel.Error);
             return null;
@@ -188,23 +185,17 @@ internal sealed record PanoramaBgParallaxDef(
         }
         Texture2D bgImage = Game1.temporaryContent.Load<Texture2D>(bgImageStr);
         if (
-            !ArgUtility.TryGetOptionalFloat(args, 2, out float zoom, out error, defaultValue: 4f, name: "float zoom")
-            || !ArgUtility.TryGetOptionalInt(
+            !ArgUtility.TryGetOptionalFloat(args, 1, out float zoom, out error, defaultValue: 4f, name: "float zoom")
+            || !ArgUtility.TryGetOptional(
                 args,
-                3,
-                out int chunksWide,
+                2,
+                out string colorStr,
                 out error,
-                defaultValue: 1,
-                name: "int chunksWide"
+                defaultValue: "White",
+                name: "string color"
             )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                4,
-                out int chunksHigh,
-                out error,
-                defaultValue: 1,
-                name: "int chunksHigh"
-            )
+            || !ArgUtility.TryGetOptionalInt(args, 3, out int xSource, out error, defaultValue: 0, name: "int xSource")
+            || !ArgUtility.TryGetOptionalInt(args, 4, out int ySource, out error, defaultValue: 0, name: "int ySource")
             || !ArgUtility.TryGetOptionalInt(
                 args,
                 5,
@@ -224,6 +215,22 @@ internal sealed record PanoramaBgParallaxDef(
             || !ArgUtility.TryGetOptionalInt(
                 args,
                 7,
+                out int chunksWide,
+                out error,
+                defaultValue: 1,
+                name: "int chunksWide"
+            )
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                8,
+                out int chunksHigh,
+                out error,
+                defaultValue: 1,
+                name: "int chunksHigh"
+            )
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                9,
                 out int defaultChunkIndex,
                 out error,
                 defaultValue: bgImage.Height,
@@ -231,7 +238,7 @@ internal sealed record PanoramaBgParallaxDef(
             )
             || !ArgUtility.TryGetOptionalInt(
                 args,
-                8,
+                10,
                 out int numChunksInSheet,
                 out error,
                 defaultValue: 1,
@@ -239,7 +246,7 @@ internal sealed record PanoramaBgParallaxDef(
             )
             || !ArgUtility.TryGetOptionalFloat(
                 args,
-                9,
+                11,
                 out float chanceForDeviation,
                 out error,
                 defaultValue: 1f,
@@ -256,6 +263,8 @@ internal sealed record PanoramaBgParallaxDef(
         }
         return new(
             bgImage,
+            xSource,
+            ySource,
             chunksWide,
             chunksHigh,
             chunkWidth,
@@ -271,15 +280,16 @@ internal sealed record PanoramaBgParallaxDef(
     internal void Draw(SpriteBatch b)
     {
         Vector2 zero = Vector2.Zero;
-        Rectangle value = new(0, 0, ChunkWidth, ChunkHeight);
+        Rectangle sourceRect = new(0, 0, ChunkWidth, ChunkHeight);
         int[] theChunks = Chunks;
+        int imgWidth = BgImage.Width - XSource;
         for (int j = 0; j < theChunks.Length; j++)
         {
             zero.X = Position.X + j * ChunkWidth % (ChunksWide * ChunkWidth) * Scale;
             zero.Y = Position.Y + j * ChunkWidth / (ChunksWide * ChunkWidth) * ChunkHeight * Scale;
-            value.X = theChunks[j] * ChunkWidth % BgImage.Width;
-            value.Y = theChunks[j] * ChunkWidth / BgImage.Width * ChunkHeight;
-            b.Draw(BgImage, zero, value, Clr, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+            sourceRect.X = XSource + theChunks[j] * ChunkWidth % imgWidth;
+            sourceRect.Y = YSource + theChunks[j] * ChunkWidth / imgWidth * ChunkHeight;
+            b.Draw(BgImage, zero, sourceRect, Clr, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
         }
     }
 }
@@ -367,7 +377,7 @@ internal sealed class PanoramaBackground(
             b.Draw(
                 bgStatic.BgImage ?? Game1.staminaRect,
                 new(0, 0, Game1.viewport.Width, Game1.viewport.Height),
-                Game1.staminaRect.Bounds,
+                bgStatic.SourceRect ?? Game1.staminaRect.Bounds,
                 bgStatic.Clr,
                 0f,
                 Vector2.Zero,
@@ -394,7 +404,7 @@ internal sealed class PanoramaBackground(
 /// Add several new map properties for displaying a BG in the current area.
 /// mushymato.MMAP_BgStatic <color> [bgImage]
 ///     changes colors in the back, optionally draw a sprite
-/// mushymato.MMAP_Background.{n} <bgImage> [color] [scale] [chunksWide] [chunksHigh] [chunkWidth] [chunkHeight] [defaultChunkIndex] [numChunksInSheet] [chanceForDeviation]
+/// mushymato.MMAP_Background.{n} <bgImage> [scale] [color] [xSource] [ySource] [chunkWidth] [chunkHeight] [chunksWide] [chunksHigh] [defaultChunkIndex] [numChunksInSheet] [chanceForDeviation]
 ///     draws optionally repeating sprite that spawns the screen
 /// mushymato.MMAP_BgTAS [SpawnMode] <tasId>+
 ///     temporary animated sprite go brrrrr
@@ -528,7 +538,7 @@ internal static class Panorama
         while (
             CommonPatch.TryGetCustomFieldsOrMapProperty(
                 location,
-                string.Join(MapProp_BgParallaxPrefix, ++i),
+                string.Concat(MapProp_BgParallaxPrefix, i.ToString()),
                 out string? bgParallaxProp
             )
         )
@@ -536,6 +546,7 @@ internal static class Panorama
             string[] args = ArgUtility.SplitBySpaceQuoteAware(bgParallaxProp);
             if (PanoramaBgParallaxDef.FromProp(args) is PanoramaBgParallaxDef bgDef)
                 bgParallaxList.Add(bgDef);
+            i++;
         }
 
         TryGetTASList(
@@ -548,7 +559,7 @@ internal static class Panorama
         if (bgStatic != null || bgParallaxList.Any() || (spawnDef != null && respawning != null))
         {
             PanoramaBackground panoramaBg =
-                new(location, bgStatic ?? new(Color.Black, null), bgParallaxList, spawnDef, respawning);
+                new(location, bgStatic ?? new(Color.Black, null, null), bgParallaxList, spawnDef, respawning);
             if (
                 TryGetTASList(
                     location,

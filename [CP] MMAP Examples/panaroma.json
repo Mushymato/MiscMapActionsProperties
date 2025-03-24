@@ -28,6 +28,7 @@
           "CustomFields": {
             "mushymato.MMAP_BgStatic": "CornflowerBlue",
             // "mushymato.MMAP_Background.0": "{{ModId}}/goose480 #abb2b9",
+            "mushymato.MMAP_BgParallax.0": "LooseSprites/Cursors 4 White 0 736 1 1 639 149",
             "mushymato.MMAP_BgTAS/Once": "Everywhere@1x0.4 1000 {{ModId}}_Clouds",
             // "mushymato.MMAP_BgTAS/Respawning": "Left@0.5 1 {{ModId}}_Clouds"
           }
