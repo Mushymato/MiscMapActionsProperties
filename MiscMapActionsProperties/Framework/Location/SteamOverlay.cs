@@ -16,30 +16,30 @@ internal static class SteamOverlay
     internal sealed record SteamCtx(Texture2D Texture, Color Color, float Scale, Vector2 Velocity)
     {
         internal Rectangle SourceRect = new(0, 0, Texture.Width, Texture.Height);
-        internal float Width = Texture.Width * Scale;
-        internal float Height = Texture.Height * Scale;
+        internal float ScaledWidth = Texture.Width * Scale;
+        internal float ScaledHeight = Texture.Height * Scale;
         internal Vector2 Position = new(-Game1.viewport.X, -Game1.viewport.Y);
         internal Vector2 Offset = Vector2.Zero;
 
         internal void Update(GameTime time)
         {
             Position -= Game1.getMostRecentViewportMotion();
-            Offset.X = (Offset.X + time.ElapsedGameTime.Milliseconds * Velocity.X) % Width;
-            Offset.Y = (Offset.Y + time.ElapsedGameTime.Milliseconds * Velocity.Y) % Height;
+            Offset.X = (Offset.X + time.ElapsedGameTime.Milliseconds * Velocity.X) % ScaledWidth;
+            Offset.Y = (Offset.Y + time.ElapsedGameTime.Milliseconds * Velocity.Y) % ScaledHeight;
         }
 
         internal void Draw(SpriteBatch b)
         {
             for (
-                float posX = Position.X + Offset.X;
-                posX < Game1.graphics.GraphicsDevice.Viewport.Width + Width;
-                posX += Width
+                float posX = Position.X + Offset.X - ScaledWidth;
+                posX < Game1.graphics.GraphicsDevice.Viewport.Width;
+                posX += ScaledWidth
             )
             {
                 for (
-                    float posY = Position.Y + Offset.Y;
-                    posY < Game1.graphics.GraphicsDevice.Viewport.Height + Height;
-                    posY += Height
+                    float posY = Position.Y + Offset.Y - ScaledHeight;
+                    posY < Game1.graphics.GraphicsDevice.Viewport.Height;
+                    posY += ScaledHeight
                 )
                 {
                     b.Draw(

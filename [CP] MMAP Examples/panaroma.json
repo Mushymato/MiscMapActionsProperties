@@ -26,13 +26,69 @@
             "AlwaysActive": false
           },
           "CustomFields": {
-            "mushymato.MMAP_BgStatic": "CornflowerBlue",
+            // "mushymato.MMAP_BgStatic": "CornflowerBlue",
             // "mushymato.MMAP_Background.0": "{{ModId}}/goose480 #abb2b9",
-            "mushymato.MMAP_BgParallax.0": "LooseSprites/Cursors 4 White 0 736 1 1 639 149",
-            "mushymato.MMAP_BgTAS/Once": "Everywhere@1x0.4 1000 {{ModId}}_Clouds",
+            // "mushymato.MMAP_BgParallax.0": "LooseSprites/Cursors 4 White 0 736 639 149 1 1",
+            // "mushymato.MMAP_BgTAS/Once": "Everywhere@1x0.4 1000 {{ModId}}_Clouds",
             // "mushymato.MMAP_BgTAS/Respawning": "Left@0.5 1 {{ModId}}_Clouds"
+            "mushymato.MMAP_Panaroma": "{{ModId}}_Fog"
           }
         },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/Panaroma",
+      "Entries": {
+        "{{ModId}}_Fog": {
+          "ParallaxLayers": [
+            {
+              "Texture": "LooseSprites/steamAnimation",
+              "RepeatX": true,
+              "Repeaty": true,
+              "ParallaxRate": "-10,1"
+            }
+          ],
+        },
+        "{{ModId}}_Test": {
+          "BackingColor": "CornflowerBlue",
+          "ParallaxLayers": [
+            {
+              "Id": "{{ModId}}_Mountains",
+              "Texture": "LooseSprites/Cursors",
+              "SourceRect": {
+                "X": 0,
+                "Y": 736,
+                "Width": 639,
+                "Height": 149
+              },
+            }
+          ],
+          "OnetimeTAS": [
+            {
+              "Id": "{{ModId}}_Clouds",
+              "TAS": "{{ModId}}_Clouds",
+              "Count": 25,
+              "Mode": "Everywhere",
+              "XStart": 0,
+              "XEnd": 1,
+              "YStart": 0,
+              "YEnd": 0.5
+            }
+          ],
+          "RespawnTAS": [
+            {
+              "Id": "{{ModId}}_Clouds",
+              "TAS": "{{ModId}}_Clouds",
+              "Count": 5,
+              "Mode": "Right",
+              "XStart": 0,
+              "XEnd": 1,
+              "YStart": 0,
+              "YEnd": 0.5
+            }
+          ]
+        }
       }
     },
     {
@@ -77,8 +133,7 @@
           },
           "Alpha": 1.00,
           // "AlphaFade": 0.002,
-          "Motion": "1,0",
-          "PositionOffset": "0,-500",
+          "Motion": "-1,0",
           "Interval": 99999,
           "Color": "White",
           "SpawnInterval": 10000,

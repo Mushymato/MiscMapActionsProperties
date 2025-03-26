@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
-using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
@@ -8,19 +7,7 @@ using StardewValley.GameData;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
-public class TASExtSub : TemporaryAnimatedSpriteDefinition
-{
-    public float ScaleChangeChange { get; set; } = 0f;
-    public Vector2 Motion { get; set; } = Vector2.Zero;
-    public Vector2 Acceleration { get; set; } = Vector2.Zero;
-    public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
-    public float? LayerDepth { get; set; } = null;
-
-    // actually opacity
-    public float Alpha { get; set; } = 1f;
-}
-
-public class TASExtRand
+public sealed class TASExtRand
 {
     public float SortOffset { get; set; } = 0f;
     public float Alpha { get; set; } = 1f;
@@ -36,13 +23,48 @@ public class TASExtRand
     public Vector2 PositionOffset { get; set; } = Vector2.Zero;
 }
 
-public class TASExt : TASExtSub
+public sealed class TASExt : TemporaryAnimatedSpriteDefinition
 {
+    public float ScaleChangeChange { get; set; } = 0f;
+    public Vector2 Motion { get; set; } = Vector2.Zero;
+    public Vector2 Acceleration { get; set; } = Vector2.Zero;
+    public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
+    public float? LayerDepth { get; set; } = null;
+
+    // actually opacity
+    public float Alpha { get; set; } = 1f;
+
     internal bool HasRand => RandMin != null && RandMax != null;
     public TASExtRand? RandMin { get; set; } = null;
     public TASExtRand? RandMax { get; set; } = null;
     public bool PingPong { get; set; }
     public double SpawnInterval { get; set; } = -1;
+}
+
+public enum MapWideTASMode
+{
+    Everywhere,
+    Below,
+    Right,
+    Left,
+    Above,
+}
+
+public sealed class MapWideTAS
+{
+    public string? IdImpl = null;
+    public string Id
+    {
+        get => IdImpl ??= TAS;
+        set => IdImpl = value;
+    }
+    public string TAS = "Unknown";
+    public int Count = 1;
+    public MapWideTASMode Mode = MapWideTASMode.Everywhere;
+    public float XStart = 0f;
+    public float XEnd = 1f;
+    public float YStart = 0f;
+    public float YEnd = 1f;
 }
 
 internal sealed record TileTAS(TASExt Def, Vector2 Pos)
@@ -136,8 +158,6 @@ internal static class TASAssetManager
     }
 
     private static Dictionary<string, TASExt>? _tasData = null;
-
-    /// <summary>Question dialogue data</summary>
     internal static Dictionary<string, TASExt> TASData
     {
         get
@@ -150,7 +170,7 @@ internal static class TASAssetManager
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(Asset_TAS))
-            e.LoadFrom(() => new Dictionary<string, TASExt>(), AssetLoadPriority.Low);
+            e.LoadFrom(() => new Dictionary<string, TASExt>(), AssetLoadPriority.Exclusive);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)

@@ -1,6 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
-using System.Text.RegularExpressions;
+using Force.DeepCloner;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,306 +10,194 @@ using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.Locations;
-using xTile.Layers;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
-internal enum PanoramaTASSpawnMode
+public sealed class ParallaxLayerData
 {
-    Everywhere,
-    Below,
-    Right,
-    Left,
-    Above,
+    private string? IdImpl = null;
+    public string Id
+    {
+        get => IdImpl ??= (Texture ?? Color ?? "None");
+        set => IdImpl = value;
+    }
+    public string? Texture = null;
+    public Rectangle SourceRect = Rectangle.Empty;
+    public string? Color = null;
+    public float Scale = 4f;
+    public Vector2 ParallaxRate = Vector2.One;
+    public bool RepeatX = false;
+    public bool RepeatY = false;
+    public int ChunksInSheet = 1;
+    public double ChunksDeviationChance = 1f;
 }
 
-internal sealed record PanoramaTASSpawnModeDef(
-    PanoramaTASSpawnMode Mode,
-    float XStart,
-    float XEnd,
-    float YStart,
-    float YEnd
-)
+public sealed class PanoramaData
 {
-    static readonly Regex spawnModePattern =
-        new(@"^(Everywhere|Below|Right|Left|Above)(?:@(-?[01]\.?[\d]*)x?(-?[01]\.?[\d]*)?)$");
-
-    internal static PanoramaTASSpawnModeDef? FromString(string spawnModeStr)
-    {
-        if (spawnModePattern.Match(spawnModeStr.Trim()) is Match match && match.Success)
-        {
-            if (!Enum.TryParse(match.Groups[1].Value, ignoreCase: true, out PanoramaTASSpawnMode mode))
-                return null;
-            float xZone = 1f;
-            float yZone = 1f;
-            float tmp;
-            if (match.Groups.Count > 2)
-            {
-                if (mode == PanoramaTASSpawnMode.Everywhere)
-                {
-                    if (float.TryParse(match.Groups[2].Value, out tmp))
-                        xZone = tmp;
-                    if (float.TryParse(match.Groups[3].Value, out tmp))
-                        yZone = tmp;
-                }
-                else if (mode == PanoramaTASSpawnMode.Left || mode == PanoramaTASSpawnMode.Right)
-                {
-                    if (float.TryParse(match.Groups[2].Value, out tmp))
-                        yZone = tmp;
-                }
-                else if (mode == PanoramaTASSpawnMode.Above || mode == PanoramaTASSpawnMode.Below)
-                {
-                    if (float.TryParse(match.Groups[2].Value, out tmp))
-                        xZone = tmp;
-                }
-            }
-            float xStart = 0f;
-            float xEnd = 1f;
-            if (xZone < 0)
-            {
-                xStart = 1f - xZone;
-                xEnd = 1f;
-            }
-            else if (xZone > 0)
-            {
-                xStart = 0;
-                xEnd = xZone;
-            }
-            float yStart = 0f;
-            float yEnd = 1f;
-            if (yZone < 0)
-            {
-                yStart = 1f - yZone;
-                yEnd = 1f;
-            }
-            else if (xZone > 0)
-            {
-                yStart = 0;
-                yEnd = yZone;
-            }
-            return new PanoramaTASSpawnModeDef(mode, xStart, xEnd, yStart, yEnd);
-        }
-        return null;
-    }
+    public string? BackingTexture = null;
+    public Rectangle BackingSourceRect = Rectangle.Empty;
+    public string? BackingColor = null;
+    public List<ParallaxLayerData>? ParallaxLayers = null;
+    public List<MapWideTAS>? OnetimeTAS = null;
+    public List<MapWideTAS>? RespawnTAS = null;
 }
 
-internal sealed record PanoramaBgStaticDef(Color Clr, Texture2D? BgImage, Rectangle? SourceRect)
+internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D Texture, Rectangle SourceRect)
 {
-    internal static PanoramaBgStaticDef FromProp(string[] args)
-    {
-        if (
-            !ArgUtility.TryGet(args, 0, out string colorStr, out string error, name: "string color")
-            || !ArgUtility.TryGetOptional(args, 1, out string bgImageStr, out error, name: "string bgImage")
-        )
-        {
-            ModEntry.Log(error, LogLevel.Error);
-            return new(Color.Black, null, null);
-        }
-        Color? c = Utility.StringToColor(colorStr);
-        if (!string.IsNullOrEmpty(bgImageStr) && Game1.temporaryContent.DoesAssetExist<Texture2D>(bgImageStr))
-        {
-            Texture2D bgImage = Game1.temporaryContent.Load<Texture2D>(bgImageStr);
-            if (!ArgUtility.TryGetRectangle(args, 2, out Rectangle sourceRect, out error, "Rectangle sourceRect"))
-            {
-                sourceRect = bgImage.Bounds;
-            }
-            return new(c ?? Color.White, bgImage, sourceRect);
-        }
-        return new(c ?? Color.Black, null, null);
-    }
-}
-
-internal sealed record PanoramaBgParallaxDef(
-    Texture2D BgImage,
-    int XSource,
-    int YSource,
-    int ChunksWide,
-    int ChunksHigh,
-    int ChunkWidth,
-    int ChunkHeight,
-    float Scale,
-    int DefaultChunkIndex,
-    int NumChunksInSheet,
-    double ChanceForDeviation,
-    Color Clr
-)
-{
-    private int[]? chunks = null;
-    internal int[] Chunks => chunks ??= GetChunks();
-
-    private int[] GetChunks()
-    {
-        Random random = Utility.CreateRandom((int)Game1.stats.DaysPlayed);
-        int[] newChunks = new int[ChunksWide * ChunksHigh];
-        for (int i = 0; i < ChunksWide * ChunksHigh; i++)
-        {
-            if (random.NextDouble() < ChanceForDeviation)
-            {
-                newChunks[i] = random.Next(NumChunksInSheet);
-            }
-            else
-            {
-                newChunks[i] = DefaultChunkIndex;
-            }
-        }
-        return newChunks;
-    }
-
     private Vector2 Position = Vector2.Zero;
+    private readonly Color TxColor = Utility.StringToColor(Data.Color) ?? Color.White;
+    private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
+    private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
 
-    internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, Layer layer)
+    internal static PanoramaParallaxContext? FromData(ParallaxLayerData data)
     {
-        Position.X =
-            0f
-            - (viewport.X + viewport.Width / 2)
-                / (layer.LayerWidth * 64f)
-                * (ChunksWide * ChunkWidth * Scale - viewport.Width);
-        Position.Y =
-            0f
-            - (viewport.Y + viewport.Height / 2)
-                / (layer.LayerHeight * 64f)
-                * (ChunksHigh * ChunkHeight * Scale - viewport.Height);
+        if (!Game1.temporaryContent.DoesAssetExist<Texture2D>(data.Texture))
+            return null;
+        Texture2D texture = Game1.temporaryContent.Load<Texture2D>(data.Texture);
+        return new(data, texture, data.SourceRect.IsEmpty ? texture.Bounds : data.SourceRect);
     }
 
-    internal static PanoramaBgParallaxDef? FromProp(string[] args)
+    internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, xTile.Layers.Layer layer)
     {
-        if (!ArgUtility.TryGet(args, 0, out string bgImageStr, out string error, allowBlank: false, "string bgImage"))
+        // csharpier-ignore
+        Position.X = 0f - Data.ParallaxRate.X * (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (ScaledWidth - viewport.Width);
+        // csharpier-ignore
+        Position.Y = 0f - Data.ParallaxRate.Y * (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (ScaledHeight - viewport.Height);
+
+        // Position.X =
+        //     0f
+        //     - (viewport.X + viewport.Width / 2)
+        //         / (layer.LayerWidth * 64f)
+        //         * (ChunksWide * ChunkWidth * Scale - viewport.Width);
+        // Position.Y =
+        //     0f
+        //     - (viewport.Y + viewport.Height / 2)
+        //         / (layer.LayerHeight * 64f)
+        //         * (ChunksHigh * ChunkHeight * Scale - viewport.Height);
+    }
+
+    private IEnumerable<Vector2> DrawPositions()
+    {
+        var viewport = Game1.viewport;
+        float i;
+        float j;
+        // repeat both, i.e. tile to fill screen
+        if (Data.RepeatX && Data.RepeatY)
         {
-            ModEntry.Log(error, LogLevel.Error);
-            return null;
+            for (i = Position.X - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
+            {
+                for (j = Position.Y - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
+                {
+                    yield return new(i, j);
+                }
+                for (j = Position.Y; j < viewport.Height; j += ScaledHeight)
+                {
+                    yield return new(i, j);
+                }
+            }
+            for (i = Position.X; i < viewport.Width; i += ScaledWidth)
+            {
+                for (j = Position.Y - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
+                {
+                    yield return new(i, j);
+                }
+                for (j = Position.Y; j < viewport.Height; j += ScaledHeight)
+                {
+                    yield return new(i, j);
+                }
+            }
+            yield break;
         }
-        if (!Game1.temporaryContent.DoesAssetExist<Texture2D>(bgImageStr))
+        // repeat only X or only Y or neither
+        yield return Position;
+        if (Data.RepeatX)
         {
-            return null;
+            for (i = Position.X - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
+                yield return new(i, Position.Y);
+            for (i = Position.X + ScaledWidth; i < viewport.Width; i += ScaledWidth)
+                yield return new(i, Position.Y);
         }
-        Texture2D bgImage = Game1.temporaryContent.Load<Texture2D>(bgImageStr);
-        if (
-            !ArgUtility.TryGetOptionalFloat(args, 1, out float zoom, out error, defaultValue: 4f, name: "float zoom")
-            || !ArgUtility.TryGetOptional(
-                args,
-                2,
-                out string colorStr,
-                out error,
-                defaultValue: "White",
-                name: "string color"
-            )
-            || !ArgUtility.TryGetOptionalInt(args, 3, out int xSource, out error, defaultValue: 0, name: "int xSource")
-            || !ArgUtility.TryGetOptionalInt(args, 4, out int ySource, out error, defaultValue: 0, name: "int ySource")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                5,
-                out int chunkWidth,
-                out error,
-                defaultValue: bgImage.Width,
-                name: "int chunkWidth"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                6,
-                out int chunkHeight,
-                out error,
-                defaultValue: bgImage.Height,
-                name: "int chunkHeight"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                7,
-                out int chunksWide,
-                out error,
-                defaultValue: 1,
-                name: "int chunksWide"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                8,
-                out int chunksHigh,
-                out error,
-                defaultValue: 1,
-                name: "int chunksHigh"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                9,
-                out int defaultChunkIndex,
-                out error,
-                defaultValue: bgImage.Height,
-                name: "int defaultChunkIndex"
-            )
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                10,
-                out int numChunksInSheet,
-                out error,
-                defaultValue: 1,
-                name: "int numChunksInSheet"
-            )
-            || !ArgUtility.TryGetOptionalFloat(
-                args,
-                11,
-                out float chanceForDeviation,
-                out error,
-                defaultValue: 1f,
-                name: "float chanceForDeviation"
-            )
-        )
+        else if (Data.RepeatY)
         {
-            ModEntry.Log(error, LogLevel.Error);
-            return null;
+            for (i = Position.Y - ScaledHeight; i > -ScaledHeight; i -= ScaledHeight)
+                yield return new(Position.X, i);
+            for (i = Position.X + ScaledHeight; i < viewport.Height; i += ScaledHeight)
+                yield return new(Position.X, i);
         }
-        if (Utility.StringToColor(colorStr) is not Color c)
-        {
-            c = Color.White;
-        }
-        return new(
-            bgImage,
-            xSource,
-            ySource,
-            chunksWide,
-            chunksHigh,
-            chunkWidth,
-            chunkHeight,
-            zoom,
-            defaultChunkIndex,
-            numChunksInSheet,
-            chanceForDeviation,
-            c
-        );
     }
 
     internal void Draw(SpriteBatch b)
     {
-        Vector2 zero = Vector2.Zero;
-        Rectangle sourceRect = new(0, 0, ChunkWidth, ChunkHeight);
-        int[] theChunks = Chunks;
-        int imgWidth = BgImage.Width - XSource;
-        for (int j = 0; j < theChunks.Length; j++)
+        // Vector2 zero = Vector2.Zero;
+        // Rectangle sourceRect = new(0, 0, ChunkWidth, ChunkHeight);
+        // int[] theChunks = Chunks;
+        // int imgWidth = BgImage.Width - XSource;
+        // for (int j = 0; j < theChunks.Length; j++)
+        // {
+        //     zero.X = Position.X + j * ChunkWidth % (ChunksWide * ChunkWidth) * Scale;
+        //     zero.Y = Position.Y + j * ChunkWidth / (ChunksWide * ChunkWidth) * ChunkHeight * Scale;
+        //     sourceRect.X = XSource + theChunks[j] * ChunkWidth % imgWidth;
+        //     sourceRect.Y = YSource + theChunks[j] * ChunkWidth / imgWidth * ChunkHeight;
+        //     b.Draw(BgImage, zero, sourceRect, Clr, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+        // }
+
+        // repeat X
+        // no tiling
+        foreach (Vector2 pos in DrawPositions())
         {
-            zero.X = Position.X + j * ChunkWidth % (ChunksWide * ChunkWidth) * Scale;
-            zero.Y = Position.Y + j * ChunkWidth / (ChunksWide * ChunkWidth) * ChunkHeight * Scale;
-            sourceRect.X = XSource + theChunks[j] * ChunkWidth % imgWidth;
-            sourceRect.Y = YSource + theChunks[j] * ChunkWidth / imgWidth * ChunkHeight;
-            b.Draw(BgImage, zero, sourceRect, Clr, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
+            b.Draw(Texture, pos, SourceRect, TxColor, 0f, Vector2.Zero, Data.Scale, SpriteEffects.None, 0f);
         }
     }
 }
 
-internal sealed class PanoramaBackground(
-    GameLocation location,
-    PanoramaBgStaticDef bgStatic,
-    List<PanoramaBgParallaxDef> bgParallaxList,
-    PanoramaTASSpawnModeDef? respawnTASMode,
-    List<TileTAS>? respawningTAS
-) : Background(location, bgStatic.Clr, false)
+internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
 {
-    internal readonly List<Vector2> BgPos = [Vector2.Zero];
+    private readonly List<PanoramaParallaxContext> parallaxCtx = [];
+    private readonly List<ValueTuple<MapWideTAS, TileTAS>> respawningTAS = [];
+    private Rectangle backingSourceRect = Rectangle.Empty;
+
+    internal void SetData(PanoramaData data)
+    {
+        if (Game1.temporaryContent.DoesAssetExist<Texture2D>(data.BackingTexture))
+        {
+            backgroundImage = Game1.temporaryContent.Load<Texture2D>(data.BackingTexture);
+            backingSourceRect = data.BackingSourceRect.IsEmpty ? backgroundImage.Bounds : backingSourceRect;
+        }
+        parallaxCtx.Clear();
+        c = Utility.StringToColor(data.BackingColor) ?? Color.Black;
+        if (data.ParallaxLayers != null)
+        {
+            foreach (var parallax in data.ParallaxLayers)
+            {
+                if (PanoramaParallaxContext.FromData(parallax) is PanoramaParallaxContext pCtx)
+                {
+                    parallaxCtx.Add(pCtx);
+                }
+            }
+        }
+        respawningTAS.Clear();
+        if (data.RespawnTAS != null)
+        {
+            foreach (MapWideTAS mwTAS in data.RespawnTAS)
+            {
+                if (TASAssetManager.TASData.TryGetValue(mwTAS.TAS, out TASExt? tasExt))
+                {
+                    TASExt clone = tasExt.DeepClone();
+                    clone.RandMin ??= new();
+                    clone.RandMax ??= new();
+                    respawningTAS.Add(new(mwTAS, new(clone, Vector2.Zero)));
+                }
+            }
+        }
+    }
 
     public override void update(xTile.Dimensions.Rectangle viewport)
     {
         // Update Parallax
-        Layer layer = Game1.currentLocation.map.RequireLayer("Back");
-        foreach (var bgDef in bgParallaxList)
+        xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
+        foreach (var pCtx in parallaxCtx)
         {
-            bgDef.UpdatePosition(viewport, layer);
+            pCtx.UpdatePosition(viewport, layer);
         }
 
         // TAS
@@ -321,64 +208,82 @@ internal sealed class PanoramaBackground(
                 tempSprites.RemoveAt(i);
             }
         }
-        if (respawnTASMode != null && respawningTAS != null)
+        if (respawningTAS.Any())
         {
-            SpawnTAS(respawnTASMode, respawningTAS, layer.LayerWidth * 64f, layer.LayerHeight * 64f);
+            float width = layer.LayerWidth * 64f;
+            float height = layer.LayerHeight * 64f;
+            foreach (var mwTAS in respawningTAS)
+                SpawnTAS(mwTAS.Item1, mwTAS.Item2, width, height, true);
         }
     }
 
-    internal void SpawnTAS(PanoramaTASSpawnModeDef spawnDef, List<TileTAS> tasList, float viewWidth, float viewHeight)
+    internal void SpawnTAS(MapWideTAS mwTAS, TileTAS tileTAS, float viewWidth, float viewHeight, bool respawning)
     {
-        GameStateQueryContext context = new(location, null, null, null, Game1.random);
         Vector2 minOffset;
         Vector2 maxOffset;
-        foreach (TileTAS tileTAS in tasList)
+        float tasWidth = tileTAS.Def.SourceRect.Width * tileTAS.Def.Scale * 4;
+        float tasHeight = tileTAS.Def.SourceRect.Height * tileTAS.Def.Scale * 4;
+        switch (mwTAS.Mode)
         {
-            float tasWidth = tileTAS.Def.SourceRect.Width * tileTAS.Def.Scale * 4;
-            float tasHeight = tileTAS.Def.SourceRect.Height * tileTAS.Def.Scale * 4;
-            switch (spawnDef.Mode)
+            case MapWideTASMode.Below:
+                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, viewHeight);
+                maxOffset = new(viewWidth * mwTAS.XEnd, viewHeight);
+                break;
+            case MapWideTASMode.Right:
+                minOffset = new(viewWidth, viewHeight * mwTAS.YStart - tasHeight);
+                maxOffset = new(viewWidth, viewHeight * mwTAS.YEnd);
+                break;
+            case MapWideTASMode.Above:
+                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, -tasHeight);
+                maxOffset = new(viewWidth * mwTAS.XEnd, 0);
+                break;
+            case MapWideTASMode.Left:
+                minOffset = new(-tasWidth, viewHeight * mwTAS.YStart - tasHeight);
+                maxOffset = new(0, viewHeight * mwTAS.YEnd);
+                break;
+            default:
+                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, viewHeight * mwTAS.YStart - tasHeight);
+                maxOffset = new(viewWidth * mwTAS.XEnd, viewHeight * mwTAS.YEnd);
+                break;
+        }
+        tileTAS.Def.RandMin!.PositionOffset = minOffset / 4f;
+        tileTAS.Def.RandMax!.PositionOffset = maxOffset / 4f;
+        // ModEntry.LogOnce(
+        //     $"{viewWidth}x{viewHeight}={mwTAS.Mode}({mwTAS.XStart}-{mwTAS.XEnd},{mwTAS.YStart}-{mwTAS.YEnd}): {tileTAS.Def.RandMin!.PositionOffset} - {tileTAS.Def.RandMax!.PositionOffset}"
+        // );
+        GameStateQueryContext context = new(location, null, null, null, Game1.random);
+        if (respawning)
+        {
+            for (int i = 0; i < mwTAS.Count; i++)
             {
-                case PanoramaTASSpawnMode.Below:
-                    minOffset = new(viewWidth * spawnDef.XStart - tasWidth, viewHeight);
-                    maxOffset = new(viewWidth * spawnDef.XEnd, viewHeight);
-                    break;
-                case PanoramaTASSpawnMode.Right:
-                    minOffset = new(viewWidth, viewHeight * spawnDef.YStart - tasHeight);
-                    maxOffset = new(viewWidth, viewHeight * spawnDef.YEnd);
-                    break;
-                case PanoramaTASSpawnMode.Above:
-                    minOffset = new(viewWidth * spawnDef.XStart - tasWidth, -tasHeight);
-                    maxOffset = new(viewWidth * spawnDef.XEnd, 0);
-                    break;
-                case PanoramaTASSpawnMode.Left:
-                    minOffset = new(-tasWidth, viewHeight * spawnDef.YStart - tasHeight);
-                    maxOffset = new(0, viewHeight * spawnDef.YEnd);
-                    break;
-                default:
-                    minOffset = new(viewWidth * spawnDef.XStart - tasWidth, viewHeight * spawnDef.YStart - tasHeight);
-                    maxOffset = new(viewWidth * spawnDef.XEnd, viewHeight * spawnDef.YEnd);
-                    break;
+                if (tileTAS.TryCreateRespawning(Game1.currentGameTime, context, out TemporaryAnimatedSprite? tas))
+                {
+                    tempSprites.Insert(0, tas);
+                }
             }
-            // ModEntry.Log(
-            //     $"{viewWidth}x{viewHeight}={spawnDef.Mode}({spawnDef.XStart}-{spawnDef.XEnd},{spawnDef.YStart}-{spawnDef.YEnd}): {minOffset} - {maxOffset}"
-            // );
-            tileTAS.Def.RandMin!.PositionOffset = minOffset;
-            tileTAS.Def.RandMax!.PositionOffset = maxOffset;
-            if (tileTAS.TryCreateRespawning(Game1.currentGameTime, context, out TemporaryAnimatedSprite? tas))
-                tempSprites.Insert(0, tas);
+        }
+        else
+        {
+            for (int i = 0; i < mwTAS.Count; i++)
+            {
+                if (tileTAS.TryCreate(context, out TemporaryAnimatedSprite? tas))
+                {
+                    tempSprites.Insert(0, tas);
+                }
+            }
         }
     }
 
     public override void draw(SpriteBatch b)
     {
-        // Static color
-        if (bgStatic.BgImage != null || bgStatic.Clr != Color.Black)
+        // static
+        if (backgroundImage != null || c != Color.Black)
         {
             b.Draw(
-                bgStatic.BgImage ?? Game1.staminaRect,
+                backgroundImage ?? Game1.staminaRect,
                 new(0, 0, Game1.viewport.Width, Game1.viewport.Height),
-                bgStatic.SourceRect ?? Game1.staminaRect.Bounds,
-                bgStatic.Clr,
+                backgroundImage != null ? backingSourceRect : Game1.staminaRect.Bounds,
+                c,
                 0f,
                 Vector2.Zero,
                 SpriteEffects.None,
@@ -387,7 +292,7 @@ internal sealed class PanoramaBackground(
         }
 
         // paralax
-        foreach (var bgDef in bgParallaxList)
+        foreach (var bgDef in parallaxCtx)
         {
             bgDef.Draw(b);
         }
@@ -411,13 +316,15 @@ internal sealed class PanoramaBackground(
 /// </summary>
 internal static class Panorama
 {
-    internal static readonly string MapProp_BgStatic = $"{ModEntry.ModId}_BgStatic";
-    internal static readonly string MapProp_BgParallaxPrefix = $"{ModEntry.ModId}_BgParallax.";
-    internal static readonly string MapProp_BgTASOnce = $"{ModEntry.ModId}_BgTAS/Once";
-    internal static readonly string MapProp_BgTASRespawning = $"{ModEntry.ModId}_BgTAS/Respawning";
+    internal static readonly string MapProp_Background = $"{ModEntry.ModId}_Panaroma";
+
+    internal static readonly string Asset_Panaroma = $"{ModEntry.ModId}/Panaroma";
 
     internal static void Register()
     {
+        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+
         ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
 
@@ -425,6 +332,37 @@ internal static class Panorama
             AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.updateWeather)),
             transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
         );
+
+        ModEntry.help.ConsoleCommands.Add("mmap_reset_bg", "Reload current area background", ConsoleReloadBg);
+    }
+
+    private static void ConsoleReloadBg(string arg1, string[] arg2)
+    {
+        // patch reload mushymato.MMAP.Example
+        // mmap_reset_bg
+        if (!Context.IsWorldReady)
+            return;
+        if (Game1.currentLocation != null)
+        {
+            _bgData = null;
+            ApplyPanoramaBackground(Game1.currentLocation);
+        }
+    }
+
+    private static Dictionary<string, PanoramaData>? _bgData = null;
+    internal static Dictionary<string, PanoramaData> BgData =>
+        _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panaroma);
+
+    private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
+    {
+        if (e.Name.IsEquivalentTo(Asset_Panaroma))
+            e.LoadFrom(() => new Dictionary<string, PanoramaData>(), AssetLoadPriority.Exclusive);
+    }
+
+    private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
+    {
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_Panaroma)))
+            _bgData = null;
     }
 
     private static IEnumerable<CodeInstruction> Game1_updateWeather_Transpiler(
@@ -476,103 +414,38 @@ internal static class Panorama
         ApplyPanoramaBackground(e.Location);
     }
 
-    private static bool TryGetTASList(
-        GameLocation location,
-        string propKey,
-        [NotNullWhen(true)] out PanoramaTASSpawnModeDef? spawnMode,
-        [NotNullWhen(true)] out List<TileTAS>? tasList
-    )
-    {
-        spawnMode = null;
-        tasList = null;
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(location, propKey, out string? backgroundTASProp)
-            && ArgUtility.SplitBySpaceQuoteAware(backgroundTASProp) is string[] tas
-        )
-        {
-            if (tas.Length >= 3 && (spawnMode = PanoramaTASSpawnModeDef.FromString(tas[0])) != null)
-            {
-                tasList = [];
-                for (int i = 2; i < tas.Length; i++)
-                {
-                    if (!int.TryParse(tas[i - 1], out int tasCount))
-                        continue;
-                    for (int j = 0; j < tasCount; j++)
-                    {
-                        string tasKey = tas[i];
-                        if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
-                        {
-                            TileTAS tileTAS = new(def, Vector2.Zero);
-                            tileTAS.Def.RandMin ??= new();
-                            tileTAS.Def.RandMax ??= new();
-                            tasList.Add(tileTAS);
-                        }
-                        else
-                        {
-                            ModEntry.LogOnce($"No mushymato.MMAP/TAS '{tasKey}' defined", LogLevel.Warn);
-                            break;
-                        }
-                    }
-                }
-                if (tasList.Count == 0)
-                {
-                    tasList = null;
-                }
-            }
-        }
-        return tasList != null;
-    }
-
     private static void ApplyPanoramaBackground(GameLocation location)
     {
         // GameLocation location, PanoramaBgStaticDef bgStatic, List<TileTAS>? respawningTAS
-        PanoramaBgStaticDef? bgStatic = null;
-        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_BgStatic, out string? bgStaticProp))
+        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_Background, out string? bgId))
         {
-            string[] args = ArgUtility.SplitBySpaceQuoteAware(bgStaticProp);
-            bgStatic = PanoramaBgStaticDef.FromProp(args);
-        }
-
-        List<PanoramaBgParallaxDef> bgParallaxList = [];
-        int i = 0;
-        while (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(
-                location,
-                string.Concat(MapProp_BgParallaxPrefix, i.ToString()),
-                out string? bgParallaxProp
-            )
-        )
-        {
-            string[] args = ArgUtility.SplitBySpaceQuoteAware(bgParallaxProp);
-            if (PanoramaBgParallaxDef.FromProp(args) is PanoramaBgParallaxDef bgDef)
-                bgParallaxList.Add(bgDef);
-            i++;
-        }
-
-        TryGetTASList(
-            location,
-            MapProp_BgTASRespawning,
-            out PanoramaTASSpawnModeDef? spawnDef,
-            out List<TileTAS>? respawning
-        );
-
-        if (bgStatic != null || bgParallaxList.Any() || (spawnDef != null && respawning != null))
-        {
-            PanoramaBackground panoramaBg =
-                new(location, bgStatic ?? new(Color.Black, null, null), bgParallaxList, spawnDef, respawning);
-            if (
-                TryGetTASList(
-                    location,
-                    MapProp_BgTASOnce,
-                    out PanoramaTASSpawnModeDef? onceSpawnDef,
-                    out List<TileTAS>? onceTas
-                )
-            )
+            if (BgData.TryGetValue(bgId, out PanoramaData? data))
             {
-                Layer layer = location.map.RequireLayer("Back");
-                panoramaBg.SpawnTAS(onceSpawnDef, onceTas, layer.LayerWidth * 64f, layer.LayerHeight * 64f);
+                if (Game1.background is not PanoramaBackground panaroma)
+                    panaroma = new(location);
+                panaroma.SetData(data);
+                if (data.OnetimeTAS != null)
+                {
+                    xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
+                    float width = layer.LayerWidth * 64f;
+                    float height = layer.LayerHeight * 64f;
+                    foreach (var mwTAS in data.OnetimeTAS)
+                    {
+                        if (TASAssetManager.TASData.TryGetValue(mwTAS.TAS, out TASExt? tasExt))
+                        {
+                            TASExt clone = tasExt.DeepClone();
+                            clone.RandMin ??= new();
+                            clone.RandMax ??= new();
+                            panaroma.SpawnTAS(mwTAS, new(clone, Vector2.Zero), width, height, false);
+                        }
+                    }
+                }
+                Game1.background = panaroma;
             }
-            Game1.background = panoramaBg;
+            else
+            {
+                ModEntry.Log($"No {ModEntry.ModId}/Panaroma with Id '{bgId}' found", LogLevel.Warn);
+            }
         }
         else
         {
