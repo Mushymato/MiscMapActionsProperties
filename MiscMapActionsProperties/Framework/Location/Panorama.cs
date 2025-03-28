@@ -25,6 +25,7 @@ public sealed class ParallaxLayerData
     public Rectangle SourceRect = Rectangle.Empty;
     public string? Color = null;
     public float Scale = 4f;
+    public Vector2 DrawOffset = Vector2.Zero;
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
     public bool RepeatY = false;
@@ -60,20 +61,9 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, xTile.Layers.Layer layer)
     {
         // csharpier-ignore
-        Position.X = 0f - Data.ParallaxRate.X * (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (ScaledWidth - viewport.Width);
+        Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
         // csharpier-ignore
-        Position.Y = 0f - Data.ParallaxRate.Y * (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (ScaledHeight - viewport.Height);
-
-        // Position.X =
-        //     0f
-        //     - (viewport.X + viewport.Width / 2)
-        //         / (layer.LayerWidth * 64f)
-        //         * (ChunksWide * ChunkWidth * Scale - viewport.Width);
-        // Position.Y =
-        //     0f
-        //     - (viewport.Y + viewport.Height / 2)
-        //         / (layer.LayerHeight * 64f)
-        //         * (ChunksHigh * ChunkHeight * Scale - viewport.Height);
+        Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
     }
 
     private IEnumerable<Vector2> DrawPositions()
@@ -145,7 +135,17 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
         // no tiling
         foreach (Vector2 pos in DrawPositions())
         {
-            b.Draw(Texture, pos, SourceRect, TxColor, 0f, Vector2.Zero, Data.Scale, SpriteEffects.None, 0f);
+            b.Draw(
+                Texture,
+                pos + Data.DrawOffset,
+                SourceRect,
+                TxColor,
+                0f,
+                Vector2.Zero,
+                Data.Scale,
+                SpriteEffects.None,
+                0f
+            );
         }
     }
 }
@@ -217,6 +217,8 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         }
     }
 
+    internal void InsertTAS(TemporaryAnimatedSprite tas) => tempSprites.Insert(0, tas);
+
     internal void SpawnTAS(MapWideTAS mwTAS, TileTAS tileTAS, float viewWidth, float viewHeight, bool respawning)
     {
         Vector2 minOffset;
@@ -256,10 +258,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         {
             for (int i = 0; i < mwTAS.Count; i++)
             {
-                if (tileTAS.TryCreateRespawning(Game1.currentGameTime, context, out TemporaryAnimatedSprite? tas))
-                {
-                    tempSprites.Insert(0, tas);
-                }
+                tileTAS.TryCreateRespawning(Game1.currentGameTime, context, InsertTAS);
             }
         }
         else
@@ -268,7 +267,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
             {
                 if (tileTAS.TryCreate(context, out TemporaryAnimatedSprite? tas))
                 {
-                    tempSprites.Insert(0, tas);
+                    InsertTAS(tas);
                 }
             }
         }
@@ -316,9 +315,9 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 /// </summary>
 internal static class Panorama
 {
-    internal static readonly string MapProp_Background = $"{ModEntry.ModId}_Panaroma";
+    internal static readonly string MapProp_Background = $"{ModEntry.ModId}_Panorama";
 
-    internal static readonly string Asset_Panaroma = $"{ModEntry.ModId}/Panaroma";
+    internal static readonly string Asset_Panorama = $"{ModEntry.ModId}/Panorama";
 
     internal static void Register()
     {
@@ -351,17 +350,17 @@ internal static class Panorama
 
     private static Dictionary<string, PanoramaData>? _bgData = null;
     internal static Dictionary<string, PanoramaData> BgData =>
-        _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panaroma);
+        _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo(Asset_Panaroma))
+        if (e.Name.IsEquivalentTo(Asset_Panorama))
             e.LoadFrom(() => new Dictionary<string, PanoramaData>(), AssetLoadPriority.Exclusive);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_Panaroma)))
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_Panorama)))
             _bgData = null;
     }
 
@@ -421,9 +420,9 @@ internal static class Panorama
         {
             if (BgData.TryGetValue(bgId, out PanoramaData? data))
             {
-                if (Game1.background is not PanoramaBackground panaroma)
-                    panaroma = new(location);
-                panaroma.SetData(data);
+                if (Game1.background is not PanoramaBackground Panorama)
+                    Panorama = new(location);
+                Panorama.SetData(data);
                 if (data.OnetimeTAS != null)
                 {
                     xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
@@ -436,15 +435,15 @@ internal static class Panorama
                             TASExt clone = tasExt.DeepClone();
                             clone.RandMin ??= new();
                             clone.RandMax ??= new();
-                            panaroma.SpawnTAS(mwTAS, new(clone, Vector2.Zero), width, height, false);
+                            Panorama.SpawnTAS(mwTAS, new(clone, Vector2.Zero), width, height, false);
                         }
                     }
                 }
-                Game1.background = panaroma;
+                Game1.background = Panorama;
             }
             else
             {
-                ModEntry.Log($"No {ModEntry.ModId}/Panaroma with Id '{bgId}' found", LogLevel.Warn);
+                ModEntry.Log($"No {ModEntry.ModId}/Panorama with Id '{bgId}' found", LogLevel.Warn);
             }
         }
         else

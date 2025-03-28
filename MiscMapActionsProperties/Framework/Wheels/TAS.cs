@@ -10,7 +10,7 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 public sealed class TASExtRand
 {
     public float SortOffset { get; set; } = 0f;
-    public float Alpha { get; set; } = 1f;
+    public float Alpha { get; set; } = 0f;
     public float AlphaFade { get; set; } = 0f;
     public float Scale { get; set; } = 0f;
     public float ScaleChange { get; set; } = 0f;
@@ -21,6 +21,8 @@ public sealed class TASExtRand
     public Vector2 Acceleration { get; set; } = Vector2.Zero;
     public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
     public Vector2 PositionOffset { get; set; } = Vector2.Zero;
+    public double SpawnInterval { get; set; } = 0;
+    public int SpawnDelay { get; set; } = -1;
 }
 
 public sealed class TASExt : TemporaryAnimatedSpriteDefinition
@@ -33,12 +35,13 @@ public sealed class TASExt : TemporaryAnimatedSpriteDefinition
 
     // actually opacity
     public float Alpha { get; set; } = 1f;
+    public bool PingPong { get; set; }
+    public double SpawnInterval { get; set; } = -1;
+    public int SpawnDelay { get; set; } = -1;
 
     internal bool HasRand => RandMin != null && RandMax != null;
     public TASExtRand? RandMin { get; set; } = null;
     public TASExtRand? RandMax { get; set; } = null;
-    public bool PingPong { get; set; }
-    public double SpawnInterval { get; set; } = -1;
 }
 
 public enum MapWideTASMode
@@ -71,9 +74,9 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
 {
     private TimeSpan spawnTimeout = TimeSpan.Zero;
 
+    // csharpier-ignore
     internal TemporaryAnimatedSprite Create()
     {
-        // csharpier-ignore
         TemporaryAnimatedSprite tas = TemporaryAnimatedSprite.GetTemporaryAnimatedSprite(
             Def.Texture,
             Def.SourceRect,
@@ -91,29 +94,13 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
             Def.Rotation + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.Rotation, Def.RandMax!.Rotation) : 0),
             Def.RotationChange + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.RotationChange, Def.RandMax!.RotationChange) : 0)
         );
-        tas.scaleChangeChange = Def.HasRand
-            ? Random.Shared.NextSingle(Def.RandMin!.ScaleChangeChange, Def.RandMax!.ScaleChangeChange)
-            : 0;
+        tas.scaleChangeChange = Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.ScaleChangeChange, Def.RandMax!.ScaleChangeChange) : 0;
         tas.pingPong = Def.PingPong;
         tas.alpha = Def.Alpha + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.Alpha, Def.RandMax!.Alpha) : 0);
         tas.layerDepth = Def.LayerDepth ?? (Pos.Y + 0.66f * Game1.tileSize) / 10000f + Pos.X / Game1.tileSize * 1E-05f;
-        tas.motion =
-            Def.Motion
-            + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Motion, Def.RandMax!.Motion) : Vector2.Zero);
-        tas.acceleration =
-            Def.Acceleration
-            + (
-                Def.HasRand
-                    ? Random.Shared.NextVector2(Def.RandMin!.Acceleration, Def.RandMax!.Acceleration)
-                    : Vector2.Zero
-            );
-        tas.accelerationChange =
-            Def.AccelerationChange
-            + (
-                Def.HasRand
-                    ? Random.Shared.NextVector2(Def.RandMin!.AccelerationChange, Def.RandMax!.AccelerationChange)
-                    : Vector2.Zero
-            );
+        tas.motion = Def.Motion + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Motion, Def.RandMax!.Motion) : Vector2.Zero);
+        tas.acceleration = Def.Acceleration + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.Acceleration, Def.RandMax!.Acceleration) : Vector2.Zero);
+        tas.accelerationChange = Def.AccelerationChange + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.AccelerationChange, Def.RandMax!.AccelerationChange) : Vector2.Zero);
         return tas;
     }
 
@@ -128,24 +115,47 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
         return false;
     }
 
+    internal bool TryCreateDelayed(GameStateQueryContext context, Action<TemporaryAnimatedSprite> addSprite)
+    {
+        if (TryCreate(context, out TemporaryAnimatedSprite? tas) && Def.SpawnDelay > 0)
+        {
+            // DelayedAction.addTemporarySpriteAfterDelay(tas, location, Def.SpawnDelay + (Def.HasRand ? Random.Shared.Next(Def.RandMin!.SpawnDelay, Def.RandMax!.SpawnDelay) : 0), true);
+            DelayedAction.functionAfterDelay(
+                () => addSprite(tas),
+                Def.SpawnDelay
+                    + (Def.HasRand ? Random.Shared.Next(Def.RandMin!.SpawnDelay, Def.RandMax!.SpawnDelay) : 0)
+            );
+            return true;
+        }
+        return false;
+    }
+
     internal bool TryCreateRespawning(
         GameTime time,
         GameStateQueryContext context,
-        [NotNullWhen(true)] out TemporaryAnimatedSprite? tas
+        Action<TemporaryAnimatedSprite> addSprite
     )
     {
         if (spawnTimeout <= TimeSpan.Zero)
         {
-            spawnTimeout = TimeSpan.FromMilliseconds(Def.SpawnInterval);
-            return TryCreate(context, out tas);
+            spawnTimeout = TimeSpan.FromMilliseconds(
+                Def.SpawnInterval
+                    + (
+                        Def.HasRand
+                            ? Random.Shared.NextDouble(Def.RandMin!.SpawnInterval, Def.RandMax!.SpawnInterval)
+                            : 0
+                    )
+            );
+            if (TryCreate(context, out TemporaryAnimatedSprite? tas))
+            {
+                addSprite(tas);
+                return true;
+            }
         }
         spawnTimeout -= time.ElapsedGameTime;
-        tas = null;
         return false;
     }
 }
-
-internal record TileTASLists(List<TileTAS> Onetime, List<TileTAS> Respawning);
 
 internal static class TASAssetManager
 {

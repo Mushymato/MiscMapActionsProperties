@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
 
@@ -14,19 +16,9 @@ internal static class HoleWarp
 {
     internal static readonly string TileAction_HoleWarp = $"{ModEntry.ModId}_HoleWarp";
 
-    internal static void Register()
-    {
-        GameLocation.RegisterTileAction(
-            TileAction_HoleWarp,
-            (location, args, farmer, tile) => DoHoleWarp(location, args, farmer)
-        );
-        GameLocation.RegisterTouchAction(
-            TileAction_HoleWarp,
-            (location, args, farmer, tile) => DoHoleWarp(location, args, farmer)
-        );
-    }
+    internal static void Register() => CommonPatch.RegisterTileAndTouch(TileAction_HoleWarp, DoHoleWarp);
 
-    private static bool DoHoleWarp(GameLocation location, string[] args, Farmer farmer)
+    private static bool DoHoleWarp(GameLocation location, string[] args, Farmer farmer, Point source)
     {
         if (
             !ArgUtility.TryGet(

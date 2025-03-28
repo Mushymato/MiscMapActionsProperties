@@ -264,7 +264,7 @@
     },
     {
       "Action": "Include",
-      "FromFile": "panaroma.json"
+      "FromFile": "panorama.json"
     }
   ]
 }

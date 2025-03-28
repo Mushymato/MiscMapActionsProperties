@@ -1,4 +1,5 @@
-﻿using StardewModdingAPI;
+﻿using MiscMapActionsProperties.Framework.Wheels;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 
@@ -21,14 +22,13 @@ internal static class ShowConstruct
 
     internal static void Register()
     {
-        GameLocation.RegisterTileAction(
+        CommonPatch.RegisterTileAndTouch(
             TileAction_ShowConstruct,
             (location, args, farmer, tile) =>
                 CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
         );
-
-        GameLocation.RegisterTileAction(
-            TileAction_ShowConstructForCurrent,
+        CommonPatch.RegisterTileAndTouch(
+            TileAction_ShowConstruct,
             (location, args, farmer, tile) =>
                 CheckArgsThenShowConstruct(
                     args,

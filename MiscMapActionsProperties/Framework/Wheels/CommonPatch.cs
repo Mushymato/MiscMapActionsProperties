@@ -74,4 +74,19 @@ internal static class CommonPatch
             return !string.IsNullOrEmpty(prop);
         return false;
     }
+
+    internal static void RegisterTileAndTouch(
+        string actionName,
+        Func<GameLocation, string[], Farmer, Point, bool> callbackAction
+    )
+    {
+        GameLocation.RegisterTileAction(
+            actionName,
+            (location, args, farmer, tile) => callbackAction(location, args, farmer, tile)
+        );
+        GameLocation.RegisterTouchAction(
+            actionName,
+            (location, args, farmer, tile) => callbackAction(location, args, farmer, tile.ToPoint())
+        );
+    }
 }

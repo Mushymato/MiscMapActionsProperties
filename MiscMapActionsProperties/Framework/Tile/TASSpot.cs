@@ -6,6 +6,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
@@ -16,7 +17,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class TASSpot
 {
     internal static readonly string TileProp_TAS = $"{ModEntry.ModId}_TAS";
-    private static readonly PerScreen<TileTASLists?> currentTASCache = new();
+    private static readonly PerScreen<List<TileTAS>?> respawningTASCache = new();
 
     internal static void Register()
     {
@@ -26,6 +27,8 @@ internal static class TASSpot
             original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
             prefix: new HarmonyMethod(typeof(TASSpot), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix))
         );
+        CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
+        TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
     }
 
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
@@ -40,16 +43,56 @@ internal static class TASSpot
 
     private static void EnterLocationTAS(GameLocation location)
     {
-        currentTASCache.Value = CreateMapDefs(location.map);
-        AddLocationTAS(location, currentTASCache.Value.Onetime);
-        AddLocationTASRespawning(location, currentTASCache.Value.Respawning, Game1.currentGameTime);
+        var tileTASs = CreateMapDefs(location.map);
+        AddLocationTAS(location, tileTASs.Item1);
+        respawningTASCache.Value = tileTASs.Item2;
+        AddLocationTASRespawning(location, respawningTASCache.Value, Game1.currentGameTime);
     }
 
     private static void GameLocation_UpdateWhenCurrentLocation_Prefix(GameLocation __instance, GameTime time)
     {
-        if (currentTASCache.Value == null)
+        if (respawningTASCache.Value == null)
             return;
-        AddLocationTASRespawning(__instance, currentTASCache.Value.Respawning, time);
+        AddLocationTASRespawning(__instance, respawningTASCache.Value, time);
+    }
+
+    private static bool TriggerActionTAS(string[] args, TriggerActionContext context, out string error)
+    {
+        return SpawnTAS(Game1.currentLocation, args, out error);
+    }
+
+    private static bool TileAndTouchTAS(GameLocation location, string[] args, Farmer farmer, Point source)
+    {
+        return SpawnTAS(location, args, out _);
+    }
+
+    private static bool SpawnTAS(GameLocation location, string[] args, out string error)
+    {
+        error = "Not enough arguments.";
+        if (args.Length < 4 || !ArgUtility.TryGetVector2(args, 1, out Vector2 pos, out error, true, "Vector2 spawnPos"))
+        {
+            ModEntry.Log(error);
+            return false;
+        }
+        List<TileTAS> onetime = [];
+        List<TileTAS> respawning = [];
+
+        pos *= Game1.tileSize;
+        foreach (var tasKey in args.Skip(3))
+            if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
+            {
+                if (def.SpawnInterval <= 0)
+                    onetime.Add(new(def, pos));
+                else
+                    respawning.Add(new(def, pos));
+            }
+
+        AddLocationTAS(location, onetime);
+        if (respawningTASCache.Value != null)
+            respawningTASCache.Value.AddRange(respawning);
+        else
+            respawningTASCache.Value = respawning;
+        return true;
     }
 
     private static void AddLocationTAS(GameLocation location, IEnumerable<TileTAS> tileTASList)
@@ -57,6 +100,8 @@ internal static class TASSpot
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
         foreach (TileTAS tileTAS in tileTASList)
         {
+            if (tileTAS.TryCreateDelayed(context, location.TemporarySprites.Add))
+                continue;
             if (tileTAS.TryCreate(context, out TemporaryAnimatedSprite? tas))
                 location.TemporarySprites.Add(tas);
         }
@@ -69,12 +114,11 @@ internal static class TASSpot
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
         foreach (TileTAS tileTAS in tileTASList)
         {
-            if (tileTAS.TryCreateRespawning(time, context, out TemporaryAnimatedSprite? tas))
-                location.TemporarySprites.Add(tas);
+            tileTAS.TryCreateRespawning(time, context, location.TemporarySprites.Add);
         }
     }
 
-    private static TileTASLists CreateMapDefs(xTile.Map map)
+    private static ValueTuple<List<TileTAS>, List<TileTAS>> CreateMapDefs(xTile.Map map)
     {
         List<TileTAS> onetime = [];
         List<TileTAS> respawning = [];

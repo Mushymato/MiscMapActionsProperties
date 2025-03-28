@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -21,8 +22,7 @@ internal static class QuestionDialogue
     {
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        GameLocation.RegisterTileAction(TileAction_QuestionDialogue, ShowQuestionDialogueTile);
-        GameLocation.RegisterTouchAction(TileAction_QuestionDialogue, ShowQuestionDialogueTouch);
+        CommonPatch.RegisterTileAndTouch(TileAction_QuestionDialogue, ShowQuestionDialogue);
         TriggerActionManager.RegisterAction(TileAction_QuestionDialogue, ShowQuestionDialogueAction);
     }
 
@@ -53,42 +53,10 @@ internal static class QuestionDialogue
     private static bool ShowQuestionDialogueAction(string[] args, TriggerActionContext context, out string? error)
     {
         error = null;
-        return ShowQuestionDialogue(
-            Game1.currentLocation,
-            args,
-            Game1.player,
-            Game1.player.TilePoint,
-            Game1.player.Tile
-        );
+        return ShowQuestionDialogue(Game1.currentLocation, args, Game1.player, Game1.player.TilePoint);
     }
 
-    private static bool ShowQuestionDialogueTile(
-        GameLocation location,
-        string[] args,
-        Farmer farmer,
-        Point tilePosition
-    )
-    {
-        return ShowQuestionDialogue(location, args, farmer, tilePosition, farmer.Tile);
-    }
-
-    private static void ShowQuestionDialogueTouch(
-        GameLocation location,
-        string[] args,
-        Farmer farmer,
-        Vector2 playerStandingPosition
-    )
-    {
-        ShowQuestionDialogue(location, args, farmer, farmer.TilePoint, playerStandingPosition);
-    }
-
-    private static bool ShowQuestionDialogue(
-        GameLocation location,
-        string[] args,
-        Farmer farmer,
-        Point tilePosition,
-        Vector2 playerStandingPosition
-    )
+    private static bool ShowQuestionDialogue(GameLocation location, string[] args, Farmer farmer, Point tilePosition)
     {
         if (!ArgUtility.TryGet(args, 1, out string qdId, out string error, allowBlank: false, "string qdId"))
         {
@@ -120,7 +88,7 @@ internal static class QuestionDialogue
             TokenParser.ParseText(qdData.Question) ?? "",
             validEntries.Select(MakeResponse).ToArray(),
             (Farmer who, string whichAnswer) =>
-                AfterQuestionBehavior(location, tilePosition, playerStandingPosition, validEntries, who, whichAnswer),
+                AfterQuestionBehavior(location, tilePosition, validEntries, who, whichAnswer),
             speaker: Game1.getCharacterFromName(qdData.Speaker)
         );
 
@@ -134,7 +102,6 @@ internal static class QuestionDialogue
     internal static void AfterQuestionBehavior(
         GameLocation location,
         Point point,
-        Vector2 standing,
         IDictionary<string, QuestionDialogueEntry> validEntries,
         Farmer who,
         string whichAnswer
@@ -168,7 +135,7 @@ internal static class QuestionDialogue
                 // Perform all touch tile actions
                 foreach (string action in qde.TouchActions)
                 {
-                    location.performTouchAction(action, standing);
+                    location.performTouchAction(action, new(point.X, point.Y));
                 }
             }
         }

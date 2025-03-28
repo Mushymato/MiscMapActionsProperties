@@ -2,7 +2,7 @@
   "Changes": [
     {
       "Action": "Load",
-      "Target": "Maps/{{ModId}}/panaroma_test",
+      "Target": "Maps/{{ModId}}/panorama_test",
       "FromFile": "assets/{{TargetWithoutPath}}.tmx"
     },
     {
@@ -14,31 +14,26 @@
       "Action": "EditData",
       "Target": "Data/Locations",
       "Entries": {
-        "panaroma_test": {
-          "DisplayName": "panaroma_test",
+        "panorama_test": {
+          "DisplayName": "panorama_test",
           "DefaultArrivalTile": {
             "X": 10,
             "Y": 29
           },
           "CreateOnLoad": {
-            "MapPath": "Maps/{{ModId}}/panaroma_test",
+            "MapPath": "Maps/{{ModId}}/panorama_test",
             "Type": null,
             "AlwaysActive": false
           },
           "CustomFields": {
-            // "mushymato.MMAP_BgStatic": "CornflowerBlue",
-            // "mushymato.MMAP_Background.0": "{{ModId}}/goose480 #abb2b9",
-            // "mushymato.MMAP_BgParallax.0": "LooseSprites/Cursors 4 White 0 736 639 149 1 1",
-            // "mushymato.MMAP_BgTAS/Once": "Everywhere@1x0.4 1000 {{ModId}}_Clouds",
-            // "mushymato.MMAP_BgTAS/Respawning": "Left@0.5 1 {{ModId}}_Clouds"
-            "mushymato.MMAP_Panaroma": "{{ModId}}_Fog"
+            "mushymato.MMAP_Panorama": "{{ModId}}_Test"
           }
         },
       }
     },
     {
       "Action": "EditData",
-      "Target": "mushymato.MMAP/Panaroma",
+      "Target": "mushymato.MMAP/Panorama",
       "Entries": {
         "{{ModId}}_Fog": {
           "ParallaxLayers": [
@@ -46,12 +41,13 @@
               "Texture": "LooseSprites/steamAnimation",
               "RepeatX": true,
               "Repeaty": true,
-              "ParallaxRate": "-10,1"
+              "ParallaxRate": "1,1"
             }
           ],
         },
         "{{ModId}}_Test": {
           "BackingColor": "CornflowerBlue",
+          "BackingTexture": "",
           "ParallaxLayers": [
             {
               "Id": "{{ModId}}_Mountains",
@@ -62,6 +58,8 @@
                 "Width": 639,
                 "Height": 149
               },
+              "ParallaxRate": "0,1",
+              "RepeatX": true,
             }
           ],
           "OnetimeTAS": [
