@@ -1,0 +1,52 @@
+{
+  "MMAP_BlueSkies": {
+    "BackingColor": "CornflowerBlue",
+    "BackingTexture": "",
+    "ParallaxLayers": [
+      {
+        "Id": "MMAP_Mountains",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 0,
+          "Y": 736,
+          "Width": 639,
+          "Height": 149
+        },
+        "ParallaxRate": "0,1",
+        "RepeatX": true
+      }
+    ],
+    "OnetimeTAS": [
+      {
+        "Id": "MMAP_Clouds",
+        "TAS": [
+          "MMAP_Cloud1",
+          "MMAP_Cloud2",
+          "MMAP_Cloud3"
+        ],
+        "Count": 10,
+        "Mode": "Everywhere",
+        "XStart": 0,
+        "XEnd": 1,
+        "YStart": 0,
+        "YEnd": 0.45
+      }
+    ],
+    "RespawnTAS": [
+      {
+        "Id": "MMAP_Clouds",
+        "TAS": [
+          "MMAP_Cloud1",
+          "MMAP_Cloud2",
+          "MMAP_Cloud3"
+        ],
+        "Count": 2,
+        "Mode": "Right",
+        "XStart": 0,
+        "XEnd": 1,
+        "YStart": 0,
+        "YEnd": 0.45
+      }
+    ]
+  }
+}

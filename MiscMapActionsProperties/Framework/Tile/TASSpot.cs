@@ -17,7 +17,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class TASSpot
 {
     internal static readonly string TileProp_TAS = $"{ModEntry.ModId}_TAS";
-    private static readonly PerScreen<List<TileTAS>?> respawningTASCache = new();
+    private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
 
     internal static void Register()
     {
@@ -74,17 +74,17 @@ internal static class TASSpot
             ModEntry.Log(error);
             return false;
         }
-        List<TileTAS> onetime = [];
-        List<TileTAS> respawning = [];
+        List<TASContext> onetime = [];
+        List<TASContext> respawning = [];
 
         pos *= Game1.tileSize;
         foreach (var tasKey in args.Skip(3))
             if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
             {
                 if (def.SpawnInterval <= 0)
-                    onetime.Add(new(def, pos));
+                    onetime.Add(new(def) { Pos = pos });
                 else
-                    respawning.Add(new(def, pos));
+                    respawning.Add(new(def) { Pos = pos });
             }
 
         AddLocationTAS(location, onetime);
@@ -95,10 +95,10 @@ internal static class TASSpot
         return true;
     }
 
-    private static void AddLocationTAS(GameLocation location, IEnumerable<TileTAS> tileTASList)
+    private static void AddLocationTAS(GameLocation location, IEnumerable<TASContext> tileTASList)
     {
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
-        foreach (TileTAS tileTAS in tileTASList)
+        foreach (TASContext tileTAS in tileTASList)
         {
             if (tileTAS.TryCreateDelayed(context, location.TemporarySprites.Add))
                 continue;
@@ -107,21 +107,25 @@ internal static class TASSpot
         }
     }
 
-    private static void AddLocationTASRespawning(GameLocation location, IEnumerable<TileTAS> tileTASList, GameTime time)
+    private static void AddLocationTASRespawning(
+        GameLocation location,
+        IEnumerable<TASContext> tileTASList,
+        GameTime time
+    )
     {
         if (location.wasUpdated)
             return;
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
-        foreach (TileTAS tileTAS in tileTASList)
+        foreach (TASContext tileTAS in tileTASList)
         {
             tileTAS.TryCreateRespawning(time, context, location.TemporarySprites.Add);
         }
     }
 
-    private static ValueTuple<List<TileTAS>, List<TileTAS>> CreateMapDefs(xTile.Map map)
+    private static ValueTuple<List<TASContext>, List<TASContext>> CreateMapDefs(xTile.Map map)
     {
-        List<TileTAS> onetime = [];
-        List<TileTAS> respawning = [];
+        List<TASContext> onetime = [];
+        List<TASContext> respawning = [];
         var backLayer = map.RequireLayer("Back");
         for (int x = 0; x < backLayer.LayerWidth; x++)
         {
@@ -139,9 +143,9 @@ internal static class TASSpot
                         if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
                         {
                             if (def.SpawnInterval <= 0)
-                                onetime.Add(new(def, pos * Game1.tileSize));
+                                onetime.Add(new(def) { Pos = pos * Game1.tileSize });
                             else
-                                respawning.Add(new(def, pos * Game1.tileSize));
+                                respawning.Add(new(def) { Pos = pos * Game1.tileSize });
                         }
                 }
             }

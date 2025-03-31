@@ -29,15 +29,18 @@ public sealed class ParallaxLayerData
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
     public bool RepeatY = false;
+    public Vector2 Velocity = Vector2.Zero;
     public int ChunksInSheet = 1;
     public double ChunksDeviationChance = 1f;
 }
 
 public sealed class PanoramaData
 {
+    public string? Condition = null;
     public string? BackingTexture = null;
     public Rectangle BackingSourceRect = Rectangle.Empty;
     public string? BackingColor = null;
+    public string? BackingColorNighttime = null;
     public List<ParallaxLayerData>? ParallaxLayers = null;
     public List<MapWideTAS>? OnetimeTAS = null;
     public List<MapWideTAS>? RespawnTAS = null;
@@ -46,6 +49,7 @@ public sealed class PanoramaData
 internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D Texture, Rectangle SourceRect)
 {
     private Vector2 Position = Vector2.Zero;
+    private Vector2 ScrollOffset = Vector2.Zero;
     private readonly Color TxColor = Utility.StringToColor(Data.Color) ?? Color.White;
     private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
     private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
@@ -64,6 +68,10 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
         Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
         // csharpier-ignore
         Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
+
+        GameTime time = Game1.currentGameTime;
+        ScrollOffset.X = (ScrollOffset.X + time.ElapsedGameTime.Milliseconds * Data.Velocity.X) % ScaledWidth;
+        ScrollOffset.Y = (ScrollOffset.Y + time.ElapsedGameTime.Milliseconds * Data.Velocity.Y) % ScaledHeight;
     }
 
     private IEnumerable<Vector2> DrawPositions()
@@ -71,27 +79,29 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
         var viewport = Game1.viewport;
         float i;
         float j;
+        float posX = Position.X + Data.DrawOffset.X + ScrollOffset.X;
+        float posY = Position.Y + Data.DrawOffset.Y + ScrollOffset.Y;
         // repeat both, i.e. tile to fill screen
         if (Data.RepeatX && Data.RepeatY)
         {
-            for (i = Position.X - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
+            for (i = posX - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
             {
-                for (j = Position.Y - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
+                for (j = posY - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
                 {
                     yield return new(i, j);
                 }
-                for (j = Position.Y; j < viewport.Height; j += ScaledHeight)
+                for (j = posY; j < viewport.Height; j += ScaledHeight)
                 {
                     yield return new(i, j);
                 }
             }
-            for (i = Position.X; i < viewport.Width; i += ScaledWidth)
+            for (i = posX; i < viewport.Width; i += ScaledWidth)
             {
-                for (j = Position.Y - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
+                for (j = posY - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
                 {
                     yield return new(i, j);
                 }
-                for (j = Position.Y; j < viewport.Height; j += ScaledHeight)
+                for (j = posY; j < viewport.Height; j += ScaledHeight)
                 {
                     yield return new(i, j);
                 }
@@ -99,20 +109,20 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
             yield break;
         }
         // repeat only X or only Y or neither
-        yield return Position;
+        yield return Position + Data.DrawOffset + ScrollOffset;
         if (Data.RepeatX)
         {
-            for (i = Position.X - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
-                yield return new(i, Position.Y);
-            for (i = Position.X + ScaledWidth; i < viewport.Width; i += ScaledWidth)
-                yield return new(i, Position.Y);
+            for (i = posX - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
+                yield return new(i, posY);
+            for (i = posX + ScaledWidth; i < viewport.Width; i += ScaledWidth)
+                yield return new(i, posY);
         }
         else if (Data.RepeatY)
         {
-            for (i = Position.Y - ScaledHeight; i > -ScaledHeight; i -= ScaledHeight)
-                yield return new(Position.X, i);
-            for (i = Position.X + ScaledHeight; i < viewport.Height; i += ScaledHeight)
-                yield return new(Position.X, i);
+            for (i = posY - ScaledHeight; i > -ScaledHeight; i -= ScaledHeight)
+                yield return new(posX, i);
+            for (i = posX + ScaledHeight; i < viewport.Height; i += ScaledHeight)
+                yield return new(posX, i);
         }
     }
 
@@ -135,17 +145,7 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
         // no tiling
         foreach (Vector2 pos in DrawPositions())
         {
-            b.Draw(
-                Texture,
-                pos + Data.DrawOffset,
-                SourceRect,
-                TxColor,
-                0f,
-                Vector2.Zero,
-                Data.Scale,
-                SpriteEffects.None,
-                0f
-            );
+            b.Draw(Texture, pos, SourceRect, TxColor, 0f, Vector2.Zero, Data.Scale, SpriteEffects.None, 0f);
         }
     }
 }
@@ -153,7 +153,7 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
 internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
 {
     private readonly List<PanoramaParallaxContext> parallaxCtx = [];
-    private readonly List<ValueTuple<MapWideTAS, TileTAS>> respawningTAS = [];
+    private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
     private Rectangle backingSourceRect = Rectangle.Empty;
 
     internal void SetData(PanoramaData data)
@@ -180,12 +180,9 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         {
             foreach (MapWideTAS mwTAS in data.RespawnTAS)
             {
-                if (TASAssetManager.TASData.TryGetValue(mwTAS.TAS, out TASExt? tasExt))
+                foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
                 {
-                    TASExt clone = tasExt.DeepClone();
-                    clone.RandMin ??= new();
-                    clone.RandMax ??= new();
-                    respawningTAS.Add(new(mwTAS, new(clone, Vector2.Zero)));
+                    respawningTAS.Add(new(mwTAS, new(tasExt) { Pos = Vector2.Zero }));
                 }
             }
         }
@@ -219,7 +216,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     internal void InsertTAS(TemporaryAnimatedSprite tas) => tempSprites.Insert(0, tas);
 
-    internal void SpawnTAS(MapWideTAS mwTAS, TileTAS tileTAS, float viewWidth, float viewHeight, bool respawning)
+    internal void SpawnTAS(MapWideTAS mwTAS, TASContext tileTAS, float viewWidth, float viewHeight, bool respawning)
     {
         Vector2 minOffset;
         Vector2 maxOffset;
@@ -248,11 +245,14 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
                 maxOffset = new(viewWidth * mwTAS.XEnd, viewHeight * mwTAS.YEnd);
                 break;
         }
-        tileTAS.Def.RandMin!.PositionOffset = minOffset / 4f;
-        tileTAS.Def.RandMax!.PositionOffset = maxOffset / 4f;
+
+        // tileTAS.Def.RandMin!.PositionOffset = minOffset / 4f;
+        // tileTAS.Def.RandMax!.PositionOffset = maxOffset / 4f;
         // ModEntry.LogOnce(
         //     $"{viewWidth}x{viewHeight}={mwTAS.Mode}({mwTAS.XStart}-{mwTAS.XEnd},{mwTAS.YStart}-{mwTAS.YEnd}): {tileTAS.Def.RandMin!.PositionOffset} - {tileTAS.Def.RandMax!.PositionOffset}"
         // );
+        tileTAS.PosOffsetMin = minOffset;
+        tileTAS.PosOffsetMax = maxOffset;
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
         if (respawning)
         {
@@ -315,7 +315,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 /// </summary>
 internal static class Panorama
 {
-    internal static readonly string MapProp_Background = $"{ModEntry.ModId}_Panorama";
+    internal static readonly string MapProp_PanoramaPrefix = $"{ModEntry.ModId}_Panorama";
 
     internal static readonly string Asset_Panorama = $"{ModEntry.ModId}/Panorama";
 
@@ -355,7 +355,7 @@ internal static class Panorama
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(Asset_Panorama))
-            e.LoadFrom(() => new Dictionary<string, PanoramaData>(), AssetLoadPriority.Exclusive);
+            e.LoadFromModFile<Dictionary<string, PanoramaData>>("assets/panorama.json", AssetLoadPriority.Exclusive);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
@@ -413,10 +413,12 @@ internal static class Panorama
         ApplyPanoramaBackground(e.Location);
     }
 
+    private static void GetPanoramaData(GameLocation location) { }
+
     private static void ApplyPanoramaBackground(GameLocation location)
     {
         // GameLocation location, PanoramaBgStaticDef bgStatic, List<TileTAS>? respawningTAS
-        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_Background, out string? bgId))
+        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_PanoramaPrefix, out string? bgId))
         {
             if (BgData.TryGetValue(bgId, out PanoramaData? data))
             {
@@ -430,12 +432,9 @@ internal static class Panorama
                     float height = layer.LayerHeight * 64f;
                     foreach (var mwTAS in data.OnetimeTAS)
                     {
-                        if (TASAssetManager.TASData.TryGetValue(mwTAS.TAS, out TASExt? tasExt))
+                        foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
                         {
-                            TASExt clone = tasExt.DeepClone();
-                            clone.RandMin ??= new();
-                            clone.RandMax ??= new();
-                            Panorama.SpawnTAS(mwTAS, new(clone, Vector2.Zero), width, height, false);
+                            Panorama.SpawnTAS(mwTAS, new(tasExt) { Pos = Vector2.Zero }, width, height, false);
                         }
                     }
                 }

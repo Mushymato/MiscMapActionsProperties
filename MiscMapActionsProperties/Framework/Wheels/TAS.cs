@@ -58,10 +58,10 @@ public sealed class MapWideTAS
     public string? IdImpl = null;
     public string Id
     {
-        get => IdImpl ??= TAS;
+        get => IdImpl ??= string.Join('-', TAS);
         set => IdImpl = value;
     }
-    public string TAS = "Unknown";
+    public List<string> TAS = [];
     public int Count = 1;
     public MapWideTASMode Mode = MapWideTASMode.Everywhere;
     public float XStart = 0f;
@@ -70,9 +70,13 @@ public sealed class MapWideTAS
     public float YEnd = 1f;
 }
 
-internal sealed record TileTAS(TASExt Def, Vector2 Pos)
+internal sealed record TASContext(TASExt Def)
 {
     private TimeSpan spawnTimeout = TimeSpan.Zero;
+    internal Vector2 Pos { get; set; } = Vector2.Zero;
+
+    internal Vector2 PosOffsetMin { get; set; } = Vector2.Zero;
+    internal Vector2 PosOffsetMax { get; set; } = Vector2.Zero;
 
     // csharpier-ignore
     internal TemporaryAnimatedSprite Create()
@@ -83,7 +87,7 @@ internal sealed record TileTAS(TASExt Def, Vector2 Pos)
             Def.Interval,
             Def.Frames,
             Def.Loops,
-            Pos + (Def.PositionOffset + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.PositionOffset, Def.RandMax!.PositionOffset) : Vector2.Zero)) * 4f,
+            Pos + Random.Shared.NextVector2(PosOffsetMin, PosOffsetMax) + (Def.PositionOffset + (Def.HasRand ? Random.Shared.NextVector2(Def.RandMin!.PositionOffset, Def.RandMax!.PositionOffset) : Vector2.Zero)) * 4f,
             Def.Flicker,
             Def.Flip,
             Def.SortOffset + (Def.HasRand ? Random.Shared.NextSingle(Def.RandMin!.SortOffset, Def.RandMax!.SortOffset) : 0),
@@ -180,12 +184,23 @@ internal static class TASAssetManager
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(Asset_TAS))
-            e.LoadFrom(() => new Dictionary<string, TASExt>(), AssetLoadPriority.Exclusive);
+            e.LoadFromModFile<Dictionary<string, TASExt>>("assets/tas.json", AssetLoadPriority.Exclusive);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_TAS)))
             _tasData = null;
+    }
+
+    public static IEnumerable<TASExt> GetTASExtList(IEnumerable<string> tasIds)
+    {
+        foreach (string tasId in tasIds)
+        {
+            if (TASData.TryGetValue(tasId, out TASExt? tasExt))
+            {
+                yield return tasExt;
+            }
+        }
     }
 }

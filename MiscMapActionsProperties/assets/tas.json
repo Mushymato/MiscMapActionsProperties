@@ -1,0 +1,83 @@
+{
+    "MMAP_Cloud1": {
+        "Id": "MMAP_Cloud1",
+        "Texture": "Minigames/Clouds",
+        "SourceRect": {
+            "X": 152,
+            "Y": 447,
+            "Width": 123,
+            "Height": 55
+        },
+        "Alpha": 1.00,
+        "Motion": "-0.9,0",
+        "Interval": 99999,
+        "Color": "White",
+        "SpawnInterval": 10000,
+        "RandMin": {
+            "LayerDepth": 0,
+            "Motion": "-0.1,0",
+            "Scale": -0.1,
+            "SpawnInterval": -1000
+        },
+        "RandMax": {
+            "LayerDepth": 0.02,
+            "Motion": "0.1,0",
+            "Scale": 0.1,
+            "SpawnInterval": 1000
+        }
+    },
+    "MMAP_Cloud2": {
+        "Id": "MMAP_Cloud2",
+        "Texture": "Minigames/Clouds",
+        "SourceRect": {
+            "X": 0,
+            "Y": 471,
+            "Width": 149,
+            "Height": 66
+        },
+        "Alpha": 1.00,
+        "Motion": "-0.8,0",
+        "Interval": 99999,
+        "Color": "White",
+        "SpawnInterval": 10000,
+        "RandMin": {
+            "LayerDepth": 0,
+            "Motion": "-0.1,0",
+            "Scale": -0.1,
+            "SpawnInterval": -1000
+        },
+        "RandMax": {
+            "LayerDepth": 0.02,
+            "Motion": "0.1,0",
+            "Scale": 0.1,
+            "SpawnInterval": 1000
+        }
+    },
+    "MMAP_Cloud3": {
+        "Id": "MMAP_Cloud3",
+        "Texture": "Minigames/Clouds",
+        "SourceRect": {
+            "X": 410,
+            "Y": 467,
+            "Width": 63,
+            "Height": 37
+        },
+        "Alpha": 1.00,
+        "Motion": "-1,0",
+        "Interval": 99999,
+        "Color": "White",
+        "SpawnInterval": 10000,
+        "RandMin": {
+            "LayerDepth": 0,
+            "Motion": "-0.1,0",
+            "Scale": -0.1,
+            "SpawnInterval": -1000
+        },
+        "RandMax": {
+            "LayerDepth": 0.02,
+            "Motion": "0.1,0",
+            "Scale": 0.1,
+            "SpawnInterval": 1000
+        }
+    }
+}
