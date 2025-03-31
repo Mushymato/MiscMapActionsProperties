@@ -27,7 +27,7 @@
           },
           "CustomFields": {
             // this is a built-in panorama, see MiscMapActionsProperties/assets/panorama.json
-            "mushymato.MMAP_Panorama": "{{ModId}}_Fog"
+            "mushymato.MMAP_Panorama": "MMAP_BlueSkies"
           }
         },
       }

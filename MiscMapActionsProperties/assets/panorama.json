@@ -12,7 +12,7 @@
           "Width": 639,
           "Height": 149
         },
-        "ParallaxRate": "0,1",
+        "ParallaxRate": "2,1",
         "RepeatX": true
       }
     ],
@@ -24,7 +24,7 @@
           "MMAP_Cloud2",
           "MMAP_Cloud3"
         ],
-        "Count": 10,
+        "Count": 8,
         "Mode": "Everywhere",
         "XStart": 0,
         "XEnd": 1,
@@ -40,7 +40,7 @@
           "MMAP_Cloud2",
           "MMAP_Cloud3"
         ],
-        "Count": 2,
+        "Count": 1,
         "Mode": "Right",
         "XStart": 0,
         "XEnd": 1,

@@ -59,6 +59,11 @@ internal static class CommonPatch
         GameLocation_DrawAboveAlwaysFrontLayer?.Invoke(null, new(__instance, b));
     }
 
+    internal static bool HasCustomFieldsOrMapProperty(GameLocation location, string propKey)
+    {
+        return TryGetCustomFieldsOrMapProperty(location, propKey, out _);
+    }
+
     internal static bool TryGetCustomFieldsOrMapProperty(
         GameLocation location,
         string propKey,

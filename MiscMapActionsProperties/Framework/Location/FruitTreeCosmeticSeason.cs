@@ -1,4 +1,5 @@
 using HarmonyLib;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.TerrainFeatures;
@@ -32,7 +33,7 @@ internal static class FruitTreeCosmeticSeason
     {
         if (
             __instance.IgnoresSeasonsHere()
-            && __instance.Location.HasMapPropertyWithValue(MapProp_FruitTreeCosmeticSeason)
+            && CommonPatch.HasCustomFieldsOrMapProperty(__instance.Location, MapProp_FruitTreeCosmeticSeason)
         )
         {
             __result = __instance.Location.GetSeason();
