@@ -265,6 +265,13 @@
     {
       "Action": "Include",
       "FromFile": "panorama.json"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/FarmHouse2",
+      "MapProperties": {
+        "mushymato.MMAP_CribPosition": "17 28"
+      },
     }
   ]
 }
