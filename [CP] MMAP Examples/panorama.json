@@ -6,11 +6,6 @@
       "FromFile": "assets/{{TargetWithoutPath}}.tmx"
     },
     {
-      "Action": "Load",
-      "Target": "{{ModId}}/goose480",
-      "FromFile": "assets/{{TargetWithoutPath}}.png"
-    },
-    {
       "Action": "EditData",
       "Target": "Data/Locations",
       "Entries": {
@@ -32,6 +27,7 @@
         },
       }
     },
+    // a panorama that bonches you
     {
       "Action": "EditData",
       "Target": "mushymato.MMAP/Panorama",
@@ -44,8 +40,7 @@
               "RepeatX": true,
               "Repeaty": true,
               "ParallaxRate": "2,1",
-              "Velocity": "0.1,0.1",
-              "LayerDepth": 5000000
+              "Velocity": "0.1,0.1"
             },
             {
               "Texture": "Portraits/Bouncer",
