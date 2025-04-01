@@ -1,10 +1,78 @@
 {
-  "MMAP_BlueSkies": {
-    "BackingColor": "CornflowerBlue",
-    "BackingTexture": "",
+  "MMAP_DefaultSkies": {
+    "BackingDay": [
+      {
+        "Id": "MMAP_Raining",
+        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 640,
+          "Y": 858,
+          "Width": 1,
+          "Height": 184
+        }
+      },
+      {
+        "Id": "MMAP_Spring",
+        "Condition": "SEASON Spring",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 639,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Summer",
+        "Condition": "SEASON Summer",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 640,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Fall",
+        "Condition": "SEASON Fall",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 641,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Winter",
+        "Condition": "SEASON Winter",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 642,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      }
+    ],
+    "BackingNight": [
+      {
+        "Id": "MMAP_Night",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 639,
+          "Y": 858,
+          "Width": 1,
+          "Height": 144
+        }
+      }
+    ],
     "ParallaxLayers": [
       {
-        "Id": "MMAP_Mountains",
+        "Id": "MMAP_SpringSummer",
+        "Condition": "SEASON Spring Summer",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -12,6 +80,35 @@
           "Width": 639,
           "Height": 149
         },
+        "DrawOffset": "0,200",
+        "ParallaxRate": "2,1",
+        "RepeatX": true
+      },
+      {
+        "Id": "MMAP_Fall",
+        "Condition": "SEASON Fall",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 0,
+          "Y": 885,
+          "Width": 639,
+          "Height": 149
+        },
+        "DrawOffset": "0,200",
+        "ParallaxRate": "2,1",
+        "RepeatX": true
+      },
+      {
+        "Id": "MMAP_Winter",
+        "Condition": "SEASON Winter",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 0,
+          "Y": 1034,
+          "Width": 639,
+          "Height": 149
+        },
+        "DrawOffset": "0,200",
         "ParallaxRate": "2,1",
         "RepeatX": true
       }
@@ -24,7 +121,7 @@
           "MMAP_Cloud2",
           "MMAP_Cloud3"
         ],
-        "Count": 8,
+        "Count": 6,
         "Mode": "Everywhere",
         "XStart": 0,
         "XEnd": 1,

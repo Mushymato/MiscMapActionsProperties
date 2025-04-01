@@ -27,7 +27,7 @@
           },
           "CustomFields": {
             // this is a built-in panorama, see MiscMapActionsProperties/assets/panorama.json
-            "mushymato.MMAP_Panorama": "MMAP_BlueSkies"
+            "mushymato.MMAP_Panorama": "MMAP_DefaultSkies"
           }
         },
       }
@@ -39,72 +39,23 @@
         "{{ModId}}_Fog": {
           "ParallaxLayers": [
             {
-              "Texture": "LooseSprites/steamAnimation",
+              "Texture": "Portraits/Bouncer",
+              "Color": "Red",
               "RepeatX": true,
               "Repeaty": true,
               "ParallaxRate": "2,1",
-              "Velocity": "0.1,0.1"
+              "Velocity": "0.1,0.1",
+              "LayerDepth": 5000000
+            },
+            {
+              "Texture": "Portraits/Bouncer",
+              "Color": "Blue",
+              "RepeatX": true,
+              "Repeaty": true,
+              "ParallaxRate": "2,1",
+              "Velocity": "-0.1,0.2"
             }
           ],
-        }
-      }
-    },
-    {
-      "Action": "EditData",
-      "Target": "mushymato.MMAP/TAS",
-      "Entries": {
-        "{{ModId}}_Steam": {
-          "Id": "{{ModId}}_Steam",
-          "Texture": "Minigames/Clouds",
-          "SourceRect": {
-            "X": 152,
-            "Y": 447,
-            "Width": 123,
-            "Height": 55
-          },
-          "Alpha": 0.75,
-          "AlphaFade": 0.002,
-          "Motion": "0,-0.5",
-          "Acceleration": "-0.002,0",
-          "Interval": 99999,
-          "Scale": 0.5,
-          "ScaleChange": 0.02,
-          "Color": "White",
-          "SpawnInterval": 10,
-          "RandMin": {
-            "LayerDepth": 0,
-            "RotationChange": -0.001
-          },
-          "RandMax": {
-            "LayerDepth": 0.01,
-            "RotationChange": 0.001
-          }
-        },
-        "{{ModId}}_Clouds": {
-          "Id": "{{ModId}}_Clouds",
-          "Texture": "Minigames/Clouds",
-          "SourceRect": {
-            "X": 152,
-            "Y": 447,
-            "Width": 123,
-            "Height": 55
-          },
-          "Alpha": 1.00,
-          // "AlphaFade": 0.002,
-          "Motion": "-1,0",
-          "Interval": 99999,
-          "Color": "White",
-          "SpawnInterval": 10000,
-          "RandMin": {
-            "LayerDepth": 0,
-            "Motion": "-0.1,0",
-            "Scale": -0.5
-          },
-          "RandMax": {
-            "LayerDepth": 0.02,
-            "Motion": "0.1,0",
-            "Scale": 0.5
-          }
         }
       }
     }

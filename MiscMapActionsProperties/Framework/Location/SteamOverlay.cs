@@ -13,7 +13,7 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class SteamOverlay
 {
-    internal sealed record SteamCtx(Texture2D Texture, Color Color, float Scale, Vector2 Velocity)
+    internal sealed record SteamCtx(Texture2D Texture, Color Color, float Scale, float Alpha, Vector2 Velocity)
     {
         internal Rectangle SourceRect = new(0, 0, Texture.Width, Texture.Height);
         internal float ScaledWidth = Texture.Width * Scale;
@@ -46,7 +46,7 @@ internal static class SteamOverlay
                         Texture,
                         new Vector2(posX, posY),
                         SourceRect,
-                        Color,
+                        Color * Alpha,
                         0f,
                         Vector2.Zero,
                         Scale,
@@ -92,10 +92,11 @@ internal static class SteamOverlay
                     allowBlank: false,
                     name: "string steamTexture"
                 )
-                && ArgUtility.TryGetOptional(args, 1, out string steamColor, out error, name: "string steamColor")
-                && ArgUtility.TryGetOptionalFloat(args, 2, out float scale, out error, 4f, "string scale")
-                && ArgUtility.TryGetOptionalFloat(args, 3, out float velocityX, out error, 0f, "string velocityX")
-                && ArgUtility.TryGetOptionalFloat(args, 4, out float velocityY, out error, 0f, "string velocityY")
+                && ArgUtility.TryGetOptionalFloat(args, 1, out float velocityX, out error, 0f, "string velocityX")
+                && ArgUtility.TryGetOptionalFloat(args, 2, out float velocityY, out error, 0f, "string velocityY")
+                && ArgUtility.TryGetOptionalFloat(args, 3, out float scale, out error, 4f, "string scale")
+                && ArgUtility.TryGetOptional(args, 4, out string steamColor, out error, name: "string steamColor")
+                && ArgUtility.TryGetOptionalFloat(args, 5, out float alpha, out error, 4f, "string alpha")
             )
             {
                 Texture2D texture = Game1.temporaryContent.DoesAssetExist<Texture2D>(steamTexture)
@@ -104,7 +105,7 @@ internal static class SteamOverlay
                 Color color = Color.White * 0.8f;
                 if (!string.IsNullOrEmpty(steamColor) && Utility.StringToColor(steamColor) is Color clr)
                     color = clr;
-                steamCtx.Value = new(texture, color, scale, new(velocityX, velocityY));
+                steamCtx.Value = new(texture, color, scale, alpha, new(velocityX, velocityY));
                 return;
             }
             ModEntry.Log(error);

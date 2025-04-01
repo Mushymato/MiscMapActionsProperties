@@ -12,7 +12,7 @@ using StardewValley.Locations;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
-public sealed class ParallaxLayerData
+public abstract class PanoramaSharedData
 {
     private string? IdImpl = null;
     public string Id
@@ -20,26 +20,29 @@ public sealed class ParallaxLayerData
         get => IdImpl ??= (Texture ?? Color ?? "None");
         set => IdImpl = value;
     }
+    public string? Condition = null;
     public string? Texture = null;
     public Rectangle SourceRect = Rectangle.Empty;
     public string? Color = null;
+}
+
+public sealed class BackingData : PanoramaSharedData;
+
+public sealed class ParallaxLayerData : PanoramaSharedData
+{
     public float Scale = 4f;
     public Vector2 DrawOffset = Vector2.Zero;
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
     public bool RepeatY = false;
     public Vector2 Velocity = Vector2.Zero;
-    public int ChunksInSheet = 1;
-    public double ChunksDeviationChance = 1f;
+    public float Alpha = 1f;
 }
 
 public sealed class PanoramaData
 {
-    public string? Condition = null;
-    public string? BackingTexture = null;
-    public Rectangle BackingSourceRect = Rectangle.Empty;
-    public string? BackingColor = null;
-    public string? BackingColorNighttime = null;
+    public List<BackingData>? BackingDay = null;
+    public List<BackingData>? BackingNight = null;
     public List<ParallaxLayerData>? ParallaxLayers = null;
     public List<MapWideTAS>? OnetimeTAS = null;
     public List<MapWideTAS>? RespawnTAS = null;
@@ -53,11 +56,17 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
     private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
 
-    internal static PanoramaParallaxContext? FromData(ParallaxLayerData data)
+    internal static PanoramaParallaxContext? FromData(ParallaxLayerData data, GameStateQueryContext context)
     {
-        if (!Game1.temporaryContent.DoesAssetExist<Texture2D>(data.Texture))
+        if (
+            !GameStateQuery.CheckConditions(data.Condition, context)
+            && !Game1.temporaryContent.DoesAssetExist<Texture2D>(data.Texture)
+        )
             return null;
-        Texture2D texture = Game1.temporaryContent.Load<Texture2D>(data.Texture);
+        Texture2D texture =
+            data.Texture == "LooseSprites/Cursors"
+                ? Game1.mouseCursors
+                : Game1.temporaryContent.Load<Texture2D>(data.Texture);
         return new(data, texture, data.SourceRect.IsEmpty ? texture.Bounds : data.SourceRect);
     }
 
@@ -127,24 +136,21 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
 
     internal void Draw(SpriteBatch b)
     {
-        // Vector2 zero = Vector2.Zero;
-        // Rectangle sourceRect = new(0, 0, ChunkWidth, ChunkHeight);
-        // int[] theChunks = Chunks;
-        // int imgWidth = BgImage.Width - XSource;
-        // for (int j = 0; j < theChunks.Length; j++)
-        // {
-        //     zero.X = Position.X + j * ChunkWidth % (ChunksWide * ChunkWidth) * Scale;
-        //     zero.Y = Position.Y + j * ChunkWidth / (ChunksWide * ChunkWidth) * ChunkHeight * Scale;
-        //     sourceRect.X = XSource + theChunks[j] * ChunkWidth % imgWidth;
-        //     sourceRect.Y = YSource + theChunks[j] * ChunkWidth / imgWidth * ChunkHeight;
-        //     b.Draw(BgImage, zero, sourceRect, Clr, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
-        // }
-
         // repeat X
         // no tiling
         foreach (Vector2 pos in DrawPositions())
         {
-            b.Draw(Texture, pos, SourceRect, TxColor, 0f, Vector2.Zero, Data.Scale, SpriteEffects.None, 0f);
+            b.Draw(
+                Texture,
+                pos,
+                SourceRect,
+                TxColor * Data.Alpha,
+                0f,
+                Vector2.Zero,
+                Data.Scale,
+                SpriteEffects.None,
+                0f
+            );
         }
     }
 }
@@ -153,27 +159,97 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 {
     private readonly List<PanoramaParallaxContext> parallaxCtx = [];
     private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
-    private Rectangle backingSourceRect = Rectangle.Empty;
+    private bool hasbacking = false;
 
-    internal void SetData(PanoramaData data)
+    // Backing Day
+    private Texture2D bDayTexture = null!;
+    private Rectangle bDayRectangle;
+    private Color bDayColor;
+
+    // Backing Night
+    private Texture2D bNightTexture = null!;
+    private Rectangle bNightRectangle;
+    private Color bNightColor;
+
+    private readonly int gettingDarkMinutes = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
+    private readonly int trulyDarkMinutes = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
+    private readonly int totalDarkenMinutes = Utility.CalculateMinutesBetweenTimes(
+        Game1.getStartingToGetDarkTime(location),
+        Game1.getTrulyDarkTime(location)
+    );
+
+    internal float GettingDarkMult()
     {
-        if (Game1.temporaryContent.DoesAssetExist<Texture2D>(data.BackingTexture))
+        float currMinutes =
+            Utility.ConvertTimeToMinutes(Game1.timeOfDay)
+            + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
+        if (currMinutes > trulyDarkMinutes)
+            return 1f;
+        if (currMinutes > gettingDarkMinutes)
+            return (currMinutes - gettingDarkMinutes) / totalDarkenMinutes;
+        return 0f;
+    }
+
+    internal static TArgs? GetFirstMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
+        where TArgs : PanoramaSharedData
+    {
+        if (dataList == null)
+            return default;
+        return dataList.FirstOrDefault(data => GameStateQuery.CheckConditions(data.Condition, context));
+    }
+
+    internal static IEnumerable<TArgs> GetAllMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
+        where TArgs : PanoramaSharedData
+    {
+        if (dataList == null)
+            return [];
+        return dataList.Where(data => GameStateQuery.CheckConditions(data.Condition, context));
+    }
+
+    internal void SetData(PanoramaData data, GameStateQueryContext context)
+    {
+        if (GetFirstMatchingData(data.BackingDay, context) is BackingData day)
         {
-            backgroundImage = Game1.temporaryContent.Load<Texture2D>(data.BackingTexture);
-            backingSourceRect = data.BackingSourceRect.IsEmpty ? backgroundImage.Bounds : backingSourceRect;
-        }
-        parallaxCtx.Clear();
-        c = Utility.StringToColor(data.BackingColor) ?? Color.Black;
-        if (data.ParallaxLayers != null)
-        {
-            foreach (var parallax in data.ParallaxLayers)
+            hasbacking = true;
+            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(day.Texture))
             {
-                if (PanoramaParallaxContext.FromData(parallax) is PanoramaParallaxContext pCtx)
-                {
-                    parallaxCtx.Add(pCtx);
-                }
+                bDayTexture = Game1.temporaryContent.Load<Texture2D>(day.Texture);
+                bDayColor = Utility.StringToColor(day.Color) ?? Color.White;
+                bDayRectangle = day.SourceRect.IsEmpty ? bDayTexture.Bounds : day.SourceRect;
+            }
+            else
+            {
+                bDayTexture = Game1.staminaRect;
+                bDayColor = Utility.StringToColor(day.Color) ?? Color.Black;
+                bDayRectangle = Game1.staminaRect.Bounds;
             }
         }
+        if (GetFirstMatchingData(data.BackingNight, context) is BackingData night)
+        {
+            hasbacking = true;
+            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(night.Texture))
+            {
+                bNightTexture = Game1.temporaryContent.Load<Texture2D>(night.Texture);
+                bNightColor = Utility.StringToColor(night.Color) ?? Color.White;
+                bNightRectangle = night.SourceRect.IsEmpty ? bDayTexture.Bounds : night.SourceRect;
+            }
+            else
+            {
+                bNightTexture = Game1.staminaRect;
+                bNightColor = Utility.StringToColor(night.Color) ?? Color.Black;
+                bNightRectangle = Game1.staminaRect.Bounds;
+            }
+        }
+
+        parallaxCtx.Clear();
+        foreach (var parallax in GetAllMatchingData(data.ParallaxLayers, context))
+        {
+            if (PanoramaParallaxContext.FromData(parallax, context) is PanoramaParallaxContext pCtx)
+            {
+                parallaxCtx.Add(pCtx);
+            }
+        }
+
         respawningTAS.Clear();
         if (data.RespawnTAS != null)
         {
@@ -275,21 +351,30 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     public override void draw(SpriteBatch b)
     {
         // static
-        if (backgroundImage != null || c != Color.Black)
+        if (hasbacking)
         {
-            b.Draw(
-                backgroundImage ?? Game1.staminaRect,
-                new(0, 0, Game1.viewport.Width, Game1.viewport.Height),
-                backgroundImage != null ? backingSourceRect : Game1.staminaRect.Bounds,
-                c,
-                0f,
-                Vector2.Zero,
-                SpriteEffects.None,
-                0f
-            );
+            float gettingDark = GettingDarkMult();
+            Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
+            if (gettingDark != 1f)
+            {
+                b.Draw(bDayTexture, viewportRect, bDayRectangle, bDayColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            }
+            if (gettingDark > 0f)
+            {
+                b.Draw(
+                    bNightTexture,
+                    viewportRect,
+                    bNightRectangle,
+                    bNightColor * gettingDark,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
         }
 
-        // paralax
+        // parallax
         foreach (var bgDef in parallaxCtx)
         {
             bgDef.Draw(b);
@@ -343,7 +428,7 @@ internal static class Panorama
         if (Game1.currentLocation != null)
         {
             _bgData = null;
-            ApplyPanoramaBackground(Game1.currentLocation);
+            RecheckPanoramaBackground(Game1.currentLocation);
         }
     }
 
@@ -404,26 +489,25 @@ internal static class Panorama
     private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
     {
         if (Game1.currentLocation != null)
-            ApplyPanoramaBackground(Game1.currentLocation);
+            RecheckPanoramaBackground(Game1.currentLocation);
     }
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
-        ApplyPanoramaBackground(e.Location);
+        RecheckPanoramaBackground(e.Location);
     }
 
-    private static void GetPanoramaData(GameLocation location) { }
-
-    private static void ApplyPanoramaBackground(GameLocation location)
+    private static void RecheckPanoramaBackground(GameLocation location)
     {
         // GameLocation location, PanoramaBgStaticDef bgStatic, List<TileTAS>? respawningTAS
         if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_PanoramaPrefix, out string? bgId))
         {
             if (BgData.TryGetValue(bgId, out PanoramaData? data))
             {
+                GameStateQueryContext context = new(location, Game1.player, null, null, null);
                 if (Game1.background is not PanoramaBackground Panorama)
                     Panorama = new(location);
-                Panorama.SetData(data);
+                Panorama.SetData(data, context);
                 if (data.OnetimeTAS != null)
                 {
                     xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");

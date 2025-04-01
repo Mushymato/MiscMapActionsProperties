@@ -9,39 +9,39 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 
 public sealed class TASExtRand
 {
-    public float SortOffset { get; set; } = 0f;
-    public float Alpha { get; set; } = 0f;
-    public float AlphaFade { get; set; } = 0f;
-    public float Scale { get; set; } = 0f;
-    public float ScaleChange { get; set; } = 0f;
-    public float ScaleChangeChange { get; set; } = 0f;
-    public float Rotation { get; set; } = 0f;
-    public float RotationChange { get; set; } = 0f;
-    public Vector2 Motion { get; set; } = Vector2.Zero;
-    public Vector2 Acceleration { get; set; } = Vector2.Zero;
-    public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
-    public Vector2 PositionOffset { get; set; } = Vector2.Zero;
-    public double SpawnInterval { get; set; } = 0;
-    public int SpawnDelay { get; set; } = -1;
+    public float SortOffset = 0f;
+    public float Alpha = 0f;
+    public float AlphaFade = 0f;
+    public float Scale = 0f;
+    public float ScaleChange = 0f;
+    public float ScaleChangeChange = 0f;
+    public float Rotation = 0f;
+    public float RotationChange = 0f;
+    public Vector2 Motion = Vector2.Zero;
+    public Vector2 Acceleration = Vector2.Zero;
+    public Vector2 AccelerationChange = Vector2.Zero;
+    public Vector2 PositionOffset = Vector2.Zero;
+    public double SpawnInterval = 0;
+    public int SpawnDelay = -1;
 }
 
 public sealed class TASExt : TemporaryAnimatedSpriteDefinition
 {
-    public float ScaleChangeChange { get; set; } = 0f;
-    public Vector2 Motion { get; set; } = Vector2.Zero;
-    public Vector2 Acceleration { get; set; } = Vector2.Zero;
-    public Vector2 AccelerationChange { get; set; } = Vector2.Zero;
-    public float? LayerDepth { get; set; } = null;
+    public float ScaleChangeChange = 0f;
+    public Vector2 Motion = Vector2.Zero;
+    public Vector2 Acceleration = Vector2.Zero;
+    public Vector2 AccelerationChange = Vector2.Zero;
+    public float? LayerDepth = null;
 
     // actually opacity
-    public float Alpha { get; set; } = 1f;
-    public bool PingPong { get; set; }
-    public double SpawnInterval { get; set; } = -1;
-    public int SpawnDelay { get; set; } = -1;
+    public float Alpha = 1f;
+    public bool PingPong = false;
+    public double SpawnInterval = -1;
+    public int SpawnDelay = -1;
 
     internal bool HasRand => RandMin != null && RandMax != null;
-    public TASExtRand? RandMin { get; set; } = null;
-    public TASExtRand? RandMax { get; set; } = null;
+    public TASExtRand? RandMin = null;
+    public TASExtRand? RandMax = null;
 }
 
 public enum MapWideTASMode
@@ -73,10 +73,10 @@ public sealed class MapWideTAS
 internal sealed record TASContext(TASExt Def)
 {
     private TimeSpan spawnTimeout = TimeSpan.Zero;
-    internal Vector2 Pos { get; set; } = Vector2.Zero;
+    internal Vector2 Pos = Vector2.Zero;
 
-    internal Vector2 PosOffsetMin { get; set; } = Vector2.Zero;
-    internal Vector2 PosOffsetMax { get; set; } = Vector2.Zero;
+    internal Vector2 PosOffsetMin = Vector2.Zero;
+    internal Vector2 PosOffsetMax = Vector2.Zero;
 
     // csharpier-ignore
     internal TemporaryAnimatedSprite Create()
