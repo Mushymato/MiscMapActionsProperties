@@ -104,6 +104,21 @@ All map properties are also Data/Location custom fields. In the case where both 
 - `T` uses `LooseSprites/LightRays`, as seen in island forest
 - Otherwise, supply a valid texture asset name
 
+#### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
+
+- Adds a tiling overlay drawn above the map.
+- If `velocityX` and/or `velocityY` are given, move the texture by that many pixels every tick to create scrolling effect.
+- By default, `color` is 80% white, `alpha` is 1 by default, and `scale` is 4 by default
+
+#### mushymato.MMAP_CribPosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the crib (vanilla is 30 12), size is still 3x4.
+- The default farmhouse has a crib baked in, which needs to be removed if you don't want duplicate cribs.
+- For wall and floor, there are 2 options:
+    1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
+    2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
+- For option 2, there are sample maps that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
+
 ### Data/Buildings Metadata
 
 Buildings Metadata are like CustomFields, except they also appear on skins and can be overwritten if needed.
@@ -111,11 +126,11 @@ Buildings Metadata are like CustomFields, except they also appear on skins and c
 #### mushymato.MMAP/ChestLight.{ChestName}: [radius] [color] [type|texture] [offsetX] [offsetY]
 
 - Add a light source at the building's tileX/tileY position, only lights up if corresponding building chest has content.
-- Radius controls size of light.
-- Can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html).
+- Radius controls size of light, 2 by default.
+- Can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html), white by default
 - Colors are inverted before being passed to light, so that "Red" will give red light.
-- type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
-- Use offsetX and offsetY to further adjust the position of the light.
+- `type|texture` is either a light id (1-10 except for 3) or a texture (must be loaded).
+- Use `offsetX` and `offsetY` to further adjust the position of the light.
 
 #### mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.{override}
 

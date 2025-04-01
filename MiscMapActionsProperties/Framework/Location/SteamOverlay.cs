@@ -94,9 +94,9 @@ internal static class SteamOverlay
                 )
                 && ArgUtility.TryGetOptionalFloat(args, 1, out float velocityX, out error, 0f, "string velocityX")
                 && ArgUtility.TryGetOptionalFloat(args, 2, out float velocityY, out error, 0f, "string velocityY")
-                && ArgUtility.TryGetOptionalFloat(args, 3, out float scale, out error, 4f, "string scale")
-                && ArgUtility.TryGetOptional(args, 4, out string steamColor, out error, name: "string steamColor")
-                && ArgUtility.TryGetOptionalFloat(args, 5, out float alpha, out error, 4f, "string alpha")
+                && ArgUtility.TryGetOptional(args, 3, out string steamColor, out error, name: "string steamColor")
+                && ArgUtility.TryGetOptionalFloat(args, 4, out float alpha, out error, 1f, "string alpha")
+                && ArgUtility.TryGetOptionalFloat(args, 5, out float scale, out error, 4f, "string scale")
             )
             {
                 Texture2D texture = Game1.temporaryContent.DoesAssetExist<Texture2D>(steamTexture)
