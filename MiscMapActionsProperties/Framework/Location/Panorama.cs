@@ -28,13 +28,22 @@ public abstract class PanoramaSharedData
 
 public sealed class BackingData : PanoramaSharedData;
 
+public enum ParallaxAlignMode
+{
+    Start = 0,
+    Middle = 1,
+    End = 2,
+}
+
 public sealed class ParallaxLayerData : PanoramaSharedData
 {
     public float Scale = 4f;
     public Vector2 DrawOffset = Vector2.Zero;
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
+    public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
     public bool RepeatY = false;
+    public ParallaxAlignMode AlignY = ParallaxAlignMode.Middle;
     public Vector2 Velocity = Vector2.Zero;
     public float Alpha = 1f;
 }
@@ -42,6 +51,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
 public sealed class PanoramaData
 {
     public List<BackingData>? BackingDay = null;
+    public List<BackingData>? BackingSunset = null;
     public List<BackingData>? BackingNight = null;
     public List<ParallaxLayerData>? ParallaxLayers = null;
     public List<MapWideTAS>? OnetimeTAS = null;
@@ -73,9 +83,31 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, xTile.Layers.Layer layer)
     {
         // csharpier-ignore
-        Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
+        switch (Data.AlignX)
+        {
+            case ParallaxAlignMode.Start:
+                Position.X = 0f;
+                break;
+            case ParallaxAlignMode.Middle:
+                Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
+                break;
+            case ParallaxAlignMode.End:
+                Position.X = viewport.Width - ScaledWidth;
+                break;
+        }
         // csharpier-ignore
-        Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
+        switch (Data.AlignY)
+        {
+            case ParallaxAlignMode.Start:
+                Position.Y = 0f;
+                break;
+            case ParallaxAlignMode.Middle:
+                Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
+                break;
+            case ParallaxAlignMode.End:
+                Position.Y = viewport.Height - ScaledHeight;
+                break;
+        }
 
         GameTime time = Game1.currentGameTime;
         ScrollOffset.X = (ScrollOffset.X + time.ElapsedGameTime.Milliseconds * Data.Velocity.X) % ScaledWidth;
@@ -155,41 +187,8 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     }
 }
 
-internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
+internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, Color Color)
 {
-    private readonly List<PanoramaParallaxContext> parallaxCtx = [];
-    private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
-    private bool hasbacking = false;
-
-    // Backing Day
-    private Texture2D bDayTexture = null!;
-    private Rectangle bDayRectangle;
-    private Color bDayColor;
-
-    // Backing Night
-    private Texture2D bNightTexture = null!;
-    private Rectangle bNightRectangle;
-    private Color bNightColor;
-
-    private readonly int gettingDarkMinutes = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
-    private readonly int trulyDarkMinutes = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
-    private readonly int totalDarkenMinutes = Utility.CalculateMinutesBetweenTimes(
-        Game1.getStartingToGetDarkTime(location),
-        Game1.getTrulyDarkTime(location)
-    );
-
-    internal float GettingDarkMult()
-    {
-        float currMinutes =
-            Utility.ConvertTimeToMinutes(Game1.timeOfDay)
-            + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
-        if (currMinutes > trulyDarkMinutes)
-            return 1f;
-        if (currMinutes > gettingDarkMinutes)
-            return (currMinutes - gettingDarkMinutes) / totalDarkenMinutes;
-        return 0f;
-    }
-
     internal static TArgs? GetFirstMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
         where TArgs : PanoramaSharedData
     {
@@ -197,6 +196,63 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
             return default;
         return dataList.FirstOrDefault(data => GameStateQuery.CheckConditions(data.Condition, context));
     }
+
+    internal static BackingContext? FromDataList(List<BackingData>? dataList, GameStateQueryContext context)
+    {
+        if (GetFirstMatchingData(dataList, context) is BackingData backing)
+        {
+            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(backing.Texture))
+            {
+                Texture2D texture = Game1.temporaryContent.Load<Texture2D>(backing.Texture);
+                return new(
+                    texture,
+                    backing.SourceRect.IsEmpty ? texture.Bounds : backing.SourceRect,
+                    Utility.StringToColor(backing.Color) ?? Color.White
+                );
+            }
+            else
+            {
+                return new(
+                    Game1.staminaRect,
+                    Game1.staminaRect.Bounds,
+                    Utility.StringToColor(backing.Color) ?? Color.Black
+                );
+            }
+        }
+        return null;
+    }
+
+    internal void Draw(SpriteBatch b, Rectangle targetRect, float colorMult)
+    {
+        b.Draw(Texture, targetRect, SourceRect, Color * colorMult, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+    }
+}
+
+internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
+{
+    private readonly List<PanoramaParallaxContext> parallaxCtx = [];
+    private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
+
+    private BackingContext? Day = null;
+    private BackingContext? Sunset = null;
+    private BackingContext? Night = null;
+
+    private readonly int startingMinutes = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
+    private readonly int moderatelyMinutes = Utility.ConvertTimeToMinutes(Game1.getModeratelyDarkTime(location));
+    private readonly int trulyMinutes = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
+
+    private readonly int startingToTrulyMinutes = Utility.CalculateMinutesBetweenTimes(
+        Game1.getStartingToGetDarkTime(location),
+        Game1.getTrulyDarkTime(location)
+    );
+    private readonly int startingToModerateMinutes = Utility.CalculateMinutesBetweenTimes(
+        Game1.getStartingToGetDarkTime(location),
+        Game1.getModeratelyDarkTime(location)
+    );
+    private readonly int moderateToTrulyMinutes = Utility.CalculateMinutesBetweenTimes(
+        Game1.getModeratelyDarkTime(location),
+        Game1.getTrulyDarkTime(location)
+    );
 
     internal static IEnumerable<TArgs> GetAllMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
         where TArgs : PanoramaSharedData
@@ -208,38 +264,9 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     internal void SetData(PanoramaData data, GameStateQueryContext context)
     {
-        if (GetFirstMatchingData(data.BackingDay, context) is BackingData day)
-        {
-            hasbacking = true;
-            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(day.Texture))
-            {
-                bDayTexture = Game1.temporaryContent.Load<Texture2D>(day.Texture);
-                bDayColor = Utility.StringToColor(day.Color) ?? Color.White;
-                bDayRectangle = day.SourceRect.IsEmpty ? bDayTexture.Bounds : day.SourceRect;
-            }
-            else
-            {
-                bDayTexture = Game1.staminaRect;
-                bDayColor = Utility.StringToColor(day.Color) ?? Color.Black;
-                bDayRectangle = Game1.staminaRect.Bounds;
-            }
-        }
-        if (GetFirstMatchingData(data.BackingNight, context) is BackingData night)
-        {
-            hasbacking = true;
-            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(night.Texture))
-            {
-                bNightTexture = Game1.temporaryContent.Load<Texture2D>(night.Texture);
-                bNightColor = Utility.StringToColor(night.Color) ?? Color.White;
-                bNightRectangle = night.SourceRect.IsEmpty ? bDayTexture.Bounds : night.SourceRect;
-            }
-            else
-            {
-                bNightTexture = Game1.staminaRect;
-                bNightColor = Utility.StringToColor(night.Color) ?? Color.Black;
-                bNightRectangle = Game1.staminaRect.Bounds;
-            }
-        }
+        Day = BackingContext.FromDataList(data.BackingDay, context);
+        Sunset = BackingContext.FromDataList(data.BackingSunset, context);
+        Night = BackingContext.FromDataList(data.BackingNight, context);
 
         parallaxCtx.Clear();
         foreach (var parallax in GetAllMatchingData(data.ParallaxLayers, context))
@@ -351,27 +378,79 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     public override void draw(SpriteBatch b)
     {
         // static
-        if (hasbacking)
+        // if (hasbacking)
+        // {
+        //     float gettingDark = GettingDarkMult();
+        //     Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
+        //     if (gettingDark != 1f)
+        //     {
+        //         b.Draw(bDayTexture, viewportRect, bDayRectangle, bDayColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+        //     }
+        //     if (gettingDark > 0f)
+        //     {
+        //         b.Draw(
+        //             bNightTexture,
+        //             viewportRect,
+        //             bNightRectangle,
+        //             bNightColor * gettingDark,
+        //             0f,
+        //             Vector2.Zero,
+        //             SpriteEffects.None,
+        //             0f
+        //         );
+        //     }
+        // }
+
+        // internal float GettingDarkMult()
+        // {
+        //     float currMinutes =
+        //         Utility.ConvertTimeToMinutes(Game1.timeOfDay)
+        //         + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
+        //     if (currMinutes > trulyDarkMinutes)
+        //         return 1f;
+        //     if (currMinutes > gettingDarkMinutes)
+        //         return (currMinutes - gettingDarkMinutes) / totalDarkenMinutes;
+        //     return 0f;
+        // }
+        Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
+        if (Day != null && Night != null)
         {
-            float gettingDark = GettingDarkMult();
-            Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
-            if (gettingDark != 1f)
+            float currMinutes =
+                Utility.ConvertTimeToMinutes(Game1.timeOfDay)
+                + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
+
+            // Day/Night Curve
+            if (currMinutes >= trulyMinutes)
             {
-                b.Draw(bDayTexture, viewportRect, bDayRectangle, bDayColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+                Night.Draw(b, viewportRect, 1f);
             }
-            if (gettingDark > 0f)
+            else if (currMinutes <= startingMinutes)
             {
-                b.Draw(
-                    bNightTexture,
-                    viewportRect,
-                    bNightRectangle,
-                    bNightColor * gettingDark,
-                    0f,
-                    Vector2.Zero,
-                    SpriteEffects.None,
-                    0f
-                );
+                Day.Draw(b, viewportRect, 1f);
             }
+            else
+            {
+                float multDarken = (currMinutes - startingMinutes) / startingToTrulyMinutes;
+                Day.Draw(b, viewportRect, 1f);
+                Night.Draw(b, viewportRect, multDarken);
+                if (Sunset != null)
+                {
+                    if (currMinutes < moderatelyMinutes)
+                    {
+                        float multSunset = (currMinutes - startingMinutes) / startingToModerateMinutes;
+                        Sunset.Draw(b, viewportRect, multSunset);
+                    }
+                    else
+                    {
+                        float multSunset = (trulyMinutes - currMinutes) / moderateToTrulyMinutes;
+                        Sunset.Draw(b, viewportRect, multSunset);
+                    }
+                }
+            }
+        }
+        else
+        {
+            Day?.Draw(b, viewportRect, 1f);
         }
 
         // parallax
@@ -389,13 +468,11 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 }
 
 /// <summary>
-/// Add several new map properties for displaying a BG in the current area.
-/// mushymato.MMAP_BgStatic <color> [bgImage]
-///     changes colors in the back, optionally draw a sprite
-/// mushymato.MMAP_Background.{n} <bgImage> [scale] [color] [xSource] [ySource] [chunkWidth] [chunkHeight] [chunksWide] [chunksHigh] [defaultChunkIndex] [numChunksInSheet] [chanceForDeviation]
-///     draws optionally repeating sprite that spawns the screen
-/// mushymato.MMAP_BgTAS [SpawnMode] <tasId>+
-///     temporary animated sprite go brrrrr
+/// Add a new map property for displaying a BG in the current area.
+/// mushymato.MMAP_Panorama [panoramaKey]
+///     Choose which panorama data to use.
+/// mushymato.MMAP/Panorama
+///     Panorama asset
 /// </summary>
 internal static class Panorama
 {

@@ -57,6 +57,12 @@
         }
       }
     ],
+    "BackingSunset": [
+      {
+        "Id": "MMAP_Sunset",
+        "Color": "#FFA50080"
+      }
+    ],
     "BackingNight": [
       {
         "Id": "MMAP_Night",
@@ -71,46 +77,97 @@
     ],
     "ParallaxLayers": [
       {
-        "Id": "MMAP_SpringSummer",
-        "Condition": "SEASON Spring Summer",
+        "Id": "MMAP_RainFar",
+        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Texture": "LooseSprites/Cursors",
+        "Color": "#808080",
+        "Scale": 3.5,
+        "SourceRect": {
+          "X": 0,
+          "Y": 886,
+          "Width": 639,
+          "Height": 148
+        },
+        "ParallaxRate": "2,1",
+        "RepeatX": true,
+        "AlignY": "End",
+        "DrawOffset": "100,-150"
+      },
+      {
+        "Id": "MMAP_RainNear",
+        "Condition": "WEATHER Here Rain Storm GreenRain",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
-          "Y": 736,
+          "Y": 886,
           "Width": 639,
-          "Height": 149
+          "Height": 148
         },
-        "DrawOffset": "0,200",
         "ParallaxRate": "2,1",
-        "RepeatX": true
+        "RepeatX": true,
+        "AlignY": "End"
       },
       {
-        "Id": "MMAP_Fall",
-        "Condition": "SEASON Fall",
+        "Id": "MMAP_NormalFar",
+        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer Fall",
+        "Texture": "LooseSprites/Cursors",
+        "Color": "#808080",
+        "Scale": 3.5,
+        "SourceRect": {
+          "X": 0,
+          "Y": 737,
+          "Width": 639,
+          "Height": 148
+        },
+        "ParallaxRate": "2,1",
+        "RepeatX": true,
+        "AlignY": "End",
+        "DrawOffset": "100,-150"
+      },
+      {
+        "Id": "MMAP_NormalNear",
+        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
-          "Y": 885,
+          "Y": 737,
           "Width": 639,
-          "Height": 149
+          "Height": 148
         },
-        "DrawOffset": "0,200",
         "ParallaxRate": "2,1",
-        "RepeatX": true
+        "RepeatX": true,
+        "AlignY": "End"
       },
       {
-        "Id": "MMAP_Winter",
+        "Id": "MMAP_WinterFar",
+        "Condition": "SEASON Winter",
+        "Texture": "LooseSprites/Cursors",
+        "Color": "#808080",
+        "Scale": 3.5,
+        "SourceRect": {
+          "X": 0,
+          "Y": 1035,
+          "Width": 639,
+          "Height": 148
+        },
+        "ParallaxRate": "2,1",
+        "RepeatX": true,
+        "AlignY": "End",
+        "DrawOffset": "100,-150"
+      },
+      {
+        "Id": "MMAP_WinterNear",
         "Condition": "SEASON Winter",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
-          "Y": 1034,
+          "Y": 1035,
           "Width": 639,
-          "Height": 149
+          "Height": 148
         },
-        "DrawOffset": "0,200",
         "ParallaxRate": "2,1",
-        "RepeatX": true
+        "RepeatX": true,
+        "AlignY": "End"
       }
     ],
     "OnetimeTAS": [
@@ -126,7 +183,7 @@
         "XStart": 0,
         "XEnd": 1,
         "YStart": 0,
-        "YEnd": 0.45
+        "YEnd": 0.3
       }
     ],
     "RespawnTAS": [
@@ -142,7 +199,7 @@
         "XStart": 0,
         "XEnd": 1,
         "YStart": 0,
-        "YEnd": 0.45
+        "YEnd": 0.3
       }
     ]
   }
