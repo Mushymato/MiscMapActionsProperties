@@ -145,34 +145,34 @@ internal static class QuestionDialogue
 public class QuestionDialogueEntry
 {
     /// <summary>Response label</summary>
-    public string Label { get; set; } = "[LocalizedText Strings/UI:Cancel]";
+    public string Label = "[LocalizedText Strings/UI:Cancel]";
 
     /// <summary>Response GSQ condition</summary>
-    public string? Condition { get; set; } = null;
+    public string? Condition = null;
 
     /// <summary>List of (trigger) actions</summary>
-    public List<string>? Actions { get; set; } = null;
+    public List<string>? Actions = null;
 
     /// <summary>List of tile actions</summary>
-    public List<string>? TileActions { get; set; } = null;
+    public List<string>? TileActions = null;
 
     /// <summary>List of touch actions</summary>
-    public List<string>? TouchActions { get; set; } = null;
+    public List<string>? TouchActions = null;
 }
 
 public class QuestionDialogueData
 {
     /// <summary>Response GSQ condition</summary>
-    public string? Condition { get; set; } = null;
+    public string? Condition = null;
 
     /// <summary>Question string</summary>
-    public string? Question { get; set; } = null;
+    public string? Question = null;
 
     /// <summary>Speaking NPC (unclear if this does anything)</summary>
-    public string? Speaker { get; set; } = null;
+    public string? Speaker = null;
 
     /// <summary>List of responses</summary>
-    public Dictionary<string, QuestionDialogueEntry> ResponseEntries { get; set; } = [];
+    public Dictionary<string, QuestionDialogueEntry> ResponseEntries = [];
 
     /// <summary>Get all valid entries per GSQ</summary>
     /// <param name="context"></param>

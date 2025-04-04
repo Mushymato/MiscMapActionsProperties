@@ -22,7 +22,12 @@
           },
           "CustomFields": {
             // this is a built-in panorama, see MiscMapActionsProperties/assets/panorama.json
-            "mushymato.MMAP_Panorama": "MMAP_DefaultSkies"
+            "mushymato.MMAP_Panorama": "MMAP_MountainView",
+            // "mushymato.MMAP_Panorama": "{{ModId}}_Bonch"
+            // MMAP_MountainView has time of day backing, control time of day for this location like so
+            "mushymato.MMAP_NightTimeStarting": "1100", // default 1800 spring summer island, 1700 fall, 1500 winter
+            // "mushymato.MMAP_NightTimeModerate": "1200", // by not setting the moderate time, it will simply be half way between starting and truly times
+            "mushymato.MMAP_NightTimeTruly": "1500" // default starting + 200
           }
         },
       }
@@ -32,7 +37,7 @@
       "Action": "EditData",
       "Target": "mushymato.MMAP/Panorama",
       "Entries": {
-        "{{ModId}}_Fog": {
+        "{{ModId}}_Bonch": {
           "ParallaxLayers": [
             {
               "Texture": "Portraits/Bouncer",

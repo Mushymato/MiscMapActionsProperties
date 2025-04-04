@@ -22,7 +22,7 @@ public sealed class TASExtRand
     public Vector2 AccelerationChange = Vector2.Zero;
     public Vector2 PositionOffset = Vector2.Zero;
     public double SpawnInterval = 0;
-    public int SpawnDelay = -1;
+    public int SpawnDelay = 0;
 }
 
 public sealed class TASExt : TemporaryAnimatedSpriteDefinition
@@ -61,6 +61,7 @@ public sealed class MapWideTAS
         get => IdImpl ??= string.Join('-', TAS);
         set => IdImpl = value;
     }
+    public string? Condition = null;
     public List<string> TAS = [];
     public int Count = 1;
     public MapWideTASMode Mode = MapWideTASMode.Everywhere;

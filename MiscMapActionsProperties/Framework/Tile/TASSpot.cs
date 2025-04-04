@@ -21,7 +21,7 @@ internal static class TASSpot
 
     internal static void Register()
     {
-        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
@@ -31,7 +31,7 @@ internal static class TASSpot
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
     }
 
-    private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
         EnterLocationTAS(Game1.currentLocation);
     }

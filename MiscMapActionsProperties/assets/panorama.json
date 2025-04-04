@@ -1,5 +1,5 @@
 {
-  "MMAP_DefaultSkies": {
+  "MMAP_MountainView": {
     "BackingDay": [
       {
         "Id": "MMAP_Raining",
@@ -77,11 +77,25 @@
     ],
     "ParallaxLayers": [
       {
+        "Id": "MMAP_NightStars",
+        "Condition": "!WEATHER Here Rain Storm GreenRain",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 0,
+          "Y": 1453,
+          "Width": 638,
+          "Height": 195
+        },
+        "RepeatX": true,
+        "AlignY": "Start",
+        "ShowDuring": "Night"
+      },
+      {
         "Id": "MMAP_RainFar",
         "Condition": "WEATHER Here Rain Storm GreenRain",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
-        "Scale": 3.5,
+        "Scale": 3.0,
         "SourceRect": {
           "X": 0,
           "Y": 886,
@@ -112,7 +126,7 @@
         "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer Fall",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
-        "Scale": 3.5,
+        "Scale": 3.0,
         "SourceRect": {
           "X": 0,
           "Y": 737,
@@ -140,10 +154,10 @@
       },
       {
         "Id": "MMAP_WinterFar",
-        "Condition": "SEASON Winter",
+        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Winter",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
-        "Scale": 3.5,
+        "Scale": 3.0,
         "SourceRect": {
           "X": 0,
           "Y": 1035,
@@ -157,7 +171,7 @@
       },
       {
         "Id": "MMAP_WinterNear",
-        "Condition": "SEASON Winter",
+        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Winter",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -178,7 +192,7 @@
           "MMAP_Cloud2",
           "MMAP_Cloud3"
         ],
-        "Count": 6,
+        "Count": 5,
         "Mode": "Everywhere",
         "XStart": 0,
         "XEnd": 1,
@@ -200,6 +214,103 @@
         "XEnd": 1,
         "YStart": 0,
         "YEnd": 0.3
+      }
+    ]
+  },
+  "MMAP_ClearSky": {
+    "BackingDay": [
+      {
+        "Id": "MMAP_Raining",
+        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 640,
+          "Y": 858,
+          "Width": 1,
+          "Height": 184
+        }
+      },
+      {
+        "Id": "MMAP_Spring",
+        "Condition": "SEASON Spring",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 639,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Summer",
+        "Condition": "SEASON Summer",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 640,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Fall",
+        "Condition": "SEASON Fall",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 641,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      },
+      {
+        "Id": "MMAP_Winter",
+        "Condition": "SEASON Winter",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 642,
+          "Y": 1051,
+          "Width": 1,
+          "Height": 400
+        }
+      }
+    ],
+    "BackingSunset": [
+      {
+        "Id": "MMAP_Sunset",
+        "Color": "#FFA50080"
+      }
+    ],
+    "BackingNight": [
+      {
+        "Id": "MMAP_Night",
+        "Texture": "LooseSprites/Cursors",
+        "SourceRect": {
+          "X": 639,
+          "Y": 858,
+          "Width": 1,
+          "Height": 144
+        }
+      }
+    ]
+  },
+  "MMAP_IslandHorizon": {
+    "ParallaxLayers": [
+      {
+        "Id": "MMAP_Cloudy_Ocean_BG",
+        "Texture": "LooseSprites/Cloudy_Ocean_BG",
+        "Scale": 3.0,
+        "RepeatX": true,
+        "AlignY": "End",
+        "ShowDuring": "Day"
+      },
+      {
+        "Id": "MMAP_Cloudy_Ocean_BG_Night",
+        "Texture": "LooseSprites/Cloudy_Ocean_BG_Night",
+        "Scale": 3.0,
+        "RepeatX": true,
+        "AlignY": "End",
+        "ShowDuring": "Night"
       }
     ]
   }

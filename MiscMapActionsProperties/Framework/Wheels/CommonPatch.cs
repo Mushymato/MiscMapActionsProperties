@@ -73,10 +73,27 @@ internal static class CommonPatch
         prop = null;
         if (
             (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
-            || location.TryGetMapProperty(propKey, out prop)
+            || (location.map != null && location.TryGetMapProperty(propKey, out prop))
             || false
         )
             return !string.IsNullOrEmpty(prop);
+        return false;
+    }
+
+    internal static bool TryGetCustomFieldsOrMapPropertyAsInt(
+        GameLocation location,
+        string propKey,
+        [NotNullWhen(true)] out int prop
+    )
+    {
+        prop = 0;
+        if (TryGetCustomFieldsOrMapProperty(location, propKey, out string? propValue))
+        {
+            if (int.TryParse(propValue, out prop))
+            {
+                return true;
+            }
+        }
         return false;
     }
 

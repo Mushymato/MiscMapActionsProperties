@@ -293,6 +293,14 @@
       "Target": "Maps/FarmHouse_Crib_0,Maps/FarmHouse_Crib_1",
       "FromFile": "assets/{{TargetWithoutPath}}.tmx",
       "Priority": "Low"
+    },
+    //
+    {
+      "Action": "EditMap",
+      "Target": "Maps/FarmHouse",
+      "MapProperties": {
+        "mushymato.MMAP_Panorama": "MMAP_MountainView"
+      }
     }
   ]
 }

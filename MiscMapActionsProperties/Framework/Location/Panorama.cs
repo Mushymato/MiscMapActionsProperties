@@ -30,22 +30,32 @@ public sealed class BackingData : PanoramaSharedData;
 
 public enum ParallaxAlignMode
 {
-    Start = 0,
-    Middle = 1,
-    End = 2,
+    Start,
+    Middle,
+    End,
+}
+
+public enum ShowDuringMode
+{
+    AllDay,
+    Day,
+    Sunset,
+    Night,
 }
 
 public sealed class ParallaxLayerData : PanoramaSharedData
 {
     public float Scale = 4f;
+    public float Alpha = 1f;
     public Vector2 DrawOffset = Vector2.Zero;
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
-    public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
     public bool RepeatY = false;
+    public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
     public ParallaxAlignMode AlignY = ParallaxAlignMode.Middle;
     public Vector2 Velocity = Vector2.Zero;
-    public float Alpha = 1f;
+    public ShowDuringMode ShowDuring = ShowDuringMode.AllDay;
+    public bool DrawInMapScreenshot = false;
 }
 
 public sealed class PanoramaData
@@ -116,11 +126,12 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
 
     private IEnumerable<Vector2> DrawPositions()
     {
-        var viewport = Game1.viewport;
-        float i;
-        float j;
+        int refWidth = Game1.viewport.Width;
+        int refHeight = Game1.viewport.Height;
         float posX = Position.X + Data.DrawOffset.X + ScrollOffset.X;
         float posY = Position.Y + Data.DrawOffset.Y + ScrollOffset.Y;
+        float i;
+        float j;
         // repeat both, i.e. tile to fill screen
         if (Data.RepeatX && Data.RepeatY)
         {
@@ -130,18 +141,18 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
                 {
                     yield return new(i, j);
                 }
-                for (j = posY; j < viewport.Height; j += ScaledHeight)
+                for (j = posY; j < refHeight; j += ScaledHeight)
                 {
                     yield return new(i, j);
                 }
             }
-            for (i = posX; i < viewport.Width; i += ScaledWidth)
+            for (i = posX; i < refWidth; i += ScaledWidth)
             {
                 for (j = posY - ScaledHeight; j > -ScaledHeight; j -= ScaledHeight)
                 {
                     yield return new(i, j);
                 }
-                for (j = posY; j < viewport.Height; j += ScaledHeight)
+                for (j = posY; j < refHeight; j += ScaledHeight)
                 {
                     yield return new(i, j);
                 }
@@ -154,29 +165,29 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
         {
             for (i = posX - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
                 yield return new(i, posY);
-            for (i = posX + ScaledWidth; i < viewport.Width; i += ScaledWidth)
+            for (i = posX + ScaledWidth; i < refWidth; i += ScaledWidth)
                 yield return new(i, posY);
         }
         else if (Data.RepeatY)
         {
             for (i = posY - ScaledHeight; i > -ScaledHeight; i -= ScaledHeight)
                 yield return new(posX, i);
-            for (i = posX + ScaledHeight; i < viewport.Height; i += ScaledHeight)
+            for (i = posX + ScaledHeight; i < refHeight; i += ScaledHeight)
                 yield return new(posX, i);
         }
     }
 
-    internal void Draw(SpriteBatch b)
+    internal void Draw(SpriteBatch b, float colorMult = 1f)
     {
-        // repeat X
-        // no tiling
+        if (colorMult == 0f)
+            return;
         foreach (Vector2 pos in DrawPositions())
         {
             b.Draw(
                 Texture,
                 pos,
                 SourceRect,
-                TxColor * Data.Alpha,
+                TxColor * Data.Alpha * colorMult,
                 0f,
                 Vector2.Zero,
                 Data.Scale,
@@ -224,6 +235,8 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
 
     internal void Draw(SpriteBatch b, Rectangle targetRect, float colorMult)
     {
+        if (colorMult == 0f)
+            return;
         b.Draw(Texture, targetRect, SourceRect, Color * colorMult, 0f, Vector2.Zero, SpriteEffects.None, 0f);
     }
 }
@@ -236,7 +249,6 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     private BackingContext? Day = null;
     private BackingContext? Sunset = null;
     private BackingContext? Night = null;
-
     private readonly int startingMinutes = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
     private readonly int moderatelyMinutes = Utility.ConvertTimeToMinutes(Game1.getModeratelyDarkTime(location));
     private readonly int trulyMinutes = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
@@ -282,6 +294,8 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         {
             foreach (MapWideTAS mwTAS in data.RespawnTAS)
             {
+                if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
+                    continue;
                 foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
                 {
                     respawningTAS.Add(new(mwTAS, new(tasExt) { Pos = Vector2.Zero }));
@@ -377,86 +391,67 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     public override void draw(SpriteBatch b)
     {
-        // static
-        // if (hasbacking)
-        // {
-        //     float gettingDark = GettingDarkMult();
-        //     Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
-        //     if (gettingDark != 1f)
-        //     {
-        //         b.Draw(bDayTexture, viewportRect, bDayRectangle, bDayColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
-        //     }
-        //     if (gettingDark > 0f)
-        //     {
-        //         b.Draw(
-        //             bNightTexture,
-        //             viewportRect,
-        //             bNightRectangle,
-        //             bNightColor * gettingDark,
-        //             0f,
-        //             Vector2.Zero,
-        //             SpriteEffects.None,
-        //             0f
-        //         );
-        //     }
-        // }
+        float multDay = 1f;
+        float multNight = 0f;
+        float multSunset = 0f;
 
-        // internal float GettingDarkMult()
-        // {
-        //     float currMinutes =
-        //         Utility.ConvertTimeToMinutes(Game1.timeOfDay)
-        //         + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
-        //     if (currMinutes > trulyDarkMinutes)
-        //         return 1f;
-        //     if (currMinutes > gettingDarkMinutes)
-        //         return (currMinutes - gettingDarkMinutes) / totalDarkenMinutes;
-        //     return 0f;
-        // }
-        Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
-        if (Day != null && Night != null)
+        // Day/Night/Sunset Curve
+        float currMinutes =
+            Utility.ConvertTimeToMinutes(Game1.timeOfDay)
+            + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
+        if (currMinutes >= trulyMinutes)
         {
-            float currMinutes =
-                Utility.ConvertTimeToMinutes(Game1.timeOfDay)
-                + ((float)Game1.gameTimeInterval / Game1.realMilliSecondsPerGameMinute);
-
-            // Day/Night Curve
-            if (currMinutes >= trulyMinutes)
-            {
-                Night.Draw(b, viewportRect, 1f);
-            }
-            else if (currMinutes <= startingMinutes)
-            {
-                Day.Draw(b, viewportRect, 1f);
-            }
-            else
-            {
-                float multDarken = (currMinutes - startingMinutes) / startingToTrulyMinutes;
-                Day.Draw(b, viewportRect, 1f);
-                Night.Draw(b, viewportRect, multDarken);
-                if (Sunset != null)
-                {
-                    if (currMinutes < moderatelyMinutes)
-                    {
-                        float multSunset = (currMinutes - startingMinutes) / startingToModerateMinutes;
-                        Sunset.Draw(b, viewportRect, multSunset);
-                    }
-                    else
-                    {
-                        float multSunset = (trulyMinutes - currMinutes) / moderateToTrulyMinutes;
-                        Sunset.Draw(b, viewportRect, multSunset);
-                    }
-                }
-            }
+            multDay = 0f;
+            multNight = 1f;
+        }
+        else if (currMinutes <= startingMinutes)
+        {
+            multDay = 1f;
         }
         else
         {
+            multNight = (currMinutes - startingMinutes) / startingToTrulyMinutes;
+            if (currMinutes < moderatelyMinutes)
+                multSunset = (currMinutes - startingMinutes) / startingToModerateMinutes;
+            else
+                multSunset = (trulyMinutes - currMinutes) / moderateToTrulyMinutes;
+        }
+
+        // backing
+        Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
+        if (Night == null)
+        {
             Day?.Draw(b, viewportRect, 1f);
+        }
+        else
+        {
+            if (multNight < 1f)
+                Day?.Draw(b, viewportRect, multDay);
+            Night?.Draw(b, viewportRect, multNight);
+            Sunset?.Draw(b, viewportRect, multSunset);
         }
 
         // parallax
         foreach (var bgDef in parallaxCtx)
         {
-            bgDef.Draw(b);
+            if (!Game1.game1.takingMapScreenshot || bgDef.Data.DrawInMapScreenshot)
+            {
+                switch (bgDef.Data.ShowDuring)
+                {
+                    case ShowDuringMode.Day:
+                        bgDef.Draw(b, multDay);
+                        break;
+                    case ShowDuringMode.Night:
+                        bgDef.Draw(b, multNight);
+                        break;
+                    case ShowDuringMode.Sunset:
+                        bgDef.Draw(b, multSunset);
+                        break;
+                    default:
+                        bgDef.Draw(b);
+                        break;
+                }
+            }
         }
 
         // TAS
@@ -590,8 +585,10 @@ internal static class Panorama
                     xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
                     float width = layer.LayerWidth * 64f;
                     float height = layer.LayerHeight * 64f;
-                    foreach (var mwTAS in data.OnetimeTAS)
+                    foreach (MapWideTAS mwTAS in data.OnetimeTAS)
                     {
+                        if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
+                            continue;
                         foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
                         {
                             Panorama.SpawnTAS(mwTAS, new(tasExt) { Pos = Vector2.Zero }, width, height, false);

@@ -15,15 +15,29 @@ All map properties are also Data/Location custom fields. In the case where both 
 
 #### mushymato.MMAP/HoeDirt.texture: \<texture\>
 
-- For use in places with tillable soil.
-- Changes the appearance of tilled soil in that location.
+- For use in places with tillable soil, changes the appearance of tilled soil in that location.
 - Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
 - See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
 
+#### mushymato.MMAP_LightRays \<texture\>
+
+- Draws some light rays near top of map, identical logic to vanilla effect in island woods.
+- The texture can be changed for something else.
+- Setting `T` gives the default texture of `LooseSprites\\LightRays`.
+
 #### mushymato.MMAP_WoodsLighting T|Color
 
-- Forces a certain ambiant lighting color, identical logic to 
-- 
+- Forces a certain ambiant lighting color, identical logic to vanilla lighting in the secret woods.
+- Colors are inverted, much like for light
+- Setting `T` gives the default color of #967832
+
+#### mushymato.MMAP_Panorama \<panoramaId\>
+
+- Draw a parallax background behind the map.
+- The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](docs/panorama.md) for details.
+- There are some some panoramas provided by MMAP that can be used out of the box.
+    - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
+    - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
 ### Tile Data
 
@@ -45,7 +59,11 @@ All map properties are also Data/Location custom fields. In the case where both 
 - Use offsetX and offsetY to further adjust the position of the light.
 - Works in building TileProperties too.
 
-#### Back Layer: mushymato.MMAP_TAS
+#### Back Layer: mushymato.MMAP_TAS \<tasId\>+ <a name="mushymato.MMAP_TAS"></a>
+
+- Add a temporary animated sprite at this tile.
+- The layer depth is based on the tile position.
+- The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
 
 ### Action
 
@@ -117,7 +135,7 @@ All map properties are also Data/Location custom fields. In the case where both 
 - For wall and floor, there are 2 options:
     1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
     2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
-- For option 2, there are sample maps that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
+- For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
 
 ### Data/Buildings Metadata
 

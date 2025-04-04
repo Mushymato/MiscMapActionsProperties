@@ -30,6 +30,7 @@ public class ModEntry : Mod
         Framework.Buildings.ChestLight.Register();
         Framework.Buildings.DrawLayerExt.Register();
         Framework.Location.CribPosition.Register();
+        Framework.Location.DayToNightTiming.Register();
         Framework.Location.FruitTreeCosmeticSeason.Register();
         Framework.Location.HoeDirtOverride.Register();
         Framework.Location.LightRays.Register();
