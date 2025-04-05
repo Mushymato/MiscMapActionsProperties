@@ -1,5 +1,6 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Characters;
@@ -40,11 +41,16 @@ internal static class CribPosition
         }
     }
 
+    private static bool TryGetCribPosition(GameLocation location, out Vector2 cribPos)
+    {
+        return CommonPatch.TryGetCustomFieldsOrMapPropertyAsVector2(location, MapProp_CribPosition, out cribPos);
+    }
+
     private static void Child_dayUpdate_Postfix(Child __instance)
     {
         if (__instance.Age == 2 && __instance.Position == new Vector2(31f, 14f) * 64f + new Vector2(0f, -24f))
         {
-            if (__instance.currentLocation.TryGetMapPropertyAs(MapProp_CribPosition, out Vector2 cribPos))
+            if (TryGetCribPosition(__instance.currentLocation, out Vector2 cribPos))
             {
                 __instance.Position = cribPos * Game1.tileSize + new Vector2(Game1.tileSize, Game1.tileSize * 2 - 24f);
             }
@@ -53,7 +59,7 @@ internal static class CribPosition
 
     private static void Child_resetForPlayerEntry_Postfix(Child __instance, GameLocation l)
     {
-        if (l.TryGetMapPropertyAs(MapProp_CribPosition, out Vector2 cribPos))
+        if (TryGetCribPosition(l, out Vector2 cribPos))
         {
             switch (__instance.Age)
             {
@@ -75,9 +81,9 @@ internal static class CribPosition
 
     private static void FarmHouse_GetCribPosition_Postfix(FarmHouse __instance, ref Rectangle? __result)
     {
-        if (__result != null && __instance.TryGetMapPropertyAs(MapProp_CribPosition, out Point cribPos))
+        if (__result != null && TryGetCribPosition(__instance, out Vector2 cribPos))
         {
-            __result = new Rectangle(cribPos.X, cribPos.Y, __result.Value.Width, __result.Value.Height);
+            __result = new Rectangle((int)cribPos.X, (int)cribPos.Y, __result.Value.Width, __result.Value.Height);
         }
     }
 }

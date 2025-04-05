@@ -97,6 +97,29 @@ internal static class CommonPatch
         return false;
     }
 
+    internal static bool TryGetCustomFieldsOrMapPropertyAsVector2(
+        GameLocation location,
+        string propKey,
+        [NotNullWhen(true)] out Vector2 prop
+    )
+    {
+        prop = Vector2.Zero;
+        if (TryGetCustomFieldsOrMapProperty(location, propKey, out string? propValue))
+        {
+            string[] args = ArgUtility.SplitBySpace(propValue);
+            if (
+                ArgUtility.TryGetFloat(args, 0, out float xVal, out string error, "float X")
+                && ArgUtility.TryGetFloat(args, 1, out float yVal, out error, "float Y")
+            )
+            {
+                prop = new Vector2(xVal, yVal);
+                return true;
+            }
+            ModEntry.Log(error, LogLevel.Warn);
+        }
+        return false;
+    }
+
     internal static void RegisterTileAndTouch(
         string actionName,
         Func<GameLocation, string[], Farmer, Point, bool> callbackAction

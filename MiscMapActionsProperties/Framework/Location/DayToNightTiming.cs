@@ -7,6 +7,9 @@ namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
 /// Add 3 new map properties for changing when the map/location becomes dark.
+/// mushymato.MMAP_NightTimeStarting <time>
+/// mushymato.MMAP_NightTimeModerate <time>
+/// mushymato.MMAP_NightTimeTruly <time>
 /// </summary>
 internal static class DayToNightTiming
 {
@@ -61,21 +64,21 @@ internal static class DayToNightTiming
             )
         )
         {
-            __result = nightTimeModerate;
+            if (nightTimeModerate > Game1.getStartingToGetDarkTime(location))
+                __result = nightTimeModerate;
+            else
+                ModEntry.Log($"Invalid {MapProp_NightTimeModerate} value {nightTimeModerate:04}", LogLevel.Warn);
         }
     }
 
     private static void Game1_getTrulyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapPropertyAsInt(
-                location,
-                MapProp_NightTimeModerate,
-                out int nightTimeTruly
-            )
-        )
+        if (CommonPatch.TryGetCustomFieldsOrMapPropertyAsInt(location, MapProp_NightTimeTruly, out int nightTimeTruly))
         {
-            __result = nightTimeTruly;
+            if (nightTimeTruly > Game1.getModeratelyDarkTime(location))
+                __result = nightTimeTruly;
+            else
+                ModEntry.Log($"Invalid {MapProp_NightTimeTruly} value {nightTimeTruly:04}", LogLevel.Warn);
         }
     }
 }

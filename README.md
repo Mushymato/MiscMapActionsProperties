@@ -78,7 +78,7 @@ All map properties are also Data/Location custom fields. In the case where both 
 - Does nothing if the current area is not buildable.
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
 
-#### mushymato.MMAP_HoleWarp <location> <X> <Y> [mailflag]
+#### mushymato.MMAP_HoleWarp \<location\> \<X\> \<Y\> [mailflag]
 
 - Can be used as either Action or TouchAction
 - Arguments are identical to vanilla warp tile actions.
@@ -109,6 +109,8 @@ All map properties are also Data/Location custom fields. In the case where both 
 
 ### Map Property
 
+All of these are also valid as `Data/Location` CustomFields, with the same name and arguments.
+
 #### mushymato.MMAP_WoodsLighting: \<T|color\>
 
 - Changes the map's ambiant lighting
@@ -136,6 +138,19 @@ All map properties are also Data/Location custom fields. In the case where both 
     1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
     2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
 - For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
+
+#### mushymato.MMAP_NightTime* \<time\>
+
+There are 3 similar map properties for setting phases of day transitioning to night.
+1. mushymato.MMAP_NightTimeStarting
+2. mushymato.MMAP_NightTimeModerate
+3. mushymato.MMAP_NightTimeTruly
+
+- All 3 of these take time in the typical military time format (0600) used by many SDV things.
+- The vanilla values are
+    - starting: 1800 spring summer island, 1700 fall, 1500 winter
+    - moderate: halfway between starting and truly
+    - truly: starting + 200
 
 ### Data/Buildings Metadata
 

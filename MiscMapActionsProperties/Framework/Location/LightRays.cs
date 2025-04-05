@@ -109,6 +109,8 @@ internal static class LightRays
             _raySeed = lightRaysCtx.Value.Seed;
             _rayTexture = lightRaysCtx.Value.Texture;
             IslandForestLocation_DrawRays_RevesePatch(e.Location, e.B);
+            _raySeed = 0;
+            _rayTexture = null!;
         }
     }
 }

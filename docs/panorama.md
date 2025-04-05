@@ -13,4 +13,5 @@ It is further divided into 3 sections:
 2. `BackingSunset`
 3. `BackingNight`
 
-In most cases, `BackingDay` lasts from 0600 to 1800, after which `BackingSunset` begins and reach it's height at 1900, then completely transitions to `BackingNight` at 2000. `BackingDay` and `BackingSunset` are both optional, if `BackingNight` is null, then `BackingDay` will be used for all times of day.
+Day starts fading into Night at 1800 (usually) and finishes at 2000, while sunset fades in during 1800-1900 and fades out during 1900-2000.
+The timing can be set with 
