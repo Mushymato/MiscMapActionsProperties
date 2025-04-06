@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="3" height="4" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="11">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="3" height="4" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="12">
  <tileset firstgid="1" name="indoor" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
   <image source="townInterior" width="512" height="1088"/>
  </tileset>
@@ -35,7 +35,7 @@
  </layer>
  <objectgroup id="4" name="Back"/>
  <objectgroup id="5" name="Buildings">
-  <object id="10" name="TileData" x="0" y="48" width="48" height="16">
+  <object id="10" name="TileData" x="0" y="16" width="48" height="48">
    <properties>
     <property name="Action" value="Crib"/>
    </properties>

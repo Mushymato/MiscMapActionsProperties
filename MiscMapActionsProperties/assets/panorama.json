@@ -105,7 +105,7 @@
         "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-150"
+        "DrawOffset": "100,-250"
       },
       {
         "Id": "MMAP_RainNear",
@@ -136,7 +136,7 @@
         "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-150"
+        "DrawOffset": "100,-250"
       },
       {
         "Id": "MMAP_NormalNear",
@@ -167,7 +167,7 @@
         "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-150"
+        "DrawOffset": "100,-250"
       },
       {
         "Id": "MMAP_WinterNear",
@@ -193,7 +193,6 @@
           "MMAP_Cloud3"
         ],
         "Count": 5,
-        "Mode": "Everywhere",
         "XStart": 0,
         "XEnd": 1,
         "YStart": 0,
@@ -209,9 +208,8 @@
           "MMAP_Cloud3"
         ],
         "Count": 1,
-        "Mode": "Right",
-        "XStart": 0,
-        "XEnd": 1,
+        "XStart": 1,
+        "XEnd": 1.3,
         "YStart": 0,
         "YEnd": 0.3
       }

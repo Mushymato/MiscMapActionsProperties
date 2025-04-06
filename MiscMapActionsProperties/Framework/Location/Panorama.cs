@@ -37,7 +37,7 @@ public enum ParallaxAlignMode
 
 public enum ShowDuringMode
 {
-    AllDay,
+    Any,
     Day,
     Sunset,
     Night,
@@ -54,7 +54,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
     public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
     public ParallaxAlignMode AlignY = ParallaxAlignMode.Middle;
     public Vector2 Velocity = Vector2.Zero;
-    public ShowDuringMode ShowDuring = ShowDuringMode.AllDay;
+    public ShowDuringMode ShowDuring = ShowDuringMode.Any;
     public bool DrawInMapScreenshot = false;
 }
 
@@ -128,6 +128,7 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     {
         int refWidth = Game1.viewport.Width;
         int refHeight = Game1.viewport.Height;
+        ModEntry.LogOnce(Data.DrawOffset.ToString());
         float posX = Position.X + Data.DrawOffset.X + ScrollOffset.X;
         float posY = Position.Y + Data.DrawOffset.Y + ScrollOffset.Y;
         float i;
@@ -334,41 +335,10 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     internal void SpawnTAS(MapWideTAS mwTAS, TASContext tileTAS, float viewWidth, float viewHeight, bool respawning)
     {
-        Vector2 minOffset;
-        Vector2 maxOffset;
         float tasWidth = tileTAS.Def.SourceRect.Width * tileTAS.Def.Scale * 4;
         float tasHeight = tileTAS.Def.SourceRect.Height * tileTAS.Def.Scale * 4;
-        switch (mwTAS.Mode)
-        {
-            case MapWideTASMode.Below:
-                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, viewHeight);
-                maxOffset = new(viewWidth * mwTAS.XEnd, viewHeight);
-                break;
-            case MapWideTASMode.Right:
-                minOffset = new(viewWidth, viewHeight * mwTAS.YStart - tasHeight);
-                maxOffset = new(viewWidth, viewHeight * mwTAS.YEnd);
-                break;
-            case MapWideTASMode.Above:
-                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, -tasHeight);
-                maxOffset = new(viewWidth * mwTAS.XEnd, 0);
-                break;
-            case MapWideTASMode.Left:
-                minOffset = new(-tasWidth, viewHeight * mwTAS.YStart - tasHeight);
-                maxOffset = new(0, viewHeight * mwTAS.YEnd);
-                break;
-            default:
-                minOffset = new(viewWidth * mwTAS.XStart - tasWidth, viewHeight * mwTAS.YStart - tasHeight);
-                maxOffset = new(viewWidth * mwTAS.XEnd, viewHeight * mwTAS.YEnd);
-                break;
-        }
-
-        // tileTAS.Def.RandMin!.PositionOffset = minOffset / 4f;
-        // tileTAS.Def.RandMax!.PositionOffset = maxOffset / 4f;
-        // ModEntry.LogOnce(
-        //     $"{viewWidth}x{viewHeight}={mwTAS.Mode}({mwTAS.XStart}-{mwTAS.XEnd},{mwTAS.YStart}-{mwTAS.YEnd}): {tileTAS.Def.RandMin!.PositionOffset} - {tileTAS.Def.RandMax!.PositionOffset}"
-        // );
-        tileTAS.PosOffsetMin = minOffset;
-        tileTAS.PosOffsetMax = maxOffset;
+        tileTAS.PosOffsetMin = new(viewWidth * mwTAS.XStart - tasWidth, viewHeight * mwTAS.YStart - tasHeight);
+        tileTAS.PosOffsetMax = new(viewWidth * mwTAS.XEnd, viewHeight * mwTAS.YEnd);
         GameStateQueryContext context = new(location, null, null, null, Game1.random);
         if (respawning)
         {

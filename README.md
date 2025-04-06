@@ -139,7 +139,17 @@ All of these are also valid as `Data/Location` CustomFields, with the same name 
     2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
 - For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
 
-#### mushymato.MMAP_NightTime* \<time\>
+#### mushymato.MMAP_FridgePosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the fridge independent of the map check for `untitled tile sheet` tile id 173 fridge.
+- The vanilla fridge logic still works and this position does not add or change map tiles, so you would actually need corresponding edit to make use of this.
+
+#### mushymato.MMAP_FridgeDoorSprite: \<F|texture\> [offsetX] [offsetY]
+
+- Farmhouse only, changes the fridge door's open sprite.
+- Only required if you need a fridge door larger than the vanilla 16x32 rectangle.
+
+#### mushymato.MMAP_NightTime* \<time\> <a name="mushymato.MMAP_NightTime"></a>
 
 There are 3 similar map properties for setting phases of day transitioning to night.
 1. mushymato.MMAP_NightTimeStarting

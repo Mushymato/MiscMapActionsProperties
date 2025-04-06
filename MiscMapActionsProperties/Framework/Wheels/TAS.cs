@@ -44,15 +44,6 @@ public sealed class TASExt : TemporaryAnimatedSpriteDefinition
     public TASExtRand? RandMax = null;
 }
 
-public enum MapWideTASMode
-{
-    Everywhere,
-    Below,
-    Right,
-    Left,
-    Above,
-}
-
 public sealed class MapWideTAS
 {
     public string? IdImpl = null;
@@ -64,7 +55,6 @@ public sealed class MapWideTAS
     public string? Condition = null;
     public List<string> TAS = [];
     public int Count = 1;
-    public MapWideTASMode Mode = MapWideTASMode.Everywhere;
     public float XStart = 0f;
     public float XEnd = 1f;
     public float YStart = 0f;
