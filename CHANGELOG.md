@@ -4,21 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0] WIP
+## [1.5.0]
 
 ### Added
 
-- Map Prop mushymato.MMAP_WoodsLighting change ambiant lighting of current map
-- Map Prop mushymato.MMAP_LightRays add god rays to current map
-- Map Prop mushymato.MMAP_SteamOverlay add a repeating texture overlay to map
-- Map Prop mushymato.MMAP_Background add a repeating texture overlay to map
-- Map Prop mushymato.MMAP_Background/TAS add a repeating texture overlay to map
-- Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map
+- Map Prop mushymato.MMAP_WoodsLighting: change ambiant lighting of current map.
+- Map Prop mushymato.MMAP_LightRays: add god rays to current map.
+- Map Prop mushymato.MMAP_SteamOverlay: add a repeating texture overlay to map.
+- Map Prop mushymato.MMAP_Panorama: add background via new custom asset mushymato.MMAP/Panorama.
+- Map Prop mushymato.MMAP_CribPosition: farmhouse only, change position of the crib.
+- Map Prop mushymato.MMAP_FridgePosition: farmhouse only, change position of the fridge independent of the tilesheet.
+- mushymato.MMAP_FridgeDoorSprite: farmhouse only, change the open door sprite.
+- Tile Data mushymato.MMAP_TAS and custom asset mushymato.MMAP/TAS to show a TAS on the map.
 
 ### Changed
 
-- QuestionDialogue now return if there are no valid entries, or if Cancel is the only entry
-- HoeDirt.texture is now also a map property
+- QuestionDialogue now return if there are no valid entries, or if Cancel is the only entry.
+- Map props and custom properties from this mod are interchangable unless otherwise noted.
 
 ## [1.4.4]
 
