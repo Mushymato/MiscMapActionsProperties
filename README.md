@@ -31,6 +31,31 @@ All map properties are also Data/Location custom fields. In the case where both 
 - Colors are inverted, much like for light
 - Setting `T` gives the default color of #967832
 
+#### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
+
+- Adds a tiling overlay drawn above the map.
+- If `velocityX` and/or `velocityY` are given, move the texture by that many pixels every tick to create scrolling effect.
+- By default, `color` is 80% white, `alpha` is 1 by default, and `scale` is 4 by default
+
+#### mushymato.MMAP_CribPosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the crib (vanilla is 30 12), size is still 3x4.
+- The default farmhouse has a crib baked in, which needs to be removed if you don't want duplicate cribs.
+- For wall and floor, there are 2 options:
+    1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
+    2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
+- For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
+
+#### mushymato.MMAP_FridgePosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the fridge independent of the map check for `untitled tile sheet` tile id 173 fridge.
+- The vanilla fridge logic still works and this position does not add or change map tiles, so you would actually need corresponding edit to make use of this.
+
+#### mushymato.MMAP_FridgeDoorSprite: \<F|texture\> [offsetX] [offsetY]
+
+- Farmhouse only, changes the fridge door's open sprite.
+- Only required if you need a fridge door larger than the vanilla 16x32 rectangle.
+
 #### mushymato.MMAP_Panorama \<panoramaId\>
 
 - Draw a parallax background behind the map.
@@ -39,6 +64,19 @@ All map properties are also Data/Location custom fields. In the case where both 
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
+
+#### mushymato.MMAP_NightTime* \<time\> <a name="mushymato.MMAP_NightTime"></a>
+
+There are 3 similar map properties for setting phases of day transitioning to night.
+1. mushymato.MMAP_NightTimeStarting
+2. mushymato.MMAP_NightTimeModerate
+3. mushymato.MMAP_NightTimeTruly
+
+- All 3 of these take time in the typical military time format (0600) used by many SDV things.
+- The vanilla values are
+    - starting: 1800 spring summer island, 1700 fall, 1500 winter
+    - moderate: halfway between starting and truly
+    - truly: starting + 200
 
 ### Tile Data
 
@@ -107,61 +145,6 @@ All map properties are also Data/Location custom fields. In the case where both 
 - `Actions` (`List<string>`, _empty_): [Trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions), run all actions.
 - `TileActions` (`List<string>`, _empty_): [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true.
 - `TouchActions` (`List<string>`, _empty_): [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions.
-
-### Map Property
-
-All of these are also valid as `Data/Location` CustomFields, with the same name and arguments.
-
-#### mushymato.MMAP_WoodsLighting: \<T|color\>
-
-- Changes the map's ambiant lighting
-- `T` uses the default value as seen in woods/island forest maps
-- Otherwise, can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html).
-- Colors are inverted before being passed to light, so that "Red" will give red light.
-
-#### mushymato.MMAP_LightRays: \<T|texture\>
-
-- Add some light rays to the map
-- `T` uses `LooseSprites/LightRays`, as seen in island forest
-- Otherwise, supply a valid texture asset name
-
-#### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
-
-- Adds a tiling overlay drawn above the map.
-- If `velocityX` and/or `velocityY` are given, move the texture by that many pixels every tick to create scrolling effect.
-- By default, `color` is 80% white, `alpha` is 1 by default, and `scale` is 4 by default
-
-#### mushymato.MMAP_CribPosition: \<X\> \<Y\>
-
-- Farmhouse only, repositions the crib (vanilla is 30 12), size is still 3x4.
-- The default farmhouse has a crib baked in, which needs to be removed if you don't want duplicate cribs.
-- For wall and floor, there are 2 options:
-    1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
-    2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
-- For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
-
-#### mushymato.MMAP_FridgePosition: \<X\> \<Y\>
-
-- Farmhouse only, repositions the fridge independent of the map check for `untitled tile sheet` tile id 173 fridge.
-- The vanilla fridge logic still works and this position does not add or change map tiles, so you would actually need corresponding edit to make use of this.
-
-#### mushymato.MMAP_FridgeDoorSprite: \<F|texture\> [offsetX] [offsetY]
-
-- Farmhouse only, changes the fridge door's open sprite.
-- Only required if you need a fridge door larger than the vanilla 16x32 rectangle.
-
-#### mushymato.MMAP_NightTime* \<time\> <a name="mushymato.MMAP_NightTime"></a>
-
-There are 3 similar map properties for setting phases of day transitioning to night.
-1. mushymato.MMAP_NightTimeStarting
-2. mushymato.MMAP_NightTimeModerate
-3. mushymato.MMAP_NightTimeTruly
-
-- All 3 of these take time in the typical military time format (0600) used by many SDV things.
-- The vanilla values are
-    - starting: 1800 spring summer island, 1700 fall, 1500 winter
-    - moderate: halfway between starting and truly
-    - truly: starting + 200
 
 ### Data/Buildings Metadata
 
