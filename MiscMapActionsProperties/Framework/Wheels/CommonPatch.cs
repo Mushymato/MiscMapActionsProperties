@@ -71,6 +71,8 @@ internal static class CommonPatch
     )
     {
         prop = null;
+        if (location == null)
+            return false;
         if (
             (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
             || (location.map != null && location.TryGetMapProperty(propKey, out prop))
