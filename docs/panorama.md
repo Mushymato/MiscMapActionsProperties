@@ -2,7 +2,10 @@
 
 Panorama defines what goes behind a map in a way independent of map tiles, there are some hardcoded in C# examples of this vanilla (summet, island north, submarine).
 
-
+There are some some panoramas provided by MMAP that can be used out of the box.
+    - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
+    - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
+    - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
 ### Structure
 
@@ -35,6 +38,8 @@ Only 1 backing can be active for day sunset and night respectively. This is deci
 
 If `BackingDay` is the only defined entry, time of day changes will not be applied, and the day background is displayed at all times.
 
+See [here](sunset.mp4) for example of the day to night transition.
+
 ### Structure
 
 | Property | Type | Default | Notes |
@@ -43,7 +48,7 @@ If `BackingDay` is the only defined entry, time of day changes will not be appli
 | `Condition` | string | _null_ | Game state query, the first backing with a null or truthy Condition will be chosen. |
 | `Texture` | string | _null_ | Texture name, drawn stretched across entire viewport. |
 | `SourceRect` | `Rectangle` | _null_ | Portion of texture to draw. |
-| `Color` | `Color` | _null_ | Color overlay to apply when drawing texture. |
+| `Color` | `Color` | _null_ | If texture is null, draw a pure color, otherwise draw the texture with this color. |
 
 ## Parallax
 

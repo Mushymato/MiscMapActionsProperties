@@ -68,7 +68,7 @@ public sealed class PanoramaData
     public List<MapWideTAS>? RespawnTAS = null;
 }
 
-internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D Texture, Rectangle SourceRect)
+internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture, Rectangle SourceRect)
 {
     private Vector2 Position = Vector2.Zero;
     private Vector2 ScrollOffset = Vector2.Zero;
@@ -76,7 +76,7 @@ internal sealed record PanoramaParallaxContext(ParallaxLayerData Data, Texture2D
     private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
     private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
 
-    internal static PanoramaParallaxContext? FromData(ParallaxLayerData data, GameStateQueryContext context)
+    internal static ParallaxContext? FromData(ParallaxLayerData data, GameStateQueryContext context)
     {
         if (
             !GameStateQuery.CheckConditions(data.Condition, context)
@@ -244,7 +244,7 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
 
 internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
 {
-    private readonly List<PanoramaParallaxContext> parallaxCtx = [];
+    private readonly List<ParallaxContext> parallaxCtx = [];
     private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
 
     private BackingContext? Day = null;
@@ -284,7 +284,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         parallaxCtx.Clear();
         foreach (var parallax in GetAllMatchingData(data.ParallaxLayers, context))
         {
-            if (PanoramaParallaxContext.FromData(parallax, context) is PanoramaParallaxContext pCtx)
+            if (ParallaxContext.FromData(parallax, context) is ParallaxContext pCtx)
             {
                 parallaxCtx.Add(pCtx);
             }

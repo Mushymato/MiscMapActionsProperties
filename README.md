@@ -37,6 +37,7 @@ All map properties are also Data/Location custom fields. In the case where both 
 - The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](docs/panorama.md) for details.
 - There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
+    - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
 ### Tile Data
