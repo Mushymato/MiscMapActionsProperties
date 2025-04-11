@@ -308,7 +308,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     public override void update(xTile.Dimensions.Rectangle viewport)
     {
         // Update Parallax
-        xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
+        xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
         foreach (var pCtx in parallaxCtx)
         {
             pCtx.UpdatePosition(viewport, layer);
@@ -552,7 +552,7 @@ internal static class Panorama
                 Panorama.SetData(data, context);
                 if (data.OnetimeTAS != null)
                 {
-                    xTile.Layers.Layer layer = Game1.currentLocation.map.RequireLayer("Back");
+                    xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
                     float width = layer.LayerWidth * 64f;
                     float height = layer.LayerHeight * 64f;
                     foreach (MapWideTAS mwTAS in data.OnetimeTAS)

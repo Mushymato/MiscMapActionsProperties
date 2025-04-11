@@ -1,9 +1,9 @@
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Extensions;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
@@ -41,21 +41,14 @@ internal static class AnimalSpot
     private static List<Vector2> GetAnimalSpots(xTile.Map map)
     {
         List<Vector2> animalSpots = [];
-        var backLayer = map.RequireLayer("Back");
-        for (int x = 0; x < backLayer.LayerWidth; x++)
+        foreach ((Vector2 pos, MapTile tile) in CommonPatch.IterateMapTiles(map, "Back"))
         {
-            for (int y = 0; y < backLayer.LayerHeight; y++)
+            if (
+                tile.Properties.ContainsKey(TileProp_AnimalSpot)
+                || tile.TileIndexProperties.ContainsKey(TileProp_AnimalSpot)
+            )
             {
-                Vector2 pos = new(x, y);
-                if (pos.Equals(Vector2.Zero))
-                    continue;
-                MapTile tile = backLayer.Tiles[x, y];
-                if (tile == null)
-                    continue;
-                if (tile.Properties.ContainsKey(TileProp_AnimalSpot))
-                {
-                    animalSpots.Add(pos);
-                }
+                animalSpots.Add(pos);
             }
         }
         return animalSpots;
@@ -75,7 +68,7 @@ internal static class AnimalSpot
         try
         {
             __instance.StopAllActions();
-            List<Vector2> animalSpots = animalSpotsCache.GetValue(location.map, GetAnimalSpots);
+            List<Vector2> animalSpots = animalSpotsCache.GetValue(location.Map, GetAnimalSpots);
             Character _base = __instance;
             foreach (Vector2 pos in animalSpots)
             {

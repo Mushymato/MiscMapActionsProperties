@@ -1,11 +1,11 @@
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Delegates;
-using StardewValley.Extensions;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
@@ -13,17 +13,28 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal enum SupportedCritter
 {
     Firefly,
+    Seagull,
+    Crab,
 }
 
 /// <summary>
 /// Add new back layer tile property mushymato.MMAP_Critter <critter type> [type dependent args]+
 /// Add critter at tile, supports
-/// - Firefly: color count
+/// - Firefly: [color] [count]
+/// - Seagull: [texture|T] [count]
 /// </summary>
 internal static class CritterSpot
 {
     internal static readonly string TileProp_Critter = $"{ModEntry.ModId}_Critter";
+    private static readonly TileDataCache<string[]> critterSpotsCache = CommonPatch.GetSimpleTileDataCache(
+        TileProp_Critter,
+        ["Back"]
+    );
     private static readonly FieldInfo fireflyLight = AccessTools.DeclaredField(typeof(Firefly), "light");
+    private static readonly FieldInfo crabSourceRectangle = AccessTools.DeclaredField(
+        typeof(CrabCritter),
+        "_baseSourceRectangle"
+    );
 
     internal static void Register()
     {
@@ -34,23 +45,9 @@ internal static class CritterSpot
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
     {
-        var backLayer = e.Location.map.RequireLayer("Back");
-        for (int x = 0; x < backLayer.LayerWidth; x++)
+        foreach ((Vector2 pos, string[] props) in critterSpotsCache.GetProps(e.Location.Map))
         {
-            for (int y = 0; y < backLayer.LayerHeight; y++)
-            {
-                Vector2 pos = new(x, y);
-                if (pos.Equals(Vector2.Zero))
-                    continue;
-                MapTile tile = backLayer.Tiles[x, y];
-                if (tile == null)
-                    continue;
-                if (tile.Properties.TryGetValue(TileProp_Critter, out string critterProp))
-                {
-                    string[] critterArgs = ArgUtility.SplitBySpaceQuoteAware(critterProp);
-                    SpawnCritter(e.Location, pos, critterArgs, 0, out string _);
-                }
-            }
+            SpawnCritter(e.Location, pos, props, 0, out string _);
         }
     }
 
@@ -91,6 +88,8 @@ internal static class CritterSpot
         return critterKind switch
         {
             SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, firstIdx + 1, out error),
+            SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, firstIdx + 1, out error),
+            SupportedCritter.Crab => SpawnCritterCrab(location, position, args, firstIdx + 1, out error),
             _ => false,
         };
     }
@@ -129,11 +128,95 @@ internal static class CritterSpot
             firefly.position.Y += Random.Shared.Next(Game1.tileSize);
             firefly.startingPosition = firefly.position;
             if (c != null && fireflyLight.GetValue(firefly) is LightSource light)
-            {
                 light.color.Value = (Color)c;
-            }
             location.addCritter(firefly);
         }
         return true;
+    }
+
+    private static bool SpawnCritterSeagull(
+        GameLocation location,
+        Vector2 position,
+        string[] args,
+        int firstIdx,
+        out string error
+    )
+    {
+        if (
+            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                firstIdx + 1,
+                out int count,
+                out error,
+                defaultValue: 1,
+                name: "int count"
+            )
+        )
+        {
+            return false;
+        }
+        if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+            texture = null;
+        int startingState = 3;
+        if (
+            location.isWaterTile((int)position.X, (int)position.Y)
+            && location.doesTileHaveProperty((int)position.X, (int)position.Y, "Passable", "Buildings") == null
+        )
+            startingState = 2;
+        for (int i = 0; i < count; i++)
+        {
+            Seagull seagull =
+                new(
+                    position * Game1.tileSize
+                        + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize)),
+                    startingState
+                );
+            if (texture != null)
+                seagull.sprite.textureName.Value = texture;
+            location.addCritter(seagull);
+        }
+        return false;
+    }
+
+    private static bool SpawnCritterCrab(
+        GameLocation location,
+        Vector2 position,
+        string[] args,
+        int firstIdx,
+        out string error
+    )
+    {
+        if (
+            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                firstIdx + 1,
+                out int count,
+                out error,
+                defaultValue: 1,
+                name: "int count"
+            )
+        )
+        {
+            return false;
+        }
+        if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+            texture = null;
+        for (int i = 0; i < count; i++)
+        {
+            CrabCritter crab =
+                new(
+                    position * Game1.tileSize
+                        + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize))
+                );
+            if (texture != null)
+            {
+                crab.sprite.textureName.Value = texture;
+                crabSourceRectangle.SetValue(crab, new Rectangle(0, 0, 18, 18));
+            }
+            location.addCritter(crab);
+        }
+        return false;
     }
 }

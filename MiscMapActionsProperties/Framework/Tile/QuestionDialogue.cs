@@ -80,9 +80,11 @@ internal static class QuestionDialogue
             return false;
         if (validEntries.Count == 1)
         {
-            QuestionDialogueEntry qde = validEntries.Values.First();
-            if (qde.Actions == null && qde.TileActions == null && qde.TouchActions == null)
+            KeyValuePair<string, QuestionDialogueEntry> qde = validEntries.First();
+            if (qde.Value.Actions == null && qde.Value.TileActions == null && qde.Value.TouchActions == null)
                 return false;
+            AfterQuestionBehavior(location, tilePosition, validEntries, farmer, qde.Key);
+            return true;
         }
         location.createQuestionDialogue(
             TokenParser.ParseText(qdData.Question) ?? "",

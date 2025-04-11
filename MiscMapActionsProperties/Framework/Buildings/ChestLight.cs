@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
-using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
@@ -126,7 +125,7 @@ internal sealed class BuildingChestLightWatcher(Building building, Chest chest, 
             if (
                 !Game1.currentLightSources.ContainsKey(lightName)
                 && Light.MakeLightFromProps(
-                    lightProps,
+                    ArgUtility.SplitBySpaceQuoteAware(lightProps),
                     lightName,
                     new Vector2(building.tileX.Value, building.tileY.Value) * Game1.tileSize
                 )

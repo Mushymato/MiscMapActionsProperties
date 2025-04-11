@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
-using StardewValley.Extensions;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
@@ -17,6 +16,10 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class TASSpot
 {
     internal static readonly string TileProp_TAS = $"{ModEntry.ModId}_TAS";
+    private static readonly TileDataCache<string[]> tasSpotsCache = CommonPatch.GetSimpleTileDataCache(
+        TileProp_TAS,
+        ["Back"]
+    );
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
 
     internal static void Register()
@@ -43,7 +46,7 @@ internal static class TASSpot
 
     private static void EnterLocationTAS(GameLocation location)
     {
-        var tileTASs = CreateMapDefs(location.map);
+        var tileTASs = CreateMapDefs(location.Map);
         AddLocationTAS(location, tileTASs.Item1);
         respawningTASCache.Value = tileTASs.Item2;
         AddLocationTASRespawning(location, respawningTASCache.Value, Game1.currentGameTime);
@@ -126,27 +129,16 @@ internal static class TASSpot
     {
         List<TASContext> onetime = [];
         List<TASContext> respawning = [];
-        var backLayer = map.RequireLayer("Back");
-        for (int x = 0; x < backLayer.LayerWidth; x++)
+        foreach ((Vector2 pos, string[] tasKeyList) in tasSpotsCache.GetProps(map))
         {
-            for (int y = 0; y < backLayer.LayerHeight; y++)
+            foreach (var tasKey in tasKeyList)
             {
-                Vector2 pos = new(x, y);
-                if (pos.Equals(Vector2.Zero))
-                    continue;
-                MapTile tile = backLayer.Tiles[x, y];
-                if (tile == null)
-                    continue;
-                if (tile.Properties.TryGetValue(TileProp_TAS, out string tasKeyList))
+                if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
                 {
-                    foreach (var tasKey in ArgUtility.SplitBySpaceQuoteAware(tasKeyList))
-                        if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
-                        {
-                            if (def.SpawnInterval <= 0)
-                                onetime.Add(new(def) { Pos = pos * Game1.tileSize });
-                            else
-                                respawning.Add(new(def) { Pos = pos * Game1.tileSize });
-                        }
+                    if (def.SpawnInterval <= 0)
+                        onetime.Add(new(def) { Pos = pos * Game1.tileSize });
+                    else
+                        respawning.Add(new(def) { Pos = pos * Game1.tileSize });
                 }
             }
         }

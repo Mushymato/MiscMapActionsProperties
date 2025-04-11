@@ -11,7 +11,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "Firefly Blue 4"
+            "mushymato.MMAP_Critter": "Crab T 3"
           }
         },
         {
@@ -22,6 +22,22 @@
           "Layer": "Back",
           "SetProperties": {
             "TouchAction": "mushymato.MMAP_Critter Firefly T 8"
+          }
+        }
+      ]
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/FarmHouse_Cubby_Add",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 31,
+            "Y": 30
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_Critter": "Firefly Blue 100"
           }
         }
       ]

@@ -17,13 +17,12 @@ internal static class Light
     /// <param name="mapName"></param>
     /// <returns></returns>
     internal static LightSource? MakeLightFromProps(
-        string lightProps,
+        string[] args,
         string lightName,
         Vector2 position,
         string? mapName = null
     )
     {
-        string[] args = ArgUtility.SplitBySpaceQuoteAware(lightProps ?? "");
         if (
             !ArgUtility.TryGetOptionalFloat(
                 args,
@@ -86,7 +85,7 @@ internal static class Light
         return newLight;
     }
 
-    internal static LightSource? MakeMapLightFromProps(string lightProps, Vector2 position, string mapName)
+    internal static LightSource? MakeMapLightFromProps(string[] lightProps, Vector2 position, string mapName)
     {
         return MakeLightFromProps(lightProps, $"{mapName}_MapLight_{position.X},{position.Y}", position, mapName);
     }
