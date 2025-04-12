@@ -98,9 +98,9 @@ internal static class CommonPatch
         bool __state
     )
     {
-        if (__state == ____appliedMapOverrides.Contains(override_key))
-            return;
         if (dest_rect == null)
+            return;
+        if (__state == ____appliedMapOverrides.Contains(override_key))
             return;
         GameLocation_ApplyMapOverride?.Invoke(null, new(__instance, (Rectangle)dest_rect));
     }

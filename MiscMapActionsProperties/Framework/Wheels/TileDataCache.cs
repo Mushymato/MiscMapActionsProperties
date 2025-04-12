@@ -9,6 +9,7 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 internal sealed class TileDataCache<TProps>
 {
     private readonly ConditionalWeakTable<xTile.Map, Dictionary<Vector2, TProps>> _cache = [];
+    private Rectangle queuedUpdateRect = Rectangle.Empty;
     private readonly string propKey;
     private readonly Func<string, MapTile, TProps?> propsValueGetter;
     private readonly string[] layers;
@@ -18,7 +19,6 @@ internal sealed class TileDataCache<TProps>
         this.propKey = propKey;
         this.layers = layers;
         this.propsValueGetter = propsValueGetter;
-        ModEntry.help.Events.GameLoop.SaveLoaded += ClearCache;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearCache;
         CommonPatch.GameLocation_ApplyMapOverride += GameLocation_ApplyMapOverride_Postfix;
     }
@@ -43,27 +43,21 @@ internal sealed class TileDataCache<TProps>
 
     private void GameLocation_ApplyMapOverride_Postfix(object? sender, CommonPatch.ApplyMapOverrideArgs e)
     {
-        UpdateProps(e.Location.Map, e.DestRect);
+        QueueUpdateProps(e.Location.Map, e.DestRect);
     }
 
-    internal void UpdateProps(xTile.Map map, Rectangle rectangle)
+    internal void QueueUpdateProps(xTile.Map map, Rectangle rectangle)
     {
         if (map == null)
             return;
-        Dictionary<Vector2, TProps> cacheEntry = GetProps(map);
-        foreach (string layer in layers)
+        Dictionary<Vector2, TProps> cacheEntry = _cache.GetValue(map, CreateProps);
+        if (queuedUpdateRect.IsEmpty)
         {
-            foreach ((Vector2 pos, MapTile tile) in CommonPatch.IterateMapTilesInRect(map, layer, rectangle))
-            {
-                if (propsValueGetter(propKey, tile) is TProps propValue)
-                {
-                    cacheEntry[pos] = propValue;
-                }
-                else
-                {
-                    cacheEntry.Remove(pos);
-                }
-            }
+            queuedUpdateRect = rectangle;
+        }
+        else if (!queuedUpdateRect.Contains(rectangle))
+        {
+            queuedUpdateRect = Rectangle.Union(queuedUpdateRect, rectangle);
         }
     }
 
@@ -71,6 +65,24 @@ internal sealed class TileDataCache<TProps>
     {
         if (map == null)
             return [];
-        return _cache.GetValue(map, CreateProps);
+        Dictionary<Vector2, TProps> cacheEntry = _cache.GetValue(map, CreateProps);
+        if (!queuedUpdateRect.IsEmpty)
+        {
+            foreach (string layer in layers)
+            {
+                foreach ((Vector2 pos, MapTile tile) in CommonPatch.IterateMapTilesInRect(map, layer, queuedUpdateRect))
+                {
+                    if (propsValueGetter(propKey, tile) is TProps propValue)
+                    {
+                        cacheEntry[pos] = propValue;
+                    }
+                    else
+                    {
+                        cacheEntry.Remove(pos);
+                    }
+                }
+            }
+        }
+        return cacheEntry;
     }
 }

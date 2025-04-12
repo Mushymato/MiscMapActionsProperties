@@ -3,6 +3,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Delegates;
@@ -38,17 +39,23 @@ internal static class CritterSpot
 
     internal static void Register()
     {
-        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
+        ModEntry.help.Events.Player.Warped += OnWarped;
         CommonPatch.RegisterTileAndTouch(TileProp_Critter, TileAndTouchCritter);
         TriggerActionManager.RegisterAction(TileProp_Critter, TriggerActionCritter);
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
+        SpawnLocationCritters(Game1.currentLocation);
+
+    private static void OnWarped(object? sender, WarpedEventArgs e) => SpawnLocationCritters(e.NewLocation);
+
+    private static void SpawnLocationCritters(GameLocation location)
     {
-        foreach ((Vector2 pos, string[] props) in critterSpotsCache.GetProps(e.Location.Map))
-        {
-            SpawnCritter(e.Location, pos, props, 0, out string _);
-        }
+        if (location == null)
+            return;
+        foreach ((Vector2 pos, string[] props) in critterSpotsCache.GetProps(location.Map))
+            SpawnCritter(location, pos, props, 0, out string _);
     }
 
     private static bool TriggerActionCritter(string[] args, TriggerActionContext context, out string error)

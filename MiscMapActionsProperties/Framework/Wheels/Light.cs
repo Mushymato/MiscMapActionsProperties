@@ -79,14 +79,13 @@ internal static class Light
                 onlyLocation: mapName
             );
         if (customTexture != null)
-        {
             newLight.lightTexture = customTexture;
-        }
         return newLight;
     }
 
     internal static LightSource? MakeMapLightFromProps(string[] lightProps, Vector2 position, string mapName)
     {
+        ModEntry.Log($"light: {string.Join(',', lightProps)} - {mapName}_MapLight_{position.X},{position.Y}");
         return MakeLightFromProps(lightProps, $"{mapName}_MapLight_{position.X},{position.Y}", position, mapName);
     }
 }

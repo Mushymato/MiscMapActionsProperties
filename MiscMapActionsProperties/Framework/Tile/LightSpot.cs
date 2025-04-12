@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
@@ -44,7 +45,21 @@ internal static class LightSpot
 
     internal static void Register()
     {
-        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
+        ModEntry.help.Events.Player.Warped += OnWarped;
+    }
+
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
+        SpawnLocationLights(Game1.currentLocation);
+
+    private static void OnWarped(object? sender, WarpedEventArgs e) => SpawnLocationLights(e.NewLocation);
+
+    private static void SpawnLocationLights(GameLocation location)
+    {
+        if (location == null || location.ignoreLights.Value)
+            return;
+        foreach (LightSource light in GetMapTileLights(location))
+            Game1.currentLightSources.Add(light);
     }
 
     private static IEnumerable<LightSource> GetMapTileLights(GameLocation location)
@@ -70,17 +85,21 @@ internal static class LightSpot
             if (building.GetData() is not BuildingData data)
                 continue;
 
-            HashSet<ValueTuple<int, int>> bannedTiles = [];
             foreach (string layerName in LayerNames)
             {
+                HashSet<ValueTuple<int, int>> bannedTiles = [];
                 foreach (BuildingTileProperty btp in data.TileProperties)
                 {
                     if (btp.Name != TileProp_LightCond || btp.Layer != layerName)
                         continue;
                     if (!GameStateQuery.CheckConditions(btp.Value, location: location))
                         for (int i = 0; i < btp.TileArea.Width; i++)
-                        for (int j = 0; j < btp.TileArea.Height; j++)
-                            bannedTiles.Add(new(i, j));
+                        {
+                            for (int j = 0; j < btp.TileArea.Height; j++)
+                            {
+                                bannedTiles.Add(new(i, j));
+                            }
+                        }
                 }
 
                 foreach (BuildingTileProperty btp in data.TileProperties)
@@ -117,17 +136,6 @@ internal static class LightSpot
                     }
                 }
             }
-        }
-    }
-
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
-    {
-        if (e.Location.ignoreLights.Value)
-            return;
-
-        foreach (LightSource light in GetMapTileLights(e.Location))
-        {
-            Game1.currentLightSources.Add(light);
         }
     }
 }
