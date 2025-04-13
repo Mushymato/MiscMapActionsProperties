@@ -88,7 +88,7 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - 1 AnimalSpot tile will get 1 animal, 2 AnimalSpot next to each other means 2 animals get to start around that area.
 - The spawn point of the animal is based on their top left tile, for 2x2 tile animals it's best to put this tile prop top left of where you want them to go.
 
-#### Front layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY]
+#### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY]
 
 - Add a light source at the center of this tile.
 - Radius controls size of light.
@@ -103,6 +103,15 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - Add a temporary animated sprite at this tile.
 - The layer depth is based on the tile position.
 - The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
+
+#### Back Layer: mushymato.MMAP_Critter \<critterType\> [type dependent args]
+
+- Spawn a certain kind of simple critter on this tile.
+- Currently supports Firefly Seagull Crab
+- Firefly: [color|T] [count]
+- Seagull: [texture|T] [count]
+- Crab: [texture|T] [count]
+- You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 
 ### Action
 

@@ -2,11 +2,11 @@
   "Changes": [
     {
       "Action": "EditMap",
-      "Target": "Maps/Farm",
+      "Target": "Maps/Backwoods",
       "MapProperties": {
-        "mushymato.MMAP_WoodsLighting": "T",
-        "mushymato.MMAP_LightRays": "Buildings/Junimo Hut"
-        // "mushymato.MMAP_SteamOverlay": "T 1 -0.1 CornflowerBlue 0.4 4"
+        // "mushymato.MMAP_WoodsLighting": "T",
+        // "mushymato.MMAP_LightRays": "Buildings/Junimo Hut",
+        "mushymato.MMAP_SteamOverlay": "T 1 0 DarkOrchid 0.4 4"
       }
     }
   ]

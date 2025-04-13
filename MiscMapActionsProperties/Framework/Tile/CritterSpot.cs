@@ -19,10 +19,11 @@ internal enum SupportedCritter
 }
 
 /// <summary>
-/// Add new back layer tile property mushymato.MMAP_Critter <critter type> [type dependent args]+
+/// Add new back layer tile property mushymato.MMAP_Critter <critter type> [type dependent args]
 /// Add critter at tile, supports
 /// - Firefly: [color] [count]
 /// - Seagull: [texture|T] [count]
+/// - Crab: [texture|T] [count]
 /// </summary>
 internal static class CritterSpot
 {
@@ -78,27 +79,34 @@ internal static class CritterSpot
         out string error
     )
     {
-        if (
-            !ArgUtility.TryGet(
-                args,
-                firstIdx,
-                out string critterKindStr,
-                out error,
-                allowBlank: false,
-                name: "string critterKind"
-            ) || !Enum.TryParse(critterKindStr, true, out SupportedCritter critterKind)
-        )
-        {
-            return false;
-        }
+        error = "";
+        bool spawned = false;
         location.instantiateCrittersList();
-        return critterKind switch
+        for (int i = firstIdx; i <= args.Length - 3; i += 3)
         {
-            SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, firstIdx + 1, out error),
-            SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, firstIdx + 1, out error),
-            SupportedCritter.Crab => SpawnCritterCrab(location, position, args, firstIdx + 1, out error),
-            _ => false,
-        };
+            if (
+                !ArgUtility.TryGet(
+                    args,
+                    i,
+                    out string critterKindStr,
+                    out error,
+                    allowBlank: false,
+                    name: "string critterKind"
+                ) || !Enum.TryParse(critterKindStr, true, out SupportedCritter critterKind)
+            )
+            {
+                break;
+            }
+            spawned =
+                critterKind switch
+                {
+                    SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, i + 1, out error),
+                    SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, i + 1, out error),
+                    SupportedCritter.Crab => SpawnCritterCrab(location, position, args, i + 1, out error),
+                    _ => false,
+                } || spawned;
+        }
+        return spawned;
     }
 
     private static bool SpawnCritterFirefly(

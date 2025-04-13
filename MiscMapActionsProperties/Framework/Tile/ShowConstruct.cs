@@ -28,7 +28,7 @@ internal static class ShowConstruct
                 CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
         );
         CommonPatch.RegisterTileAndTouch(
-            TileAction_ShowConstruct,
+            TileAction_ShowConstructForCurrent,
             (location, args, farmer, tile) =>
                 CheckArgsThenShowConstruct(
                     args,
