@@ -1,5 +1,11 @@
 {
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/crab, {{ModId}}/seagull",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
     {
       "Action": "EditMap",
       "Target": "Maps/FarmCave",
@@ -12,6 +18,16 @@
           "Layer": "Back",
           "SetProperties": {
             "mushymato.MMAP_Critter": "Crab T 3 Firefly T 8"
+          }
+        },
+        {
+          "Position": {
+            "X": 6,
+            "Y": 5
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_Critter": "Crab {{ModId}}/crab 4 Seagull {{ModId}}/seagull 4"
           }
         },
         {
