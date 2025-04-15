@@ -1,7 +1,9 @@
+using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.TokenizableStrings;
@@ -17,13 +19,28 @@ internal static class QuestionDialogue
 {
     internal static readonly string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
     internal static readonly string Asset_QuestionDialogue = $"{ModEntry.ModId}/QuestionDialogue";
+    internal static readonly PerScreen<GameLocation.afterQuestionBehavior?> heldAfterQuestionBehavior = new();
 
     internal static void Register()
     {
+        heldAfterQuestionBehavior.Value = null;
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         CommonPatch.RegisterTileAndTouch(TileAction_QuestionDialogue, ShowQuestionDialogue);
         TriggerActionManager.RegisterAction(TileAction_QuestionDialogue, ShowQuestionDialogueAction);
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.answerDialogue)),
+            postfix: new HarmonyMethod(typeof(QuestionDialogue), nameof(GameLocation_answerDialogue_Postfix))
+        );
+    }
+
+    private static void GameLocation_answerDialogue_Postfix(GameLocation __instance)
+    {
+        if (heldAfterQuestionBehavior.Value != null)
+        {
+            __instance.afterQuestion = heldAfterQuestionBehavior.Value;
+            heldAfterQuestionBehavior.Value = null;
+        }
     }
 
     private static Dictionary<string, QuestionDialogueData>? _qdData = null;
@@ -72,6 +89,7 @@ internal static class QuestionDialogue
         {
             return false;
         }
+        ModEntry.Log($"ShowQuestionDialogue: {qdId}");
 
         GameStateQueryContext context = new(location, farmer, null, null, null, null, null);
 
@@ -86,11 +104,16 @@ internal static class QuestionDialogue
             AfterQuestionBehavior(location, tilePosition, validEntries, farmer, qde.Key);
             return true;
         }
+
+        GameLocation.afterQuestionBehavior afterQBehavior = (Farmer who, string whichAnswer) =>
+            AfterQuestionBehavior(location, tilePosition, validEntries, who, whichAnswer);
+        if (location.afterQuestion != null)
+            heldAfterQuestionBehavior.Value = afterQBehavior;
+
         location.createQuestionDialogue(
             TokenParser.ParseText(qdData.Question) ?? "",
             validEntries.Select(MakeResponse).ToArray(),
-            (Farmer who, string whichAnswer) =>
-                AfterQuestionBehavior(location, tilePosition, validEntries, who, whichAnswer),
+            afterQBehavior,
             speaker: Game1.getCharacterFromName(qdData.Speaker)
         );
 
@@ -109,6 +132,7 @@ internal static class QuestionDialogue
         string whichAnswer
     )
     {
+        ModEntry.Log($"AfterQuestionBehavior: {whichAnswer}");
         if (validEntries.TryGetValue(whichAnswer, out QuestionDialogueEntry? qde))
         {
             if (qde.Actions != null)
