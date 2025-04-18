@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- Let question dialogue work when nested
 - Changed some draws to use Render events
 
 ## [1.5.2]
