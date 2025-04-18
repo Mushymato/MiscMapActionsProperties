@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 
@@ -67,7 +68,7 @@ internal static class SteamOverlay
         {
             CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
             CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Postfix;
-            CommonPatch.GameLocation_DrawAboveAlwaysFrontLayer += GameLocation_drawAboveAlwaysFrontLayer_Postfix;
+            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep_World_AlwaysFront;
         }
         catch (Exception err)
         {
@@ -121,11 +122,11 @@ internal static class SteamOverlay
         steamCtx.Value?.Update(e.Time);
     }
 
-    private static void GameLocation_drawAboveAlwaysFrontLayer_Postfix(
-        object? sender,
-        CommonPatch.DrawAboveAlwaysFrontLayerArgs e
-    )
+    private static void OnRenderedStep_World_AlwaysFront(object? sender, RenderedStepEventArgs e)
     {
-        steamCtx.Value?.Draw(e.B);
+        if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront)
+        {
+            steamCtx.Value?.Draw(e.SpriteBatch);
+        }
     }
 }

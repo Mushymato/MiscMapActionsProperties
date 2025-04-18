@@ -4,6 +4,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
@@ -36,7 +37,7 @@ internal static class LightRays
                     nameof(IslandForestLocation_DrawRays_RevesePatchTranspiler)
                 )
             );
-            CommonPatch.GameLocation_DrawAboveAlwaysFrontLayer += GameLocation_drawAboveAlwaysFrontLayer_Postfix;
+            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep_World_AlwaysFront;
             CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
@@ -99,16 +100,13 @@ internal static class LightRays
         lightRaysCtx.Value = null;
     }
 
-    private static void GameLocation_drawAboveAlwaysFrontLayer_Postfix(
-        object? sender,
-        CommonPatch.DrawAboveAlwaysFrontLayerArgs e
-    )
+    private static void OnRenderedStep_World_AlwaysFront(object? sender, RenderedStepEventArgs e)
     {
         if (lightRaysCtx.Value != null)
         {
             _raySeed = lightRaysCtx.Value.Seed;
             _rayTexture = lightRaysCtx.Value.Texture;
-            IslandForestLocation_DrawRays_RevesePatch(e.Location, e.B);
+            IslandForestLocation_DrawRays_RevesePatch(Game1.currentLocation, e.SpriteBatch);
             _raySeed = 0;
             _rayTexture = null!;
         }

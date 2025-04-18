@@ -24,11 +24,11 @@ internal static class HoeDirtOverride
 
     internal static void Register()
     {
-        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
     }
 
-    private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
         if (HasHoeDirtOverride(Game1.currentLocation))
         {

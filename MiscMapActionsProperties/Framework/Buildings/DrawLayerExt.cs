@@ -84,7 +84,7 @@ internal static class DrawLayerExt
 
     internal static void Register()
     {
-        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         ModEntry.help.Events.Player.Warped += OnWarped;
@@ -144,7 +144,7 @@ internal static class DrawLayerExt
             dlExtInfoInMenu.Clear();
     }
 
-    private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
         AddBuildingDrawLayerRotate(Game1.currentLocation);
     }
@@ -173,6 +173,8 @@ internal static class DrawLayerExt
 
     internal static void AddBuildingDrawLayerRotate(GameLocation location)
     {
+        if (Game1.currentLocation == null)
+            return;
         foreach (Building building in location.buildings)
         {
             BuildingData data = building.GetData();

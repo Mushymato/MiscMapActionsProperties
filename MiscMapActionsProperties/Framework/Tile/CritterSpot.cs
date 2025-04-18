@@ -7,6 +7,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Delegates;
+using StardewValley.Extensions;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
@@ -16,6 +17,7 @@ internal enum SupportedCritter
     Firefly,
     Seagull,
     Crab,
+    Birdie,
 }
 
 /// <summary>
@@ -103,6 +105,7 @@ internal static class CritterSpot
                     SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, i + 1, out error),
                     SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, i + 1, out error),
                     SupportedCritter.Crab => SpawnCritterCrab(location, position, args, i + 1, out error),
+                    SupportedCritter.Birdie => SpawnCritterBirdie(location, position, args, i + 1, out error),
                     _ => false,
                 } || spawned;
         }
@@ -231,6 +234,86 @@ internal static class CritterSpot
                 crabSourceRectangle.SetValue(crab, new Rectangle(0, 0, 18, 18));
             }
             location.addCritter(crab);
+        }
+        return false;
+    }
+
+    private static bool SpawnCritterBirdie(
+        GameLocation location,
+        Vector2 position,
+        string[] args,
+        int firstIdx,
+        out string error
+    )
+    {
+        if (
+            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                firstIdx + 1,
+                out int count,
+                out error,
+                defaultValue: 1,
+                name: "int count"
+            )
+        )
+        {
+            return false;
+        }
+        int startingIndex = -1;
+        if (texture != null)
+        {
+            if (int.TryParse(texture, out startingIndex))
+            {
+                texture = null;
+            }
+            else if (texture != "T" && Game1.content.DoesAssetExist<Texture2D>(texture))
+            {
+                startingIndex = 0;
+            }
+            else
+            {
+                texture = null;
+                startingIndex = -1;
+            }
+        }
+        Season season = location.GetSeason();
+        for (int i = 0; i < count; i++)
+        {
+            int startIdx = startingIndex;
+            if (startIdx == -1)
+            {
+                // GameLocation.addBirdies
+                if (Random.Shared.NextBool() && Game1.MasterPlayer.mailReceived.Contains("Farm_Eternal"))
+                {
+                    startIdx = (season == Season.Fall) ? 135 : 125;
+                }
+                else
+                {
+                    if (season == Season.Fall)
+                    {
+                        startIdx = 45;
+                    }
+                    else if (Game1.random.NextDouble() < 0.05)
+                    {
+                        startIdx = 165;
+                    }
+                    else
+                    {
+                        startIdx = 25;
+                    }
+                }
+            }
+            Birdie birdie = new((int)position.X, (int)position.Y, startIdx);
+            birdie.position += new Vector2(
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
+            );
+            if (texture != null)
+            {
+                birdie.sprite.textureName.Value = texture;
+            }
+            location.addCritter(birdie);
         }
         return false;
     }

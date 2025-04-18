@@ -3,8 +3,8 @@
   "Changes": [
     {
       "Action": "Load",
-      "Target": "{{ModId}}/crab, {{ModId}}/seagull",
-      "FromFile": "assets/{{TargetWithoutPath}}.png"
+      "Target": "{{ModId}}/critters/crab, {{ModId}}/critters/seagull, {{ModId}}/critters/birdie",
+      "FromFile": "assets/critters/{{TargetWithoutPath}}.png"
     },
     {
       "Action": "EditMap",
@@ -17,7 +17,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "Crab T 3 Firefly T 8"
+            "mushymato.MMAP_Critter": "Birdie T 4 Birdie 175 4 Birdie {{ModId}}/critters/birdie 4"
           }
         },
         {

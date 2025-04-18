@@ -50,6 +50,14 @@ internal static class Light
             )
             || !ArgUtility.TryGetOptionalInt(args, 3, out int offsetX, out error, defaultValue: 0, name: "int offsetX")
             || !ArgUtility.TryGetOptionalInt(args, 4, out int offsetY, out error, defaultValue: 0, name: "int offsetY")
+            || !ArgUtility.TryGetOptionalEnum(
+                args,
+                5,
+                out LightSource.LightContext lightContext,
+                out error,
+                defaultValue: LightSource.LightContext.MapLight,
+                name: "LightSource.LightContext lightContext"
+            )
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -68,6 +76,8 @@ internal static class Light
         }
         Color color = Utility.StringToColor(colorStr) ?? Color.White;
         color = new Color(color.PackedValue ^ 0x00FFFFFF);
+        if (lightContext == LightSource.LightContext.MapLight && mapName == null)
+            lightContext = LightSource.LightContext.None;
         LightSource newLight =
             new(
                 lightName,
@@ -75,7 +85,7 @@ internal static class Light
                 position + new Vector2(offsetX, offsetY),
                 radius,
                 color,
-                mapName != null ? LightSource.LightContext.MapLight : LightSource.LightContext.None,
+                lightContext,
                 onlyLocation: mapName
             );
         if (customTexture != null)
@@ -85,7 +95,6 @@ internal static class Light
 
     internal static LightSource? MakeMapLightFromProps(string[] lightProps, Vector2 position, string mapName)
     {
-        ModEntry.Log($"light: {string.Join(',', lightProps)} - {mapName}_MapLight_{position.X},{position.Y}");
         return MakeLightFromProps(lightProps, $"{mapName}_MapLight_{position.X},{position.Y}", position, mapName);
     }
 }

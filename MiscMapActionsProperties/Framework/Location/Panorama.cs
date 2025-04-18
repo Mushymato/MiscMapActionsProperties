@@ -450,7 +450,6 @@ internal static class Panorama
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
 
-        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
 
         ModEntry.harm.Patch(
@@ -526,12 +525,6 @@ internal static class Panorama
             ModEntry.Log($"Error in Game1_updateWeather_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
-    }
-
-    private static void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
-    {
-        if (Game1.currentLocation != null)
-            RecheckPanoramaBackground(Game1.currentLocation);
     }
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
