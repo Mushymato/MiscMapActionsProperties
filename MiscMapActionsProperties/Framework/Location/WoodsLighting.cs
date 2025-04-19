@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -29,7 +30,10 @@ internal static class WoodsLighting
         {
             Harmony.ReversePatch(
                 AccessTools.DeclaredMethod(typeof(Woods), "_updateWoodsLighting"),
-                new(typeof(WoodsLighting), nameof(Woods_updateWoodsLighting_RevesePatch)),
+                new(typeof(WoodsLighting), nameof(Woods_updateWoodsLighting_ReversePatch))
+                {
+                    reversePatchType = HarmonyReversePatchType.Original,
+                },
                 AccessTools.DeclaredMethod(
                     typeof(WoodsLighting),
                     nameof(Woods_updateWoodsLighting_RevesePatchTranspiler)
@@ -44,7 +48,17 @@ internal static class WoodsLighting
         }
     }
 
-    private static void Woods_updateWoodsLighting_RevesePatch(GameLocation location) => Console.WriteLine("No U");
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void Woods_updateWoodsLighting_ReversePatch(GameLocation location)
+    {
+        ModEntry.Log(
+            $"Woods_updateWoodsLighting_ReversePatch failed, deactivated {MapProp_WoodsLighting}",
+            LogLevel.Error
+        );
+        CommonPatch.GameLocation_UpdateWhenCurrentLocation -= GameLocation_UpdateWhenCurrentLocation_Postfix;
+        CommonPatch.GameLocation_resetLocalState -= GameLocation_resetLocalState_Postfix;
+        woodsLightingCtx.Value = null;
+    }
 
     private static IEnumerable<CodeInstruction> Woods_updateWoodsLighting_RevesePatchTranspiler(
         IEnumerable<CodeInstruction> instructions
@@ -83,7 +97,7 @@ internal static class WoodsLighting
                 return;
             }
             woodsLightingCtx.Value = new(_ambientLightColor);
-            Woods_updateWoodsLighting_RevesePatch(e.Location);
+            Woods_updateWoodsLighting_ReversePatch(e.Location);
             return;
         }
         woodsLightingCtx.Value = null;
@@ -97,7 +111,7 @@ internal static class WoodsLighting
         if (woodsLightingCtx.Value != null)
         {
             _ambientLightColor = woodsLightingCtx.Value.Color;
-            Woods_updateWoodsLighting_RevesePatch(e.Location);
+            Woods_updateWoodsLighting_ReversePatch(e.Location);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -31,13 +32,16 @@ internal static class LightRays
         {
             Harmony.ReversePatch(
                 AccessTools.DeclaredMethod(typeof(IslandForestLocation), nameof(IslandForestLocation.DrawRays)),
-                new(typeof(LightRays), nameof(IslandForestLocation_DrawRays_RevesePatch)),
+                new(typeof(LightRays), nameof(IslandForestLocation_DrawRays_ReversePatch))
+                {
+                    reversePatchType = HarmonyReversePatchType.Original,
+                },
                 AccessTools.DeclaredMethod(
                     typeof(LightRays),
                     nameof(IslandForestLocation_DrawRays_RevesePatchTranspiler)
                 )
             );
-            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep_World_AlwaysFront;
+            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
             CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
@@ -46,8 +50,17 @@ internal static class LightRays
         }
     }
 
-    private static void IslandForestLocation_DrawRays_RevesePatch(GameLocation location, SpriteBatch b) =>
-        Console.WriteLine("No U");
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void IslandForestLocation_DrawRays_ReversePatch(GameLocation location, SpriteBatch b)
+    {
+        ModEntry.Log(
+            $"IslandForestLocation_DrawRays_ReversePatch failed, deactivated {MapProp_LightRays}",
+            LogLevel.Error
+        );
+        ModEntry.help.Events.Display.RenderedStep -= OnRenderedStep;
+        CommonPatch.GameLocation_resetLocalState -= GameLocation_resetLocalState_Postfix;
+        lightRaysCtx.Value = null;
+    }
 
     private static IEnumerable<CodeInstruction> IslandForestLocation_DrawRays_RevesePatchTranspiler(
         IEnumerable<CodeInstruction> instructions
@@ -100,13 +113,13 @@ internal static class LightRays
         lightRaysCtx.Value = null;
     }
 
-    private static void OnRenderedStep_World_AlwaysFront(object? sender, RenderedStepEventArgs e)
+    private static void OnRenderedStep(object? sender, RenderedStepEventArgs e)
     {
-        if (lightRaysCtx.Value != null)
+        if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront && lightRaysCtx.Value != null)
         {
             _raySeed = lightRaysCtx.Value.Seed;
             _rayTexture = lightRaysCtx.Value.Texture;
-            IslandForestLocation_DrawRays_RevesePatch(Game1.currentLocation, e.SpriteBatch);
+            IslandForestLocation_DrawRays_ReversePatch(Game1.currentLocation, e.SpriteBatch);
             _raySeed = 0;
             _rayTexture = null!;
         }

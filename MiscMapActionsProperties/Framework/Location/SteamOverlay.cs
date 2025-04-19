@@ -68,7 +68,7 @@ internal static class SteamOverlay
         {
             CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
             CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Postfix;
-            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep_World_AlwaysFront;
+            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
         }
         catch (Exception err)
         {
@@ -122,7 +122,7 @@ internal static class SteamOverlay
         steamCtx.Value?.Update(e.Time);
     }
 
-    private static void OnRenderedStep_World_AlwaysFront(object? sender, RenderedStepEventArgs e)
+    private static void OnRenderedStep(object? sender, RenderedStepEventArgs e)
     {
         if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront)
         {
