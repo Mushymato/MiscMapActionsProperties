@@ -188,6 +188,10 @@
       "FromFile": "critters.json"
     },
     {
+      "Action": "Include",
+      "FromFile": "grass.json"
+    },
+    {
       "Action": "EditMap",
       "Target": "Maps/FarmHouse2_marriage",
       "MapProperties": {

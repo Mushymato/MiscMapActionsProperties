@@ -13,7 +13,7 @@ All map properties are also Data/Location custom fields. In the case where both 
 - For use in maps with map property IsGreenhouse T.
 - Make fruit trees use seasonal appearances even in greenhouse.
 
-#### mushymato.MMAP/HoeDirt.texture: \<texture\>
+#### mushymato.MMAP_HoeDirt: \<texture\>
 
 - For use in places with tillable soil, changes the appearance of tilled soil in that location.
 - Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay

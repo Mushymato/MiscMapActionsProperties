@@ -1,0 +1,16 @@
+{
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/inverted/grass",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Farm",
+      "MapProperties": {
+        "mushymato.MMAP_Grass": "{{ModId}}/inverted/grass TerrainFeatures/grass",
+      }
+    }
+  ]
+}
