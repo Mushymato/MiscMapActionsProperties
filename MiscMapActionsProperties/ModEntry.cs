@@ -29,7 +29,6 @@ public class ModEntry : Mod
         Framework.Buildings.DrawLayerExt.Register();
         Framework.Location.CribPosition.Register();
         Framework.Location.DayToNightTiming.Register();
-        // Framework.Location.ForestShortcutFix.Register();
         Framework.Location.FridgePosition.Register();
         Framework.Location.FruitTreeCosmeticSeason.Register();
         Framework.Location.GrassOverride.Register();

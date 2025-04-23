@@ -106,7 +106,9 @@ internal static class CommonPatch
             return false;
         if (
             (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
-            || (location.Map != null && location.TryGetMapProperty(propKey, out prop))
+            || (
+                location.Map != null && location.Map.Properties != null && location.TryGetMapProperty(propKey, out prop)
+            )
             || false
         )
             return !string.IsNullOrEmpty(prop);
