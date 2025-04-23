@@ -1,3 +1,4 @@
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -19,39 +20,22 @@ internal static class GrassOverride
 {
     internal static readonly string MapProp_GrassTexture = $"{ModEntry.ModId}_Grass";
     private static readonly PerScreen<List<Texture2D>?> grassTextureList = new();
-    internal static bool Active = true;
 
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
-        ModEntry.help.Events.GameLoop.SaveLoaded += OnGameLauched;
-        grassTextureList.Value = null;
-        Active = true;
-    }
-
-    private static void Teardown()
-    {
-        Game1.currentLocation.terrainFeatures.OnValueAdded -= ModifyGrassTexture;
-        ModEntry.help.Events.Player.Warped -= OnWarped;
+        ModEntry.help.Events.GameLoop.GameLaunched += OnGameLaunched;
         grassTextureList.Value = null;
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Grass_loadSprite_ReversePatch(Grass grass)
-    {
-        ModEntry.Log($"Grass_loadSprite_ReversePatch failed, deactivated {MapProp_GrassTexture}", LogLevel.Error);
-        Teardown();
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Grass_draw_ReversePatch(Grass grass, SpriteBatch spriteBatch)
-    {
-        ModEntry.Log($"Grass_draw_ReversePatch failed, deactivated {MapProp_GrassTexture}", LogLevel.Error);
-        Teardown();
-    }
-
-    private static void OnGameLauched(object? sender, EventArgs e)
+    /// <summary>
+    /// Horrorterror compatibility patch with MoreGrass
+    /// - Patching on Entry doesn't fly
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private static void OnGameLaunched(object? sender, EventArgs e)
     {
         if (ModEntry.help.ModRegistry.Get("EpicBellyFlop45.MoreGrass") is not IModInfo modInfo)
             return;
@@ -62,33 +46,18 @@ internal static class GrassOverride
                 var assembly = mod.GetType().Assembly;
                 if (assembly.GetType("MoreGrass.Patches.GrassPatch") is Type MoreGrass_Patches_GrassPatch)
                 {
-                    Harmony.ReversePatch(
-                        AccessTools.DeclaredMethod(typeof(Grass), nameof(Grass.loadSprite)),
-                        new(typeof(GrassOverride), nameof(Grass_loadSprite_ReversePatch))
-                        {
-                            reversePatchType = HarmonyReversePatchType.Original,
-                        }
-                    );
-                    Harmony.ReversePatch(
-                        AccessTools.DeclaredMethod(typeof(Grass), nameof(Grass.draw)),
-                        new(typeof(GrassOverride), nameof(Grass_draw_ReversePatch))
-                        {
-                            reversePatchType = HarmonyReversePatchType.Original,
-                        }
-                    );
-
                     ModEntry.harm.Patch(
                         original: AccessTools.DeclaredMethod(MoreGrass_Patches_GrassPatch, "LoadSpritePrefix"),
-                        prefix: new HarmonyMethod(
+                        transpiler: new HarmonyMethod(
                             typeof(GrassOverride),
-                            nameof(MoreGrass_Patches_GrassPatch_LoadSpritePrefix__Prefix)
+                            nameof(MoreGrass_Patches_GrassPatch_LoadSpritePrefix__Transpiler)
                         )
                     );
                     ModEntry.harm.Patch(
                         original: AccessTools.DeclaredMethod(MoreGrass_Patches_GrassPatch, "DrawPrefix"),
-                        prefix: new HarmonyMethod(
+                        transpiler: new HarmonyMethod(
                             typeof(GrassOverride),
-                            nameof(MoreGrass_Patches_GrassPatch_DrawPrefix__Prefix)
+                            nameof(MoreGrass_Patches_GrassPatch_DrawPrefix__Transpiler)
                         )
                     );
 
@@ -100,56 +69,74 @@ internal static class GrassOverride
         }
         catch (Exception ex)
         {
-            ModEntry.Log($"Failed to patch EpicBellyFlop45.MoreGrass::MoreGrass.Patches.GrassPatch.\n{ex}");
+            ModEntry.Log(
+                $"Failed to patch EpicBellyFlop45.MoreGrass::MoreGrass.Patches.GrassPatch, disabling {MapProp_GrassTexture}.\n{ex}"
+            );
+            ModEntry.help.Events.GameLoop.DayStarted -= OnDayStarted;
+            ModEntry.help.Events.Player.Warped -= OnWarped;
             return;
         }
     }
 
-    private static bool DoNotSkipMoreGrass(Grass grass)
+    private static bool ShouldSkipMoreGrass(Grass grass)
     {
         if (
-            !Active
+            !Context.IsWorldReady
             || grass == null
             || grass.Location == null
             || !CommonPatch.TryGetCustomFieldsOrMapProperty(grass.Location, MapProp_GrassTexture, out string? _)
         )
-            return true;
-        return false;
+            return false;
+        return true;
     }
 
-    private static bool MoreGrass_Patches_GrassPatch_LoadSpritePrefix__Prefix(object[] __args)
+    private static IEnumerable<CodeInstruction> MoreGrass_Patches_GrassPatch_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator,
+        OpCode grassLdarg
+    )
     {
         try
         {
-            Grass grass = (Grass)__args[0];
-            if (DoNotSkipMoreGrass(grass))
-                return true;
-            Grass_loadSprite_ReversePatch(grass);
-            return false;
+            CodeMatcher matcher = new(instructions, generator);
+            matcher
+                .Advance(1)
+                .CreateLabel(out Label lbl)
+                .Insert(
+                    [
+                        new(grassLdarg),
+                        new(
+                            OpCodes.Call,
+                            AccessTools.DeclaredMethod(typeof(GrassOverride), nameof(ShouldSkipMoreGrass))
+                        ),
+                        new(OpCodes.Brfalse_S, lbl),
+                        new(OpCodes.Ldc_I4_1),
+                        new(OpCodes.Ret),
+                    ]
+                );
+            return matcher.Instructions();
         }
-        catch
+        catch (Exception err)
         {
-            Teardown();
-            return true;
+            ModEntry.Log($"Error in MoreGrass_Patches_GrassPatch_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
         }
     }
 
-    private static bool MoreGrass_Patches_GrassPatch_DrawPrefix__Prefix(object[] __args)
+    private static IEnumerable<CodeInstruction> MoreGrass_Patches_GrassPatch_LoadSpritePrefix__Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
     {
-        try
-        {
-            Grass grass = (Grass)__args[1];
-            if (DoNotSkipMoreGrass(grass))
-                return true;
-            SpriteBatch spriteBatch = (SpriteBatch)__args[0];
-            Grass_draw_ReversePatch(grass, spriteBatch);
-            return false;
-        }
-        catch
-        {
-            Teardown();
-            return true;
-        }
+        return MoreGrass_Patches_GrassPatch_Transpiler(instructions, generator, OpCodes.Ldarg_0);
+    }
+
+    private static IEnumerable<CodeInstruction> MoreGrass_Patches_GrassPatch_DrawPrefix__Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        return MoreGrass_Patches_GrassPatch_Transpiler(instructions, generator, OpCodes.Ldarg_1);
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)

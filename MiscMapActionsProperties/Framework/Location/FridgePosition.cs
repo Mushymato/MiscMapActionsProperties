@@ -167,7 +167,7 @@ internal static class FridgePosition
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in FarmHouse_drawAboveFrontLayer_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
