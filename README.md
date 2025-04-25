@@ -77,6 +77,7 @@ There are 3 similar map properties for setting phases of day transitioning to ni
     - starting: 1800 spring summer island, 1700 fall, 1500 winter
     - moderate: halfway between starting and truly
     - truly: starting + 200
+- If you only set starting, the other two will be calculated according to vanilla logic.
 
 ### Tile Data
 
@@ -88,7 +89,7 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - 1 AnimalSpot tile will get 1 animal, 2 AnimalSpot next to each other means 2 animals get to start around that area.
 - The spawn point of the animal is based on their top left tile, for 2x2 tile animals it's best to put this tile prop top left of where you want them to go.
 
-#### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY]
+#### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext]
 
 - Add a light source at the center of this tile.
 - Radius controls size of light.
@@ -96,6 +97,10 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - Colors are inverted before being passed to light, so that "Red" will give red light.
 - type|texture is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use offsetX and offsetY to further adjust the position of the light.
+- lightContext is an enum, one of the following:
+    - `None`: Always on lighting
+    - `MapLight`: When under woods lighting (secret woods, island east, `mushymato.MMAP_WoodsLighting`), turn off these lights at night.
+    - `WindowLight`: Follows vanilla window light regarding rain and night time.
 - Works in building TileProperties too.
 
 #### Back Layer: mushymato.MMAP_TAS \<tasId\>+ <a name="mushymato.MMAP_TAS"></a>
@@ -103,8 +108,9 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - Add a temporary animated sprite at this tile.
 - The layer depth is based on the tile position.
 - The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
+- This can also be used as a tile/touch/trigger action, where the first 2 arguments are the tile coordinate followed by all the `tasId` (i.e. `mushymato.MMAP_TAS <X> <Y> \<tasId\>+`)
 
-#### Back Layer: mushymato.MMAP_Critter \<critterType\> [type dependent args]
+#### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+
 
 - Spawn a certain kind of simple critter on this tile.
 - Currently supports Firefly Seagull Crab
@@ -117,6 +123,10 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a texture, they need to have same number of frames as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.
+- This can also be used as:
+    - Building layer Action: spawns critter at this tile on interact
+    - Back layer TouchAction: spawns critter at this tile when player walks over
+    - TriggerAction: takes a coordinate as the first 2 arguments (i.e. `mushymato.MMAP_Critter <X> <Y> [\<critterType\> [type dependent args]]+`)
 
 ### Action
 

@@ -1,5 +1,4 @@
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -30,8 +29,7 @@ internal static class GrassOverride
     }
 
     /// <summary>
-    /// Horrorterror compatibility patch with MoreGrass
-    /// - Patching on Entry doesn't fly
+    /// Horrorterror compatibility patch with MoreGrass where I transpiler their skipping prefixes to make them not skip sometimes.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
