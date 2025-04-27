@@ -1,0 +1,12 @@
+{
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Backwoods",
+      "MapProperties": {
+        "mushymato.MMAP_ProtectTree": "Strings\\1_6_Strings:TownTreeWarning",
+        "mushymato.MMAP_ProtectFruitTree": "No U"
+      }
+    }
+  ]
+}

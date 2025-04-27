@@ -27,6 +27,7 @@ public class ModEntry : Mod
 
         Framework.Buildings.ChestLight.Register();
         Framework.Buildings.DrawLayerExt.Register();
+
         Framework.Location.CribPosition.Register();
         Framework.Location.DayToNightTiming.Register();
         Framework.Location.FridgePosition.Register();
@@ -36,8 +37,10 @@ public class ModEntry : Mod
         Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
         Framework.Location.Panorama.Register();
+        Framework.Location.ProtectTree.Register();
         Framework.Location.SteamOverlay.Register();
         Framework.Location.WoodsLighting.Register();
+
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.CritterSpot.Register();
         Framework.Tile.HoleWarp.Register();

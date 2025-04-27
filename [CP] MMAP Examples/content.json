@@ -192,6 +192,10 @@
       "FromFile": "grass.json"
     },
     {
+      "Action": "Include",
+      "FromFile": "protect_tree.json"
+    },
+    {
       "Action": "EditMap",
       "Target": "Maps/FarmHouse2_marriage",
       "MapProperties": {
