@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
@@ -152,39 +153,44 @@ internal sealed record TASContext(TASExt Def)
     }
 }
 
-internal static class TASAssetManager
+internal sealed class TASAssetManager
 {
-    internal static readonly string Asset_TAS = $"{ModEntry.ModId}/TAS";
-
-    internal static void Register()
+    private readonly string assetName;
+    internal TASAssetManager(IModHelper helper, string assetName)
     {
-        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
-        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        helper.Events.Content.AssetRequested += OnAssetRequested;
+        helper.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        this.assetName = assetName;
     }
 
-    private static Dictionary<string, TASExt>? _tasData = null;
-    internal static Dictionary<string, TASExt> TASData
+    private Dictionary<string, TASExt>? _tasData = null;
+    internal Dictionary<string, TASExt> TASData
     {
         get
         {
-            _tasData ??= Game1.content.Load<Dictionary<string, TASExt>>(Asset_TAS);
+            _tasData ??= Game1.content.Load<Dictionary<string, TASExt>>(assetName);
             return _tasData;
         }
     }
 
-    private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
+    private void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo(Asset_TAS))
+        if (e.Name.IsEquivalentTo(assetName))
             e.LoadFromModFile<Dictionary<string, TASExt>>("assets/tas.json", AssetLoadPriority.Exclusive);
     }
 
-    private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
+    private void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_TAS)))
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(assetName)))
             _tasData = null;
     }
 
-    public static IEnumerable<TASExt> GetTASExtList(IEnumerable<string> tasIds)
+    public bool TryGetTASExt(string tasId, [NotNullWhen(true)] out TASExt? tasExt)
+    {
+        return TASData.TryGetValue(tasId, out tasExt);
+    }
+
+    public IEnumerable<TASExt> GetTASExtList(IEnumerable<string> tasIds)
     {
         foreach (string tasId in tasIds)
         {

@@ -82,7 +82,7 @@ internal static class TASSpot
 
         pos *= Game1.tileSize;
         foreach (var tasKey in args.Skip(3))
-            if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
+            if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
             {
                 if (def.SpawnInterval <= 0)
                     onetime.Add(new(def) { Pos = pos });
@@ -133,7 +133,7 @@ internal static class TASSpot
         {
             foreach (var tasKey in tasKeyList)
             {
-                if (TASAssetManager.TASData.TryGetValue(tasKey, out TASExt? def))
+                if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
                 {
                     if (def.SpawnInterval <= 0)
                         onetime.Add(new(def) { Pos = pos * Game1.tileSize });

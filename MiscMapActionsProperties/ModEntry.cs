@@ -15,6 +15,7 @@ public class ModEntry : Mod
     internal static IManifest manifest = null!;
     internal static IModHelper help = null!;
     internal static Harmony harm = null!;
+    internal static Framework.Wheels.TASAssetManager TAS = null!;
 
     internal static string ModId => manifest?.UniqueID ?? "ERROR";
 
@@ -24,6 +25,9 @@ public class ModEntry : Mod
         manifest = ModManifest;
         help = helper;
         harm = new(ModId);
+
+        TAS = new(helper, $"{ModId}/TAS");
+        Framework.Wheels.CommonPatch.Register();
 
         Framework.Buildings.ChestLight.Register();
         Framework.Buildings.DrawLayerExt.Register();
@@ -48,9 +52,6 @@ public class ModEntry : Mod
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.TASSpot.Register();
-
-        Framework.Wheels.CommonPatch.Register();
-        Framework.Wheels.TASAssetManager.Register();
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

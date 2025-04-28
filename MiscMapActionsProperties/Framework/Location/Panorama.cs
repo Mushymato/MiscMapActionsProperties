@@ -297,7 +297,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
             {
                 if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
                     continue;
-                foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
+                foreach (TASExt tasExt in ModEntry.TAS.GetTASExtList(mwTAS.TAS))
                 {
                     respawningTAS.Add(new(mwTAS, new(tasExt) { Pos = Vector2.Zero }));
                 }
@@ -552,7 +552,7 @@ internal static class Panorama
                     {
                         if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
                             continue;
-                        foreach (TASExt tasExt in TASAssetManager.GetTASExtList(mwTAS.TAS))
+                        foreach (TASExt tasExt in ModEntry.TAS.GetTASExtList(mwTAS.TAS))
                         {
                             Panorama.SpawnTAS(mwTAS, new(tasExt) { Pos = Vector2.Zero }, width, height, false);
                         }
