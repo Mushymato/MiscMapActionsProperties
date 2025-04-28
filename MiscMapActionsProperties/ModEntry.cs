@@ -1,5 +1,6 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
 using HarmonyLib;
+using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 
 namespace MiscMapActionsProperties;
@@ -15,7 +16,7 @@ public class ModEntry : Mod
     internal static IManifest manifest = null!;
     internal static IModHelper help = null!;
     internal static Harmony harm = null!;
-    internal static Framework.Wheels.TASAssetManager TAS = null!;
+    internal static TASAssetManager TAS = null!;
 
     internal static string ModId => manifest?.UniqueID ?? "ERROR";
 

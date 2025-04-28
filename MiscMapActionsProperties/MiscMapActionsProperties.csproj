@@ -22,11 +22,10 @@
     <Dependencies_VersionBehavior>UpdateFull</Dependencies_VersionBehavior>
   </PropertyGroup>
 
-  <ItemGroup>
-    <SMAPIDependency Include="EpicBellyFlop45.MoreGrass" Required="false" />
-  </ItemGroup>
+  <Import Project="../ExtendedTAS/ExtendedTAS.projitems" Label="Shared" />
 
   <ItemGroup>
+    <SMAPIDependency Include="EpicBellyFlop45.MoreGrass" Required="false" />
   </ItemGroup>
 
   <ItemGroup>

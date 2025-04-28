@@ -57,10 +57,7 @@ internal static class ProtectTree
             }
             if (protectMessage != null)
             {
-                Game1.addHUDMessage(new HUDMessage(protectMessage)
-                {
-                    noIcon = true
-                });
+                Game1.addHUDMessage(new HUDMessage(protectMessage) { noIcon = true });
             }
         }
     }

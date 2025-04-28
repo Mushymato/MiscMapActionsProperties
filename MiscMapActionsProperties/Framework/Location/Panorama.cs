@@ -3,6 +3,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
+using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -11,6 +12,23 @@ using StardewValley.Extensions;
 using StardewValley.Locations;
 
 namespace MiscMapActionsProperties.Framework.Location;
+
+public sealed class MapWideTAS
+{
+    public string? IdImpl = null;
+    public string Id
+    {
+        get => IdImpl ??= string.Join('-', TAS);
+        set => IdImpl = value;
+    }
+    public string? Condition = null;
+    public List<string> TAS = [];
+    public int Count = 1;
+    public float XStart = 0f;
+    public float XEnd = 1f;
+    public float YStart = 0f;
+    public float YEnd = 1f;
+}
 
 public abstract class PanoramaSharedData
 {
