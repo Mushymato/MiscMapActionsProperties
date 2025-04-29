@@ -25,9 +25,13 @@
       ]
     },
     {
-      "Action": "Load",
-      "Target": "Mods/{{ModId}}/FarmCaveHoeDirt",
-      "FromFile": "assets/{{TargetWithoutPath}}.png"
+      "Action": "EditData",
+      "Target": "TerrainFeatures/hoeDirt",
+      "FromFile": "assets/FarmCaveHoeDirt.png",
+      "Update": "OnLocationChange",
+      "When": {
+        "LocationName": "FarmCave"
+      }
     },
     {
       "Action": "EditData",
@@ -69,10 +73,7 @@
         ],
         "MusicDefault": "Volcano_Ambient",
         "MinDailyWeeds": 0,
-        "MaxDailyWeeds": 0,
-        "CustomFields": {
-          "mushymato.MMAP_HoeDirt": "Mods/{{ModId}}/FarmCaveHoeDirt",
-        }
+        "MaxDailyWeeds": 0
       },
     },
     // Optional: Add farm cave to minecart network

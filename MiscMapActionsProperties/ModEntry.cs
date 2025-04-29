@@ -37,8 +37,6 @@ public class ModEntry : Mod
         Framework.Location.DayToNightTiming.Register();
         Framework.Location.FridgePosition.Register();
         Framework.Location.FruitTreeCosmeticSeason.Register();
-        Framework.Location.GrassOverride.Register();
-        Framework.Location.HoeDirtOverride.Register();
         Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
         Framework.Location.Panorama.Register();

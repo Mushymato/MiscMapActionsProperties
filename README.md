@@ -13,12 +13,6 @@ All map properties are also Data/Location custom fields. In the case where both 
 - For use in maps with map property IsGreenhouse T.
 - Make fruit trees use seasonal appearances even in greenhouse.
 
-#### mushymato.MMAP_HoeDirt: \<texture\>
-
-- For use in places with tillable soil, changes the appearance of tilled soil in that location.
-- Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
-- See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
-
 #### mushymato.MMAP_LightRays \<texture\>
 
 - Draws some light rays near top of map, identical logic to vanilla effect in island woods.
@@ -30,6 +24,9 @@ All map properties are also Data/Location custom fields. In the case where both 
 - Forces a certain ambiant lighting color, identical logic to vanilla lighting in the secret woods.
 - Colors are inverted, much like for light
 - Setting `T` gives the default color of #967832
+- **Note:** woods lighting causes map lights to turn off at night, this affects the `Light` map property and path layer lights. To keep your lights on at night, use [mushymato.MMAP_Light](#mushymato.MMAP_Light) with these arguments:
+    - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile, Back or Front layer.
+    - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile, Back or Front layer.
 
 #### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
 
@@ -89,7 +86,7 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - 1 AnimalSpot tile will get 1 animal, 2 AnimalSpot next to each other means 2 animals get to start around that area.
 - The spawn point of the animal is based on their top left tile, for 2x2 tile animals it's best to put this tile prop top left of where you want them to go.
 
-#### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext]
+#### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext] <a name="mushymato.MMAP_Light"></a>
 
 - Add a light source at the center of this tile.
 - Radius controls size of light.
@@ -243,3 +240,11 @@ If you need something from here ask me about it and I'll try to think of better 
 
 - For use in building maps.
 - Changes where the player arrives on entry, away from the default 1 tile above first warp.
+- DEPRECATED: no direct replacement exists, but this is rather niche to begin with.
+
+#### mushymato.MMAP_HoeDirt: \<texture\>
+
+- For use in places with tillable soil, changes the appearance of tilled soil in that location.
+- Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay
+- See `[CP] Vulkan Farm Cave` and `[PIF] Vulkan Cave` for example.
+- DEPRECATED: can use locational content patcher editimage for similar effect.
