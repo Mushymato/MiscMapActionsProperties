@@ -25,8 +25,8 @@ All map properties are also Data/Location custom fields. In the case where both 
 - Colors are inverted, much like for light
 - Setting `T` gives the default color of #967832
 - **Note:** woods lighting causes map lights to turn off at night, this affects the `Light` map property and path layer lights. To keep your lights on at night, use [mushymato.MMAP_Light](#mushymato.MMAP_Light) with these arguments:
-    - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile, Back or Front layer.
-    - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile, Back or Front layer.
+    - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile's TileData, Back or Front layer.
+    - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile's TileData, Back or Front layer.
 
 #### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
 

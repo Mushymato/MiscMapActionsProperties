@@ -66,6 +66,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
     public float Scale = 4f;
     public float Alpha = 1f;
     public Vector2 DrawOffset = Vector2.Zero;
+    public Vector2 PlayerPositionOffset = Vector2.Zero;
     public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
     public bool RepeatY = false;
@@ -146,9 +147,10 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     {
         int refWidth = Game1.viewport.Width;
         int refHeight = Game1.viewport.Height;
-        ModEntry.LogOnce(Data.DrawOffset.ToString());
-        float posX = Position.X + Data.DrawOffset.X + ScrollOffset.X;
-        float posY = Position.Y + Data.DrawOffset.Y + ScrollOffset.Y;
+        Vector2 playerPos = Game1.player.Position;
+        Vector2 posOffset = new(playerPos.X * Data.PlayerPositionOffset.X, playerPos.Y * Data.PlayerPositionOffset.Y);
+        float posX = Position.X + Data.DrawOffset.X + posOffset.X + ScrollOffset.X;
+        float posY = Position.Y + Data.DrawOffset.Y + posOffset.Y + ScrollOffset.Y;
         float i;
         float j;
         // repeat both, i.e. tile to fill screen
@@ -179,7 +181,7 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
             yield break;
         }
         // repeat only X or only Y or neither
-        yield return Position + Data.DrawOffset + ScrollOffset;
+        yield return Position + Data.DrawOffset + posOffset + ScrollOffset;
         if (Data.RepeatX)
         {
             for (i = posX - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)
