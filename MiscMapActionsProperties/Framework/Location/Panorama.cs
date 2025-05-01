@@ -50,6 +50,7 @@ public enum ParallaxAlignMode
 {
     Start,
     Middle,
+    Inverse,
     End,
 }
 
@@ -71,7 +72,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
     public bool RepeatX = false;
     public bool RepeatY = false;
     public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
-    public ParallaxAlignMode AlignY = ParallaxAlignMode.Middle;
+    public ParallaxAlignMode AlignY = ParallaxAlignMode.Inverse;
     public Vector2 Velocity = Vector2.Zero;
     public ShowDuringMode ShowDuring = ShowDuringMode.Any;
     public bool DrawInMapScreenshot = false;
@@ -120,6 +121,9 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
             case ParallaxAlignMode.Middle:
                 Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
                 break;
+            case ParallaxAlignMode.Inverse:
+                Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (viewport.Width - Data.ParallaxRate.X * ScaledWidth);
+                break;
             case ParallaxAlignMode.End:
                 Position.X = viewport.Width - ScaledWidth;
                 break;
@@ -132,6 +136,9 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
                 break;
             case ParallaxAlignMode.Middle:
                 Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
+                break;
+            case ParallaxAlignMode.Inverse:
+                Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (viewport.Height - Data.ParallaxRate.Y * ScaledHeight);
                 break;
             case ParallaxAlignMode.End:
                 Position.Y = viewport.Height - ScaledHeight;

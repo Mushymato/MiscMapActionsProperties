@@ -6,6 +6,11 @@
       "FromFile": "assets/{{TargetWithoutPath}}.tmx"
     },
     {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}/panorama_tall",
+      "FromFile": "assets/{{TargetWithoutPath}}.tmx"
+    },
+    {
       "Action": "EditData",
       "Target": "Data/Locations",
       "Entries": {
@@ -28,6 +33,21 @@
             "mushymato.MMAP_NightTimeStarting": "1100", // default 1800 spring summer island, 1700 fall, 1500 winter
             // "mushymato.MMAP_NightTimeModerate": "1200", // by not setting the moderate time, it will simply be half way between starting and truly times
             "mushymato.MMAP_NightTimeTruly": "1500" // default starting + 200
+          }
+        },
+        "panorama_tall": {
+          "DisplayName": "panorama_tall",
+          "DefaultArrivalTile": {
+            "X": 10,
+            "Y": 99
+          },
+          "CreateOnLoad": {
+            "MapPath": "Maps/{{ModId}}/panorama_tall",
+            "Type": null,
+            "AlwaysActive": false
+          },
+          "CustomFields": {
+            "mushymato.MMAP_Panorama": "MMAP_MountainView",
           }
         },
       }

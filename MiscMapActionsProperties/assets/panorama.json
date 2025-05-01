@@ -138,10 +138,9 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
+        "ParallaxRate": "2,2",
         "RepeatX": true,
-        "AlignY": "End",
-        "DrawOffset": "100,-250"
+        "DrawOffset": "100,1000"
       },
       {
         "Id": "MMAP_NormalNear",
