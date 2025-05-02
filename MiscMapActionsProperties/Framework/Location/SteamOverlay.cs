@@ -24,7 +24,7 @@ internal static class SteamOverlay
 
         internal void Update(GameTime time)
         {
-            Position -= Game1.getMostRecentViewportMotion();
+            Position = new(-Game1.viewport.X, -Game1.viewport.Y);
             Offset.X = (Offset.X + time.ElapsedGameTime.Milliseconds * Velocity.X) % ScaledWidth;
             Offset.Y = (Offset.Y + time.ElapsedGameTime.Milliseconds * Velocity.Y) % ScaledHeight;
         }
