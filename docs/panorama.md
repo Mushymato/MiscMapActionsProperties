@@ -68,7 +68,7 @@ This is the middle layers, parallax refers to how the background moves as player
 | `Scale` | float | 4 | Scale to draw at. |
 | `Alpha` | float | 1 | A number to multiply color by, 0.8 would make it 20% transparent. |
 | `DrawOffset` | Vector2 | 0,0 | Offset from the calculated position to draw at. |
-| `PlayerPositionOffset` | Vector2 | 0,0 | Similar to draw offset, but multiplied by on the player's pixel position in the current location (0,0 is top left). |
+| `DrawPercentOffset` | Vector2 | 0,0 | Similar to draw offset, but is instead a percent of the viewport, i.e. `0.1,-0.05` on a 1280x720 screen translates to `128,-36` draw offset. |
 | `ParallaxRate` | Vector2 | 1,1 | Rate to progress parallax, not quite a direct multiple, instead this is a multiplier on the size of parallax texture when used to calculate parallax against the screen size. |
 | `RepeatX` | bool | false | If true, repeat the texture horizontally. |
 | `RepeatY` | bool | false |  If true, repeat the texture vertically. |
