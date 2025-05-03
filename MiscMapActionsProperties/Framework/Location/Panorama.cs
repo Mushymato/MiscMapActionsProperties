@@ -49,8 +49,6 @@ public sealed class BackingData : PanoramaSharedData;
 public enum ParallaxAlignMode
 {
     Start,
-    Middle,
-    Inverse,
     End,
 }
 
@@ -66,13 +64,13 @@ public sealed class ParallaxLayerData : PanoramaSharedData
 {
     public float Scale = 4f;
     public float Alpha = 1f;
-    public Vector2 DrawOffset = Vector2.Zero;
-    public Vector2 DrawPercentOffset = Vector2.Zero;
-    public Vector2 ParallaxRate = Vector2.One;
     public bool RepeatX = false;
     public bool RepeatY = false;
-    public ParallaxAlignMode AlignX = ParallaxAlignMode.Middle;
-    public ParallaxAlignMode AlignY = ParallaxAlignMode.Inverse;
+    public ParallaxAlignMode AlignX = ParallaxAlignMode.Start;
+    public ParallaxAlignMode AlignY = ParallaxAlignMode.End;
+    public Vector2 DrawOffset = Vector2.Zero;
+    public Vector2 DrawPercentOffset = Vector2.Zero;
+    public Vector2 DrawViewportOffset = Vector2.Zero;
     public Vector2 Velocity = Vector2.Zero;
     public ShowDuringMode ShowDuring = ShowDuringMode.Any;
     public bool DrawInMapScreenshot = false;
@@ -112,38 +110,8 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
 
     internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, xTile.Layers.Layer layer)
     {
-        // csharpier-ignore
-        switch (Data.AlignX)
-        {
-            case ParallaxAlignMode.Start:
-                Position.X = 0f;
-                break;
-            case ParallaxAlignMode.Middle:
-                Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (Data.ParallaxRate.X * ScaledWidth - viewport.Width);
-                break;
-            case ParallaxAlignMode.Inverse:
-                Position.X = 0f - (viewport.X + viewport.Width / 2) / (layer.LayerWidth * 64f) * (viewport.Width - Data.ParallaxRate.X * ScaledWidth);
-                break;
-            case ParallaxAlignMode.End:
-                Position.X = viewport.Width - ScaledWidth;
-                break;
-        }
-        // csharpier-ignore
-        switch (Data.AlignY)
-        {
-            case ParallaxAlignMode.Start:
-                Position.Y = 0f;
-                break;
-            case ParallaxAlignMode.Middle:
-                Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (Data.ParallaxRate.Y * ScaledHeight - viewport.Height);
-                break;
-            case ParallaxAlignMode.Inverse:
-                Position.Y = 0f - (viewport.Y + viewport.Height / 2) / (layer.LayerHeight * 64f) * (viewport.Height - Data.ParallaxRate.Y * ScaledHeight);
-                break;
-            case ParallaxAlignMode.End:
-                Position.Y = viewport.Height - ScaledHeight;
-                break;
-        }
+        Position.X = Data.AlignX == ParallaxAlignMode.Start ? 0f : viewport.Width - ScaledWidth;
+        Position.Y = Data.AlignY == ParallaxAlignMode.Start ? 0f : viewport.Height - ScaledHeight;
 
         GameTime time = Game1.currentGameTime;
         ScrollOffset.X = (ScrollOffset.X + time.ElapsedGameTime.Milliseconds * Data.Velocity.X) % ScaledWidth;
@@ -154,9 +122,13 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     {
         int refWidth = Game1.viewport.Width;
         int refHeight = Game1.viewport.Height;
-        Vector2 vpOffset = new(refWidth * Data.DrawPercentOffset.X, refHeight * Data.DrawPercentOffset.Y);
-        float posX = Position.X + Data.DrawOffset.X + vpOffset.X + ScrollOffset.X;
-        float posY = Position.Y + Data.DrawOffset.Y + vpOffset.Y + ScrollOffset.Y;
+        Vector2 drawOffset =
+            new(
+                Data.DrawOffset.X + refWidth * Data.DrawPercentOffset.X + Game1.viewport.X * Data.DrawViewportOffset.X,
+                Data.DrawOffset.Y + refHeight * Data.DrawPercentOffset.Y + Game1.viewport.Y * Data.DrawViewportOffset.Y
+            );
+        float posX = Position.X + drawOffset.X + ScrollOffset.X;
+        float posY = Position.Y + drawOffset.Y + ScrollOffset.Y;
         float i;
         float j;
         // repeat both, i.e. tile to fill screen
@@ -187,7 +159,7 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
             yield break;
         }
         // repeat only X or only Y or neither
-        yield return Position + Data.DrawOffset + vpOffset + ScrollOffset;
+        yield return Position + drawOffset + ScrollOffset;
         if (Data.RepeatX)
         {
             for (i = posX - ScaledWidth; i > -ScaledWidth; i -= ScaledWidth)

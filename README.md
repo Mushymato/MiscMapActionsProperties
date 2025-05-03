@@ -117,6 +117,10 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - Birdies: [texture|<number>|T] [count]
     - The number option allows you to give a start index for `TileSheet/critters` which has birdies starting at 25, 45, 125, 135, 165, and 175.
     - When using T, the birdie start index will be picked with logic similar to base game.
+- Butterfly: [texture|<number>|T] [count]
+    - The number option allows you to give a start index for `TileSheet/critters` (WIP: figure out the indicies)
+    - When using texture, the bufferfly will follow summer butterfly rules (4 frames)
+    - When using T, the birdie start index will be picked base game logic.
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a texture, they need to have same number of frames as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.

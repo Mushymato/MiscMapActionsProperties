@@ -17,7 +17,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "Birdie T 4 Birdie 175 4 Birdie {{ModId}}/critters/birdie 4"
+            "mushymato.MMAP_Critter": "Birdie T 4 Birdie 175 4 BirdieStationary {{ModId}}/critters/birdie 4"
           }
         },
         {
@@ -37,7 +37,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "TouchAction": "mushymato.MMAP_Critter Firefly T 8"
+            "TouchAction": "mushymato.MMAP_Critter Firefly T 8 Butterfly T 4"
           }
         }
       ]

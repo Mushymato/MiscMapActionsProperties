@@ -45,7 +45,8 @@
           "Scale": 2,
           "RotationChange": 0.05,
           "LayerDepth": 0,
-          "SpawnDelay": 1000
+          "SpawnDelay": 1000,
+          "LightRadius": 4
         },
         "{{ModId}}_StarDrop": {
           "Id": "{{ModId}}_StarDrop",

@@ -18,6 +18,7 @@ internal enum SupportedCritter
     Seagull,
     Crab,
     Birdie,
+    Butterfly,
 }
 
 /// <summary>
@@ -26,6 +27,8 @@ internal enum SupportedCritter
 /// - Firefly: [color] [count]
 /// - Seagull: [texture|T] [count]
 /// - Crab: [texture|T] [count]
+/// - Birdies: [texture|<number>|T] [count]
+/// - Butterfly: [texture|<number>|T] [count]
 /// </summary>
 internal static class CritterSpot
 {
@@ -99,15 +102,16 @@ internal static class CritterSpot
             {
                 break;
             }
-            spawned =
-                critterKind switch
-                {
-                    SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, i + 1, out error),
-                    SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, i + 1, out error),
-                    SupportedCritter.Crab => SpawnCritterCrab(location, position, args, i + 1, out error),
-                    SupportedCritter.Birdie => SpawnCritterBirdie(location, position, args, i + 1, out error),
-                    _ => false,
-                } || spawned;
+            // csharpier-ignore
+            spawned = critterKind switch
+            {
+                SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, i + 1, out error),
+                SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, i + 1, out error),
+                SupportedCritter.Crab => SpawnCritterCrab(location, position, args, i + 1, out error),
+                SupportedCritter.Birdie => SpawnCritterBirdie(location, position, args, i + 1, out error),
+                SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, args, i + 1, out error),
+                _ => false,
+            } || spawned;
         }
         return spawned;
     }
@@ -314,6 +318,61 @@ internal static class CritterSpot
                 birdie.sprite.textureName.Value = texture;
             }
             location.addCritter(birdie);
+        }
+        return false;
+    }
+
+    private static bool SpawnCritterButterfly(
+        GameLocation location,
+        Vector2 position,
+        string[] args,
+        int firstIdx,
+        out string error
+    )
+    {
+        if (
+            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                firstIdx + 1,
+                out int count,
+                out error,
+                defaultValue: 1,
+                name: "int count"
+            )
+        )
+        {
+            return false;
+        }
+        int startingIndex = -1;
+        if (texture != null)
+        {
+            if (int.TryParse(texture, out startingIndex))
+            {
+                texture = null;
+            }
+            else if (texture != "T" && Game1.content.DoesAssetExist<Texture2D>(texture))
+            {
+                startingIndex = 0;
+            }
+            else
+            {
+                texture = null;
+                startingIndex = -1;
+            }
+        }
+        for (int i = 0; i < count; i++)
+        {
+            Butterfly butterfly = new(location, position, forceSummerButterfly: startingIndex != -1, baseFrameOverride: startingIndex);
+            butterfly.position += new Vector2(
+                Random.Shared.Next(0, Game1.tileSize),
+                Random.Shared.Next(0, Game1.tileSize)
+            );
+            if (texture != null)
+            {
+                butterfly.sprite.textureName.Value = texture;
+            }
+            location.addCritter(butterfly);
         }
         return false;
     }

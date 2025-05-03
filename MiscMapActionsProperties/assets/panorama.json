@@ -93,6 +93,7 @@
         },
         "RepeatX": true,
         "AlignY": "Start",
+        "DrawViewportOffset": "-0.1,0",
         "ShowDuring": "Night"
       },
       {
@@ -107,10 +108,10 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-250"
+        "DrawOffset": "100,-250",
+        "DrawViewportOffset": "-0.4,-0.01"
       },
       {
         "Id": "MMAP_RainNear",
@@ -122,9 +123,9 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
-        "AlignY": "End"
+        "AlignY": "End",
+        "DrawViewportOffset": "-0.5,0"
       },
       {
         "Id": "MMAP_NormalFar",
@@ -138,10 +139,10 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-250"
+        "DrawOffset": "100,-250",
+        "DrawViewportOffset": "-0.4,-0.01"
       },
       {
         "Id": "MMAP_NormalNear",
@@ -153,9 +154,9 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
-        "AlignY": "End"
+        "AlignY": "End",
+        "DrawViewportOffset": "-0.5,0"
       },
       {
         "Id": "MMAP_WinterFar",
@@ -169,10 +170,10 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
         "AlignY": "End",
-        "DrawOffset": "100,-250"
+        "DrawOffset": "100,-250",
+        "DrawViewportOffset": "-0.4,-0.01"
       },
       {
         "Id": "MMAP_WinterNear",
@@ -184,9 +185,9 @@
           "Width": 639,
           "Height": 148
         },
-        "ParallaxRate": "2,1",
         "RepeatX": true,
-        "AlignY": "End"
+        "AlignY": "End",
+        "DrawViewportOffset": "-0.5,0"
       }
     ],
     "OnetimeTAS": [
@@ -313,6 +314,7 @@
           "Height": 195
         },
         "RepeatX": true,
+        "DrawViewportOffset": "-0.1,0",
         "AlignY": "Start",
         "ShowDuring": "Night"
       }
@@ -325,7 +327,8 @@
         "Texture": "LooseSprites/Cloudy_Ocean_BG",
         "Scale": 3.0,
         "RepeatX": true,
-        "AlignY": "End",
+        "DrawViewportOffset": "-0.5,-0.01",
+        "AlignY": "Start",
         "ShowDuring": "Day"
       },
       {
@@ -333,7 +336,8 @@
         "Texture": "LooseSprites/Cloudy_Ocean_BG_Night",
         "Scale": 3.0,
         "RepeatX": true,
-        "AlignY": "End",
+        "DrawViewportOffset": "-0.5,-0.01",
+        "AlignY": "Start",
         "ShowDuring": "Night"
       }
     ]
