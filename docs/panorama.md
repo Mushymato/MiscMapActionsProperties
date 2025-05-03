@@ -67,11 +67,11 @@ This is the middle layers, parallax refers to how the background moves as player
 | `Color` | `Color` | _null_ | Color overlay to apply when drawing texture. |
 | `Scale` | float | 4 | Scale to draw at. |
 | `Alpha` | float | 1 | A number to multiply color by, 0.8 would make it 20% transparent. |
-| `AlignX` | ParallaxAlignMode | `"Middle"` | Forces the layer to align to the left of the viewport (`"Start"`), or right of viewport (`"End"`). Default `"Start"`. |
-| `AlignY` | ParallaxAlignMode | `"Middle"` | Forces the layer to align to the top of the viewport (`"Start"`), or bottom of viewport (`"End"`). Default `"End"`. |
+| `AlignX` | ParallaxAlignMode | `"Start"` | Forces the layer to align to the left of the viewport (`"Start"`), or right of viewport (`"End"`). |
+| `AlignY` | ParallaxAlignMode | `"End"` | Forces the layer to align to the top of the viewport (`"Start"`), or bottom of viewport (`"End"`). Default `"End"`. |
 | `DrawOffset` | Vector2 | 0,0 | Flat numeric draw offset from the aligned position. |
-| `DrawPercentOffset` | Vector2 | 0,0 | Similar to draw offset, but is instead a percent of the viewport, i.e. `0.1,-0.05` on a 1280x720 screen translates to `128,-36` draw offset. |
-| `DrawViewportOffset` | Vector2 | 0,0 | T |
+| `DrawPercentOffset` | Vector2 | 0,0 | Offset based on a percent of the viewport, i.e. `0.1,-0.05` on a 1280x720 screen translates to `128,-36` draw offset. |
+| `DrawViewportOffset` | Vector2 | 0,0 | Offset based on the viewport position, this is what implements parallax movement. |
 | `RepeatX` | bool | false | If true, repeat the texture horizontally. |
 | `RepeatY` | bool | false |  If true, repeat the texture vertically. |
 | `Velocity` | Vector2 | 0,0 | Moves the layer by this many pixels every tick to create a scrolling effect, best used with `RepeatX` or `RepeatY`. |
