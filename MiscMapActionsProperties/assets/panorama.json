@@ -146,7 +146,7 @@
       },
       {
         "Id": "MMAP_NormalNear",
-        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer",
+        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer Fall",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,

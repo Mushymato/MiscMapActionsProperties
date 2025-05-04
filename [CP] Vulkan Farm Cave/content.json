@@ -8,7 +8,11 @@
     "EnableConstructionMenu": {
       "AllowValues": "true, false",
       "Default": true,
-    }
+    },
+    "EnableConstructionAtRobins": {
+      "AllowValues": "true, false",
+      "Default": false,
+    },
   },
   "Changes": [
     // Location
@@ -23,15 +27,6 @@
       "AddWarps": [
         "8 12 Farm 34 6"
       ]
-    },
-    {
-      "Action": "EditData",
-      "Target": "TerrainFeatures/hoeDirt",
-      "FromFile": "assets/FarmCaveHoeDirt.png",
-      "Update": "OnLocationChange",
-      "When": {
-        "LocationName": "FarmCave"
-      }
     },
     {
       "Action": "EditData",

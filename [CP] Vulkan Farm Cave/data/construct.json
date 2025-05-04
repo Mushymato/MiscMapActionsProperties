@@ -4,8 +4,7 @@
       "Action": "EditMap",
       "Target": "Maps/FarmCave",
       "MapProperties": {
-        "CanBuildHere": "T",
-        "BuildConditions": "PLAYER_LOCATION_NAME Current FarmCave"
+        "CanBuildHere": "T"
       },
       "MapTiles": [
         {
@@ -32,5 +31,15 @@
         },
       ]
     },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/FarmCave",
+      "MapProperties": {
+        "BuildConditions": "PLAYER_LOCATION_NAME Current FarmCave"
+      },
+      "When": {
+        "EnableConstructionAtRobins": false
+      }
+    }
   ]
 }

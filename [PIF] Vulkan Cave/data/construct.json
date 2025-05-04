@@ -4,8 +4,7 @@
       "Action": "EditMap",
       "Target": "Mods/{{ModID}}/FarmCave",
       "MapProperties": {
-        "CanBuildHere": "T",
-        "BuildConditions": "LOCATION_HAS_CUSTOM_FIELD Here {{ModID}}"
+        "CanBuildHere": "T"
       },
       "MapTiles": [
         {
@@ -32,5 +31,15 @@
         },
       ]
     },
+    {
+      "Action": "EditMap",
+      "Target": "Mods/{{ModID}}/FarmCave",
+      "MapProperties": {
+        "BuildConditions": "LOCATION_HAS_CUSTOM_FIELD Here {{ModID}}"
+      },
+      "When": {
+        "EnableConstructionAtRobins": false
+      }
+    }
   ]
 }

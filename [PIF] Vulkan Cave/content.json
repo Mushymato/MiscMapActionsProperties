@@ -39,12 +39,6 @@
     },
     {
       "Action": "Load",
-      "Target": "Mods/{{ModId}}/FarmCaveHoeDirt",
-      "FromFile": "assets/{{TargetWithoutPath}}.png",
-      "Priority": "Low"
-    },
-    {
-      "Action": "Load",
       "Target": "Mods/{{ModID}}/FarmCavePreview",
       "FromFile": "assets/{{TargetWithoutPath}}.png"
     },
@@ -80,8 +74,7 @@
           "MinDailyWeeds": 0,
           "MaxDailyWeeds": 0,
           "CustomFields": {
-            "{{ModID}}": "T",
-            "mushymato.MMAP_HoeDirt": "Mods/{{ModId}}/FarmCaveHoeDirt"
+            "{{ModID}}": "T"
           },
         }
       }

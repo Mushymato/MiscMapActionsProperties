@@ -363,7 +363,8 @@ internal static class CritterSpot
         }
         for (int i = 0; i < count; i++)
         {
-            Butterfly butterfly = new(location, position, forceSummerButterfly: startingIndex != -1, baseFrameOverride: startingIndex);
+            Butterfly butterfly =
+                new(location, position, forceSummerButterfly: startingIndex != -1, baseFrameOverride: startingIndex);
             butterfly.position += new Vector2(
                 Random.Shared.Next(0, Game1.tileSize),
                 Random.Shared.Next(0, Game1.tileSize)

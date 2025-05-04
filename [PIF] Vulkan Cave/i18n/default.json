@@ -1,6 +1,10 @@
 {
+  "PIFCave.DisplayName": "Vulkan Cave",
+  "DimensionLadder.DisplayName": "Dimension Ladder - Pele",
   "config.EnableMinecart.name": "Minecart",
   "config.EnableMinecart.description": "Add PIF room minecart.",
-  "PIFCave.DisplayName": "Vulkan Cave",
-  "DimensionLadder.DisplayName": "Dimension Ladder - Pele"
+  "config.EnableConstructionMenu.name": "Construction Menu",
+  "config.EnableConstructionMenu.description": "Add an interactable chest that opens the carpenter menu for building in the farm cave. Requires MMAP (Nexus 28423).",
+  "config.EnableConstructionAtRobins.name": "General Construction",
+  "config.EnableConstructionAtRobins.description": "Allows construction from carpenter and wizard."
 }
