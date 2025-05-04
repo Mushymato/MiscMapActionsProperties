@@ -6,7 +6,7 @@
   "UniqueID": "mushymato.VulkanCave.PIF",
   "MinimumApiVersion": "4.0.0",
   "UpdateKeys": [
-    "Nexus:28445"
+    "Nexus:28445@PIFRoom"
   ],
   "ContentPackFor": {
     "UniqueID": "Pathoschild.ContentPatcher"
