@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,15 +6,12 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
-using StardewValley.GameData.Buildings;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
 internal static class CommonPatch
 {
-    public record ResetLocalStateArgs(GameLocation Location);
-
-    public static event EventHandler<ResetLocalStateArgs>? GameLocation_resetLocalState;
+    public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
 
     public record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
 
@@ -26,6 +22,12 @@ internal static class CommonPatch
     public record ApplyMapOverrideArgs(GameLocation Location, Rectangle DestRect);
 
     public static event EventHandler<ApplyMapOverrideArgs>? GameLocation_ApplyMapOverride;
+
+    public static event EventHandler<GameLocation>? GameLocation_ReloadMap;
+
+    public record OnBuildingMovedArgs(GameLocation Location, Building Building);
+
+    public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingMoved;
 
     internal static void Register()
     {
@@ -49,16 +51,34 @@ internal static class CommonPatch
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Prefix)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Finalizer))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
+            );
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch CommonPatch:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Failed to patch CommonPatch, this is a severe issue:\n{err}", LogLevel.Error);
         }
+    }
+
+    private static void GameLocation_OnBuildingMoved_Finalizer(GameLocation __instance, Building building)
+    {
+        GameLocation_OnBuildingMoved?.Invoke(null, new(__instance, building));
+    }
+
+    private static void GameLocation_reloadMap_Finalizer(GameLocation __instance)
+    {
+        GameLocation_ReloadMap?.Invoke(null, __instance);
     }
 
     private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
     {
-        GameLocation_resetLocalState?.Invoke(null, new(__instance));
+        GameLocation_resetLocalState?.Invoke(null, __instance);
     }
 
     private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance, GameTime time)
@@ -185,65 +205,20 @@ internal static class CommonPatch
         }
     }
 
-    internal static IEnumerable<ValueTuple<Vector2, MapTile>> IterateMapTilesInRect(
-        xTile.Map map,
-        string layerName,
-        Rectangle rect
-    )
+    internal static string[]? SimpleTilePropTransformer(string?[] propValues)
     {
-        xTile.Layers.Layer layer = map.RequireLayer(layerName);
-        for (int x = rect.X; x < rect.X + rect.Width; x++)
-        {
-            for (int y = rect.Y; y < rect.Y + rect.Height; y++)
-            {
-                Vector2 pos = new(x, y);
-                if (layer.Tiles[x, y] is not MapTile tile)
-                    continue;
-                yield return new(pos, tile);
-            }
-        }
+        if (propValues.Length != 1 || propValues[0] is not string propV)
+            return null;
+        return ArgUtility.SplitBySpaceQuoteAware(propV);
     }
 
-    internal static IEnumerable<ValueTuple<Vector2, BuildingTileProperty>> IterateBuildingTiles(
-        IEnumerable<Building> buildings,
-        string? layerName = null
-    )
+    private static bool SimpleTilePropComparer(string[]? props1, string[]? props2)
     {
-        foreach (Building building in buildings)
-        {
-            if (building.GetData() is not BuildingData data)
-                continue;
-
-            foreach (BuildingTileProperty btp in data.TileProperties)
-            {
-                if (btp.Layer != layerName)
-                    continue;
-                for (int i = 0; i < btp.TileArea.Width; i++)
-                {
-                    for (int j = 0; j < btp.TileArea.Height; j++)
-                    {
-                        yield return new(
-                            new(building.tileX.Value + btp.TileArea.X + i, building.tileY.Value + btp.TileArea.Y + j),
-                            btp
-                        );
-                    }
-                }
-            }
-        }
+        return props1 == props2;
     }
 
-    internal static string[]? SimplePropValueGetter(string propKey, MapTile tile)
+    internal static TileDataCache<string[]> GetSimpleTileDataCache(string[] propKeys, string layers)
     {
-        if (
-            tile.Properties.TryGetValue(propKey, out string propValue)
-            || tile.TileIndexProperties.TryGetValue(propKey, out propValue)
-        )
-        {
-            return ArgUtility.SplitBySpaceQuoteAware(propValue);
-        }
-        return null;
+        return new(propKeys, layers, SimpleTilePropTransformer, SimpleTilePropComparer);
     }
-
-    internal static TileDataCache<string[]> GetSimpleTileDataCache(string propKey, string[] layers) =>
-        new(propKey, layers, SimplePropValueGetter);
 }

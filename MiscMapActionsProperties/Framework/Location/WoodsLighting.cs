@@ -76,10 +76,10 @@ internal static class WoodsLighting
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
         if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(e.Location, MapProp_WoodsLighting, out string? colorValue)
+            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_WoodsLighting, out string? colorValue)
             && !string.IsNullOrWhiteSpace(colorValue)
         )
         {
@@ -97,7 +97,7 @@ internal static class WoodsLighting
                 return;
             }
             woodsLightingCtx.Value = new(_ambientLightColor);
-            Woods_updateWoodsLighting_ReversePatch(e.Location);
+            Woods_updateWoodsLighting_ReversePatch(location);
             return;
         }
         woodsLightingCtx.Value = null;

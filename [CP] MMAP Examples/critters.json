@@ -57,6 +57,28 @@
           }
         }
       ]
-    }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Well",
+        "TileProperties"
+      ],
+      "Entries": {
+        "{{ModId}}_Critter": {
+          "Id": "{{ModId}}_Critter",
+          "Name": "mushymato.MMAP_Critter",
+          "Value": "Butterfly T 4",
+          "Layer": "Back",
+          "TileArea": {
+            "X": 1,
+            "Y": 0,
+            "Width": 1,
+            "Height": 1
+          }
+        }
+      }
+    },
   ]
 }

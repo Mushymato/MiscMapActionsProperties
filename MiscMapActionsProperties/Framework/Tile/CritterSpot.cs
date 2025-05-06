@@ -3,7 +3,9 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Delegates;
@@ -34,8 +36,8 @@ internal static class CritterSpot
 {
     internal static readonly string TileProp_Critter = $"{ModEntry.ModId}_Critter";
     private static readonly TileDataCache<string[]> critterSpotsCache = CommonPatch.GetSimpleTileDataCache(
-        TileProp_Critter,
-        ["Back"]
+        [TileProp_Critter],
+        "Back"
     );
     private static readonly FieldInfo fireflyLight = AccessTools.DeclaredField(typeof(Firefly), "light");
     private static readonly FieldInfo crabSourceRectangle = AccessTools.DeclaredField(
@@ -43,12 +45,54 @@ internal static class CritterSpot
         "_baseSourceRectangle"
     );
 
+    internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new();
+
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
         CommonPatch.RegisterTileAndTouch(TileProp_Critter, TileAndTouchCritter);
         TriggerActionManager.RegisterAction(TileProp_Critter, TriggerActionCritter);
+
+        critterSpotsCache.TileDataCacheChanged += OnCacheChanged;
+    }
+
+    private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
+    {
+        GameLocation location = e.Item1;
+        if (location != Game1.currentLocation)
+            return;
+        if (location.critters == null)
+        {
+            SpawnLocationCritters(location);
+            return;
+        }
+        Dictionary<Point, List<Critter>> spawnedCritters = TileDataSpawnedCritters.Value;
+        if (e.Item2 == null)
+        {
+            foreach (List<Critter> critters in spawnedCritters.Values)
+                location.critters.RemoveAll(critters.Contains);
+            SpawnLocationCritters(location);
+            return;
+        }
+
+        Dictionary<Point, string[]> cacheEntry = critterSpotsCache.GetTileData(location);
+        foreach (Point pos in e.Item2)
+        {
+            if (spawnedCritters.TryGetValue(pos, out List<Critter>? critters))
+            {
+                location.critters.RemoveAll(critters.Contains);
+                spawnedCritters.Remove(pos);
+            }
+            if (cacheEntry.TryGetValue(pos, out string[]? props))
+            {
+                var spawned = SpawnCritter(location, pos, props, 0, out string _);
+                if (spawned.Count > 0)
+                {
+                    spawnedCritters[pos] = spawned;
+                }
+            }
+        }
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
@@ -60,32 +104,39 @@ internal static class CritterSpot
     {
         if (location == null)
             return;
-        foreach ((Vector2 pos, string[] props) in critterSpotsCache.GetProps(location.Map))
-            SpawnCritter(location, pos, props, 0, out string _);
+        TileDataSpawnedCritters.Value = [];
+        foreach ((Point pos, string[] props) in critterSpotsCache.GetTileData(location))
+        {
+            var spawned = SpawnCritter(location, pos, props, 0, out string _);
+            if (spawned.Count > 0)
+            {
+                TileDataSpawnedCritters.Value[pos] = spawned;
+            }
+        }
     }
 
     private static bool TriggerActionCritter(string[] args, TriggerActionContext context, out string error)
     {
-        if (!ArgUtility.TryGetVector2(args, 1, out Vector2 position, out error, integerOnly: true, "Vector2 position"))
+        if (!ArgUtility.TryGetPoint(args, 1, out Point position, out error, "Point position"))
             return false;
-        return SpawnCritter(Game1.currentLocation, position, args, 3, out error);
+        return SpawnCritter(Game1.currentLocation, position, args, 3, out error).Count > 0;
     }
 
     private static bool TileAndTouchCritter(GameLocation location, string[] args, Farmer farmer, Point source)
     {
-        return SpawnCritter(location, source.ToVector2(), args, 1, out _);
+        return SpawnCritter(location, source, args, 1, out _).Count > 0;
     }
 
-    private static bool SpawnCritter(
+    private static List<Critter> SpawnCritter(
         GameLocation location,
-        Vector2 position,
+        Point position,
         string[] args,
         int firstIdx,
         out string error
     )
     {
         error = "";
-        bool spawned = false;
+        List<Critter> spawned = [];
         location.instantiateCrittersList();
         for (int i = firstIdx; i <= args.Length - 3; i += 3)
         {
@@ -102,42 +153,45 @@ internal static class CritterSpot
             {
                 break;
             }
-            // csharpier-ignore
-            spawned = critterKind switch
+            if (
+                !ArgUtility.TryGetOptional(args, firstIdx + 1, out string? arg1, out error, name: "string arg1")
+                || !ArgUtility.TryGetOptionalInt(
+                    args,
+                    firstIdx + 2,
+                    out int count,
+                    out error,
+                    defaultValue: 1,
+                    name: "int count"
+                )
+            )
             {
-                SupportedCritter.Firefly => SpawnCritterFirefly(location, position, args, i + 1, out error),
-                SupportedCritter.Seagull => SpawnCritterSeagull(location, position, args, i + 1, out error),
-                SupportedCritter.Crab => SpawnCritterCrab(location, position, args, i + 1, out error),
-                SupportedCritter.Birdie => SpawnCritterBirdie(location, position, args, i + 1, out error),
-                SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, args, i + 1, out error),
-                _ => false,
-            } || spawned;
+                ModEntry.Log(error, LogLevel.Error);
+                break;
+            }
+            // csharpier-ignore
+            var spawnedThisTime = critterKind switch
+            {
+                SupportedCritter.Firefly => SpawnCritterFirefly(location, position, arg1, count),
+                SupportedCritter.Seagull => SpawnCritterSeagull(location, position, arg1, count),
+                SupportedCritter.Crab => SpawnCritterCrab(location, position, arg1, count),
+                SupportedCritter.Birdie => SpawnCritterBirdie(location, position, arg1, count),
+                SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, arg1, count),
+                _ => null,
+            };
+            if (spawnedThisTime != null)
+                spawned.AddRange(spawnedThisTime);
         }
+        location.critters.AddRange(spawned);
         return spawned;
     }
 
-    private static bool SpawnCritterFirefly(
+    private static IEnumerable<Critter> SpawnCritterFirefly(
         GameLocation location,
-        Vector2 position,
-        string[] args,
-        int firstIdx,
-        out string error
+        Point position,
+        string? color,
+        int count
     )
     {
-        if (
-            !ArgUtility.TryGetOptional(args, firstIdx, out string? color, out error, name: "string color")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                firstIdx + 1,
-                out int count,
-                out error,
-                defaultValue: 1,
-                name: "int count"
-            )
-        )
-        {
-            return false;
-        }
         Color? c = null;
         if (color != null && color != "T" && (c = Utility.StringToColor(color)) != null)
         {
@@ -145,39 +199,23 @@ internal static class CritterSpot
         }
         for (int i = 0; i < count; i++)
         {
-            Firefly firefly = new(position);
+            Firefly firefly = new(position.ToVector2());
             firefly.position.X += Random.Shared.Next(Game1.tileSize);
             firefly.position.Y += Random.Shared.Next(Game1.tileSize);
             firefly.startingPosition = firefly.position;
             if (c != null && fireflyLight.GetValue(firefly) is LightSource light)
                 light.color.Value = (Color)c;
-            location.addCritter(firefly);
+            yield return firefly;
         }
-        return true;
     }
 
-    private static bool SpawnCritterSeagull(
+    private static IEnumerable<Critter> SpawnCritterSeagull(
         GameLocation location,
-        Vector2 position,
-        string[] args,
-        int firstIdx,
-        out string error
+        Point position,
+        string? texture,
+        int count
     )
     {
-        if (
-            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                firstIdx + 1,
-                out int count,
-                out error,
-                defaultValue: 1,
-                name: "int count"
-            )
-        )
-        {
-            return false;
-        }
         if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
             texture = null;
         int startingState = 3;
@@ -190,46 +228,30 @@ internal static class CritterSpot
         {
             Seagull seagull =
                 new(
-                    position * Game1.tileSize
+                    position.ToVector2() * Game1.tileSize
                         + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize)),
                     startingState
                 );
             if (texture != null)
                 seagull.sprite.textureName.Value = texture;
-            location.addCritter(seagull);
+            yield return seagull;
         }
-        return false;
     }
 
-    private static bool SpawnCritterCrab(
+    private static IEnumerable<Critter> SpawnCritterCrab(
         GameLocation location,
-        Vector2 position,
-        string[] args,
-        int firstIdx,
-        out string error
+        Point position,
+        string? texture,
+        int count
     )
     {
-        if (
-            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                firstIdx + 1,
-                out int count,
-                out error,
-                defaultValue: 1,
-                name: "int count"
-            )
-        )
-        {
-            return false;
-        }
         if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
             texture = null;
         for (int i = 0; i < count; i++)
         {
             CrabCritter crab =
                 new(
-                    position * Game1.tileSize
+                    position.ToVector2() * Game1.tileSize
                         + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize))
                 );
             if (texture != null)
@@ -237,33 +259,17 @@ internal static class CritterSpot
                 crab.sprite.textureName.Value = texture;
                 crabSourceRectangle.SetValue(crab, new Rectangle(0, 0, 18, 18));
             }
-            location.addCritter(crab);
+            yield return crab;
         }
-        return false;
     }
 
-    private static bool SpawnCritterBirdie(
+    private static IEnumerable<Critter> SpawnCritterBirdie(
         GameLocation location,
-        Vector2 position,
-        string[] args,
-        int firstIdx,
-        out string error
+        Point position,
+        string? texture,
+        int count
     )
     {
-        if (
-            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                firstIdx + 1,
-                out int count,
-                out error,
-                defaultValue: 1,
-                name: "int count"
-            )
-        )
-        {
-            return false;
-        }
         int startingIndex = -1;
         if (texture != null)
         {
@@ -317,33 +323,17 @@ internal static class CritterSpot
             {
                 birdie.sprite.textureName.Value = texture;
             }
-            location.addCritter(birdie);
+            yield return birdie;
         }
-        return false;
     }
 
-    private static bool SpawnCritterButterfly(
+    private static IEnumerable<Critter> SpawnCritterButterfly(
         GameLocation location,
-        Vector2 position,
-        string[] args,
-        int firstIdx,
-        out string error
+        Point position,
+        string? texture,
+        int count
     )
     {
-        if (
-            !ArgUtility.TryGetOptional(args, firstIdx, out string? texture, out error, name: "string texture")
-            || !ArgUtility.TryGetOptionalInt(
-                args,
-                firstIdx + 1,
-                out int count,
-                out error,
-                defaultValue: 1,
-                name: "int count"
-            )
-        )
-        {
-            return false;
-        }
         int startingIndex = -1;
         if (texture != null)
         {
@@ -364,7 +354,12 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Butterfly butterfly =
-                new(location, position, forceSummerButterfly: startingIndex != -1, baseFrameOverride: startingIndex);
+                new(
+                    location,
+                    position.ToVector2(),
+                    forceSummerButterfly: startingIndex != -1,
+                    baseFrameOverride: startingIndex
+                );
             butterfly.position += new Vector2(
                 Random.Shared.Next(0, Game1.tileSize),
                 Random.Shared.Next(0, Game1.tileSize)
@@ -373,8 +368,7 @@ internal static class CritterSpot
             {
                 butterfly.sprite.textureName.Value = texture;
             }
-            location.addCritter(butterfly);
+            yield return butterfly;
         }
-        return false;
     }
 }

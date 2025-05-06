@@ -91,10 +91,10 @@ internal static class LightRays
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
         if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(e.Location, MapProp_LightRays, out string? rayTexture)
+            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_LightRays, out string? rayTexture)
             && !string.IsNullOrWhiteSpace(rayTexture)
         )
         {

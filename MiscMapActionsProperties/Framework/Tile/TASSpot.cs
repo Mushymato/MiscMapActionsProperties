@@ -18,8 +18,8 @@ internal static class TASSpot
 {
     internal static readonly string TileProp_TAS = $"{ModEntry.ModId}_TAS";
     private static readonly TileDataCache<string[]> tasSpotsCache = CommonPatch.GetSimpleTileDataCache(
-        TileProp_TAS,
-        ["Back"]
+        [TileProp_TAS],
+        "Back"
     );
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
 
@@ -47,7 +47,7 @@ internal static class TASSpot
 
     private static void EnterLocationTAS(GameLocation location)
     {
-        var tileTASs = CreateMapDefs(location.Map);
+        var tileTASs = CreateTASDefs(location);
         AddLocationTAS(location, tileTASs.Item1);
         respawningTASCache.Value = tileTASs.Item2;
         AddLocationTASRespawning(location, respawningTASCache.Value, Game1.currentGameTime);
@@ -126,20 +126,20 @@ internal static class TASSpot
         }
     }
 
-    private static ValueTuple<List<TASContext>, List<TASContext>> CreateMapDefs(xTile.Map map)
+    private static ValueTuple<List<TASContext>, List<TASContext>> CreateTASDefs(GameLocation location)
     {
         List<TASContext> onetime = [];
         List<TASContext> respawning = [];
-        foreach ((Vector2 pos, string[] tasKeyList) in tasSpotsCache.GetProps(map))
+        foreach ((Point pos, string[] tasKeyList) in tasSpotsCache.GetTileData(location))
         {
             foreach (var tasKey in tasKeyList)
             {
                 if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
                 {
                     if (def.SpawnInterval <= 0)
-                        onetime.Add(new(def) { Pos = pos * Game1.tileSize });
+                        onetime.Add(new(def) { Pos = pos.ToVector2() * Game1.tileSize });
                     else
-                        respawning.Add(new(def) { Pos = pos * Game1.tileSize });
+                        respawning.Add(new(def) { Pos = pos.ToVector2() * Game1.tileSize });
                 }
             }
         }

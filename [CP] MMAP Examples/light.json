@@ -1,0 +1,58 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 10,
+            "Y": 23
+          },
+          "SetTilesheet": "outdoors",
+          "SetIndex": 161,
+          "Layer": "Front",
+          "SetProperties": {
+            "mushymato.MMAP_Light": "4 White",
+            "mushymato.MMAP_LightCond": "RANDOM 0.5"
+          }
+        }
+      ]
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Well",
+        "TileProperties"
+      ],
+      "Entries": {
+        "{{ModId}}_Light": {
+          "Id": "{{ModId}}_Light",
+          "Name": "mushymato.MMAP_Light",
+          "Value": "4 Green Characters/Junimo",
+          "Layer": "Front",
+          "TileArea": {
+            "X": 1,
+            "Y": 1,
+            "Width": 1,
+            "Height": 1
+          }
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Mill",
+        "Metadata"
+      ],
+      "Entries": {
+        "mushymato.MMAP/ChestLight.Input": "1 Green 1 96 -96",
+        "mushymato.MMAP/ChestLight.Output": "1 Red 1 224 0"
+      }
+    }
+  ]
+}

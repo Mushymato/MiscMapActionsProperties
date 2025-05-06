@@ -93,6 +93,7 @@ internal static class DrawLayerExt
 
         try
         {
+            // map draws
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.draw)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
@@ -101,22 +102,30 @@ internal static class DrawLayerExt
                 }
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
-                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
-            );
-            ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.drawBackground)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
                 {
                     after = ["mouahrara.FlipBuildings"],
                 }
             );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch DrawLayerExt(core draw methods):\n{err}", LogLevel.Error);
+            return;
+        }
 
+        try
+        {
+            // method draws
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
+                transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
+            );
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_drawInMenu_Transpiler))
             );
-
             ModEntry.harm.Patch(
                 original: AccessTools.Method(
                     typeof(CarpenterMenu),
@@ -128,7 +137,7 @@ internal static class DrawLayerExt
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch DrawLayerRotate:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Failed to patch DrawLayerExt(nice to have draws):\n{err}", LogLevel.Warn);
         }
     }
 

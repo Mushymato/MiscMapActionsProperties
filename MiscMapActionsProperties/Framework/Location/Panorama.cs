@@ -526,9 +526,9 @@ internal static class Panorama
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
-        RecheckPanoramaBackground(e.Location);
+        RecheckPanoramaBackground(location);
     }
 
     private static void RecheckPanoramaBackground(GameLocation location)

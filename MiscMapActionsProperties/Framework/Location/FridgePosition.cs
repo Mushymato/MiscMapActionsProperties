@@ -51,9 +51,9 @@ internal static class FridgePosition
         }
     }
 
-    private static void GameLocation_resetLocalState_Postfix(object? sender, CommonPatch.ResetLocalStateArgs e)
+    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
-        if (e.Location is not FarmHouse farmHouse)
+        if (location is not FarmHouse farmHouse)
             return;
         if (
             CommonPatch.TryGetCustomFieldsOrMapProperty(farmHouse, MapProp_FridgeDoorSprite, out string? fridgeDoorProp)
