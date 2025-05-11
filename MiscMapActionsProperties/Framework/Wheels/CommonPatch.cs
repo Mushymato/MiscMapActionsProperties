@@ -11,6 +11,8 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 
 internal static class CommonPatch
 {
+    public static string Building_PreviousBounds => $"{ModEntry.ModId}/PreviousBounds";
+
     public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
 
     public record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
@@ -25,9 +27,9 @@ internal static class CommonPatch
 
     public static event EventHandler<GameLocation>? GameLocation_ReloadMap;
 
-    public record OnBuildingMovedArgs(GameLocation Location, Building Building);
+    public record OnBuildingMovedArgs(GameLocation Location, Building Building, Rectangle PreviousBounds);
 
-    public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingMoved;
+    public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
     internal static void Register()
     {
@@ -52,6 +54,10 @@ internal static class CommonPatch
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Finalizer))
             );
             ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.OnStartMove)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnStartMove_Prefix))
+            );
+            ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
             );
@@ -62,13 +68,53 @@ internal static class CommonPatch
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch CommonPatch, this is a severe issue:\n{err}", LogLevel.Error);
+            ModEntry.Log(
+                $"Failed to patch CommonPatch, this should be reported to the mod page:\n{err}",
+                LogLevel.Error
+            );
         }
+    }
+
+    private static void GameLocation_OnStartMove_Prefix(Building __instance)
+    {
+        __instance.modData[Building_PreviousBounds] =
+            $"{__instance.tileX.Value} {__instance.tileY.Value} {__instance.tilesWide.Value} {__instance.tilesHigh.Value}";
+    }
+
+    private static Rectangle GetBuildingPreviousBounds(Building building, bool withRadius)
+    {
+        if (building.modData.TryGetValue(Building_PreviousBounds, out string prevBoundsStr))
+        {
+            if (
+                ArgUtility.TryGetRectangle(
+                    ArgUtility.SplitBySpace(prevBoundsStr),
+                    0,
+                    out Rectangle prevBounds,
+                    out _,
+                    "string prevBoundsStr"
+                )
+            )
+            {
+                if (!withRadius)
+                    return prevBounds;
+                int radius = building.GetAdditionalTilePropertyRadius();
+                return new(
+                    prevBounds.X - radius,
+                    prevBounds.Y - radius,
+                    prevBounds.Width + radius,
+                    prevBounds.Height + radius
+                );
+            }
+        }
+        return Rectangle.Empty;
     }
 
     private static void GameLocation_OnBuildingMoved_Finalizer(GameLocation __instance, Building building)
     {
-        GameLocation_OnBuildingMoved?.Invoke(null, new(__instance, building));
+        GameLocation_OnBuildingEndMove?.Invoke(
+            null,
+            new(__instance, building, GetBuildingPreviousBounds(building, true))
+        );
     }
 
     private static void GameLocation_reloadMap_Finalizer(GameLocation __instance)

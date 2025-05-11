@@ -33,11 +33,23 @@ internal sealed class TileDataCache<TProps>
         this.propsValueTransformer = propsValueTransformer;
         this.propsValueComparer = propsValueComparer;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearCache;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
+        ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
-        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
+        // ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
         CommonPatch.GameLocation_ApplyMapOverride += OnApplyMapOverride;
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
-        CommonPatch.GameLocation_OnBuildingMoved += OnBuildingMoved;
+        CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
+    }
+
+    private void OnWarped(object? sender, WarpedEventArgs e) { }
+
+    private void OnDayStarted(object? sender, DayStartedEventArgs e)
+    {
+        if (Game1.currentLocation != null)
+        {
+            GetTileData(Game1.currentLocation);
+        }
     }
 
     private void ClearCache(object? sender, EventArgs e) => _cache.Clear();
@@ -87,18 +99,29 @@ internal sealed class TileDataCache<TProps>
             UpdateLocationTileData(e.Location, GetBuildingTileDataBounds(building), ref changedPoints);
         }
         if (changedPoints.Any())
-            TileDataCacheChanged?.Invoke(this, new(e.Location, changedPoints));
+        {
+            DelayedAction delayedAction = DelayedAction.functionAfterDelay(
+                () => TileDataCacheChanged?.Invoke(this, new(e.Location, changedPoints)),
+                1
+            );
+            delayedAction.waitUntilMenusGone = true;
+        }
     }
 
-    private void OnBuildingMoved(object? sender, CommonPatch.OnBuildingMovedArgs e)
+    private void OnBuildingEndMove(object? sender, CommonPatch.OnBuildingMovedArgs e)
     {
         if (!_cache.TryGetValue(e.Location, out _))
             return;
-        // hard to determine where building moved from, just gotta bonk the whole cache i guess :(
-        if (_cache.TryGetValue(e.Location, out _))
+        HashSet<Point> changedPoints = [];
+        UpdateLocationTileData(e.Location, e.PreviousBounds, ref changedPoints);
+        UpdateLocationTileData(e.Location, GetBuildingTileDataBounds(e.Building), ref changedPoints);
+        if (changedPoints.Any())
         {
-            _cache.Remove(e.Location);
-            TileDataCacheChanged?.Invoke(this, new(e.Location, null));
+            DelayedAction delayedAction = DelayedAction.functionAfterDelay(
+                () => TileDataCacheChanged?.Invoke(this, new(e.Location, changedPoints)),
+                1
+            );
+            delayedAction.waitUntilMenusGone = true;
         }
     }
 
@@ -143,7 +166,6 @@ internal sealed class TileDataCache<TProps>
         if (location.Map == null)
             return;
         Dictionary<Point, TProps> cacheEntry = _cache.GetValue(location, CreateLocationTileData);
-        ModEntry.Log($"UpdateLocationTileData START");
         for (int x = Math.Max(bounds.X, 0); x < Math.Min(bounds.X + bounds.Width, location.Map.DisplayWidth / 64); x++)
         {
             for (
@@ -153,7 +175,6 @@ internal sealed class TileDataCache<TProps>
             )
             {
                 Point pos = new(x, y);
-                ModEntry.Log($"UpdateLocationTileData: {pos}");
                 bool hasPrevious = cacheEntry.TryGetValue(pos, out TProps? previous);
                 if (
                     propsValueTransformer(
@@ -177,11 +198,6 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-    internal Dictionary<Point, TProps> GetTileData(GameLocation location)
-    {
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        var result = _cache.GetValue(location, CreateLocationTileData);
-        ModEntry.Log($"TileDataCache.GetTileData({location.NameOrUniqueName}): {stopwatch.Elapsed}");
-        return result;
-    }
+    internal Dictionary<Point, TProps> GetTileData(GameLocation location) =>
+        _cache.GetValue(location, CreateLocationTileData);
 }

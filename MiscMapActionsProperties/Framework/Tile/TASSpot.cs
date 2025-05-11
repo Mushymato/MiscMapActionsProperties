@@ -21,6 +21,7 @@ internal static class TASSpot
         [TileProp_TAS],
         "Back"
     );
+
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
 
     internal static void Register()
