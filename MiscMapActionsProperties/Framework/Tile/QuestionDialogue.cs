@@ -58,7 +58,7 @@ internal static class QuestionDialogue
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(Asset_QuestionDialogue))
-            e.LoadFrom(() => new Dictionary<string, QuestionDialogueData>(), AssetLoadPriority.Low);
+            e.LoadFrom(() => new Dictionary<string, QuestionDialogueData>(), AssetLoadPriority.Exclusive);
     }
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
