@@ -62,10 +62,17 @@ internal static class MapChangeRelocate
         {
             return false;
         }
-        GameLocation? gameLocation = null;
+        GameLocation? gameLocation;
         if (locationName != null)
-            gameLocation = Utility.fuzzyLocationSearch(locationName);
-        if ((gameLocation ??= Utility.getHomeOfFarmer(Game1.player)) == null)
+        {
+            if (locationName == "Cellar")
+                gameLocation = Utility.getHomeOfFarmer(Game1.player)?.GetCellar();
+            else
+                gameLocation = Utility.fuzzyLocationSearch(locationName);
+        }
+        else
+            gameLocation = Utility.getHomeOfFarmer(Game1.player);
+        if (gameLocation == null)
             return false;
         ModEntry.Log($"{args[0]}: {source} -> {target} ({area})");
         DoRelocate(gameLocation, source, target, area);

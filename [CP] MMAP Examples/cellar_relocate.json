@@ -1,0 +1,24 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/TriggerActions",
+      "Entries": {
+        // Move the cellar casks on house upgrade
+        "{{ModId}}_House2to3": {
+          "Id": "{{ModId}}_House2to3",
+          // when house upgrade=2, and about to upgrade
+          "Condition": "PLAYER_FARMHOUSE_UPGRADE Current 2 2",
+          "Trigger": "mushymato.MMAP_MoveObjectsForHouseUpgrade",
+          // as an example this moves the third row up to between row 1 and row 2
+          "Actions": [
+            // mushymato.MMAP_ShiftContents SourceX SourceY TargetX TargetY AreaWidth AreaHeight
+            "mushymato.MMAP_ShiftContents 6 12 6 9 11 1 Cellar"
+          ],
+          // only do this once
+          "MarkActionApplied": true
+        },
+      },
+    }
+  ]
+}
