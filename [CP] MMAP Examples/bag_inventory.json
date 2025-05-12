@@ -1,0 +1,20 @@
+{
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 14,
+            "Y": 26
+          },
+          "Layer": "Buildings",
+          "SetProperties": {
+            "Action": "mushymato.MMAP_ShowBag TestBag1"
+          }
+        }
+      ]
+    },
+  ]
+}

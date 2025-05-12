@@ -160,5 +160,9 @@
       "FromFile": "assets/{{TargetWithoutPath}}.tmx",
       "Priority": "Low"
     },
+    {
+      "Action": "Include",
+      "FromFile": "bag_inventory.json"
+    }
   ]
 }

@@ -51,6 +51,7 @@ public class ModEntry : Mod
         Framework.Tile.LightSpot.Register();
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
+        Framework.Tile.ShowGlobalInventory.Register();
         Framework.Tile.TASSpot.Register();
     }
 
