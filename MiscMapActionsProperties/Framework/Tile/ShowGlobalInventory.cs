@@ -15,8 +15,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class ShowGlobalInventory
 {
-    internal static readonly string TileAction_ShowBag = $"{ModEntry.ModId}_ShowBag";
-    private static readonly PerScreen<WeakReference<Chest?>> placeholderChest = new() { Value = new(null) };
+    internal const string TileAction_ShowBag = $"{ModEntry.ModId}_ShowBag";
 
     internal static void Register()
     {
@@ -31,34 +30,35 @@ internal static class ShowGlobalInventory
         return ShowBag(Game1.currentLocation, [.. args.Skip(2)], Game1.player, bagPoint);
     }
 
-    internal static string GetBagInventoryId(GameLocation location, string bagInvId)
+    internal static string GetBagInventoryId(string bagInvId)
     {
-        return string.Join('#', ModEntry.ModId, location.NameOrUniqueName, bagInvId);
-    }
-
-    private static Chest GetPlaceholderChest()
-    {
-        if (!placeholderChest.Value.TryGetTarget(out Chest? chest) || chest == null)
-        {
-            chest = new Chest(playerChest: true);
-        }
-        return chest;
+        return string.Join('#', ModEntry.ModId, bagInvId);
     }
 
     private static bool ShowBag(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!ArgUtility.TryGet(args, 1, out string bagInvId, out string error, allowBlank: false, "string bagInvId"))
+        if (
+            !ArgUtility.TryGet(args, 1, out string bagInvId, out string error, allowBlank: false, "string bagInvId")
+            || !ArgUtility.TryGetOptionalEnum(
+                args,
+                2,
+                out Chest.SpecialChestTypes bagInvType,
+                out error,
+                defaultValue: Chest.SpecialChestTypes.None,
+                "Chest.SpecialChestTypes bagInvType"
+            )
+        )
         {
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        Chest phChest = GetPlaceholderChest();
+        Chest phChest = new(playerChest: false);
 
         bool before = Game1.player.showChestColorPicker;
         Game1.player.showChestColorPicker = false;
 
-        phChest.GlobalInventoryId = GetBagInventoryId(location, bagInvId);
-        phChest.SpecialChestType = Chest.SpecialChestTypes.None;
+        phChest.GlobalInventoryId = GetBagInventoryId(bagInvId);
+        phChest.SpecialChestType = bagInvType;
         phChest
             .GetMutex()
             .RequestLock(() =>

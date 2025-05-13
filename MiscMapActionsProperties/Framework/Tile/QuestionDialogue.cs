@@ -17,8 +17,11 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class QuestionDialogue
 {
-    internal static readonly string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
-    internal static readonly string Asset_QuestionDialogue = $"{ModEntry.ModId}/QuestionDialogue";
+    internal const string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
+    internal static readonly IAssetName Asset_QuestionDialogue = ModEntry.help.GameContent.ParseAssetName(
+        $"{ModEntry.ModId}/QuestionDialogue"
+    );
+
     internal static readonly PerScreen<GameLocation.afterQuestionBehavior?> heldAfterQuestionBehavior = new();
 
     internal static void Register()
@@ -28,10 +31,17 @@ internal static class QuestionDialogue
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         CommonPatch.RegisterTileAndTouch(TileAction_QuestionDialogue, ShowQuestionDialogue);
         TriggerActionManager.RegisterAction(TileAction_QuestionDialogue, ShowQuestionDialogueAction);
-        ModEntry.harm.Patch(
-            original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.answerDialogue)),
-            postfix: new HarmonyMethod(typeof(QuestionDialogue), nameof(GameLocation_answerDialogue_Postfix))
-        );
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.answerDialogue)),
+                postfix: new HarmonyMethod(typeof(QuestionDialogue), nameof(GameLocation_answerDialogue_Postfix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureTileData:\n{err}", LogLevel.Error);
+        }
     }
 
     private static void GameLocation_answerDialogue_Postfix(GameLocation __instance)
@@ -50,7 +60,9 @@ internal static class QuestionDialogue
     {
         get
         {
-            _qdData ??= Game1.content.Load<Dictionary<string, QuestionDialogueData>>(Asset_QuestionDialogue);
+            _qdData ??= ModEntry.help.GameContent.Load<Dictionary<string, QuestionDialogueData>>(
+                Asset_QuestionDialogue
+            );
             return _qdData;
         }
     }

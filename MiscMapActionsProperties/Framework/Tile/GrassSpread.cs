@@ -11,7 +11,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class GrassSpread
 {
-    internal static readonly string TileProp_GrassSpread = $"{ModEntry.ModId}_GrassSpread";
+    internal const string TileProp_GrassSpread = $"{ModEntry.ModId}_GrassSpread";
 
     internal static void Register()
     {

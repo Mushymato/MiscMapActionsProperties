@@ -12,7 +12,7 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class FruitTreeCosmeticSeason
 {
-    internal static readonly string MapProp_FruitTreeCosmeticSeason = $"{ModEntry.ModId}_FruitTreeCosmeticSeason";
+    internal const string MapProp_FruitTreeCosmeticSeason = $"{ModEntry.ModId}_FruitTreeCosmeticSeason";
 
     internal static void Register()
     {

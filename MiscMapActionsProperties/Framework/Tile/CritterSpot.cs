@@ -34,7 +34,7 @@ internal enum SupportedCritter
 /// </summary>
 internal static class CritterSpot
 {
-    internal static readonly string TileProp_Critter = $"{ModEntry.ModId}_Critter";
+    internal const string TileProp_Critter = $"{ModEntry.ModId}_Critter";
     private static readonly TileDataCache<string[]> critterSpotsCache = CommonPatch.GetSimpleTileDataCache(
         [TileProp_Critter],
         "Back"
@@ -45,7 +45,7 @@ internal static class CritterSpot
         "_baseSourceRectangle"
     );
 
-    internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new();
+    internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new() { Value = [] };
 
     internal static void Register()
     {

@@ -59,7 +59,7 @@ internal static class SteamOverlay
         }
     }
 
-    internal static readonly string MapProp_SteamOverlay = $"{ModEntry.ModId}_SteamOverlay";
+    internal const string MapProp_SteamOverlay = $"{ModEntry.ModId}_SteamOverlay";
     private static readonly PerScreen<SteamCtx?> steamCtx = new();
 
     internal static void Register()

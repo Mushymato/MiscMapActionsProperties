@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Locations;
@@ -14,13 +15,13 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class MapChangeRelocate
 {
-    internal static readonly string MapProp_SkipMoveObjectsForHouseUpgrade =
-        $"{ModEntry.ModId}_SkipMoveObjectsForHouseUpgrade";
-    internal static readonly string Trigger_MoveObjectsForHouseUpgrade = $"{ModEntry.ModId}_MoveObjectsForHouseUpgrade";
-    internal static readonly string Action_ShiftContents = $"{ModEntry.ModId}_ShiftContents";
+    internal const string MapProp_SkipMoveObjectsForHouseUpgrade = $"{ModEntry.ModId}_SkipMoveObjectsForHouseUpgrade";
+    internal const string Trigger_MoveObjectsForHouseUpgrade = $"{ModEntry.ModId}_MoveObjectsForHouseUpgrade";
+    internal const string Action_ShiftContents = $"{ModEntry.ModId}_ShiftContents";
 
     internal static void Register()
     {
+        ModEntry.help.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
         TriggerActionManager.RegisterTrigger(Trigger_MoveObjectsForHouseUpgrade);
         TriggerActionManager.RegisterAction(Action_ShiftContents, MapChangeRelocateAction);
         try
@@ -39,6 +40,21 @@ internal static class MapChangeRelocate
         }
     }
 
+    private static void OnModMessageReceived(object? sender, ModMessageReceivedEventArgs e)
+    {
+        if (Context.IsMainPlayer && e.FromModID == ModEntry.ModId && e.Type == Action_ShiftContents)
+        {
+            string[] args = e.ReadAs<string[]>();
+            if (
+                Game1.GetPlayer(e.FromPlayerID) is Farmer farmhand
+                && !MapChangeRelocateAction(args, out string error, farmhand)
+            )
+            {
+                ModEntry.Log(error, LogLevel.Error);
+            }
+        }
+    }
+
     private static bool FarmHouse_moveObjectsForHouseUpgrade_Prefix(FarmHouse __instance)
     {
         TriggerActionManager.Raise(Trigger_MoveObjectsForHouseUpgrade);
@@ -54,6 +70,28 @@ internal static class MapChangeRelocate
     private static bool MapChangeRelocateAction(string[] args, TriggerActionContext context, out string error)
     {
         if (
+            !Context.IsMainPlayer
+            && (
+                !ArgUtility.TryGetOptional(args, 7, out string? locationName, out _, name: "string? locationName")
+                || locationName != Game1.player.homeLocation.Value
+            )
+        )
+        {
+            error = null!;
+            ModEntry.help.Multiplayer.SendMessage(
+                args,
+                Action_ShiftContents,
+                [ModEntry.ModId],
+                [Game1.serverHost.Value.UniqueMultiplayerID]
+            );
+            return true;
+        }
+        return MapChangeRelocateAction(args, out error, Game1.player);
+    }
+
+    private static bool MapChangeRelocateAction(string[] args, out string error, Farmer farmer)
+    {
+        if (
             !ArgUtility.TryGetPoint(args, 1, out Point source, out error, name: "Point source")
             || !ArgUtility.TryGetPoint(args, 3, out Point target, out error, name: "Point target")
             || !ArgUtility.TryGetPoint(args, 5, out Point area, out error, name: "Point area")
@@ -65,24 +103,23 @@ internal static class MapChangeRelocate
         GameLocation? gameLocation;
         if (locationName != null)
         {
-            if (locationName == "Cellar")
-                gameLocation = Utility.getHomeOfFarmer(Game1.player)?.GetCellar();
+            if (locationName == "Here")
+                gameLocation = Game1.currentLocation;
+            else if (locationName == "Cellar")
+                gameLocation = Utility.getHomeOfFarmer(farmer)?.GetCellar();
             else
                 gameLocation = Utility.fuzzyLocationSearch(locationName);
         }
         else
-            gameLocation = Utility.getHomeOfFarmer(Game1.player);
+            gameLocation = Utility.getHomeOfFarmer(farmer);
         if (gameLocation == null)
             return false;
-        ModEntry.Log($"{args[0]}: {source} -> {target} ({area})");
-        DoRelocate(gameLocation, source, target, area);
-        return true;
-    }
+        ModEntry.Log($"{gameLocation.NameOrUniqueName}: {source} -> {target} ({area})");
 
-    private static void DoRelocate(GameLocation location, Point source, Point target, Point area)
-    {
         Point delta = target - source;
         Rectangle bounds = new(source.X, source.Y, area.X, area.Y);
-        location.shiftContents(delta.X, delta.Y, (tile, obj) => bounds.Contains(tile));
+        gameLocation.shiftContents(delta.X, delta.Y, (tile, obj) => bounds.Contains(tile));
+
+        return true;
     }
 }

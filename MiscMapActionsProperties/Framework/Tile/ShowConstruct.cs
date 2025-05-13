@@ -17,8 +17,8 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class ShowConstruct
 {
-    internal static readonly string TileAction_ShowConstruct = $"{ModEntry.ModId}_ShowConstruct";
-    internal static readonly string TileAction_ShowConstructForCurrent = $"{ModEntry.ModId}_ShowConstructForCurrent";
+    internal const string TileAction_ShowConstruct = $"{ModEntry.ModId}_ShowConstruct";
+    internal const string TileAction_ShowConstructForCurrent = $"{ModEntry.ModId}_ShowConstructForCurrent";
 
     internal static void Register()
     {

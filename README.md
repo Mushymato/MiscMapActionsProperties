@@ -232,7 +232,9 @@ This trigger action shifts things on map from one area to another area of the sa
 - `SourceX`, `SourceY`: This is the top left corner of the area to move, on the previous level
 - `TargetY`, `TargetX`: This is the top left corner of the area to move to, on the new level
 - `AreaWidth`, `AreaHeight`: This is the size of the area to move.
-- `locationName`: This is the (optional) location name. It defaults to the player's farmhouse and only need to be provided if you want to use this action on a different location.
+- `locationName`: This is the (optional) location name. It defaults to the player's farmhouse and only need to be provided if you want to use this action on a different location. There are 2 special values:
+    - `Here`: use current location
+    - `Cellar`: use assigned cellar (though this seems oddly unreliable)
 
 ## DEPRECATED
 

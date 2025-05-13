@@ -18,8 +18,8 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class ProtectTree
 {
-    internal static readonly string MapProp_ProtectTree = $"{ModEntry.ModId}_ProtectTree";
-    internal static readonly string MapProp_ProtectFruitTree = $"{ModEntry.ModId}_ProtectFruitTree";
+    internal const string MapProp_ProtectTree = $"{ModEntry.ModId}_ProtectTree";
+    internal const string MapProp_ProtectFruitTree = $"{ModEntry.ModId}_ProtectFruitTree";
 
     internal static void Register()
     {

@@ -18,7 +18,7 @@ public class ModEntry : Mod
     internal static Harmony harm = null!;
     internal static TASAssetManager TAS = null!;
 
-    internal static string ModId => manifest?.UniqueID ?? "ERROR";
+    internal const string ModId = "mushymato.MMAP";
 
     public override void Entry(IModHelper helper)
     {
@@ -46,6 +46,7 @@ public class ModEntry : Mod
 
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.CritterSpot.Register();
+        Framework.Tile.FurnitureProperty.Register();
         Framework.Tile.GrassSpread.Register();
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Register();

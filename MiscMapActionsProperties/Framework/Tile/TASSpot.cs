@@ -16,12 +16,15 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class TASSpot
 {
-    internal static readonly string TileProp_TAS = $"{ModEntry.ModId}_TAS";
+    internal const string TileProp_TAS = $"{ModEntry.ModId}_TAS";
     private static readonly TileDataCache<string[]> tasSpotsCache = CommonPatch.GetSimpleTileDataCache(
         [TileProp_TAS],
         "Back"
     );
 
+    private record LocationTASDefs(List<TASContext> Onetime, List<TASContext> Respawning);
+
+    private static readonly PerScreen<LocationTASDefs?> locationTASDefs = new();
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
 
     internal static void Register()
@@ -34,6 +37,20 @@ internal static class TASSpot
         );
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
+
+        tasSpotsCache.TileDataCacheChanged += OnCacheChanged;
+    }
+
+    private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
+    {
+        if (e.Item1 != Game1.currentLocation || locationTASDefs.Value == null)
+            return;
+
+        foreach (TASContext ctx in locationTASDefs.Value.Onetime.Concat(locationTASDefs.Value.Respawning))
+        {
+            ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+        }
+        EnterLocationTAS(Game1.currentLocation);
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -48,9 +65,9 @@ internal static class TASSpot
 
     private static void EnterLocationTAS(GameLocation location)
     {
-        var tileTASs = CreateTASDefs(location);
-        AddLocationTAS(location, tileTASs.Item1);
-        respawningTASCache.Value = tileTASs.Item2;
+        locationTASDefs.Value = CreateTASDefs(location);
+        AddLocationTAS(location, locationTASDefs.Value.Onetime);
+        respawningTASCache.Value = [.. locationTASDefs.Value.Respawning];
         AddLocationTASRespawning(location, respawningTASCache.Value, Game1.currentGameTime);
     }
 
@@ -127,7 +144,7 @@ internal static class TASSpot
         }
     }
 
-    private static ValueTuple<List<TASContext>, List<TASContext>> CreateTASDefs(GameLocation location)
+    private static LocationTASDefs CreateTASDefs(GameLocation location)
     {
         List<TASContext> onetime = [];
         List<TASContext> respawning = [];

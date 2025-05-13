@@ -20,7 +20,7 @@ internal static class WoodsLighting
 {
     internal sealed record WoodsLightingCtx(Color Color);
 
-    internal static readonly string MapProp_WoodsLighting = $"{ModEntry.ModId}_WoodsLighting";
+    internal const string MapProp_WoodsLighting = $"{ModEntry.ModId}_WoodsLighting";
     private static readonly PerScreen<WoodsLightingCtx?> woodsLightingCtx = new();
     private static Color _ambientLightColor = Color.White;
 

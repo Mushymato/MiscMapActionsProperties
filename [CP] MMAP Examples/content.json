@@ -142,6 +142,10 @@
       "FromFile": "protect_tree.json"
     },
     {
+      "Action": "Include",
+      "FromFile": "furniture_tile_property.json"
+    },
+    {
       "Action": "EditMap",
       "Target": "Maps/FarmHouse2_marriage",
       "MapProperties": {

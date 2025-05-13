@@ -1,0 +1,79 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperty",
+      "Entries": {
+        "LargeJojaRug": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-TouchAction-mushymato.MMAP_Critter",
+              "Name": "TouchAction",
+              "Value": "mushymato.MMAP_Critter Firefly T 8 Butterfly T 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 3
+              }
+            }
+          ],
+        },
+        "SmallJojaRug": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_Critter",
+              "Name": "mushymato.MMAP_Critter",
+              "Value": "Crab T 1",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 1
+              }
+            }
+          ],
+        },
+        "JojaColaFridge": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_ShowBag",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_ShowBag JojaColaFridge",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 2,
+                "Height": 2
+              }
+            }
+          ],
+        },
+        "WizardDresser": {
+          "CollisionMap": "XO\nOO"
+        },
+        "Cauldron": {
+          "AdditionalTilePropertyRadius": 1,
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_TAS",
+              "Name": "mushymato.MMAP_TAS",
+              "Value": "{{ModId}}_CauldronSmoke",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": -1,
+                "Width": 2,
+                "Height": 1
+              }
+            }
+          ],
+        }
+      },
+    }
+  ]
+}

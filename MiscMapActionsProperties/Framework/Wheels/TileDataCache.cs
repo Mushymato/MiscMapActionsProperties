@@ -33,49 +33,53 @@ internal sealed class TileDataCache<TProps>
         this.propsValueTransformer = propsValueTransformer;
         this.propsValueComparer = propsValueComparer;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearCache;
-        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
+        ModEntry.help.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
-        // ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
         CommonPatch.GameLocation_ApplyMapOverride += OnApplyMapOverride;
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
     }
 
-    private void OnWarped(object? sender, WarpedEventArgs e) { }
-
-    private void OnDayStarted(object? sender, DayStartedEventArgs e)
+    private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
     {
-        if (Game1.currentLocation != null)
-        {
-            GetTileData(Game1.currentLocation);
-        }
+        SetFurnitureChanged(Game1.currentLocation);
+    }
+
+    private void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        ClearFurnitureChanged(e.OldLocation);
+        SetFurnitureChanged(e.NewLocation);
+    }
+
+    private void SetFurnitureChanged(GameLocation location)
+    {
+        if (location == null)
+            return;
+        location.furniture.OnValueAdded += OnFurnitureChanged;
+        location.furniture.OnValueRemoved += OnFurnitureChanged;
+    }
+
+    private void ClearFurnitureChanged(GameLocation location)
+    {
+        if (location == null)
+            return;
+        location.furniture.OnValueAdded -= OnFurnitureChanged;
+        location.furniture.OnValueRemoved -= OnFurnitureChanged;
     }
 
     private void ClearCache(object? sender, EventArgs e) => _cache.Clear();
 
-    private static Rectangle GetFurnitureTileDataBounds(Furniture furniture)
+    private void OnFurnitureChanged(Furniture furniture)
     {
-        int radius = furniture.GetAdditionalTilePropertyRadius();
-        return new(
-            (int)furniture.TileLocation.X - radius,
-            (int)furniture.TileLocation.Y - radius,
-            furniture.getTilesWide() + radius,
-            furniture.getTilesHigh() + radius
-        );
-    }
-
-    private void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
-    {
-        if (!_cache.TryGetValue(e.Location, out _))
-            return;
         HashSet<Point> changedPoints = [];
-        foreach (Furniture furniture in e.Removed.Concat(e.Added))
-        {
-            UpdateLocationTileData(e.Location, GetFurnitureTileDataBounds(furniture), ref changedPoints);
-        }
+        UpdateLocationTileData(
+            furniture.Location,
+            CommonPatch.GetFurnitureTileDataBounds(furniture),
+            ref changedPoints
+        );
         if (changedPoints.Any())
-            TileDataCacheChanged?.Invoke(this, new(e.Location, changedPoints));
+            TileDataCacheChanged?.Invoke(this, new(furniture.Location, changedPoints));
     }
 
     private static Rectangle GetBuildingTileDataBounds(Building building)

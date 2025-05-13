@@ -13,7 +13,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class AnimalSpot
 {
-    internal static readonly string TileProp_AnimalSpot = $"{ModEntry.ModId}_AnimalSpot";
+    internal const string TileProp_AnimalSpot = $"{ModEntry.ModId}_AnimalSpot";
     private static readonly ConditionalWeakTable<xTile.Map, List<Vector2>> animalSpotsCache = [];
 
     internal static void Register()

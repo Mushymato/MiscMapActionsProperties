@@ -21,7 +21,7 @@ internal static class LightRays
 {
     internal sealed record LightRaysCtx(int Seed, Texture2D Texture);
 
-    internal static readonly string MapProp_LightRays = $"{ModEntry.ModId}_LightRays";
+    internal const string MapProp_LightRays = $"{ModEntry.ModId}_LightRays";
     private static readonly PerScreen<LightRaysCtx?> lightRaysCtx = new();
     private static int _raySeed = 0;
     private static Texture2D _rayTexture = null!;

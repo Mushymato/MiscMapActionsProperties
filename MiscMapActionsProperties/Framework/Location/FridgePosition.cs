@@ -22,8 +22,8 @@ internal static class FridgePosition
 {
     internal record FridgeDoorSprite(Texture2D? Texture, Vector2 Offset);
 
-    internal static readonly string MapProp_FridgePosition = $"{ModEntry.ModId}_FridgePosition";
-    internal static readonly string MapProp_FridgeDoorSprite = $"{ModEntry.ModId}_FridgeDoorSprite";
+    internal const string MapProp_FridgePosition = $"{ModEntry.ModId}_FridgePosition";
+    internal const string MapProp_FridgeDoorSprite = $"{ModEntry.ModId}_FridgeDoorSprite";
     internal static readonly Vector2 ChildOffset = new Vector2(1f, 2f) * Game1.tileSize;
     internal static PerScreen<FridgeDoorSprite?> DoorSprite = new();
 

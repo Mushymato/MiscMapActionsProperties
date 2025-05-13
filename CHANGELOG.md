@@ -4,10 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0]
+
+### Changed
+- Some implementation details around tile data cache
+- mushymato.MMAP_ShiftContents now runs on the host to avoid ghost location issues
+    - but "Cellar" 
+
+### Added
+- New tile action/trigger action mushymato.MMAP_ShowBag, opens a global inventory
+- New furniture properties system that allows (some) tile properties to take effect for furniture
+
 ## [1.6.0]
 
 ### Removed
-
 - mushymato.MMAP_HoeDirt is removed due to strange visual bugs.
 
 ### Changed

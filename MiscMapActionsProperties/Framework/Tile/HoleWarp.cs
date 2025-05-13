@@ -14,7 +14,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class HoleWarp
 {
-    internal static readonly string TileAction_HoleWarp = $"{ModEntry.ModId}_HoleWarp";
+    internal const string TileAction_HoleWarp = $"{ModEntry.ModId}_HoleWarp";
 
     internal static void Register() => CommonPatch.RegisterTileAndTouch(TileAction_HoleWarp, DoHoleWarp);
 

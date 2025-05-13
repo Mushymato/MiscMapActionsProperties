@@ -13,9 +13,9 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class DayToNightTiming
 {
-    internal static readonly string MapProp_NightTimeStarting = $"{ModEntry.ModId}_NightTimeStarting";
-    internal static readonly string MapProp_NightTimeModerate = $"{ModEntry.ModId}_NightTimeModerate";
-    internal static readonly string MapProp_NightTimeTruly = $"{ModEntry.ModId}_NightTimeTruly";
+    internal const string MapProp_NightTimeStarting = $"{ModEntry.ModId}_NightTimeStarting";
+    internal const string MapProp_NightTimeModerate = $"{ModEntry.ModId}_NightTimeModerate";
+    internal const string MapProp_NightTimeTruly = $"{ModEntry.ModId}_NightTimeTruly";
 
     internal static void Register()
     {

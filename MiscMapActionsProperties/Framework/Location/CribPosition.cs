@@ -15,7 +15,7 @@ namespace MiscMapActionsProperties.Framework.Location;
 /// </summary>
 internal static class CribPosition
 {
-    internal static readonly string MapProp_CribPosition = $"{ModEntry.ModId}_CribPosition";
+    internal const string MapProp_CribPosition = $"{ModEntry.ModId}_CribPosition";
     internal static readonly Vector2 ChildOffset = new Vector2(1f, 2f) * Game1.tileSize;
 
     internal static void Register()

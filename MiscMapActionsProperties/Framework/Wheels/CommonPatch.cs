@@ -6,6 +6,7 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
+using StardewValley.Objects;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -219,6 +220,17 @@ internal static class CommonPatch
             ModEntry.Log(error, LogLevel.Warn);
         }
         return false;
+    }
+
+    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture)
+    {
+        int radius = furniture.GetAdditionalTilePropertyRadius();
+        return new(
+            (int)furniture.TileLocation.X - radius,
+            (int)furniture.TileLocation.Y - radius,
+            furniture.getTilesWide() + radius,
+            furniture.getTilesHigh() + radius
+        );
     }
 
     internal static void RegisterTileAndTouch(

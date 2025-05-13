@@ -18,8 +18,8 @@ internal record LightCondAndProps(string? Cond, string[] Props);
 /// </summary>
 internal static class LightSpot
 {
-    internal static readonly string TileProp_Light = $"{ModEntry.ModId}_Light";
-    internal static readonly string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
+    internal const string TileProp_Light = $"{ModEntry.ModId}_Light";
+    internal const string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
 
     private static readonly TileDataCache<LightCondAndProps> lightSpotsCacheBack =
         new([TileProp_LightCond, TileProp_Light], "Back", LightSpotValueGetter, LightSpotValueComparer);
@@ -47,8 +47,9 @@ internal static class LightSpot
         return new(propValues[0], lightProps);
     }
 
-    private static readonly PerScreen<List<LightSource>> unconditionalLightSources = new();
-    private static readonly PerScreen<Dictionary<string, List<LightSource>>> conditionalLightSources = new();
+    private static readonly PerScreen<List<LightSource>> unconditionalLightSources = new() { Value = [] };
+    private static readonly PerScreen<Dictionary<string, List<LightSource>>> conditionalLightSources =
+        new() { Value = [] };
 
     internal static void Register()
     {

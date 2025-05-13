@@ -78,7 +78,7 @@ internal record DLExtInfo(
 /// </summary>
 internal static class DrawLayerExt
 {
-    internal static readonly string Metadata_DrawLayerRotate_Prefix = $"{ModEntry.ModId}/DrawLayerRotate.";
+    internal const string Metadata_DrawLayerRotate_Prefix = $"{ModEntry.ModId}/DrawLayerRotate.";
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoCache = [];
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoInMenu = [];
 
