@@ -133,11 +133,13 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 
 #### mushymato.MMAP_ShowConstruct \<builder\> [restrict]
 
+- Can be used as either Action or TouchAction
 - Opens the construction menu for specified builder (`Robin` or `Wizard` in vanilla)
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
 
 #### mushymato.MMAP_ShowConstructForCurrent \<builder\> [restrict]
 
+- Can be used as either Action or TouchAction
 - Opens the construction menu for the current area.
 - Does nothing if the current area is not buildable.
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
@@ -147,6 +149,13 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - Can be used as either Action or TouchAction
 - Arguments are identical to vanilla warp tile actions.
 - When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
+
+#### mushymato.MMAP_ShowBag \<bagInventoryId\> [bagKind]
+
+- Can be used as either Action or TouchAction or TriggerAction.
+- Opens a global inventory with the given inventory id. This id is always prefixed with `mushymato.MMAP#`, but it is recommended to prefix it with your own mod id too.
+- This can be used to create junimo chest like containers, though automate will not work with it.
+- Bag kind will allow you to make this chest a big chest with 70 slots, but it is up to the mod to consistently use `BigChest` for all places where this bag is accessible.
 
 #### mushymato.MMAP_QuestionDialogue <question_dialog_id>
 
@@ -170,6 +179,12 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - `Actions` (`List<string>`, _empty_): [Trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions), run all actions.
 - `TileActions` (`List<string>`, _empty_): [Map tile actions](https://stardewvalleywiki.com/Modding:Maps#Action), stops at the first tile action that returns true.
 - `TouchActions` (`List<string>`, _empty_): [Map touch actions](https://stardewvalleywiki.com/Modding:Maps#TouchAction), run all touch actions.
+
+### Furniture Properties
+
+You can give furniture tile properties (including action and tile actions) and collision using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions. Besides this, you can also give a collision map to make the furniture passable on some tiles.
+
+[More details here](./docs/furniture_properties.md).
 
 ### Data/Buildings Metadata
 

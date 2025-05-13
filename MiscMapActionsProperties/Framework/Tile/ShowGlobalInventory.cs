@@ -52,13 +52,14 @@ internal static class ShowGlobalInventory
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        Chest phChest = new(playerChest: false);
+        Chest phChest = new(playerChest: true);
 
         bool before = Game1.player.showChestColorPicker;
         Game1.player.showChestColorPicker = false;
 
         phChest.GlobalInventoryId = GetBagInventoryId(bagInvId);
         phChest.SpecialChestType = bagInvType;
+        ModEntry.Log($"Open global inventory {phChest.GlobalInventoryId} ({phChest.SpecialChestType})");
         phChest
             .GetMutex()
             .RequestLock(() =>

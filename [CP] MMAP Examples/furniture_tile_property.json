@@ -3,7 +3,7 @@
   "Changes": [
     {
       "Action": "EditData",
-      "Target": "mushymato.MMAP/FurnitureProperty",
+      "Target": "mushymato.MMAP/FurnitureProperties",
       "Entries": {
         "LargeJojaRug": {
           "TileProperties": [
@@ -53,8 +53,25 @@
             }
           ],
         },
+        "WizardStudy": {
+          "CollisionMap": "XOX"
+        },
         "WizardDresser": {
-          "CollisionMap": "XO\nOO"
+          "CollisionMap": "OX\nXO",
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-TouchAction-mushymato.MMAP_Critter",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_Critter Butterfly T 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 3
+              }
+            }
+          ],
         },
         "Cauldron": {
           "AdditionalTilePropertyRadius": 1,

@@ -11,21 +11,21 @@
           },
           "Layer": "Buildings",
           "SetProperties": {
-            "Action": "mushymato.MMAP_ShowBag TestBag1"
+            "Action": "mushymato.MMAP_ShowBag TestBag1 BigChest"
           }
         }
       ]
     },
     {
       "Action": "EditData",
-      "Target": "mushymato.MMAP/FurnitureProperty",
+      "Target": "mushymato.MMAP/FurnitureProperties",
       "Entries": {
         "JojaCrate": {
           "TileProperties": [
             {
               "Id": "{{ModId}}-mushymato.MMAP_ShowBag",
               "Name": "Action",
-              "Value": "mushymato.MMAP_ShowBag TestBag1",
+              "Value": "mushymato.MMAP_ShowBag TestBag1 BigChest",
               "Layer": "Buildings",
               "TileArea": {
                 "X": 0,

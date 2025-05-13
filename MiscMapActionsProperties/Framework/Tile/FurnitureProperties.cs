@@ -1,9 +1,9 @@
+using System.Security.AccessControl;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewValley;
 using StardewValley.GameData.Buildings;
 using StardewValley.Objects;
 
@@ -12,20 +12,20 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// <summary>
 /// Allow furniture to get tile data, using the same format as building tile data
 /// </summary>
-internal static class FurnitureProperty
+internal static class FurnitureProperties
 {
-    internal static readonly IAssetName Asset_FurnitureProperty = ModEntry.help.GameContent.ParseAssetName(
-        $"{ModEntry.ModId}/FurnitureProperty"
+    internal static readonly IAssetName Asset_FurnitureProperties = ModEntry.help.GameContent.ParseAssetName(
+        $"{ModEntry.ModId}/FurnitureProperties"
     );
-    private static Dictionary<string, BuildingData>? _ftpData = null;
+    private static Dictionary<string, BuildingData>? _fpData = null;
 
     /// <summary>Furniture tile property data (secretly building data)</summary>
-    internal static Dictionary<string, BuildingData> FTPData
+    internal static Dictionary<string, BuildingData> FPData
     {
         get
         {
-            _ftpData ??= ModEntry.help.GameContent.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperty);
-            return _ftpData;
+            _fpData ??= ModEntry.help.GameContent.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperties);
+            return _fpData;
         }
     }
 
@@ -37,18 +37,21 @@ internal static class FurnitureProperty
         {
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperty), nameof(Furniture_DoesTileHaveProperty_Postfix))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Furniture), nameof(Furniture.GetAdditionalTilePropertyRadius)),
                 postfix: new HarmonyMethod(
-                    typeof(FurnitureProperty),
+                    typeof(FurnitureProperties),
                     nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
                 )
             );
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperty), nameof(Furniture_IntersectsForCollision_Postfix))
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_IntersectsForCollision_Postfix)
+                )
             );
         }
         catch (Exception err)
@@ -59,9 +62,9 @@ internal static class FurnitureProperty
 
     private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
     {
-        if (!FTPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
             return;
-        __result = ftpData.AdditionalTilePropertyRadius;
+        __result = Math.Max(0, ftpData.AdditionalTilePropertyRadius);
     }
 
     private static void Furniture_IntersectsForCollision_Postfix(
@@ -70,16 +73,23 @@ internal static class FurnitureProperty
         ref bool __result
     )
     {
-        if (!__result || !FTPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
+        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
             return;
 
         ftpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
+        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
 
         for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
         {
             for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
             {
-                if (!ftpData.IsTilePassable((int)(j - __instance.TileLocation.X), (int)(i - __instance.TileLocation.Y)))
+                if (
+                    bounds.Contains(j, i)
+                    && !ftpData.IsTilePassable(
+                        (int)(j - __instance.TileLocation.X),
+                        (int)(i - __instance.TileLocation.Y)
+                    )
+                )
                 {
                     return;
                 }
@@ -90,13 +100,13 @@ internal static class FurnitureProperty
 
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperty)))
-            _ftpData = null;
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
+            _fpData = null;
     }
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo(Asset_FurnitureProperty))
+        if (e.Name.IsEquivalentTo(Asset_FurnitureProperties))
             e.LoadFrom(() => new Dictionary<string, BuildingData>(), AssetLoadPriority.Exclusive);
     }
 
@@ -110,7 +120,7 @@ internal static class FurnitureProperty
         ref bool __result
     )
     {
-        if (__result || !FTPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
+        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
             return;
         __result = ftpData.HasPropertyAtTile(
             (int)(tile_x - __instance.TileLocation.X),

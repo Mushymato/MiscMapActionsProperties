@@ -9,11 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Some implementation details around tile data cache
 - mushymato.MMAP_ShiftContents now runs on the host to avoid ghost location issues
-    - but "Cellar" 
+    - "Cellar" will now pick the player's own Cellar, though assignments don't seem to quite work in multiplayer.
 
 ### Added
-- New tile action/trigger action mushymato.MMAP_ShowBag, opens a global inventory
-- New furniture properties system that allows (some) tile properties to take effect for furniture
+- New tile action/trigger action mushymato.MMAP_ShowBag, opens a global inventory.
+- New furniture properties system that allows (some) tile properties to take effect for furniture.
 
 ## [1.6.0]
 
