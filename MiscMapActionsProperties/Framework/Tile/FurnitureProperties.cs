@@ -4,8 +4,10 @@ using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
 using StardewValley.GameData.Buildings;
 using StardewValley.Objects;
+using StardewValley.TokenizableStrings;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
@@ -29,75 +31,6 @@ internal static class FurnitureProperties
         }
     }
 
-    internal static void Register()
-    {
-        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
-        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        try
-        {
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Furniture), nameof(Furniture.GetAdditionalTilePropertyRadius)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
-                )
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_IntersectsForCollision_Postfix)
-                )
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureTileData:\n{err}", LogLevel.Error);
-        }
-    }
-
-    private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
-    {
-        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
-            return;
-        __result = Math.Max(0, ftpData.AdditionalTilePropertyRadius);
-    }
-
-    private static void Furniture_IntersectsForCollision_Postfix(
-        Furniture __instance,
-        Rectangle rect,
-        ref bool __result
-    )
-    {
-        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
-            return;
-
-        ftpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
-        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
-
-        for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
-        {
-            for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
-            {
-                if (
-                    bounds.Contains(j, i)
-                    && !ftpData.IsTilePassable(
-                        (int)(j - __instance.TileLocation.X),
-                        (int)(i - __instance.TileLocation.Y)
-                    )
-                )
-                {
-                    return;
-                }
-            }
-        }
-        __result = false;
-    }
-
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
@@ -110,6 +43,104 @@ internal static class FurnitureProperties
             e.LoadFrom(() => new Dictionary<string, BuildingData>(), AssetLoadPriority.Exclusive);
     }
 
+    internal static void Register()
+    {
+        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(
+                    typeof(Furniture),
+                    nameof(Furniture.GetAdditionalTilePropertyRadius)
+                ),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+                )
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_IntersectsForCollision_Postfix)
+                )
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureTileData:\n{err}", LogLevel.Error);
+        }
+        try
+        {
+            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will always come first.
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureTileData::Furniture.loadDescription:\n{err}", LogLevel.Warn);
+        }
+    }
+
+    private static bool Furniture_loadDescription_Prefix(Furniture __instance, ref string __result)
+    {
+        if (
+            FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData)
+            && !string.IsNullOrEmpty(fpData.Description)
+            && TokenParser.ParseText(fpData.Description) is string furniDesc
+        )
+        {
+            __result = Game1.parseText(furniDesc, Game1.smallFont, 320);
+            return false;
+        }
+        return true;
+    }
+
+    private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
+    {
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        __result = Math.Max(0, fpData.AdditionalTilePropertyRadius);
+    }
+
+    private static void Furniture_IntersectsForCollision_Postfix(
+        Furniture __instance,
+        Rectangle rect,
+        ref bool __result
+    )
+    {
+        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+
+        fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
+        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
+
+        for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
+        {
+            for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
+            {
+                if (
+                    bounds.Contains(j, i)
+                    && !fpData.IsTilePassable(
+                        (int)(j - __instance.TileLocation.X),
+                        (int)(i - __instance.TileLocation.Y)
+                    )
+                )
+                {
+                    return;
+                }
+            }
+        }
+        __result = false;
+    }
+
     private static void Furniture_DoesTileHaveProperty_Postfix(
         Furniture __instance,
         int tile_x,
@@ -120,9 +151,9 @@ internal static class FurnitureProperties
         ref bool __result
     )
     {
-        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? ftpData))
+        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
-        __result = ftpData.HasPropertyAtTile(
+        __result = fpData.HasPropertyAtTile(
             (int)(tile_x - __instance.TileLocation.X),
             (int)(tile_y - __instance.TileLocation.Y),
             property_name,

@@ -32,6 +32,8 @@ internal static class CommonPatch
 
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
+    public static event EventHandler<Furniture>? Furniture_OnMoved;
+
     internal static void Register()
     {
         try
@@ -56,11 +58,19 @@ internal static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.OnStartMove)),
-                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnStartMove_Prefix))
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Building_OnStartMove_Prefix))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnRemoved)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnRemoved_Prefix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnAdded)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnAdded_Finalizer))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
@@ -76,7 +86,17 @@ internal static class CommonPatch
         }
     }
 
-    private static void GameLocation_OnStartMove_Prefix(Building __instance)
+    private static void Furniture_OnAdded_Finalizer(Furniture __instance)
+    {
+        Furniture_OnMoved?.Invoke(null, __instance);
+    }
+
+    private static void Furniture_OnRemoved_Prefix(Furniture __instance)
+    {
+        Furniture_OnMoved?.Invoke(null, __instance);
+    }
+
+    private static void Building_OnStartMove_Prefix(Building __instance)
     {
         __instance.modData[Building_PreviousBounds] =
             $"{__instance.tileX.Value} {__instance.tileY.Value} {__instance.tilesWide.Value} {__instance.tilesHigh.Value}";
@@ -228,8 +248,8 @@ internal static class CommonPatch
         return new(
             (int)furniture.TileLocation.X - radius,
             (int)furniture.TileLocation.Y - radius,
-            furniture.getTilesWide() + radius,
-            furniture.getTilesHigh() + radius
+            furniture.getTilesWide() + 2 * radius,
+            furniture.getTilesHigh() + 2 * radius
         );
     }
 
@@ -275,8 +295,8 @@ internal static class CommonPatch
         return props1 == props2;
     }
 
-    internal static TileDataCache<string[]> GetSimpleTileDataCache(string[] propKeys, string layers)
+    internal static TileDataCache<string[]> GetSimpleTileDataCache(string[] propKeys, string layer)
     {
-        return new(propKeys, layers, SimpleTilePropTransformer, SimpleTilePropComparer);
+        return new(propKeys, [layer], SimpleTilePropTransformer, SimpleTilePropComparer);
     }
 }

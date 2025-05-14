@@ -86,6 +86,11 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - 1 AnimalSpot tile will get 1 animal, 2 AnimalSpot next to each other means 2 animals get to start around that area.
 - The spawn point of the animal is based on their top left tile, for 2x2 tile animals it's best to put this tile prop top left of where you want them to go.
 
+#### Back layer: mushymato.MMAP_GrassSpread T
+
+- If set, allow this tile to spread grass (without using Diggable)
+- Ideally this is set on the tile sheet, rather than on a per tile data basis.
+
 #### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext] <a name="mushymato.MMAP_Light"></a>
 
 - Add a light source at the center of this tile.

@@ -20,12 +20,10 @@ internal static class LightSpot
 {
     internal const string TileProp_Light = $"{ModEntry.ModId}_Light";
     internal const string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
+    internal const string MapLightPrefix = $"{ModEntry.ModId}_MapLight_";
 
-    private static readonly TileDataCache<LightCondAndProps> lightSpotsCacheBack =
-        new([TileProp_LightCond, TileProp_Light], "Back", LightSpotValueGetter, LightSpotValueComparer);
-
-    private static readonly TileDataCache<LightCondAndProps> lightSpotsCacheFront =
-        new([TileProp_LightCond, TileProp_Light], "Front", LightSpotValueGetter, LightSpotValueComparer);
+    private static readonly TileDataCache<LightCondAndProps> lightSpotsCache =
+        new([TileProp_LightCond, TileProp_Light], ["Front", "Back"], LightSpotValueGetter, LightSpotValueComparer);
 
     private static bool LightSpotValueComparer(LightCondAndProps? props1, LightCondAndProps? props2)
     {
@@ -33,9 +31,6 @@ internal static class LightSpot
             return props2 == null;
         if (props2 == null)
             return props1 == null;
-        ModEntry.LogOnce(
-            $"{string.Join(',', props1.Props)}=={string.Join(',', props2.Props)}? {props1.Props == props2.Props}"
-        );
         return props1.Cond == props2.Cond && props1.Props == props2.Props;
     }
 
@@ -47,7 +42,9 @@ internal static class LightSpot
         return new(propValues[0], lightProps);
     }
 
-    private static readonly PerScreen<List<LightSource>> unconditionalLightSources = new() { Value = [] };
+    private static string FormLightId(Point pos) =>
+        string.Concat(MapLightPrefix, pos.X.ToString(), ",", pos.Y.ToString());
+
     private static readonly PerScreen<Dictionary<string, List<LightSource>>> conditionalLightSources =
         new() { Value = [] };
 
@@ -57,8 +54,7 @@ internal static class LightSpot
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
 
-        lightSpotsCacheBack.TileDataCacheChanged += OnCacheChanged;
-        lightSpotsCacheFront.TileDataCacheChanged += OnCacheChanged;
+        lightSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
 
     // TODO: refactor this later to take advantage of changed
@@ -66,16 +62,30 @@ internal static class LightSpot
     {
         if (e.Item1 != Game1.currentLocation)
             return;
-        foreach (LightSource light in unconditionalLightSources.Value)
+
+        if (e.Item2 == null)
         {
-            Game1.currentLightSources.Remove(light.Id);
+            Game1.currentLightSources.RemoveWhere(kv => kv.Key.StartsWith(MapLightPrefix));
+            SpawnLocationLights(e.Item1);
+            return;
         }
-        foreach ((string cond, List<LightSource> lights) in conditionalLightSources.Value)
+
+        string lightId;
+        foreach (Point pos in e.Item2)
         {
-            foreach (LightSource light in lights)
-                Game1.currentLightSources.Remove(light.Id);
+            lightId = FormLightId(pos);
+            if (Game1.currentLightSources.Remove(lightId))
+            {
+                foreach (List<LightSource> lights in conditionalLightSources.Value.Values)
+                {
+                    lights.RemoveWhere(light => light.Id == lightId);
+                }
+            }
         }
-        SpawnLocationLights(e.Item1);
+
+        UpdateLocationLightsForCache(e.Item1, e.Item2, lightSpotsCache);
+
+        UpdateConditionalLights(e.Item1);
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
@@ -91,43 +101,69 @@ internal static class LightSpot
 
     private static void SpawnLocationLights(GameLocation location)
     {
-        unconditionalLightSources.Value = [];
         conditionalLightSources.Value = [];
 
         if (location == null || location.ignoreLights.Value)
             return;
 
-        foreach (
-            (Point pos, LightCondAndProps condprop) in lightSpotsCacheFront
-                .GetTileData(location)
-                .Concat(lightSpotsCacheBack.GetTileData(location))
+        SpawnLocationLightsForCache(location, lightSpotsCache);
+
+        UpdateConditionalLights(location);
+    }
+
+    private static void SpawnLocationLightsForCache(GameLocation location, TileDataCache<LightCondAndProps> cache)
+    {
+        foreach ((Point pos, LightCondAndProps condprop) in cache.GetTileData(location))
+        {
+            CreateNewLight(location, pos, condprop);
+        }
+    }
+
+    private static void UpdateLocationLightsForCache(
+        GameLocation location,
+        HashSet<Point> changedPos,
+        TileDataCache<LightCondAndProps> cache
+    )
+    {
+        Dictionary<Point, LightCondAndProps> cachedProps = cache.GetTileData(location);
+        foreach (Point pos in changedPos)
+        {
+            if (cachedProps.TryGetValue(pos, out LightCondAndProps? condprop))
+            {
+                CreateNewLight(location, pos, condprop);
+            }
+        }
+    }
+
+    private static void CreateNewLight(GameLocation location, Point pos, LightCondAndProps condprop)
+    {
+        if (
+            Light.MakeMapLightFromProps(
+                condprop.Props,
+                FormLightId(pos),
+                new Vector2(pos.X + 1 / 2, pos.Y + 1 / 2) * Game1.tileSize,
+                location.NameOrUniqueName
+            )
+            is LightSource light
         )
         {
-            if (
-                Light.MakeMapLightFromProps(
-                    condprop.Props,
-                    new Vector2(pos.X + 1 / 2, pos.Y + 1 / 2) * Game1.tileSize,
-                    location.NameOrUniqueName
-                )
-                is not LightSource light
-            )
-            {
-                continue;
-            }
             if (condprop.Cond == null)
             {
                 Game1.currentLightSources.Add(light);
-                unconditionalLightSources.Value.Add(light);
             }
             else
             {
-                if (!conditionalLightSources.Value.ContainsKey(condprop.Cond))
-                    conditionalLightSources.Value[condprop.Cond] = [];
-                conditionalLightSources.Value[condprop.Cond].Add(light);
+                string condTrim = condprop.Cond.Trim();
+                if (conditionalLightSources.Value.TryGetValue(condTrim, out List<LightSource>? lightSources))
+                {
+                    lightSources.Add(light);
+                }
+                else
+                {
+                    conditionalLightSources.Value[condTrim] = [light];
+                }
             }
         }
-
-        UpdateConditionalLights(location);
     }
 
     private static void UpdateConditionalLights(GameLocation location)

@@ -45,7 +45,7 @@ internal static class Light
                 2,
                 out string textureStr,
                 out error,
-                defaultValue: "1",
+                defaultValue: "4",
                 name: "string texture"
             )
             || !ArgUtility.TryGetOptionalInt(args, 3, out int offsetX, out error, defaultValue: 0, name: "int offsetX")
@@ -93,8 +93,13 @@ internal static class Light
         return newLight;
     }
 
-    internal static LightSource? MakeMapLightFromProps(string[] lightProps, Vector2 position, string mapName)
+    internal static LightSource? MakeMapLightFromProps(
+        string[] lightProps,
+        string lightName,
+        Vector2 position,
+        string mapName
+    )
     {
-        return MakeLightFromProps(lightProps, $"{mapName}_MapLight_{position.X},{position.Y}", position, mapName);
+        return MakeLightFromProps(lightProps, lightName, position, mapName);
     }
 }

@@ -1,0 +1,152 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "LargeJojaRug": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_Critter",
+              "Name": "mushymato.MMAP_Critter",
+              "Value": "Crab T 3",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 1
+              }
+            }
+          ],
+        },
+        "SmallJojaRug": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-TouchAction-mushymato.MMAP_Critter",
+              "Name": "TouchAction",
+              "Value": "mushymato.MMAP_Critter Firefly T 8 Butterfly T 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 3
+              }
+            }
+          ],
+        },
+        "JojaColaFridge": {
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_ShowBag",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_ShowBag JojaColaFridge",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 2,
+                "Height": 1
+              }
+            },
+            {
+              "Id": "{{ModId}}-WaterSource",
+              "Name": "WaterSource",
+              "Value": "T",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 2,
+                "Height": 1
+              }
+            }
+          ],
+        },
+        "WizardStudy": {
+          "CollisionMap": "XOX",
+          "AdditionalTilePropertyRadius": 2,
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_Light",
+              "Name": "mushymato.MMAP_Light",
+              "Value": "2 Red 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": -2,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_Light",
+              "Name": "mushymato.MMAP_Light",
+              "Value": "2 Green 4",
+              "Layer": "Front",
+              "TileArea": {
+                "X": 4,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            }
+          ],
+        },
+        "WizardDresser": {
+          "CollisionMap": "OX\nXO",
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-TouchAction-mushymato.MMAP_Critter",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_Critter Butterfly T 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 5,
+                "Height": 3
+              }
+            }
+          ],
+        },
+        "Cauldron": {
+          "AdditionalTilePropertyRadius": 1,
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.MMAP_TAS",
+              "Name": "mushymato.MMAP_TAS",
+              "Value": "{{ModId}}_CauldronSmoke",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": -1,
+                "Width": 2,
+                "Height": 1
+              }
+            }
+          ],
+        },
+        "WizardCushion": {
+          "Description": " Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam aliquet vestibulum odio, aliquam tempor velit condimentum tincidunt. Proin ac rhoncus eros. Mauris porta pellentesque nibh et facilisis. In hac habitasse platea dictumst. In hac habitasse platea dictumst. Maecenas nunc diam, facilisis nec dolor quis, sollicitudin imperdiet purus. Vivamus consequat, enim et placerat rhoncus, arcu lectus sodales massa, sed dignissim nisi magna sed justo. Sed dictum eros vitae mauris tempor tincidunt. Vestibulum vel felis convallis, aliquam neque sit amet, pretium arcu. Morbi et erat pharetra, varius tortor eu, viverra sapien. Nulla molestie porta malesuada. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Quisque felis lectus, tincidunt id ornare eu, pulvinar non nisl. Morbi venenatis mi a arcu faucibus euismod. Aliquam a tempus felis, nec pellentesque mi. Fusce luctus convallis lectus in condimentum. ",
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-mushymato.Trough",
+              "Name": "Trough",
+              "Value": "T",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            }
+          ],
+        }
+      },
+    }
+  ]
+}

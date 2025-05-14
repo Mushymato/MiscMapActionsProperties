@@ -24,7 +24,7 @@ internal static class GrassSpread
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch FruitTreeCosmeticSeason:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Failed to patch GrassSpread:\n{err}", LogLevel.Error);
         }
     }
 
