@@ -7,13 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [1.7.1]
 
 ### Changed
+- Some more implementation details around tile data cache.
 - mushymato.MMAP_Light's 3rd argument (texture) now uses "4" by default, this is same as path light.
-
 
 ## [1.7.0]
 
 ### Changed
-- Some implementation details around tile data cache
+- Some implementation details around tile data cache.
 - mushymato.MMAP_ShiftContents now runs on the host to avoid ghost location issues
     - "Cellar" will now pick the player's own Cellar, though assignments don't seem to quite work in multiplayer.
 

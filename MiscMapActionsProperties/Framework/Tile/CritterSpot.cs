@@ -45,6 +45,11 @@ internal static class CritterSpot
         typeof(CrabCritter),
         "_baseSourceRectangle"
     );
+    private static readonly FieldInfo butterflyLightId = AccessTools.DeclaredField(
+        typeof(Butterfly),
+        "lightId"
+    );
+
 
     internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new() { Value = [] };
 
@@ -56,6 +61,22 @@ internal static class CritterSpot
         TriggerActionManager.RegisterAction(TileProp_Critter, TriggerActionCritter);
 
         critterSpotsCache.TileDataCacheChanged += OnCacheChanged;
+    }
+
+    private static void RemoveTheseCritters(GameLocation location, List<Critter> critters)
+    {
+        location.critters.RemoveAll(critters.Contains);
+        foreach (Critter critter in critters)
+        {
+            if (critter is Firefly firefly && fireflyLight.GetValue(firefly) is LightSource light)
+            {
+                Game1.currentLightSources.Remove(light.Id);
+            }
+            else if (critter is Butterfly butterfly && butterfly.isLit && butterflyLightId.GetValue(butterfly) is string lightId)
+            {
+                Game1.currentLightSources.Remove(lightId);
+            }
+        }
     }
 
     private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
@@ -72,7 +93,7 @@ internal static class CritterSpot
         if (e.Item2 == null)
         {
             foreach (List<Critter> critters in spawnedCritters.Values)
-                location.critters.RemoveAll(critters.Contains);
+                RemoveTheseCritters(location, critters);
             SpawnLocationCritters(location);
             return;
         }
@@ -82,7 +103,7 @@ internal static class CritterSpot
         {
             if (spawnedCritters.TryGetValue(pos, out List<Critter>? critters))
             {
-                location.critters.RemoveAll(critters.Contains);
+                RemoveTheseCritters(location, critters);
                 spawnedCritters.Remove(pos);
             }
             if (cacheEntry.TryGetValue(pos, out string[]? props))
@@ -108,11 +129,10 @@ internal static class CritterSpot
 
         if (
             location.critters != null
-            && TileDataSpawnedCritters.Value.Values.SelectMany(critter => critter).ToHashSet()
-                is HashSet<Critter> critters
+            && TileDataSpawnedCritters.Value.Values.SelectMany(critter => critter).ToList() is List<Critter> critters
         )
         {
-            location.critters.RemoveAll(critters.Contains);
+            RemoveTheseCritters(location, critters);
         }
         TileDataSpawnedCritters.Value = [];
         foreach ((Point pos, string[] props) in critterSpotsCache.GetTileData(location))
