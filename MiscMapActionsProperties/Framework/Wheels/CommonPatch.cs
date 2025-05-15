@@ -242,6 +242,17 @@ internal static class CommonPatch
         return false;
     }
 
+    internal static Rectangle GetBuildingTileDataBounds(Building building)
+    {
+        int radius = building.GetAdditionalTilePropertyRadius();
+        return new(
+            building.tileX.Value - radius,
+            building.tileY.Value - radius,
+            building.tilesWide.Value + 2 * radius,
+            building.tilesHigh.Value + 2 * radius
+        );
+    }
+
     internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture)
     {
         int radius = furniture.GetAdditionalTilePropertyRadius();

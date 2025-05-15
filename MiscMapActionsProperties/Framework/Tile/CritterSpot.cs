@@ -105,6 +105,15 @@ internal static class CritterSpot
     {
         if (location == null)
             return;
+
+        if (
+            location.critters != null
+            && TileDataSpawnedCritters.Value.Values.SelectMany(critter => critter).ToHashSet()
+                is HashSet<Critter> critters
+        )
+        {
+            location.critters.RemoveAll(critters.Contains);
+        }
         TileDataSpawnedCritters.Value = [];
         foreach ((Point pos, string[] props) in critterSpotsCache.GetTileData(location))
         {

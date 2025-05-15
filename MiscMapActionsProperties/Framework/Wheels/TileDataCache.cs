@@ -89,17 +89,6 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-    private static Rectangle GetBuildingTileDataBounds(Building building)
-    {
-        int radius = building.GetAdditionalTilePropertyRadius();
-        return new(
-            building.tileX.Value - radius,
-            building.tileY.Value - radius,
-            building.tilesWide.Value + radius,
-            building.tilesHigh.Value + radius
-        );
-    }
-
     private void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
         if (!_cache.TryGetValue(e.Location, out _))
@@ -107,7 +96,7 @@ internal sealed class TileDataCache<TProps>
         HashSet<Point> changedPoints = [];
         foreach (Building building in e.Removed.Concat(e.Added))
         {
-            UpdateLocationTileData(e.Location, GetBuildingTileDataBounds(building), ref changedPoints);
+            UpdateLocationTileData(e.Location, CommonPatch.GetBuildingTileDataBounds(building), ref changedPoints);
         }
         if (changedPoints.Any())
             PushChangedPoints(e.Location, changedPoints);
@@ -119,7 +108,7 @@ internal sealed class TileDataCache<TProps>
             return;
         HashSet<Point> changedPoints = [];
         UpdateLocationTileData(e.Location, e.PreviousBounds, ref changedPoints);
-        UpdateLocationTileData(e.Location, GetBuildingTileDataBounds(e.Building), ref changedPoints);
+        UpdateLocationTileData(e.Location, CommonPatch.GetBuildingTileDataBounds(e.Building), ref changedPoints);
         if (changedPoints.Any())
         {
             PushChangedPoints(e.Location, changedPoints);
@@ -204,7 +193,6 @@ internal sealed class TileDataCache<TProps>
                 {
                     changedPoints.Add(pos);
                     cacheEntry.Remove(pos);
-                    break;
                 }
             }
         }

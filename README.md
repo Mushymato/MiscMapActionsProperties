@@ -6,7 +6,21 @@ See `[CP] MMAP Examples` for samples.
 
 ### Map Property
 
-All map properties are also Data/Location custom fields. In the case where both map property and Data/Location custom fields exist, custom fields are prioritized.
+All map properties are also `Data/Location` custom fields. In the case where both map property and `Data/Location` custom fields exist, custom fields are prioritized.
+
+#### mushymato.MMAP_ProtectTree [T|message]
+
+- Protects wild trees from being chopped by an axe in a location.
+- If the value is not `"T"`, it is treated as a HUD message to be shown if the player attempts to chop a tree.
+- If the tree is protected and chop is attempted, a trigger named `mushymato.MMAP_ProtectTree` is raised.
+- Will not affect custom ways that remove trees (i.e. anything that does not go through `Tree.performToolAction`).
+
+#### mushymato.MMAP_ProtectFruitTree [T|message]
+
+- Protects fruit trees from being chopped by an axe in a location.
+- If the value is not `"T"`, it is treated as a HUD message to be shown if the player attempts to chop a tree.
+- If the tree is protected and chop is attempted, a trigger named `mushymato.MMAP_ProtectFruitTree` is raised.
+- Will not affect custom ways that remove trees (i.e. anything that does not go through `FruitTree.performToolAction`).
 
 #### mushymato.MMAP_FruitTreeCosmeticSeason \<x\> \<y\>
 
@@ -260,15 +274,13 @@ This trigger action shifts things on map from one area to another area of the sa
 
 If you need something from here ask me about it and I'll try to think of better implementation.
 
-### Map Property
-
-#### mushymato.MMAP_BuildingEntry \<x\> \<y\>
+#### Map Property: mushymato.MMAP_BuildingEntry \<x\> \<y\>
 
 - For use in building maps.
 - Changes where the player arrives on entry, away from the default 1 tile above first warp.
 - DEPRECATED: no direct replacement exists, but this is rather niche to begin with.
 
-#### mushymato.MMAP_HoeDirt: \<texture\>
+#### Map Property: mushymato.MMAP_HoeDirt: \<texture\>
 
 - For use in places with tillable soil, changes the appearance of tilled soil in that location.
 - Texture should follow vanilla format of 3 sets of 16 tiles: tilled, watered overlay, paddy overlay

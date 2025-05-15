@@ -349,10 +349,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         {
             for (int i = 0; i < mwTAS.Count; i++)
             {
-                if (tileTAS.TryCreate(context, out TemporaryAnimatedSprite? tas))
-                {
-                    InsertTAS(tas);
-                }
+                tileTAS.TryCreate(context, InsertTAS);
             }
         }
     }
