@@ -439,9 +439,7 @@ internal static class Panorama
 {
     internal const string MapProp_PanoramaPrefix = $"{ModEntry.ModId}_Panorama";
 
-    internal static readonly IAssetName Asset_Panorama = ModEntry.help.GameContent.ParseAssetName(
-        $"{ModEntry.ModId}/Panorama"
-    );
+    internal const string Asset_Panorama = $"{ModEntry.ModId}/Panorama";
 
     internal static void Register()
     {
@@ -473,7 +471,7 @@ internal static class Panorama
 
     private static Dictionary<string, PanoramaData>? _bgData = null;
     internal static Dictionary<string, PanoramaData> BgData =>
-        _bgData ??= ModEntry.help.GameContent.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
+        _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {

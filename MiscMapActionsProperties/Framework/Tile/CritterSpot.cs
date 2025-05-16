@@ -45,11 +45,7 @@ internal static class CritterSpot
         typeof(CrabCritter),
         "_baseSourceRectangle"
     );
-    private static readonly FieldInfo butterflyLightId = AccessTools.DeclaredField(
-        typeof(Butterfly),
-        "lightId"
-    );
-
+    private static readonly FieldInfo butterflyLightId = AccessTools.DeclaredField(typeof(Butterfly), "lightId");
 
     internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new() { Value = [] };
 
@@ -72,7 +68,11 @@ internal static class CritterSpot
             {
                 Game1.currentLightSources.Remove(light.Id);
             }
-            else if (critter is Butterfly butterfly && butterfly.isLit && butterflyLightId.GetValue(butterfly) is string lightId)
+            else if (
+                critter is Butterfly butterfly
+                && butterfly.isLit
+                && butterflyLightId.GetValue(butterfly) is string lightId
+            )
             {
                 Game1.currentLightSources.Remove(lightId);
             }

@@ -16,9 +16,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// </summary>
 internal static class FurnitureProperties
 {
-    internal static readonly IAssetName Asset_FurnitureProperties = ModEntry.help.GameContent.ParseAssetName(
-        $"{ModEntry.ModId}/FurnitureProperties"
-    );
+    internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
 
     /// <summary>Furniture tile property data (secretly building data)</summary>
@@ -26,7 +24,7 @@ internal static class FurnitureProperties
     {
         get
         {
-            _fpData ??= ModEntry.help.GameContent.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperties);
+            _fpData ??= Game1.content.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperties);
             return _fpData;
         }
     }

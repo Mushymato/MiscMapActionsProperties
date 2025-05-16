@@ -90,6 +90,16 @@ There are 3 similar map properties for setting phases of day transitioning to ni
     - truly: starting + 200
 - If you only set starting, the other two will be calculated according to vanilla logic.
 
+A related feature are the triggers raised at the same timings with same name:
+- mushymato.MMAP_NightTimeStarting: raised at night starting time
+- mushymato.MMAP_NightTimeModerate: raised at night moderate time
+- mushymato.MMAP_NightTimeTruly: raised at night truly time
+
+And Game State Queries
+- mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time
+- mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time
+- mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time
+
 ### Tile Data
 
 #### Back layer: mushymato.MMAP_AnimalSpot T

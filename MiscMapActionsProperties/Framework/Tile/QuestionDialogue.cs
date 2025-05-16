@@ -18,9 +18,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class QuestionDialogue
 {
     internal const string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
-    internal static readonly IAssetName Asset_QuestionDialogue = ModEntry.help.GameContent.ParseAssetName(
-        $"{ModEntry.ModId}/QuestionDialogue"
-    );
+    internal const string Asset_QuestionDialogue = $"{ModEntry.ModId}/QuestionDialogue";
 
     internal static readonly PerScreen<GameLocation.afterQuestionBehavior?> heldAfterQuestionBehavior = new();
 
@@ -60,9 +58,7 @@ internal static class QuestionDialogue
     {
         get
         {
-            _qdData ??= ModEntry.help.GameContent.Load<Dictionary<string, QuestionDialogueData>>(
-                Asset_QuestionDialogue
-            );
+            _qdData ??= Game1.content.Load<Dictionary<string, QuestionDialogueData>>(Asset_QuestionDialogue);
             return _qdData;
         }
     }
