@@ -59,6 +59,7 @@ internal sealed class TileDataCache<TProps>
         CommonPatch.GameLocation_ApplyMapOverride += OnApplyMapOverride;
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
+        CommonPatch.GameLocation_MapTilePropChanged += OnMapTilePropChanged;
     }
 
     private void ClearCache(object? sender, EventArgs e) => _cache.Clear();
@@ -73,6 +74,18 @@ internal sealed class TileDataCache<TProps>
             TileDataCacheChanged?.Invoke(this, new(location, changed));
         }
         nextTickChangedPoints.Clear();
+    }
+
+    private void OnMapTilePropChanged(object? sender, CommonPatch.MapTilePropChangedArgs e)
+    {
+        if (!layers.Contains(e.Layer))
+            return;
+        HashSet<Point> changedPoints = [];
+        UpdateLocationTileData(e.Location, new(e.DestPoint, new(1, 1)), ref changedPoints);
+        if (changedPoints.Any())
+        {
+            PushChangedPoints(e.Location, changedPoints);
+        }
     }
 
     private void OnFurnitureMoved(object? sender, Furniture furniture)

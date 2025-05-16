@@ -7,10 +7,11 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
 using StardewValley.Objects;
+using xTile.Tiles;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
-internal static class CommonPatch
+public static class CommonPatch
 {
     public static string Building_PreviousBounds => $"{ModEntry.ModId}/PreviousBounds";
 
@@ -33,6 +34,10 @@ internal static class CommonPatch
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
     public static event EventHandler<Furniture>? Furniture_OnMoved;
+
+    public record MapTilePropChangedArgs(GameLocation Location, Point DestPoint, string Layer);
+
+    public static event EventHandler<MapTilePropChangedArgs>? GameLocation_MapTilePropChanged;
 
     internal static void Register()
     {
@@ -76,6 +81,15 @@ internal static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setMapTile)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Prefix)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setAnimatedMapTile)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Finalizer))
+            );
         }
         catch (Exception err)
         {
@@ -83,6 +97,52 @@ internal static class CommonPatch
                 $"Failed to patch CommonPatch, this should be reported to the mod page:\n{err}",
                 LogLevel.Error
             );
+        }
+    }
+
+    private static void GameLocation_setAnimatedMapTile_Finalizer(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        bool copyProperties
+    )
+    {
+        if (!copyProperties)
+        {
+            GameLocation_MapTilePropChanged?.Invoke(null, new(__instance, new(tileX, tileY), layer));
+        }
+    }
+
+    private static void GameLocation_setMapTile_Prefix(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        string tileSheetId,
+        bool copyProperties,
+        ref bool __state
+    )
+    {
+        __state = false;
+        if (!copyProperties)
+        {
+            xTile.Layers.Layer layer2 = __instance.map.RequireLayer(layer);
+            __state = layer2.Tiles[tileX, tileY] is StaticTile stile && stile.TileSheet.Id == tileSheetId;
+        }
+    }
+
+    private static void GameLocation_setMapTile_Finalizer(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        ref bool __state
+    )
+    {
+        if (__state)
+        {
+            GameLocation_MapTilePropChanged?.Invoke(null, new(__instance, new(tileX, tileY), layer));
         }
     }
 
