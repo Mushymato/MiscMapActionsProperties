@@ -97,8 +97,8 @@
           }
         },
         "{{ModId}}_GoToClint": {
-          "Speaker": "wwwwwww",
-          // "SpeakerPortrait": "Portraits/Gil",
+          "Speaker": "Clint",
+          "SpeakerPortrait": "Portraits/Gil",
           "DialogueBefore": "How are your tools holding up?#$b#If they ever need repairs, just come by my shop. I guarantee these tools for life!",
           "Question": "Location?",
           "ResponseEntries": {

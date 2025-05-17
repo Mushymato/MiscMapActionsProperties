@@ -103,8 +103,6 @@ internal sealed class TileDataCache<TProps>
 
     private void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
-        if (!_cache.TryGetValue(e.Location.NameOrUniqueName, out _))
-            return;
         HashSet<Point> changedPoints = [];
         foreach (Building building in e.Removed.Concat(e.Added))
         {
@@ -116,8 +114,6 @@ internal sealed class TileDataCache<TProps>
 
     private void OnBuildingEndMove(object? sender, CommonPatch.OnBuildingMovedArgs e)
     {
-        if (!_cache.TryGetValue(e.Location.NameOrUniqueName, out _))
-            return;
         HashSet<Point> changedPoints = [];
         UpdateLocationTileData(e.Location, e.PreviousBounds, ref changedPoints);
         UpdateLocationTileData(e.Location, CommonPatch.GetBuildingTileDataBounds(e.Building), ref changedPoints);
@@ -137,7 +133,7 @@ internal sealed class TileDataCache<TProps>
 
     private void OnReloadMap(object? sender, GameLocation location)
     {
-        if (_cache.TryGetValue(location.NameOrUniqueName, out _))
+        if (HasTileData(location))
         {
             _cache.Remove(location.NameOrUniqueName);
             PushChangedPoints(location, null);
@@ -209,6 +205,12 @@ internal sealed class TileDataCache<TProps>
                 }
             }
         }
+    }
+
+
+    internal bool HasTileData(GameLocation location)
+    {
+        return location != null && location.NameOrUniqueName != null && _cache.ContainsKey(location.NameOrUniqueName);
     }
 
     internal Dictionary<Point, TProps> GetTileData(GameLocation location)
