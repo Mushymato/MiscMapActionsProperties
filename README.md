@@ -198,8 +198,10 @@ And Game State Queries
 
 ##### QuestionDialogueData
 
-- `Speaker` (`string`, _empty_): NPC name of speaker, used to show a portrait in the dialogue.
+- `Speaker` (`string`, _empty_): NPC name of speaker, or none. If this is a real NPC id, their portrait and display name is used for `DialogueBefore`.
+- `SpeakerPortrait` (`string`, _empty_): Portrait to use for `DialogueBefore`, or none. This overrides portrait from `Speaker`.
 - `DialogueBefore` (`string`, _empty_): Dialogue to display before the question, or none.
+    - __Note:__ If your dialogue contains `$e` all dialogue after is lost.
 - `Question` (`string`, _empty_): Question string to display, or none.
 - `Condition` (`string`, _empty_): A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this dialogue should be enabled.
 - `ResponseEntries` (`Dictionary<string, QuestionDialogueEntry>`, _empty_): Response data.

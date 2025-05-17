@@ -119,13 +119,21 @@ internal static class QuestionDialogue
         )
         {
             portrait = Game1.content.Load<Texture2D>(qdData.SpeakerPortrait);
-            speakerName = TokenParser.ParseText(qdData.Speaker) ?? "???";
+            if (speaker != null)
+            {
+                speakerName = speaker.displayName;
+            }
+            else
+            {
+                speakerName = TokenParser.ParseText(qdData.Speaker) ?? "???";
+            }
         }
         else if (speaker != null)
         {
             portrait = speaker.Portrait;
             speakerName = speaker.displayName;
         }
+
         if (portrait != null)
         {
             speaker = new NPC(
