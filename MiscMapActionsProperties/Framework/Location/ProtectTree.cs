@@ -42,7 +42,7 @@ internal static class ProtectTree
         }
     }
 
-    private static void ShowProtectMessage(string protectMessageKey)
+    private static void ShowProtectMessage(GameLocation location, Vector2 tileLocation, string protectMessageKey)
     {
         if (protectMessageKey != "T")
         {
@@ -57,6 +57,7 @@ internal static class ProtectTree
             }
             if (protectMessage != null)
             {
+                location.playSound("axchop", tileLocation, null);
                 Game1.addHUDMessage(new HUDMessage(protectMessage) { noIcon = true });
             }
         }
@@ -82,7 +83,7 @@ internal static class ProtectTree
             return true;
         }
         __instance.shake(tileLocation, doEvenIfStillShaking: true);
-        ShowProtectMessage(protectMessageKey);
+        ShowProtectMessage(__instance.Location, tileLocation, protectMessageKey);
         TriggerActionManager.Raise(MapProp_ProtectTree);
         __result = false;
         return false;
@@ -107,7 +108,7 @@ internal static class ProtectTree
             return true;
         }
         __instance.shake(tileLocation, doEvenIfStillShaking: true);
-        ShowProtectMessage(protectMessageKey);
+        ShowProtectMessage(__instance.Location, tileLocation, protectMessageKey);
         TriggerActionManager.Raise(MapProp_ProtectFruitTree);
         return false;
     }

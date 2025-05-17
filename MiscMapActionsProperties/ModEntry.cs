@@ -32,6 +32,7 @@ public class ModEntry : Mod
 
         Framework.Buildings.ChestLight.Register();
         Framework.Buildings.DrawLayerExt.Register();
+        Framework.Buildings.HumanDoorExt.Register();
 
         Framework.Location.CribPosition.Register();
         Framework.Location.DayToNightTiming.Register();

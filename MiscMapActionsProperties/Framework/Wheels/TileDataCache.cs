@@ -207,7 +207,6 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-
     internal bool HasTileData(GameLocation location)
     {
         return location != null && location.NameOrUniqueName != null && _cache.ContainsKey(location.NameOrUniqueName);

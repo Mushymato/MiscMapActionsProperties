@@ -188,6 +188,55 @@ And Game State Queries
 - This can be used to create junimo chest like containers, though automate will not work with it.
 - Bag kind will allow you to make this chest a big chest with 70 slots, but it is up to the mod to consistently use `BigChest` for all places where this bag is accessible.
 
+#### mushymato.MMAP_WarpBuilding [X Y]
+
+- Can be used as either Action or TouchAction.
+- Mainly for usage in building `ActionTiles` or `TileProperties`, warps the player into the building that is occupying this tile.
+- The building must have an interior, and ideally still define a `HumanDoor` which will serve as the exit tile.
+- You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
+- The original human door tile will still work.
+
+_Example (`ActionTiles`):_
+```json
+"ActionTiles": [
+    {
+        "Id": "{{ModId}}_WarpBuilding",
+        "Tile": {
+            "X": 0,
+            "Y": 0
+        },
+        "Action": "mushymato.MMAP_WarpBuilding"
+    }
+]
+```
+
+#### mushymato.MMAP_MagicWarpBuilding [X Y]
+
+- Can be used as either Action or TouchAction.
+- Mainly for usage in building `ActionTiles` or `TileProperties`, warps the player into the building that is occupying this tile.
+- The building must have an interior, and ideally still define a valid `HumanDoor` which will serve as the exit tile.
+- You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
+- The original human door tile will still work.
+- Does magic warp in the back (the biiiiu and teleport effect).
+
+_Example (`TileProperties`):_
+```json
+"TileProperties": [
+    {
+        "Id": "Default_MagicWarpBuilding",
+        "Name": "TouchAction",
+        "Value": "mushymato.MMAP_MagicWarpBuilding 6 6",
+        "Layer": "Back",
+        "TileArea": {
+            "X": 1,
+            "Y": 0,
+            "Width": 1,
+            "Height": 1
+        }
+    }
+],
+```
+
 #### mushymato.MMAP_QuestionDialogue <question_dialog_id>
 
 - Can be used as either Action or TouchAction
@@ -293,7 +342,7 @@ If you need something from here ask me about it and I'll try to think of better 
 
 - For use in building maps.
 - Changes where the player arrives on entry, away from the default 1 tile above first warp.
-- DEPRECATED: no direct replacement exists, but this is rather niche to begin with.
+- DEPRECATED: you can now use action `mushymato.MMAP_WarpBuilding` or `mushymato.MMAP_MagicWarpBuilding`
 
 #### Map Property: mushymato.MMAP_HoeDirt: \<texture\>
 
