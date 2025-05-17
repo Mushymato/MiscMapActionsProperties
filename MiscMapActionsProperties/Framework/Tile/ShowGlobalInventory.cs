@@ -1,9 +1,9 @@
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
+using StardewValley.Menus;
 using StardewValley.Objects;
 using StardewValley.Triggers;
 
@@ -65,15 +65,19 @@ internal static class ShowGlobalInventory
             .RequestLock(() =>
             {
                 phChest.ShowMenu();
-                DelayedAction delayedAction = DelayedAction.functionAfterDelay(
-                    () =>
-                    {
-                        Game1.player.showChestColorPicker = before;
-                        phChest.GetMutex().ReleaseLock();
-                    },
-                    1
-                );
-                delayedAction.waitUntilMenusGone = true;
+                if (Game1.activeClickableMenu is ItemGrabMenu igm)
+                {
+                    igm.exitFunction = (IClickableMenu.onExit)
+                        Delegate.Combine(
+                            igm.exitFunction,
+                            (IClickableMenu.onExit)
+                                delegate
+                                {
+                                    Game1.player.showChestColorPicker = before;
+                                    phChest.GetMutex().ReleaseLock();
+                                }
+                        );
+                }
             });
         return true;
     }

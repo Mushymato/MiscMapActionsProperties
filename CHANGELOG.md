@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Some more implementation details around tile data cache.
 - mushymato.MMAP_Light's 3rd argument (texture) now uses "4" by default, this is same as path light.
 
+### Added
+- GSQs for checking special times of the day.
+- Triggers for special times of day.
+- New DialogueBefore field in question dialogue, which displays a dialogue box before raising the question.
+
 ## [1.7.0]
 
 ### Changed

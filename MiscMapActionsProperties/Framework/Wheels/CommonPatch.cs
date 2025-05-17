@@ -7,7 +7,6 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
 using StardewValley.Objects;
-using xTile.Tiles;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -81,6 +80,7 @@ public static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
             );
+
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Prefix)),
@@ -90,6 +90,19 @@ public static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setAnimatedMapTile)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Finalizer))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeMapTile)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Prefix)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setTileProperty)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeTileProperty)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+            );
         }
         catch (Exception err)
         {
@@ -97,6 +110,51 @@ public static class CommonPatch
                 $"Failed to patch CommonPatch, this should be reported to the mod page:\n{err}",
                 LogLevel.Error
             );
+        }
+    }
+
+    internal static void GameLocation_MapTilePropChangedInvoke(GameLocation location, Point pos, string layer)
+    {
+        GameLocation_MapTilePropChanged?.Invoke(null, new(location, pos, layer));
+    }
+
+    private static void GameLocation_setTileProperty_Finalizer(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        string key
+    )
+    {
+        if (__instance.map?.GetLayer(layer)?.Tiles[tileX, tileY] != null)
+        {
+            GameLocation_MapTilePropChanged?.Invoke(null, new(__instance, new(tileX, tileY), layer));
+        }
+    }
+
+    private static void GameLocation_removeMapTile_Prefix(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        ref bool __state
+    )
+    {
+        xTile.Layers.Layer layer2 = __instance.map.RequireLayer(layer);
+        __state = layer2.Tiles[tileX, tileY] != null;
+    }
+
+    private static void GameLocation_removeMapTile_Finalizer(
+        GameLocation __instance,
+        int tileX,
+        int tileY,
+        string layer,
+        ref bool __state
+    )
+    {
+        if (__state)
+        {
+            GameLocation_MapTilePropChanged?.Invoke(null, new(__instance, new(tileX, tileY), layer));
         }
     }
 
@@ -128,7 +186,7 @@ public static class CommonPatch
         if (!copyProperties)
         {
             xTile.Layers.Layer layer2 = __instance.map.RequireLayer(layer);
-            __state = layer2.Tiles[tileX, tileY] is StaticTile stile && stile.TileSheet.Id == tileSheetId;
+            __state = layer2.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
         }
     }
 

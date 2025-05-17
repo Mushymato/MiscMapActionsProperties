@@ -97,6 +97,8 @@
           }
         },
         "{{ModId}}_GoToClint": {
+          "Speaker": "Clint",
+          "DialogueBefore": "How are your tools holding up?#$e#If they ever need repairs, just come by my shop. I guarantee these tools for life!",
           "Question": "Location?",
           "ResponseEntries": {
             "1": {

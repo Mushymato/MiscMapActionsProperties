@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -13,7 +12,6 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 /// </summary>
 internal sealed class TileDataCache<TProps>
 {
-    private readonly ConditionalWeakTable<GameLocation, Dictionary<Point, TProps>> _cache = [];
     private readonly string[] propKeys;
     private readonly Func<string?[], TProps?> propsValueTransformer;
     private readonly Func<TProps?, TProps?, bool> propsValueComparer;
@@ -21,6 +19,7 @@ internal sealed class TileDataCache<TProps>
     private readonly string[] layers;
     internal event EventHandler<(GameLocation, HashSet<Point>?)>? TileDataCacheChanged;
 
+    private readonly Dictionary<string, Dictionary<Point, TProps>> _cache = [];
     internal Dictionary<GameLocation, HashSet<Point>?> nextTickChangedPoints = [];
 
     internal void PushChangedPoints(GameLocation location, HashSet<Point>? newPoints)
@@ -104,7 +103,7 @@ internal sealed class TileDataCache<TProps>
 
     private void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
-        if (!_cache.TryGetValue(e.Location, out _))
+        if (!_cache.TryGetValue(e.Location.NameOrUniqueName, out _))
             return;
         HashSet<Point> changedPoints = [];
         foreach (Building building in e.Removed.Concat(e.Added))
@@ -117,7 +116,7 @@ internal sealed class TileDataCache<TProps>
 
     private void OnBuildingEndMove(object? sender, CommonPatch.OnBuildingMovedArgs e)
     {
-        if (!_cache.TryGetValue(e.Location, out _))
+        if (!_cache.TryGetValue(e.Location.NameOrUniqueName, out _))
             return;
         HashSet<Point> changedPoints = [];
         UpdateLocationTileData(e.Location, e.PreviousBounds, ref changedPoints);
@@ -138,9 +137,9 @@ internal sealed class TileDataCache<TProps>
 
     private void OnReloadMap(object? sender, GameLocation location)
     {
-        if (_cache.TryGetValue(location, out _))
+        if (_cache.TryGetValue(location.NameOrUniqueName, out _))
         {
-            _cache.Remove(location);
+            _cache.Remove(location.NameOrUniqueName);
             PushChangedPoints(location, null);
         }
     }
@@ -171,7 +170,8 @@ internal sealed class TileDataCache<TProps>
     {
         if (location.Map == null)
             return;
-        Dictionary<Point, TProps> cacheEntry = _cache.GetValue(location, CreateLocationTileData);
+
+        Dictionary<Point, TProps> cacheEntry = GetTileData(location);
 
         for (int x = Math.Max(bounds.X, 0); x < Math.Min(bounds.X + bounds.Width, location.Map.DisplayWidth / 64); x++)
         {
@@ -211,6 +211,18 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-    internal Dictionary<Point, TProps> GetTileData(GameLocation location) =>
-        _cache.GetValue(location, CreateLocationTileData);
+    internal Dictionary<Point, TProps> GetTileData(GameLocation location)
+    {
+        Dictionary<Point, TProps> cacheEntry;
+        if (_cache.ContainsKey(location.NameOrUniqueName))
+        {
+            cacheEntry = _cache[location.NameOrUniqueName];
+        }
+        else
+        {
+            cacheEntry = CreateLocationTileData(location);
+            _cache[location.NameOrUniqueName] = cacheEntry;
+        }
+        return cacheEntry;
+    }
 }

@@ -1,11 +1,13 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
+using StardewValley.Menus;
 using StardewValley.TokenizableStrings;
 using StardewValley.Triggers;
 
@@ -95,26 +97,110 @@ internal static class QuestionDialogue
         }
         if (!GameStateQuery.CheckConditions(qdData.Condition, location, farmer))
         {
+            ModEntry.Log($"ShowQuestionDialogue({qdId}): Disabled by condition");
             return false;
         }
-        ModEntry.Log($"ShowQuestionDialogue: {qdId}");
 
         GameStateQueryContext context = new(location, farmer, null, null, null, null, null);
 
         IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context);
         if (validEntries.Count == 0)
+        {
+            ModEntry.Log($"ShowQuestionDialogue({qdId}): No valid entries found");
             return false;
+        }
+
+        NPC? speaker = Game1.getCharacterFromName(qdData.Speaker);
+        Texture2D? portrait = null;
+        string? speakerName = null;
+        if (
+            !string.IsNullOrEmpty(qdData.SpeakerPortrait)
+            && Game1.content.DoesAssetExist<Texture2D>(qdData.SpeakerPortrait)
+        )
+        {
+            portrait = Game1.content.Load<Texture2D>(qdData.SpeakerPortrait);
+            speakerName = TokenParser.ParseText(qdData.Speaker) ?? "???";
+        }
+        else if (speaker != null)
+        {
+            portrait = speaker.Portrait;
+            speakerName = speaker.displayName;
+        }
+        if (portrait != null)
+        {
+            speaker = new NPC(
+                new AnimatedSprite("Characters\\Abigail", 0, 16, 16),
+                Vector2.Zero,
+                "",
+                0,
+                "",
+                portrait,
+                eventActor: false
+            )
+            {
+                displayName = speakerName,
+            };
+        }
+        else
+        {
+            speaker = null;
+        }
+
+        if (string.IsNullOrEmpty(qdData.DialogueBefore))
+        {
+            return MakeQuestion(location, farmer, tilePosition, qdId, qdData, validEntries, speaker);
+        }
+        else
+        {
+            Dialogue dialogueBefore =
+                new(speaker, qdData.DialogueBefore, TokenParser.ParseText(qdData.DialogueBefore) ?? "");
+            Game1.DrawDialogue(dialogueBefore);
+            Game1.afterDialogues = (Game1.afterFadeFunction)
+                Delegate.Combine(
+                    Game1.afterDialogues,
+                    (Game1.afterFadeFunction)
+                        delegate
+                        {
+                            MakeQuestion(location, farmer, tilePosition, qdId, qdData, validEntries, speaker);
+                        }
+                );
+
+            return true;
+        }
+    }
+
+    public static bool MakeQuestion(
+        GameLocation location,
+        Farmer farmer,
+        Point tilePosition,
+        string qdId,
+        QuestionDialogueData qdData,
+        IDictionary<string, QuestionDialogueEntry> validEntries,
+        NPC? speaker
+    )
+    {
         if (validEntries.Count == 1)
         {
             KeyValuePair<string, QuestionDialogueEntry> qde = validEntries.First();
             if (qde.Value.Actions == null && qde.Value.TileActions == null && qde.Value.TouchActions == null)
+            {
+                ModEntry.Log(
+                    $"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}', with no Actions/TileActions/TouchActions"
+                );
                 return false;
+            }
+            ModEntry.Log($"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}'");
             AfterQuestionBehavior(location, tilePosition, validEntries, farmer, qde.Key);
             return true;
         }
 
-        GameLocation.afterQuestionBehavior afterQBehavior = (Farmer who, string whichAnswer) =>
+        ModEntry.Log(
+            $"ShowQuestionDialogue({qdId}): Got {validEntries.Count} valid entries '{string.Join(',', validEntries.Keys)}'"
+        );
+
+        void afterQBehavior(Farmer who, string whichAnswer) =>
             AfterQuestionBehavior(location, tilePosition, validEntries, who, whichAnswer);
+
         if (location.afterQuestion != null)
             heldAfterQuestionBehavior.Value = afterQBehavior;
 
@@ -122,7 +208,7 @@ internal static class QuestionDialogue
             TokenParser.ParseText(qdData.Question) ?? "",
             validEntries.Select(MakeResponse).ToArray(),
             afterQBehavior,
-            speaker: Game1.getCharacterFromName(qdData.Speaker)
+            speaker: speaker
         );
 
         return true;
@@ -176,7 +262,7 @@ internal static class QuestionDialogue
     }
 }
 
-public class QuestionDialogueEntry
+public sealed class QuestionDialogueEntry
 {
     /// <summary>Response label</summary>
     public string Label = "[LocalizedText Strings/UI:Cancel]";
@@ -194,16 +280,22 @@ public class QuestionDialogueEntry
     public List<string>? TouchActions = null;
 }
 
-public class QuestionDialogueData
+public sealed class QuestionDialogueData
 {
     /// <summary>Response GSQ condition</summary>
     public string? Condition = null;
 
+    /// <summary>Optional dialogue to display before raising the question</summary>
+    public string? DialogueBefore = null;
+
     /// <summary>Question string</summary>
     public string? Question = null;
 
-    /// <summary>Speaking NPC (unclear if this does anything)</summary>
+    /// <summary>Speaking NPC</summary>
     public string? Speaker = null;
+
+    /// <summary>Speaking NPC Portrait</summary>
+    public string? SpeakerPortrait = null;
 
     /// <summary>List of responses</summary>
     public Dictionary<string, QuestionDialogueEntry> ResponseEntries = [];
