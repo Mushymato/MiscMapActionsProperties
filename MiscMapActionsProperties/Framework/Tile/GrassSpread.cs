@@ -15,6 +15,11 @@ internal static class GrassSpread
 
     internal static void Register()
     {
+        if (ModEntry.help.ModRegistry.IsLoaded("bcmpinc.GrassGrowth"))
+        {
+            ModEntry.Log($"Detected mod 'bcmpinc.GrassGrowth', disabled '{TileProp_GrassSpread}'", LogLevel.Debug);
+            return;
+        }
         try
         {
             ModEntry.harm.Patch(
@@ -60,7 +65,7 @@ internal static class GrassSpread
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Building_drawInMenu_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in GameLocation_growWeedGrass_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
