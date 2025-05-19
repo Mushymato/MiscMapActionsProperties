@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New tile/touch action mushymato.MMAP_WarpBuilding [X Y], warp that will put player into the building on this tile, for use with buildings.
 - New tile/touch action mushymato.MMAP_MagicWarpBuilding [X Y], magic warp that will put player into the building on this tile, for use with buildings.
 
+### Fixed
+- When Grass Growth (`bcmpinc.GrassGrowth`) is installed, `mushymato.MMAP_GrassSpread` is disabled.
+- mushymato.MMAP_ProtectTree/mushymato.MMAP_ProtectFruitTree plays axchop sound.
+
 ## [1.7.2]
 
 ### Fixed

@@ -114,8 +114,9 @@ And Game State Queries
 
 #### Back layer: mushymato.MMAP_GrassSpread T
 
-- If set, allow this tile to spread grass (without using Diggable)
+- If set, allow this tile to spread grass (without using `Diggable`)
 - Ideally this is set on the tile sheet, rather than on a per tile data basis.
+- This is disabled if the player has `bcmpinc.GrassGrowth` installed since that mod simply skips the `Diggable` check entirely.
 
 #### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext] <a name="mushymato.MMAP_Light"></a>
 
