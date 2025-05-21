@@ -45,6 +45,7 @@ public class ModEntry : Mod
         Framework.Location.SteamOverlay.Register();
         Framework.Location.WoodsLighting.Register();
 
+        Framework.Tile.ActionCond.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.CritterSpot.Register();
         Framework.Tile.FurnitureProperties.Register();

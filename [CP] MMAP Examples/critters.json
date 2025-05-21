@@ -37,6 +37,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
+            "mushymato.MMAP_TouchActionCond": "TIME 1700",
             "TouchAction": "mushymato.MMAP_Critter Firefly T 8 Butterfly T 4"
           }
         }
