@@ -159,7 +159,7 @@ internal static class TASSpot
     private static bool SpawnTAS(GameLocation location, string[] args, out string error)
     {
         error = "Not enough arguments.";
-        if (args.Length < 4 || !ArgUtility.TryGetPoint(args, 1, out Point pos, out error, "Vector2 spawnPos"))
+        if (args.Length < 4 || !ArgUtility.TryGetPoint(args, 1, out Point pos, out error, "Point spawnPos"))
         {
             ModEntry.Log(error);
             return false;
@@ -178,6 +178,8 @@ internal static class TASSpot
             }
 
         AddLocationTAS(location, onetime.Values);
+        respawningTASCache.Value ??= [];
+        respawningTASCache.Value.AddRange(respawning.Values);
         return true;
     }
 
