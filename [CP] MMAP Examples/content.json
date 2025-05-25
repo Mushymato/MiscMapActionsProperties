@@ -78,7 +78,7 @@
           },
           "Layer": "Buildings",
           "SetProperties": {
-            "Action": "mushymato.MMAP_ShowConstruct Robin 1"
+            "Action": "mushymato.MMAP_ShowConstruct Robin"
           }
         },
         // This one will not do anything, unless bus stop is made buildable

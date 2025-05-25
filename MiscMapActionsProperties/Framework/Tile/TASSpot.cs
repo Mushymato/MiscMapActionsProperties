@@ -18,7 +18,8 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class TASSpot
 {
     internal const string TileProp_TAS = $"{ModEntry.ModId}_TAS";
-    internal const string TileProp_ToggleTAS = $"{ModEntry.ModId}_ToggleTAS";
+    internal const string Action_ToggleTAS = $"{ModEntry.ModId}_ToggleTAS";
+    internal const string Action_ContactTAS = $"{ModEntry.ModId}_ContactTAS";
 
     private static readonly TileDataCache<string[]> tasSpotsCache = CommonPatch.GetSimpleTileDataCache(
         [TileProp_TAS],
@@ -30,9 +31,12 @@ internal static class TASSpot
         Dictionary<Point, List<TASContext>> Respawning
     );
 
+    private record ContatTASDefs(Point Pos, List<TASContext> Onetime, List<TASContext> Respawning);
+
     private static readonly PerScreen<LocationTASDefs?> locationTASDefs = new();
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
     private static readonly PerScreen<Dictionary<string, (List<TASContext>, List<TASContext>)>?> toggleTASDefs = new();
+    private static readonly PerScreen<ContatTASDefs?> contactTASDefs = new();
 
     internal static void Register()
     {
@@ -45,7 +49,8 @@ internal static class TASSpot
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
 
-        GameLocation.RegisterTileAction(TileProp_ToggleTAS, ToggleTileTAS);
+        GameLocation.RegisterTileAction(Action_ToggleTAS, ToggleTileTAS);
+        GameLocation.RegisterTouchAction(Action_ContactTAS, ContactTouchTAS);
 
         tasSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
@@ -130,6 +135,8 @@ internal static class TASSpot
     {
         locationTASDefs.Value = null;
         toggleTASDefs.Value = null;
+        respawningTASCache.Value = null;
+        contactTASDefs.Value = null;
 
         if (location == null)
             return;
@@ -155,6 +162,26 @@ internal static class TASSpot
         {
             foreach (TASContext tileTAS in locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx))
                 tileTAS.TryCreateRespawning(time, context, __instance.TemporarySprites.Add);
+        }
+        if (contactTASDefs.Value != null)
+        {
+            if (contactTASDefs.Value.Pos == Game1.player.TilePoint)
+            {
+                foreach (TASContext tileTAS in contactTASDefs.Value.Respawning)
+                    tileTAS.TryCreateRespawning(time, context, __instance.TemporarySprites.Add);
+            }
+            else
+            {
+                foreach (TASContext ctx in contactTASDefs.Value.Onetime)
+                {
+                    ctx.RemoveAllSpawned(__instance.TemporarySprites.Remove);
+                }
+                foreach (TASContext ctx in contactTASDefs.Value.Respawning)
+                {
+                    ctx.RemoveAllSpawned(__instance.TemporarySprites.Remove);
+                }
+                contactTASDefs.Value = null;
+            }
         }
     }
 
@@ -185,11 +212,11 @@ internal static class TASSpot
         {
             foreach (TASContext ctx in current.Item1)
             {
-                ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+                ctx.RemoveAllSpawned(location.TemporarySprites.Remove);
             }
             foreach (TASContext ctx in current.Item2)
             {
-                ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+                ctx.RemoveAllSpawned(location.TemporarySprites.Remove);
             }
             respawningTASCache.Value?.RemoveAll(current.Item2.Contains);
             toggleTASDefs.Value.Remove(spawnKey);
@@ -211,6 +238,20 @@ internal static class TASSpot
         return true;
     }
 
+    private static void ContactTouchTAS(GameLocation location, string[] args, Farmer farmer, Vector2 point)
+    {
+        Point pos = point.ToPoint();
+        ModEntry.Log($"ContactTouchTAS {pos}");
+        if (!CreateTASDefsFromArgs(args, 1, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
+        {
+            return;
+        }
+
+        contactTASDefs.Value = new(pos, onetime, respawning);
+
+        AddLocationTAS(location, onetime);
+    }
+
     private static bool SpawnTAS(GameLocation location, string[] args, out string error)
     {
         error = "Not enough arguments.";
@@ -226,8 +267,7 @@ internal static class TASSpot
         }
 
         AddLocationTAS(location, onetime);
-        respawningTASCache.Value ??= [];
-        respawningTASCache.Value.AddRange(respawning);
+
         return true;
     }
 
