@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -17,6 +18,8 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class TASSpot
 {
     internal const string TileProp_TAS = $"{ModEntry.ModId}_TAS";
+    internal const string TileProp_ToggleTAS = $"{ModEntry.ModId}_ToggleTAS";
+
     private static readonly TileDataCache<string[]> tasSpotsCache = CommonPatch.GetSimpleTileDataCache(
         [TileProp_TAS],
         "Back"
@@ -29,6 +32,7 @@ internal static class TASSpot
 
     private static readonly PerScreen<LocationTASDefs?> locationTASDefs = new();
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
+    private static readonly PerScreen<Dictionary<string, (List<TASContext>, List<TASContext>)>?> toggleTASDefs = new();
 
     internal static void Register()
     {
@@ -40,6 +44,8 @@ internal static class TASSpot
         );
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
+
+        GameLocation.RegisterTileAction(TileProp_ToggleTAS, ToggleTileTAS);
 
         tasSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
@@ -122,6 +128,12 @@ internal static class TASSpot
 
     private static void EnterLocationTAS(GameLocation location)
     {
+        locationTASDefs.Value = null;
+        toggleTASDefs.Value = null;
+
+        if (location == null)
+            return;
+
         locationTASDefs.Value = CreateTASDefs(location);
         if (locationTASDefs.Value != null)
         {
@@ -156,6 +168,49 @@ internal static class TASSpot
         return SpawnTAS(location, args, out _);
     }
 
+    private static bool ToggleTileTAS(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        string error = "Not enough arguments.";
+        if (
+            args.Length < 5
+            || !ArgUtility.TryGet(args, 1, out string spawnKey, out error, allowBlank: false, name: "string spawnKey")
+            || !ArgUtility.TryGetPoint(args, 2, out Point pos, out error, "Point spawnPos")
+        )
+        {
+            ModEntry.Log(error);
+            return false;
+        }
+
+        if (toggleTASDefs.Value?.TryGetValue(spawnKey, out (List<TASContext>, List<TASContext>) current) ?? false)
+        {
+            foreach (TASContext ctx in current.Item1)
+            {
+                ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+            }
+            foreach (TASContext ctx in current.Item2)
+            {
+                ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+            }
+            respawningTASCache.Value?.RemoveAll(current.Item2.Contains);
+            toggleTASDefs.Value.Remove(spawnKey);
+            return true;
+        }
+
+        if (!CreateTASDefsFromArgs(args, 4, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
+        {
+            return false;
+        }
+
+        toggleTASDefs.Value ??= [];
+        toggleTASDefs.Value[spawnKey] = (onetime, respawning);
+
+        AddLocationTAS(location, onetime);
+        respawningTASCache.Value ??= [];
+        respawningTASCache.Value.AddRange(respawning);
+
+        return true;
+    }
+
     private static bool SpawnTAS(GameLocation location, string[] args, out string error)
     {
         error = "Not enough arguments.";
@@ -164,22 +219,15 @@ internal static class TASSpot
             ModEntry.Log(error);
             return false;
         }
-        Dictionary<Point, TASContext> onetime = [];
-        Dictionary<Point, TASContext> respawning = [];
 
-        Vector2 pixelPos = new(pos.X * Game1.tileSize, pos.Y * Game1.tileSize);
-        foreach (var tasKey in args.Skip(3))
-            if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
-            {
-                if (def.SpawnInterval <= 0)
-                    onetime[pos] = new(def) { Pos = pixelPos };
-                else
-                    respawning[pos] = new(def) { Pos = pixelPos };
-            }
+        if (!CreateTASDefsFromArgs(args, 3, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
+        {
+            return false;
+        }
 
-        AddLocationTAS(location, onetime.Values);
+        AddLocationTAS(location, onetime);
         respawningTASCache.Value ??= [];
-        respawningTASCache.Value.AddRange(respawning.Values);
+        respawningTASCache.Value.AddRange(respawning);
         return true;
     }
 
@@ -216,5 +264,37 @@ internal static class TASSpot
         if (!onetime.Any() && !respawning.Any())
             return null;
         return new(onetime, respawning);
+    }
+
+    private static bool CreateTASDefsFromArgs(
+        string[] args,
+        int startIdx,
+        Point pos,
+        [NotNullWhen(true)] out List<TASContext>? onetime,
+        [NotNullWhen(true)] out List<TASContext>? respawning
+    )
+    {
+        onetime = [];
+        respawning = [];
+
+        Vector2 pixelPos = new(pos.X * Game1.tileSize, pos.Y * Game1.tileSize);
+        foreach (var tasKey in args.Skip(startIdx))
+        {
+            if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
+            {
+                if (def.SpawnInterval <= 0)
+                    onetime.Add(new(def) { Pos = pixelPos });
+                else
+                    respawning.Add(new(def) { Pos = pixelPos });
+            }
+        }
+
+        if (!onetime.Any() && !respawning.Any())
+        {
+            onetime = null;
+            respawning = null;
+            return false;
+        }
+        return true;
     }
 }

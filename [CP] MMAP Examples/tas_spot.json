@@ -23,7 +23,17 @@
           "SetProperties": {
             "mushymato.MMAP_TAS": "{{ModId}}_CauldronSmoke"
           }
-        }
+        },
+        {
+          "Position": {
+            "X": 28,
+            "Y": 21
+          },
+          "Layer": "Buildings",
+          "SetProperties": {
+            "Action": "mushymato.MMAP_ToggleTAS stardrop 20 20 {{ModId}}_StarDrop"
+          }
+        },
       ]
     },
     {
