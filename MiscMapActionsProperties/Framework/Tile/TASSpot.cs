@@ -50,6 +50,8 @@ internal static class TASSpot
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
 
         GameLocation.RegisterTileAction(Action_ToggleTAS, ToggleTileTAS);
+        TriggerActionManager.RegisterAction(Action_ToggleTAS, TriggerToggleTileTAS);
+
         GameLocation.RegisterTouchAction(Action_ContactTAS, ContactTouchTAS);
 
         tasSpotsCache.TileDataCacheChanged += OnCacheChanged;
@@ -193,6 +195,12 @@ internal static class TASSpot
     private static bool TileAndTouchTAS(GameLocation location, string[] args, Farmer farmer, Point source)
     {
         return SpawnTAS(location, args, out _);
+    }
+
+    private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string error)
+    {
+        error = "";
+        return ToggleTileTAS(Game1.currentLocation, args, Game1.player, Point.Zero);
     }
 
     private static bool ToggleTileTAS(GameLocation location, string[] args, Farmer farmer, Point point)
