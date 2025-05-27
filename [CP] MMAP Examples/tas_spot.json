@@ -110,7 +110,7 @@
           "ScaleChange": 0.01,
           "Color": "Lime",
           "SpawnInterval": 100,
-          "SpawnDelay": 1000,
+          // "SpawnDelay": 1000,
           "RandMin": {
             "PositionOffset": "-8,0",
             "LayerDepth": 0,

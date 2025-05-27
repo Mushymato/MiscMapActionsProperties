@@ -135,10 +135,6 @@
     },
     {
       "Action": "Include",
-      "FromFile": "grass.json"
-    },
-    {
-      "Action": "Include",
       "FromFile": "protect_tree.json"
     },
     {
