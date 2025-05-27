@@ -254,7 +254,7 @@ internal static class QuestionDialogue
                 xTile.Dimensions.Location loc = new(point.X, point.Y);
                 foreach (string action in qde.TileActions)
                 {
-                    if (location.performAction(action, who, loc))
+                    if (location.performAction(action, who, loc) && qde.TileActionStopAtFirstSuccess)
                         return;
                 }
             }
@@ -284,8 +284,12 @@ public sealed class QuestionDialogueEntry
     /// <summary>List of tile actions</summary>
     public List<string>? TileActions = null;
 
+    /// <summary>Stop at the first successful tile action</summary>
+    public bool TileActionStopAtFirstSuccess = true;
+
     /// <summary>List of touch actions</summary>
     public List<string>? TouchActions = null;
+
 }
 
 public sealed class QuestionDialogueData

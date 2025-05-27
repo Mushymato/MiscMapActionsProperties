@@ -1,44 +1,23 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
-using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
 /// <summary>
-/// Add new tile prop mushymato.MMAP_ActionCond GSQ
-/// If set on a tile with Action, this GSQ is checked before the Action is allowed to run
-/// Add new tile prop mushymato.MMAP_TouchActionCond GSQ
-/// Does similar thing but for touch actions
+/// Add new tile/touch action mushymato.MMAP_If GSQ ## if-case ## else-case
+/// Works just like Trigger action If
 /// </summary>
 internal static class ActionCond
 {
-    internal const string TileProp_ActionCond = $"{ModEntry.ModId}_ActionCond";
-    internal const string TileProp_TouchActionCond = $"{ModEntry.ModId}_TouchActionCond";
     internal const string Action_If = $"{ModEntry.ModId}_If";
 
     internal static void Register()
     {
         GameLocation.RegisterTileAction(Action_If, TileActionIf);
         GameLocation.RegisterTouchAction(Action_If, TouchActionIf);
-        try
-        {
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.ShouldIgnoreAction)),
-                postfix: new HarmonyMethod(typeof(ActionCond), nameof(GameLocation_ShouldIgnoreAction_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.IgnoreTouchActions)),
-                postfix: new HarmonyMethod(typeof(ActionCond), nameof(GameLocation_IgnoreTouchActions_Postfix))
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch ActionCond:\n{err}", LogLevel.Error);
-        }
     }
 
     private static bool TryGetIfElse(
@@ -121,41 +100,4 @@ internal static class ActionCond
         return;
     }
 
-    private static void GameLocation_IgnoreTouchActions_Postfix(GameLocation __instance, ref bool __result)
-    {
-        if (__result)
-            return;
-
-        if (
-            __instance.doesTileHaveProperty(
-                (int)__instance.lastTouchActionLocation.X,
-                (int)__instance.lastTouchActionLocation.Y,
-                TileProp_TouchActionCond,
-                "Back"
-            )
-            is string actionCond
-        )
-        {
-            __result = !GameStateQuery.CheckConditions(actionCond, location: __instance);
-        }
-    }
-
-    private static void GameLocation_ShouldIgnoreAction_Postfix(
-        GameLocation __instance,
-        Farmer who,
-        xTile.Dimensions.Location tileLocation,
-        ref bool __result
-    )
-    {
-        if (__result)
-            return;
-
-        if (
-            __instance.doesTileHaveProperty(tileLocation.X, tileLocation.Y, TileProp_ActionCond, "Buildings")
-            is string actionCond
-        )
-        {
-            __result = !GameStateQuery.CheckConditions(actionCond, location: __instance, player: who);
-        }
-    }
 }

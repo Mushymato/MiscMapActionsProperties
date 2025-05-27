@@ -117,6 +117,8 @@ internal static class LightRays
     {
         if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront && lightRaysCtx.Value != null)
         {
+            if (Game1.game1.takingMapScreenshot && Game1.viewport.Y != 0)
+                return;
             _raySeed = lightRaysCtx.Value.Seed;
             _rayTexture = lightRaysCtx.Value.Texture;
             IslandForestLocation_DrawRays_ReversePatch(Game1.currentLocation, e.SpriteBatch);

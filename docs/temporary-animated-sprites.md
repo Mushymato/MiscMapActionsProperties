@@ -35,8 +35,8 @@ Some temporary animated sprites are provided by default by this mod:
 | `LayerDepth` | Vector2 | 0,0 | Absolute layer depth, but layer depth from position may still apply. |
 | `Alpha` | float | 1f | Multiplier on Color, i.e. 0 is transparent. |
 | `PingPong` | bool | false | Makes animation frames go 0 1 2 3 2 1 0 instead of 0 1 2 3 0 1 2 3. |
-| `SpawnInterval` | double | -1 | How many miliseconds before a new copy of this TAS should be spawned, ideally used with soem motion and alpha fade. |
-| `SpawnDelay` | double | -1 | How many miliseconds before the first copy of this TAS should be spawned, setting this. |
+| `SpawnInterval` | double | -1 | How many miliseconds before a new copy of this TAS should be spawned, ideally used with some randomization. |
+| `SpawnDelay` | double | -1 | How many miliseconds before the first copy of this TAS should be spawned, `SpawnInterval` begins counting after `SpawnDelay` elapses. |
 | `RandMin` | TASExtRand | _null_ | Model used for randomizing certain fields. |
 | `RandMax` | TASExtRand | _null_ | Model used for randomizing certain fields. |
 
@@ -44,7 +44,7 @@ Some temporary animated sprites are provided by default by this mod:
 
 Some of the above fields can be randomized with an offset chosen from a range. These must be defined via `RandMin` and `RandMax`.
 
-For example, this causes the `Motion` of the temporary animated sprite to have a random value between `-3,-3` and `5,5` every time it 
+For example, this causes the `Motion` of the temporary animated sprite to have a random value between `-3,-3` and `5,5` every time it (re)spawns.
 ```js
 // Content Patcher "Changes" entry
 {

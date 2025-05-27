@@ -120,7 +120,9 @@ internal static class TASSpot
                 }
             }
         }
-        AddLocationTAS(Game1.currentLocation, newCtxList);
+
+        GameStateQueryContext context = new(Game1.currentLocation, null, null, null, null);
+        AddLocationTAS(Game1.currentLocation, context, newCtxList);
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -146,7 +148,8 @@ internal static class TASSpot
         locationTASDefs.Value = CreateTASDefs(location);
         if (locationTASDefs.Value != null)
         {
-            AddLocationTAS(location, locationTASDefs.Value.Onetime.Values.SelectMany(ctx => ctx));
+            GameStateQueryContext context = new(Game1.currentLocation, null, null, null, null);
+            AddLocationTAS(location, context, locationTASDefs.Value.Onetime.Values.SelectMany(ctx => ctx));
         }
     }
 
@@ -154,31 +157,24 @@ internal static class TASSpot
     {
         if (__instance.wasUpdated)
             return;
-        GameStateQueryContext context = new(__instance, null, null, null, Game1.random);
+        GameStateQueryContext context = new(__instance, null, null, null, null);
         if (respawningTASCache.Value != null)
         {
-            foreach (TASContext tileTAS in respawningTASCache.Value)
-                tileTAS.TryCreateRespawning(time, context, __instance.TemporarySprites.Add);
+            AddRespawnTAS(__instance, time, context, respawningTASCache.Value);
         }
         if (locationTASDefs.Value != null)
         {
-            foreach (TASContext tileTAS in locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx))
-                tileTAS.TryCreateRespawning(time, context, __instance.TemporarySprites.Add);
+            AddRespawnTAS(__instance, time, context, locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx));
         }
         if (contactTASDefs.Value != null)
         {
             if (contactTASDefs.Value.Pos == Game1.player.TilePoint)
             {
-                foreach (TASContext tileTAS in contactTASDefs.Value.Respawning)
-                    tileTAS.TryCreateRespawning(time, context, __instance.TemporarySprites.Add);
+                AddRespawnTAS(__instance, time, context, contactTASDefs.Value.Respawning);
             }
             else
             {
                 foreach (TASContext ctx in contactTASDefs.Value.Onetime)
-                {
-                    ctx.RemoveAllSpawned(__instance.TemporarySprites.Remove);
-                }
-                foreach (TASContext ctx in contactTASDefs.Value.Respawning)
                 {
                     ctx.RemoveAllSpawned(__instance.TemporarySprites.Remove);
                 }
@@ -239,7 +235,9 @@ internal static class TASSpot
         toggleTASDefs.Value ??= [];
         toggleTASDefs.Value[spawnKey] = (onetime, respawning);
 
-        AddLocationTAS(location, onetime);
+        GameStateQueryContext context = new(location, null, null, null, null);
+        AddLocationTAS(location, context, onetime);
+        AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
         respawningTASCache.Value ??= [];
         respawningTASCache.Value.AddRange(respawning);
 
@@ -257,7 +255,9 @@ internal static class TASSpot
 
         contactTASDefs.Value = new(pos, onetime, respawning);
 
-        AddLocationTAS(location, onetime);
+        GameStateQueryContext context = new(location, null, null, null, null);
+        AddLocationTAS(location, context, onetime);
+        AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
     }
 
     private static bool SpawnTAS(GameLocation location, string[] args, out string error)
@@ -274,19 +274,30 @@ internal static class TASSpot
             return false;
         }
 
-        AddLocationTAS(location, onetime);
+        GameStateQueryContext context = new(location, null, null, null, null);
+        AddLocationTAS(location, context, onetime);
+        AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
+        respawningTASCache.Value ??= [];
+        respawningTASCache.Value.AddRange(respawning);
 
         return true;
     }
 
-    private static void AddLocationTAS(GameLocation location, IEnumerable<TASContext> tileTASList)
+    private static void AddLocationTAS(GameLocation location, GameStateQueryContext context, IEnumerable<TASContext> tileTASList)
     {
-        GameStateQueryContext context = new(location, null, null, null, Game1.random);
         foreach (TASContext tileTAS in tileTASList)
         {
             if (tileTAS.TryCreateDelayed(context, location.TemporarySprites.Add))
                 continue;
             tileTAS.TryCreate(context, location.TemporarySprites.Add);
+        }
+    }
+
+    private static void AddRespawnTAS(GameLocation location, GameTime time, GameStateQueryContext context, IEnumerable<TASContext> tileTASList)
+    {
+        foreach (TASContext tileTAS in tileTASList)
+        {
+            tileTAS.TryCreateRespawning(time, context, location.TemporarySprites.Add);
         }
     }
 
