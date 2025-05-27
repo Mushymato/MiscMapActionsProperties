@@ -283,7 +283,11 @@ internal static class TASSpot
         return true;
     }
 
-    private static void AddLocationTAS(GameLocation location, GameStateQueryContext context, IEnumerable<TASContext> tileTASList)
+    private static void AddLocationTAS(
+        GameLocation location,
+        GameStateQueryContext context,
+        IEnumerable<TASContext> tileTASList
+    )
     {
         foreach (TASContext tileTAS in tileTASList)
         {
@@ -293,7 +297,12 @@ internal static class TASSpot
         }
     }
 
-    private static void AddRespawnTAS(GameLocation location, GameTime time, GameStateQueryContext context, IEnumerable<TASContext> tileTASList)
+    private static void AddRespawnTAS(
+        GameLocation location,
+        GameTime time,
+        GameStateQueryContext context,
+        IEnumerable<TASContext> tileTASList
+    )
     {
         foreach (TASContext tileTAS in tileTASList)
         {

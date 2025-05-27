@@ -289,7 +289,6 @@ public sealed class QuestionDialogueEntry
 
     /// <summary>List of touch actions</summary>
     public List<string>? TouchActions = null;
-
 }
 
 public sealed class QuestionDialogueData
