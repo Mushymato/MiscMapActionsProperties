@@ -1,4 +1,3 @@
-using System.Security.AccessControl;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -71,11 +70,11 @@ internal static class FurnitureProperties
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch FurnitureTileData:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Failed to patch FurnitureProperties:\n{err}", LogLevel.Error);
         }
         try
         {
-            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will always come first.
+            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
                 prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
@@ -83,7 +82,7 @@ internal static class FurnitureProperties
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch FurnitureTileData::Furniture.loadDescription:\n{err}", LogLevel.Warn);
+            ModEntry.Log($"Failed to patch FurnitureProperties::Furniture.loadDescription:\n{err}", LogLevel.Warn);
         }
     }
 

@@ -98,7 +98,9 @@ internal static class CritterSpot
             return;
         }
 
-        Dictionary<Point, string[]> cacheEntry = critterSpotsCache.GetTileData(location);
+        if (critterSpotsCache.GetTileData(location) is not Dictionary<Point, string[]> cacheEntry)
+            return;
+
         foreach (Point pos in e.Item2)
         {
             if (spawnedCritters.TryGetValue(pos, out List<Critter>? critters))
@@ -135,7 +137,11 @@ internal static class CritterSpot
             RemoveTheseCritters(location, critters);
         }
         TileDataSpawnedCritters.Value = [];
-        foreach ((Point pos, string[] props) in critterSpotsCache.GetTileData(location))
+
+        if (critterSpotsCache.GetTileData(location) is not Dictionary<Point, string[]> cacheEntry)
+            return;
+
+        foreach ((Point pos, string[] props) in cacheEntry)
         {
             var spawned = SpawnCritter(location, pos, props, 0, out string _);
             if (spawned.Count > 0)

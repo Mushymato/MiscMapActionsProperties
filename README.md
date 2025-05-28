@@ -265,7 +265,13 @@ Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu 
 
 You can give furniture tile properties (including action and tile actions) and collision using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions. Besides this, you can also give a collision map to make the furniture passable on some tiles.
 
-[More details here](./docs/furniture_properties.md).
+To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, [more details here](./docs/furniture-properties.md).
+
+### Floor Path Properties
+
+You can give paths (`Data/FloorsAndPaths`) tile properties (including action and tile actions) using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions.
+
+To give floor and path some properties, add an entry to custom asset `mushymato.MMAP/FloorPathProperties`. Please see [example here](./[CP]%20MMAP%20Examples/floor_path_properties.json).
 
 ### Data/Buildings Metadata
 

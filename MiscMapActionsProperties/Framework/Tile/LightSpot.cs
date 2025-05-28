@@ -113,7 +113,10 @@ internal static class LightSpot
 
     private static void SpawnLocationLightsForCache(GameLocation location, TileDataCache<LightCondAndProps> cache)
     {
-        foreach ((Point pos, LightCondAndProps condprop) in cache.GetTileData(location))
+        if (cache.GetTileData(location) is not Dictionary<Point, LightCondAndProps> cachedProps)
+            return;
+
+        foreach ((Point pos, LightCondAndProps condprop) in cachedProps)
         {
             CreateNewLight(location, pos, condprop);
         }
@@ -125,7 +128,9 @@ internal static class LightSpot
         TileDataCache<LightCondAndProps> cache
     )
     {
-        Dictionary<Point, LightCondAndProps> cachedProps = cache.GetTileData(location);
+        if (cache.GetTileData(location) is not Dictionary<Point, LightCondAndProps> cachedProps)
+            return;
+
         foreach (Point pos in changedPos)
         {
             if (cachedProps.TryGetValue(pos, out LightCondAndProps? condprop))
@@ -141,7 +146,7 @@ internal static class LightSpot
             Light.MakeMapLightFromProps(
                 condprop.Props,
                 FormLightId(pos),
-                new Vector2(pos.X + 1 / 2, pos.Y + 1 / 2) * Game1.tileSize,
+                new Vector2(pos.X + 0.5f, pos.Y + 0.5f) * Game1.tileSize,
                 location.NameOrUniqueName
             )
             is LightSource light

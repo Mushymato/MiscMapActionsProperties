@@ -7,6 +7,7 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
 using StardewValley.Objects;
+using StardewValley.TerrainFeatures;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -33,6 +34,8 @@ public static class CommonPatch
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
     public static event EventHandler<Furniture>? Furniture_OnMoved;
+
+    public static event EventHandler<Flooring>? Flooring_OnMoved;
 
     public record MapTilePropChangedArgs(GameLocation Location, Point DestPoint, string Layer);
 
@@ -103,6 +106,14 @@ public static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeTileProperty)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnAdded)),
+                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnRemoved)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnRemoved_Prefix))
+            );
         }
         catch (Exception err)
         {
@@ -111,6 +122,16 @@ public static class CommonPatch
                 LogLevel.Error
             );
         }
+    }
+
+    private static void Flooring_OnRemoved_Prefix(Flooring __instance)
+    {
+        Flooring_OnMoved?.Invoke(null, __instance);
+    }
+
+    private static void Flooring_OnAdded_Finalizer(Flooring __instance)
+    {
+        Flooring_OnMoved?.Invoke(null, __instance);
     }
 
     internal static void GameLocation_MapTilePropChangedInvoke(GameLocation location, Point pos, string layer)

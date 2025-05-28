@@ -16,7 +16,7 @@
     <Description>Various map stuff for modders.</Description>
     <UniqueId>mushymato.MMAP</UniqueId>
     <UpdateKeys>Nexus:28423</UpdateKeys>
-    <Version>1.7.4-rc.2</Version>
+    <Version>1.8.0-rc.0</Version>
     <MinimumApiVersion_Behavior>UpdateFull</MinimumApiVersion_Behavior>
     <MinimumGameVersion_Behavior>UpdateFull</MinimumGameVersion_Behavior>
     <Dependencies_VersionBehavior>UpdateFull</Dependencies_VersionBehavior>

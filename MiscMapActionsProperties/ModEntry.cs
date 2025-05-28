@@ -48,6 +48,7 @@ public class ModEntry : Mod
         Framework.Tile.ActionCond.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.CritterSpot.Register();
+        Framework.Tile.FloorPathProperties.Register();
         Framework.Tile.FurnitureProperties.Register();
         Framework.Tile.GrassSpread.Register();
         Framework.Tile.HoleWarp.Register();

@@ -1,9 +1,11 @@
 using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
 using StardewValley.Objects;
+using StardewValley.TerrainFeatures;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -55,6 +57,7 @@ internal sealed class TileDataCache<TProps>
 
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
         CommonPatch.Furniture_OnMoved += OnFurnitureMoved;
+        CommonPatch.Flooring_OnMoved += OnFlooringMoved;
         CommonPatch.GameLocation_ApplyMapOverride += OnApplyMapOverride;
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
@@ -84,6 +87,16 @@ internal sealed class TileDataCache<TProps>
         if (changedPoints.Any())
         {
             PushChangedPoints(e.Location, changedPoints);
+        }
+    }
+
+    private void OnFlooringMoved(object? sender, Flooring flooring)
+    {
+        HashSet<Point> changedPoints = [];
+        UpdateLocationTileData(flooring.Location, new(flooring.Tile.ToPoint(), new(1, 1)), ref changedPoints);
+        if (changedPoints.Any())
+        {
+            PushChangedPoints(flooring.Location, changedPoints);
         }
     }
 
@@ -164,10 +177,11 @@ internal sealed class TileDataCache<TProps>
 
     private void UpdateLocationTileData(GameLocation location, Rectangle bounds, ref HashSet<Point> changedPoints)
     {
-        if (location.Map == null)
+        if (!Context.IsWorldReady)
             return;
 
-        Dictionary<Point, TProps> cacheEntry = GetTileData(location);
+        if (GetTileData(location) is not Dictionary<Point, TProps> cacheEntry)
+            return;
 
         for (int x = Math.Max(bounds.X, 0); x < Math.Min(bounds.X + bounds.Width, location.Map.DisplayWidth / 64); x++)
         {
@@ -212,8 +226,10 @@ internal sealed class TileDataCache<TProps>
         return location != null && location.NameOrUniqueName != null && _cache.ContainsKey(location.NameOrUniqueName);
     }
 
-    internal Dictionary<Point, TProps> GetTileData(GameLocation location)
+    internal Dictionary<Point, TProps>? GetTileData(GameLocation location)
     {
+        if (location.NameOrUniqueName == null)
+            return null;
         Dictionary<Point, TProps> cacheEntry;
         if (_cache.ContainsKey(location.NameOrUniqueName))
         {

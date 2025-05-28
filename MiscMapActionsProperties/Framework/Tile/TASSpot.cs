@@ -79,7 +79,9 @@ internal static class TASSpot
             return;
         }
 
-        Dictionary<Point, string[]> tasSpotData = tasSpotsCache.GetTileData(Game1.currentLocation);
+        if (tasSpotsCache.GetTileData(Game1.currentLocation) is not Dictionary<Point, string[]> tasSpotData)
+            return;
+
         Dictionary<Point, List<TASContext>> target;
         List<TASContext> newCtxList = [];
         foreach (Point pos in e.Item2)
@@ -315,7 +317,11 @@ internal static class TASSpot
         Dictionary<Point, List<TASContext>> onetime = [];
         Dictionary<Point, List<TASContext>> respawning = [];
         Dictionary<Point, List<TASContext>> target;
-        foreach ((Point pos, string[] tasKeyList) in tasSpotsCache.GetTileData(location))
+
+        if (tasSpotsCache.GetTileData(Game1.currentLocation) is not Dictionary<Point, string[]> tasSpotData)
+            return null;
+
+        foreach ((Point pos, string[] tasKeyList) in tasSpotData)
         {
             foreach (var tasKey in tasKeyList)
             {

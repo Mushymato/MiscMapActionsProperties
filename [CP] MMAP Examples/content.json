@@ -167,6 +167,10 @@
     {
       "Action": "Include",
       "FromFile": "building_warp.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "floor_path_properties.json"
     }
   ]
 }
