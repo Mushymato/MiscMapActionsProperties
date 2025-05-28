@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Tile;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewValley;
 using StardewValley.Buildings;
@@ -13,11 +14,21 @@ internal static class HumanDoorExt
 {
     internal const string Action_Warp = $"{ModEntry.ModId}_WarpBuilding";
     internal const string Action_MagicWarp = $"{ModEntry.ModId}_MagicWarpBuilding";
+    internal const string Action_HoleWarp = $"{HoleWarp.TileAction_HoleWarp}Building";
+
+    internal const string Action_WarpOut = $"{ModEntry.ModId}_WarpBuildingOut";
+    internal const string Action_MagicWarpOut = $"{ModEntry.ModId}_MagicWarpBuildingOut";
+    internal const string Action_HoleWarpOut = $"{HoleWarp.TileAction_HoleWarp}BuildingOut";
 
     internal static void Register()
     {
         CommonPatch.RegisterTileAndTouch(Action_Warp, DoWarpBuilding);
         CommonPatch.RegisterTileAndTouch(Action_MagicWarp, DoMagicWarpBuilding);
+        CommonPatch.RegisterTileAndTouch(Action_HoleWarp, DoHoleWarpBuilding);
+
+        CommonPatch.RegisterTileAndTouch(Action_WarpOut, DoWarpBuildingOut);
+        CommonPatch.RegisterTileAndTouch(Action_MagicWarpOut, DoMagicWarpBuildingOut);
+        CommonPatch.RegisterTileAndTouch(Action_HoleWarpOut, DoHoleWarpBuildingOut);
     }
 
     private static bool DoWarpBuilding(GameLocation location, string[] args, Farmer who, Point point)
@@ -35,6 +46,46 @@ internal static class HumanDoorExt
         if (TryGetWarpArgs("MagicWarp", location, args, who, point, out string[]? warpArgs))
         {
             location.performTouchAction(warpArgs, who.getStandingPosition());
+            return true;
+        }
+        return false;
+    }
+
+    private static bool DoHoleWarpBuilding(GameLocation location, string[] args, Farmer who, Point point)
+    {
+        if (TryGetWarpArgs(HoleWarp.TileAction_HoleWarp, location, args, who, point, out string[]? warpArgs))
+        {
+            location.performTouchAction(warpArgs, who.getStandingPosition());
+            return true;
+        }
+        return false;
+    }
+
+    private static bool DoWarpBuildingOut(GameLocation location, string[] args, Farmer who, Point point)
+    {
+        if (TryGetWarpOutArgs("Warp", location, args, out string[]? warpOutArgs))
+        {
+            location.performTouchAction(warpOutArgs, who.getStandingPosition());
+            return true;
+        }
+        return false;
+    }
+
+    private static bool DoMagicWarpBuildingOut(GameLocation location, string[] args, Farmer who, Point point)
+    {
+        if (TryGetWarpOutArgs("MagicWarp", location, args, out string[]? warpOutArgs))
+        {
+            location.performTouchAction(warpOutArgs, who.getStandingPosition());
+            return true;
+        }
+        return false;
+    }
+
+    private static bool DoHoleWarpBuildingOut(GameLocation location, string[] args, Farmer who, Point point)
+    {
+        if (TryGetWarpOutArgs(HoleWarp.TileAction_HoleWarp, location, args, out string[]? warpOutArgs))
+        {
+            location.performTouchAction(warpOutArgs, who.getStandingPosition());
             return true;
         }
         return false;
@@ -91,6 +142,35 @@ internal static class HumanDoorExt
             warpToY = buildingIndoors.warps[0].Y - 1;
         }
         warpArgs = [touchAction, buildingIndoors.NameOrUniqueName, warpToX.ToString(), warpToY.ToString()];
+        return true;
+    }
+
+    private static bool TryGetWarpOutArgs(
+        string touchAction,
+        GameLocation location,
+        string[] args,
+        [NotNullWhen(true)] out string[]? warpOutArgs
+    )
+    {
+        warpOutArgs = null;
+        if (location.ParentBuilding is not Building building)
+        {
+            ModEntry.LogOnce($"Cannot use WarpBuildingOut outside of building interiors.");
+            return false;
+        }
+
+        if (
+            !ArgUtility.TryGetInt(args, 1, out int warpToX, out _, "int warpToX")
+            || !ArgUtility.TryGetInt(args, 2, out int warpToY, out _, "int warpToY")
+        )
+        {
+            warpToX = building.humanDoor.X;
+            warpToY = building.humanDoor.Y + 1;
+        }
+        warpToX += building.tileX.Value;
+        warpToY += building.tileY.Value;
+
+        warpOutArgs = [touchAction, building.parentLocationName.Value, warpToX.ToString(), warpToY.ToString()];
         return true;
     }
 }

@@ -48,20 +48,20 @@
       ],
       "Entries": {
         // day chimkin
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.alpha": "0.5 1.0",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.rotate": "0 3.0",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.rotateRate": 1,
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.origin": "8 8",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.scale": "12 16.0",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.effect": "FlipHorizontally",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_Chimkin.condition": "TIME 0000 1659",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.alpha": "0.5 1.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotate": "0 3.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotateRate": 1,
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.origin": "8 8",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.scale": "12 16.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.effect": "FlipHorizontally",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.condition": "!mushymato.MMAP_TIME_IS_LIGHTS_OFF",
         // night chimkin
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.alpha": "0.5 1.0",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.rotate": "0 3.0",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.rotateRate": 1,
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.origin": "8 8",
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.scale": 16.0,
-        "mushymato.MMAP/DrawLayerRotate.{{ModId}}_VoidChimkin.condition": "TIME 1700 2600"
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.alpha": "0.5 1.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.rotate": "0 3.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.rotateRate": 1,
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.origin": "8 8",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.scale": 16.0,
+        "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.condition": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
       }
     }
   ]

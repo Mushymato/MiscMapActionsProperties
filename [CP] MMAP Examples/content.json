@@ -163,6 +163,10 @@
     {
       "Action": "Include",
       "FromFile": "bag_inventory.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "building_warp.json"
     }
   ]
 }

@@ -13,6 +13,7 @@ Some temporary animated sprites are provided by default by this mod:
 | -------- | ---- | ------- | ----- |
 | `Id` | string | **required** | Unique string id |
 | `Condition` | string | _null_ | Game state query, show TAS if true (or null). |
+| `ConditionInterval` | double | -1 | Number of miliseconds between each GSQ check for TAS, -1 means never recheck. Only useful for respawning TAS (`SpawnInterval` > 0). |
 | `Texture` | string | **required** | Texture asset name. |
 | `SourceRect` | Rectangle | **required** | Area of texture to draw. |
 | `Interval` | float | 100 | Time between frames, in miliseconds. |

@@ -93,13 +93,13 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 There are also related Triggers for use in Data/TriggerActions
 - mushymato.MMAP_NightTimeStarting: raised at night starting time
 - mushymato.MMAP_NightTimeModerate: raised at night moderate time
-- mushymato.MMAP__NightTimeLightsOff: raised 100 before night truly time, this is when lights turn off
+- mushymato.MMAP_NightTimeLightsOff: raised 100 before night truly time, this is when lights turn off
 - mushymato.MMAP_NightTimeTruly: raised at night truly time
 
 And Game State Queries
 - mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time
 - mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time
-- mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after lights off
+- mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after window lights turn off and lamp lights turn on.
 - mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time
 
 ### Tile Data
@@ -114,7 +114,7 @@ And Game State Queries
 
 #### Back layer: mushymato.MMAP_GrassSpread T
 
-- If set, allow this tile to spread grass (without using `Diggable`)
+- If set, allow this tile to spread grass (without using `Diggable`).
 - Ideally this is set on the tile sheet, rather than on a per tile data basis.
 - This is disabled if the player has `bcmpinc.GrassGrowth` installed since that mod simply skips the `Diggable` check entirely.
 
@@ -137,7 +137,6 @@ And Game State Queries
 - Add a temporary animated sprite at this tile.
 - The layer depth is based on the tile position.
 - The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
-- This can also be used as a tile/touch/trigger action, where the first 2 arguments are the tile coordinate followed by all the `tasId` (i.e. `mushymato.MMAP_TAS <X> <Y> \<tasId\>+`)
 
 #### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+
 
@@ -189,56 +188,52 @@ And Game State Queries
 - This can be used to create junimo chest like containers, though automate will not work with it.
 - Bag kind will allow you to make this chest a big chest with 70 slots, but it is up to the mod to consistently use `BigChest` for all places where this bag is accessible.
 
+#### mushymato.MMAP_TAS \<X\> \<Y\> \<tasId\>+
+
+- Can be used as either Action or TouchAction or TriggerAction.
+- Spawns [TAS](./docs/temporary-animated-sprites.md) on the specified tile.
+- Works nearly identical to the tile data version but does not respond to tile data changes.
+
+#### mushymato.MMAP_ToggleTAS \<spawnKey\> \<X\> \<Y\> \<tasId\>+
+
+- Can be used as either Action or TriggerAction.
+- Spawns [TAS](./docs/temporary-animated-sprites.md) on the specified tile, associated with a specific key.
+- When activated again, remove the spawnned TAS.
+
+#### mushymato.MMAP_ContactTAS \<tasId\>+
+
+- Can be used as TouchAction.
+- Spawns the TAS while player is standing on the tile, removed if player moves off the tile.
+
 #### mushymato.MMAP_WarpBuilding [X Y]
 
-- Can be used as either Action or TouchAction.
-- Mainly for usage in building `ActionTiles` or `TileProperties`, warps the player into the building that is occupying this tile.
+Also available as: `mushymato.MMAP_MagicWarpBuilding [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWarpBuilding [X Y]` (does the hole warp).
+
+- Can be used as either Action or TouchAction, mainly for usage in building `ActionTiles` or `TileProperties`.
+- Warps the player into the building that is occupying this tile.
 - The building must have an interior, and ideally still define a `HumanDoor` which will serve as the exit tile.
 - You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
 - The original human door tile will still work.
 
-_Example (`ActionTiles`):_
-```json
-"ActionTiles": [
-    {
-        "Id": "{{ModId}}_WarpBuilding",
-        "Tile": {
-            "X": 0,
-            "Y": 0
-        },
-        "Action": "mushymato.MMAP_WarpBuilding"
-    }
-]
-```
+_See [[CP] MMAP Examples/building_warp.json]([CP]%20MMAP%20Examples/building_warp.json) for examples of adding this to building tile data_
 
-#### mushymato.MMAP_MagicWarpBuilding [X Y]
+#### mushymato.MMAP_WarpBuildingOut [X Y]
 
-- Can be used as either Action or TouchAction.
-- Mainly for usage in building `ActionTiles` or `TileProperties`, warps the player into the building that is occupying this tile.
-- The building must have an interior, and ideally still define a valid `HumanDoor` which will serve as the exit tile.
-- You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
-- The original human door tile will still work.
-- Does magic warp in the back (the biiiiu and teleport effect).
+Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWarpBuildingOut [X Y]` (does the hole warp).
 
-_Example (`TileProperties`):_
-```json
-"TileProperties": [
-    {
-        "Id": "Default_MagicWarpBuilding",
-        "Name": "TouchAction",
-        "Value": "mushymato.MMAP_MagicWarpBuilding 6 6",
-        "Layer": "Back",
-        "TileArea": {
-            "X": 1,
-            "Y": 0,
-            "Width": 1,
-            "Height": 1
-        }
-    }
-],
-```
+- Can be used as either Action or TouchAction, only valid in a building interior map.
+- Warps the player out of a building, optionally to a position other than the default 1 tile below HumanDoor.
+- X and Y arguments are relative to the building's top left tile, it can be negative.
+- There's **no guarentee** that the warp out tile is not occupied, it's recommended to use `AdditionalPlacementTiles` to enforce a cleared tile.
 
-#### mushymato.MMAP_QuestionDialogue <question_dialog_id>
+#### mushymato.MMAP_If \<GSQ\> ## \<if-case\> [## \<else-case\>]
+
+- Can be used as either Action or TouchAction
+- Works like Trigger Action If, blocks the `if-case` Action behind a GSQ.
+- Optionally allows a `else-case` Action.
+- The action provided must match the usescase, e.g. if this If is on a TileAction, both the if-case and else-case actions should also be tile actions.
+
+#### mushymato.MMAP_QuestionDialogue \<question_dialog_id\>
 
 - Can be used as either Action or TouchAction
 - Can also be used as trigger Action
@@ -285,34 +280,34 @@ Buildings Metadata are like CustomFields, except they also appear on skins and c
 - `type|texture` is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use `offsetX` and `offsetY` to further adjust the position of the light.
 
-#### mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.{override}
+#### mushymato.MMAP/DrawLayer.{DrawLayerId}.{override}
 
 Various draw layer overriding fields, can be used with regular draw layer things.
 
 ##### string values
 
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.condition`: A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this layer should draw. Rechecked on time changed (e.g. 10 in game minutes).
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.condition`: A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this layer should draw. Rechecked on time changed (e.g. 10 in game minutes).
 
 ##### float values
 
 These are all support passing either `0.1` float, or `"0.1 0.4"` for random value between first and second.
 
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.alpha`: transparency (0 to 1)
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.rotate`: rotation (0 to 6.28318), around the origin.
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.rotateRate`: rotation change per second, positive is clockwise, negative is counter clockwise.
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.scale`: draw scale (default 4f)
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.alpha`: transparency (0 to 1)
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotate`: rotation (0 to 6.28318), around the origin.
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotateRate`: rotation change per second, positive is clockwise, negative is counter clockwise.
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.scale`: draw scale (default 4f)
 
 ##### Vector2 values
 
 These are Vector2 coordinates, takes 2 integers like `"0 0"`.
 
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.origin`: defines the origin of the sprite, relevant if you also use rotate, but can act as a secondary offset if the draw layer 
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.origin`: defines the origin of the sprite. Mainly relevant if you also use rotate, but can act as a secondary offset for the draw layer.
 
 ##### SpriteEffects values
 
 SpriteEffects, one of "None", "FlipHorizontally", "FlipVertically"
 
-- `mushymato.MMAP/DrawLayerRotate.{DrawLayerId}.effect`: sprite effects for flipping the sprite
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.effect`: sprite effects for flipping the sprite
 
 ### Farmhouse Upgrade Relocation Solution
 
@@ -345,7 +340,7 @@ If you need something from here ask me about it and I'll try to think of better 
 
 - For use in building maps.
 - Changes where the player arrives on entry, away from the default 1 tile above first warp.
-- DEPRECATED: you can now use action `mushymato.MMAP_WarpBuilding` or `mushymato.MMAP_MagicWarpBuilding`
+- DEPRECATED: you can now use action `mushymato.MMAP_WarpBuilding` or `mushymato.MMAP_MagicWarpBuilding` or `mushymato.MMAP_HoleWarpBuilding`
 
 #### Map Property: mushymato.MMAP_HoeDirt: \<texture\>
 

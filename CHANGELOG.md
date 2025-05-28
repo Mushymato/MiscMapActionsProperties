@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.4]
+
+### Added
+- New tile/touch action mushymato.MMAP_HoleWarpBuilding [X Y], warp that will put player into the building on this tile, for use with buildings.
+- New tile/touch action mushymato.MMAP_WarpBuildingOut [X Y], mushymato.MMAP_MagicWarpBuildingOut [X Y], mushymato.MMAP_HoleWarpBuildingOut [X Y], to add additional nonstandard exits from building interior.
+- New tile/touch action mushymato.MMAP_If GSQ ## if-case ## else-case
+- New tile/trigger action mushymato.MMAP_ToggleTAS X Y \<tasId\>+
+
+### Changed
+- `mushymato.MMAP/DrawLayerRotate.` keys are renamed to `mushymato.MMAP/DrawLayer.`
+
+### Fixed
+- Respawning temporary animated sprites now immediately spawn.
+
 ## [1.7.3]
 
 ### Added

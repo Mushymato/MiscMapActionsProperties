@@ -1,0 +1,94 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/warpybuildy",
+      "FromFile": "assets/warpybuildy.png"
+    },
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}/Shed2",
+      "FromFile": "assets/Shed2.tmx"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/{{ModId}}/Shed2",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 5,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "TouchAction": "mushymato.MMAP_MagicWarpBuildingOut -1 -1"
+          },
+        },
+      ]
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "Entries": {
+        "{{ModId}}.WarpyBuildy": {
+          "Name": "WarpyBuildy",
+          "Description": "WarpyBuildy",
+          "Texture": "{{ModId}}/warpybuildy",
+          "Size": {
+            "X": 3,
+            "Y": 3
+          },
+          "IndoorMap": "{{ModId}}/Shed2",
+          "IndoorMapType": "StardewValley.Shed",
+          // normal built-in human door
+          "HumanDoor": {
+            "X": 0,
+            "Y": 2
+          },
+          "DrawShadow": false,
+          "CollisionMap": "XOX\nOXO\nXOX",
+          "ActionTiles": [
+            {
+              // special alternate door
+              "Id": "{{ModId}}_WarpBuilding",
+              "Tile": {
+                "X": 2,
+                "Y": 2
+              },
+              "Action": "mushymato.MMAP_WarpBuilding"
+            }
+          ],
+          "TileProperties": [
+            {
+              // special alternate magic touch warp
+              "Id": "Default_MagicWarpBuilding",
+              "Name": "TouchAction",
+              "Value": "mushymato.MMAP_MagicWarpBuilding 6 6",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 1,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            {
+              // special alternate hole touch warp
+              "Id": "Default_HoleWarpBuilding",
+              "Name": "TouchAction",
+              "Value": "mushymato.MMAP_HoleWarpBuilding 4 4",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 2,
+                "Y": 1,
+                "Width": 1,
+                "Height": 1
+              }
+            }
+          ],
+        }
+      }
+    }
+  ]
+}

@@ -72,13 +72,13 @@ internal record DLExtInfo(
 }
 
 /// <summary>
-/// Add new BuildingData.Metadata mushymato.MMAP/DrawLayerRotate.<DrawLayerId>: <rotation> <originX> <originY>
+/// Add new BuildingData.Metadata mushymato.MMAP/DrawLayer.<DrawLayerId>: <rotation> <originX> <originY>
 /// Rotates the layer by rotation every second (rotation/60 every tick) around originX, originY
 /// Can be used with regular draw layer things.
 /// </summary>
 internal static class DrawLayerExt
 {
-    internal const string Metadata_DrawLayerRotate_Prefix = $"{ModEntry.ModId}/DrawLayerRotate.";
+    internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoCache = [];
     private static readonly Dictionary<string, DLExtInfo> dlExtInfoInMenu = [];
 
@@ -144,7 +144,7 @@ internal static class DrawLayerExt
     private static void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
         if (e.IsCurrentLocation)
-            AddBuildingDrawLayerRotate(Game1.currentLocation);
+            AddBuildingDrawLayer(Game1.currentLocation);
     }
 
     private static void OnMenuChanged(object? sender, MenuChangedEventArgs e)
@@ -155,13 +155,13 @@ internal static class DrawLayerExt
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
-        AddBuildingDrawLayerRotate(Game1.currentLocation);
+        AddBuildingDrawLayer(Game1.currentLocation);
     }
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
         dlExtInfoCache.Clear();
-        AddBuildingDrawLayerRotate(e.NewLocation);
+        AddBuildingDrawLayer(e.NewLocation);
     }
 
     private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
@@ -180,7 +180,7 @@ internal static class DrawLayerExt
             value.TimeChanged();
     }
 
-    internal static void AddBuildingDrawLayerRotate(GameLocation location)
+    internal static void AddBuildingDrawLayer(GameLocation location)
     {
         if (Game1.currentLocation == null)
             return;
@@ -229,7 +229,7 @@ internal static class DrawLayerExt
     )
     {
         dlExtInfo = null;
-        string drawRotatePrefix = $"{Metadata_DrawLayerRotate_Prefix}{drawLayer.Id}.";
+        string drawRotatePrefix = $"{Metadata_DrawLayer_Prefix}{drawLayer.Id}.";
 
         Vector2 origin = Vector2.Zero;
         SpriteEffects effect = SpriteEffects.None;
