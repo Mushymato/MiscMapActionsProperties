@@ -3,6 +3,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using Mushymato.ExtendedTAS;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -197,7 +198,7 @@ internal static class TASSpot
 
     private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string error)
     {
-        error = "";
+        error = null!;
         return ToggleTileTAS(Game1.currentLocation, args, Game1.player, Point.Zero);
     }
 
@@ -210,7 +211,7 @@ internal static class TASSpot
             || !ArgUtility.TryGetPoint(args, 2, out Point pos, out error, "Point spawnPos")
         )
         {
-            ModEntry.Log(error);
+            ModEntry.Log(error, LogLevel.Error);
             return false;
         }
 
@@ -249,7 +250,6 @@ internal static class TASSpot
     private static void ContactTouchTAS(GameLocation location, string[] args, Farmer farmer, Vector2 point)
     {
         Point pos = point.ToPoint();
-        ModEntry.Log($"ContactTouchTAS {pos}");
         if (!CreateTASDefsFromArgs(args, 1, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
         {
             return;
@@ -365,6 +365,7 @@ internal static class TASSpot
 
         if (!onetime.Any() && !respawning.Any())
         {
+            ModEntry.Log($"No TAS found from '{string.Join(' ', args)}'", LogLevel.Error);
             onetime = null;
             respawning = null;
             return false;
