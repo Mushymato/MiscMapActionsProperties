@@ -228,8 +228,9 @@ internal sealed class TileDataCache<TProps>
 
     internal Dictionary<Point, TProps>? GetTileData(GameLocation location)
     {
-        if (location.NameOrUniqueName == null)
+        if (location == null || location.NameOrUniqueName == null)
             return null;
+
         Dictionary<Point, TProps> cacheEntry;
         if (_cache.ContainsKey(location.NameOrUniqueName))
         {
