@@ -453,7 +453,7 @@ internal static class Panorama
             transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
         );
 
-        ModEntry.help.ConsoleCommands.Add("mmap_reset_bg", "Reload current area background", ConsoleReloadBg);
+        ModEntry.help.ConsoleCommands.Add("mmap.reset_bg", "Reload current area background", ConsoleReloadBg);
     }
 
     private static void ConsoleReloadBg(string arg1, string[] arg2)

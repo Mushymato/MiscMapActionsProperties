@@ -1,0 +1,19 @@
+{
+  "Name": "[CP] Firefly Paths",
+  "Author": "mushymato",
+  "Version": "1.0.0",
+  "Description": "Fireflies :)",
+  "UniqueID": "mushymato.FireflyPaths",
+  "MinimumApiVersion": "4.2.0",
+  "UpdateKeys": [],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "mushymato.MMAP",
+      "MinimumVersion": "1.8.0",
+      "IsRequired": true
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/floor",
+      "FromFile": "assets/floor.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Objects",
+      "Entries": {
+        "{{ModId}}_Fireflies": {
+          "Name": "Glowing Floor",
+          "DisplayName": "Glowing Floor",
+          "Description": "Glowing Floor Example",
+          "Type": "Crafting",
+          "Category": -24,
+          "Price": 1,
+          "Texture": "{{ModId}}/floor",
+          "SpriteIndex": 0
+        },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/FloorsAndPaths",
+      "Entries": {
+        "{{ModId}}_FloorTerrain": {
+          "Id": "{{ModId}}_FloorTerrain",
+          "ItemId": "{{ModId}}_FloorItem",
+          "Texture": "{{ModId}}/floor",
+          "Corner": {
+            "X": 0,
+            "Y": 0
+          },
+          "WinterTexture": "{{ModId}}/floor",
+          "WinterCorner": {
+            "X": 64,
+            "Y": 0
+          },
+          "PlacementSound": "axchop",
+          "RemovalSound": null,
+          "RemovalDebrisType": 12,
+          "FootstepSound": "woodyStep",
+          "ConnectType": "Default",
+          "ShadowType": "Square",
+          "CornerSize": 4,
+          "FarmSpeedBuff": -1.0
+        },
+      }
+    }
+  ]
+}
