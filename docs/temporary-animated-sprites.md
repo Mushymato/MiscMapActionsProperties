@@ -22,7 +22,8 @@ Some temporary animated sprites are provided by default by this mod:
 | `PositionOffset` | Vector2 | Vector2.Zero | Offset added to position during draw. |
 | `Flicker` | bool | false | Skips drawing every other frame. |
 | `Flip` | bool | false | Horizontally flip the sprite during draw. |
-| `SortOffset` | float | 0f | Offset on layer depth, for determining whether this sprite appear over or under other sprites. |
+| `LayerDepth` | float | 0 | Absolute layer depth for determining whether sprite is above or below other sprites. |
+| `SortOffset` | float | 0f | If this is set to a non-zero value, do an offset on layer depth relative to the Y position of the sprite + SortOffset, useful when using this TAS at various different positions. |
 | `AlphaFade` | float | 0f | Amount of additional transparency every frame. Set this to make the sprite fade away over time. |
 | `Scale` | float | 1f | Draw scale, applied on top of the default 4x scale. |
 | `ScaleChange` | float | 0f | Amount of additional scale every frame. Set this to make sprite enlarge/shrink over time. |
@@ -33,7 +34,6 @@ Some temporary animated sprites are provided by default by this mod:
 | `Motion` | Vector2 | 0,0 | Amount of movement in pixels to do on X and Y axis each tick. |
 | `Acceleration` | Vector2 | 0,0 | Amount of increase in motion on X and Y axis each tick. |
 | `AccelerationChange` | Vector2 | 0,0 | Amount of increase in acceleration on X and Y axis each tick. |
-| `LayerDepth` | Vector2 | 0,0 | Absolute layer depth, but layer depth from position may still apply. |
 | `Alpha` | float | 1f | Multiplier on Color, i.e. 0 is transparent. |
 | `PingPong` | bool | false | Makes animation frames go 0 1 2 3 2 1 0 instead of 0 1 2 3 0 1 2 3. |
 | `SpawnInterval` | double | -1 | How many miliseconds before a new copy of this TAS should be spawned, ideally used with some randomization. |

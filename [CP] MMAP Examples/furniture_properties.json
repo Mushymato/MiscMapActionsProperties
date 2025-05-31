@@ -117,10 +117,10 @@
           "TileProperties": [
             {
               "Id": "{{ModId}}-mushymato.MMAP_TAS",
-              // "Name": "mushymato.MMAP_TAS",
-              // "Value": "{{ModId}}_CauldronSmoke",
-              "Name": "mushymato.MMAP_Paddy",
-              "Value": "T",
+              "Name": "mushymato.MMAP_TAS",
+              "Value": "{{ModId}}_CauldronSmoke",
+              // "Name": "mushymato.MMAP_Paddy",
+              // "Value": "T",
               "Layer": "Back",
               "TileArea": {
                 "X": -1,
@@ -138,6 +138,30 @@
               "Id": "{{ModId}}-mushymato.Trough",
               "Name": "Trough",
               "Value": "T",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            {
+              "Id": "{{ModId}}-Bed",
+              "Name": "Bed",
+              "Value": "T",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            {
+              "Id": "{{ModId}}-Sleep",
+              "Name": "TouchAction",
+              "Value": "Sleep",
               "Layer": "Back",
               "TileArea": {
                 "X": 0,

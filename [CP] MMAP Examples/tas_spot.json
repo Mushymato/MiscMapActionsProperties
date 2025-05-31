@@ -106,6 +106,7 @@
           "Acceleration": "-0.002,0",
           "Interval": 99999,
           "LayerDepth": 0.144,
+          "SortOffset": 0,
           "Scale": 0.75,
           "ScaleChange": 0.01,
           "Color": "Lime",
