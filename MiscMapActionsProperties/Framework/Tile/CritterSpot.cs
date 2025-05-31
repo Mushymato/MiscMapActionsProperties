@@ -22,6 +22,8 @@ internal enum SupportedCritter
     Crab,
     Birdie,
     Butterfly,
+    Frog,
+    LeaperFrog,
 }
 
 /// <summary>
@@ -32,6 +34,7 @@ internal enum SupportedCritter
 /// - Crab: [texture|T] [count]
 /// - Birdies: [texture|<number>|T] [count]
 /// - Butterfly: [texture|<number>|T] [count]
+/// - Frog: [T|F] [count]
 /// </summary>
 internal static class CritterSpot
 {
@@ -212,6 +215,8 @@ internal static class CritterSpot
                 SupportedCritter.Crab => SpawnCritterCrab(location, position, arg1, count),
                 SupportedCritter.Birdie => SpawnCritterBirdie(location, position, arg1, count),
                 SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, arg1, count),
+                SupportedCritter.Frog => SpawnCritterFrog(location, position, arg1, count),
+                SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, position, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)
@@ -405,6 +410,39 @@ internal static class CritterSpot
                 butterfly.sprite.textureName.Value = texture;
             }
             yield return butterfly;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterFrog(GameLocation location, Point position, string? arg1, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Frog frog = new(position.ToVector2(), waterLeaper: false);
+            frog.position += new Vector2(
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
+            );
+            frog.flip = arg1 == "F";
+            yield return frog;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterLeaperFrog(
+        GameLocation location,
+        Point position,
+        string? arg1,
+        int count
+    )
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Frog frog = new(position.ToVector2(), waterLeaper: true);
+            frog.position += new Vector2(
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
+            );
+            frog.flip = arg1 == "F";
+            yield return frog;
         }
     }
 }

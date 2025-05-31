@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New tile/trigger action mushymato.MMAP_ToggleTAS X Y \<tasId\>+
 - New feature mushymato.MMAP/FloorPathProperties which allows paths to get tile properties.
 - New tile data mushymato.MMAP_Paddy for making a tile valid for paddy.
+- mushymato.MMAP_Critter now supports Frog and LeaperFrog
 
 ### Changed
 - `mushymato.MMAP/DrawLayerRotate.` keys are renamed to `mushymato.MMAP/DrawLayer.`
