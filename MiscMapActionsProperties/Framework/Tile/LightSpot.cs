@@ -57,7 +57,6 @@ internal static class LightSpot
         lightSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
 
-    // TODO: refactor this later to take advantage of changed
     private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
     {
         if (e.Item1 != Game1.currentLocation)
@@ -74,17 +73,14 @@ internal static class LightSpot
         foreach (Point pos in e.Item2)
         {
             lightId = FormLightId(pos);
-            if (Game1.currentLightSources.Remove(lightId))
+            Game1.currentLightSources.Remove(lightId);
+            foreach (List<LightSource> lights in conditionalLightSources.Value.Values)
             {
-                foreach (List<LightSource> lights in conditionalLightSources.Value.Values)
-                {
-                    lights.RemoveWhere(light => light.Id == lightId);
-                }
+                lights.RemoveWhere(light => light.Id == lightId);
             }
         }
 
         UpdateLocationLightsForCache(e.Item1, e.Item2, lightSpotsCache);
-
         UpdateConditionalLights(e.Item1);
     }
 
