@@ -53,6 +53,7 @@ public class ModEntry : Mod
         Framework.Tile.GrassSpread.Register();
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Register();
+        Framework.Tile.PaddySpot.Register();
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.ShowGlobalInventory.Register();

@@ -117,8 +117,10 @@
           "TileProperties": [
             {
               "Id": "{{ModId}}-mushymato.MMAP_TAS",
-              "Name": "mushymato.MMAP_TAS",
-              "Value": "{{ModId}}_CauldronSmoke",
+              // "Name": "mushymato.MMAP_TAS",
+              // "Value": "{{ModId}}_CauldronSmoke",
+              "Name": "mushymato.MMAP_Paddy",
+              "Value": "T",
               "Layer": "Back",
               "TileArea": {
                 "X": -1,

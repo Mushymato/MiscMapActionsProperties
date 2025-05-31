@@ -64,16 +64,9 @@ internal static class SteamOverlay
 
     internal static void Register()
     {
-        try
-        {
-            CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
-            CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Postfix;
-            ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch SteamOverlay:\n{err}", LogLevel.Error);
-        }
+        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+        ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
     }
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
@@ -114,7 +107,7 @@ internal static class SteamOverlay
         steamCtx.Value = null;
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(
+    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(
         object? sender,
         CommonPatch.UpdateWhenCurrentLocationArgs e
     )

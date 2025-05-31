@@ -31,7 +31,9 @@ internal static class FurnitureProperties
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
+        {
             _fpData = null;
+        }
     }
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)

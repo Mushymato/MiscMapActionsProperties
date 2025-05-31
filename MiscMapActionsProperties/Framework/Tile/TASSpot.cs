@@ -43,10 +43,8 @@ internal static class TASSpot
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
-        ModEntry.harm.Patch(
-            original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
-            prefix: new HarmonyMethod(typeof(TASSpot), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix))
-        );
+        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
 
@@ -156,30 +154,34 @@ internal static class TASSpot
         }
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(GameLocation __instance, GameTime time)
+    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(
+        object? sender,
+        CommonPatch.UpdateWhenCurrentLocationArgs e
+    )
     {
-        if (__instance.wasUpdated)
+        if (e.Location.wasUpdated)
             return;
-        GameStateQueryContext context = new(__instance, null, null, null, null);
+
+        GameStateQueryContext context = new(e.Location, null, null, null, null);
         if (respawningTASCache.Value != null)
         {
-            AddRespawnTAS(__instance, time, context, respawningTASCache.Value);
+            AddRespawnTAS(e.Location, e.Time, context, respawningTASCache.Value);
         }
         if (locationTASDefs.Value != null)
         {
-            AddRespawnTAS(__instance, time, context, locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx));
+            AddRespawnTAS(e.Location, e.Time, context, locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx));
         }
         if (contactTASDefs.Value != null)
         {
             if (contactTASDefs.Value.Pos == Game1.player.TilePoint)
             {
-                AddRespawnTAS(__instance, time, context, contactTASDefs.Value.Respawning);
+                AddRespawnTAS(e.Location, e.Time, context, contactTASDefs.Value.Respawning);
             }
             else
             {
                 foreach (TASContext ctx in contactTASDefs.Value.Onetime)
                 {
-                    ctx.RemoveAllSpawned(__instance.TemporarySprites.Remove);
+                    ctx.RemoveAllSpawned(e.Location.TemporarySprites.Remove);
                 }
                 contactTASDefs.Value = null;
             }

@@ -39,13 +39,13 @@ internal static class WoodsLighting
                     nameof(Woods_updateWoodsLighting_RevesePatchTranspiler)
                 )
             );
-            CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Postfix;
-            CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         }
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch WoodsLighting:\n{err}", LogLevel.Error);
         }
+        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -55,7 +55,7 @@ internal static class WoodsLighting
             $"Woods_updateWoodsLighting_ReversePatch failed, deactivated {MapProp_WoodsLighting}",
             LogLevel.Error
         );
-        CommonPatch.GameLocation_UpdateWhenCurrentLocation -= GameLocation_UpdateWhenCurrentLocation_Postfix;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocation -= GameLocation_UpdateWhenCurrentLocation_Prefix;
         CommonPatch.GameLocation_resetLocalState -= GameLocation_resetLocalState_Postfix;
         woodsLightingCtx.Value = null;
     }
@@ -103,7 +103,7 @@ internal static class WoodsLighting
         woodsLightingCtx.Value = null;
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(
+    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(
         object? sender,
         CommonPatch.UpdateWhenCurrentLocationArgs e
     )

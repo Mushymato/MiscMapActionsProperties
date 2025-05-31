@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Tile;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
@@ -21,8 +23,12 @@ internal sealed class TileDataCache<TProps>
     private readonly string[] layers;
     internal event EventHandler<(GameLocation, HashSet<Point>?)>? TileDataCacheChanged;
 
-    private readonly Dictionary<string, Dictionary<Point, TProps>> _cache = [];
+    private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new() { Value = [] };
+    private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value;
     internal Dictionary<GameLocation, HashSet<Point>?> nextTickChangedPoints = [];
+
+    private readonly PerScreen<bool> furniturePropertyJustInvalidated = new() { Value = false };
+    private readonly PerScreen<bool> floorPathPropertyJustInvalidated = new() { Value = false };
 
     internal void PushChangedPoints(GameLocation location, HashSet<Point>? newPoints)
     {
@@ -62,20 +68,82 @@ internal sealed class TileDataCache<TProps>
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
         CommonPatch.GameLocation_MapTilePropChanged += OnMapTilePropChanged;
+
+        ModEntry.help.Events.Content.AssetReady += OnAssetReady;
     }
 
-    private void ClearCache(object? sender, EventArgs e) => _cache.Clear();
+    private void OnAssetReady(object? sender, AssetReadyEventArgs e)
+    {
+        if (!Context.IsWorldReady)
+            return;
+
+        if (
+            e.NameWithoutLocale.IsEquivalentTo(FurnitureProperties.Asset_FurnitureProperties)
+            || e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/FurnitureExtensionData")
+        )
+        {
+            furniturePropertyJustInvalidated.Value = true;
+        }
+
+        if (e.NameWithoutLocale.IsEquivalentTo(FloorPathProperties.Asset_FloorPathProperties))
+        {
+            floorPathPropertyJustInvalidated.Value = true;
+        }
+    }
+
+    private void ClearCache(object? sender, EventArgs e) => Cache.Clear();
 
     private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
-        if (Game1.activeClickableMenu != null || !nextTickChangedPoints.Any())
+        if (!Context.IsWorldReady)
             return;
 
-        foreach ((GameLocation location, HashSet<Point>? changed) in nextTickChangedPoints)
+        if (Game1.activeClickableMenu != null)
+            return;
+
+        if (furniturePropertyJustInvalidated.Value)
         {
-            TileDataCacheChanged?.Invoke(this, new(location, changed));
+            foreach (string locName in Cache.Keys)
+            {
+                GameLocation loc = Game1.getLocationFromName(locName);
+                if (loc?.furniture.Any() ?? false)
+                {
+                    foreach (Furniture furniture in loc.furniture)
+                    {
+                        OnFurnitureMoved(null, furniture);
+                    }
+                }
+            }
+            furniturePropertyJustInvalidated.Value = false;
         }
-        nextTickChangedPoints.Clear();
+
+        if (floorPathPropertyJustInvalidated.Value)
+        {
+            foreach (string locName in Cache.Keys)
+            {
+                GameLocation loc = Game1.getLocationFromName(locName);
+                if (loc?.terrainFeatures.Values.Any(tf => tf is Flooring) ?? false)
+                {
+                    foreach (TerrainFeature feature in loc.terrainFeatures.Values)
+                    {
+                        if (feature is Flooring flooring)
+                        {
+                            OnFlooringMoved(null, flooring);
+                        }
+                    }
+                }
+            }
+            floorPathPropertyJustInvalidated.Value = false;
+        }
+
+        if (nextTickChangedPoints.Any())
+        {
+            foreach ((GameLocation location, HashSet<Point>? changed) in nextTickChangedPoints)
+            {
+                TileDataCacheChanged?.Invoke(this, new(location, changed));
+            }
+            nextTickChangedPoints.Clear();
+        }
     }
 
     private void OnMapTilePropChanged(object? sender, CommonPatch.MapTilePropChangedArgs e)
@@ -148,7 +216,7 @@ internal sealed class TileDataCache<TProps>
     {
         if (HasTileData(location))
         {
-            _cache.Remove(location.NameOrUniqueName);
+            Cache.Remove(location.NameOrUniqueName);
             PushChangedPoints(location, null);
         }
     }
@@ -223,7 +291,7 @@ internal sealed class TileDataCache<TProps>
 
     internal bool HasTileData(GameLocation location)
     {
-        return location != null && location.NameOrUniqueName != null && _cache.ContainsKey(location.NameOrUniqueName);
+        return location != null && location.NameOrUniqueName != null && Cache.ContainsKey(location.NameOrUniqueName);
     }
 
     internal Dictionary<Point, TProps>? GetTileData(GameLocation location)
@@ -232,14 +300,14 @@ internal sealed class TileDataCache<TProps>
             return null;
 
         Dictionary<Point, TProps> cacheEntry;
-        if (_cache.ContainsKey(location.NameOrUniqueName))
+        if (Cache.ContainsKey(location.NameOrUniqueName))
         {
-            cacheEntry = _cache[location.NameOrUniqueName];
+            cacheEntry = Cache[location.NameOrUniqueName];
         }
         else
         {
             cacheEntry = CreateLocationTileData(location);
-            _cache[location.NameOrUniqueName] = cacheEntry;
+            Cache[location.NameOrUniqueName] = cacheEntry;
         }
         return cacheEntry;
     }

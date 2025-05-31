@@ -51,7 +51,7 @@ public static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Postfix))
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix))
             );
             ModEntry.harm.Patch(
                 // Map override_map, string override_key, Microsoft.Xna.Framework.Rectangle? source_rect = null, Microsoft.Xna.Framework.Rectangle? dest_rect = null, Action<Point> perTileCustomAction = null
@@ -118,7 +118,7 @@ public static class CommonPatch
         catch (Exception err)
         {
             ModEntry.Log(
-                $"Failed to patch CommonPatch, this should be reported to the mod page:\n{err}",
+                $"Failed to apply CommonPatch, this is a critical error that should be reported to the mod page:\n{err}",
                 LogLevel.Error
             );
         }
@@ -287,7 +287,7 @@ public static class CommonPatch
         GameLocation_resetLocalState?.Invoke(null, __instance);
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance, GameTime time)
+    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(GameLocation __instance, GameTime time)
     {
         GameLocation_UpdateWhenCurrentLocation?.Invoke(null, new(__instance, time));
     }

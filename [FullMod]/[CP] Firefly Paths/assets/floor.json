@@ -10,10 +10,10 @@
       "Action": "EditData",
       "Target": "Data/Objects",
       "Entries": {
-        "{{ModId}}_Fireflies": {
-          "Name": "Glowing Floor",
-          "DisplayName": "Glowing Floor",
-          "Description": "Glowing Floor Example",
+        "{{ModId}}_FireflyPathItem": {
+          "Name": "{{ModId}}_FireflyPathItem",
+          "DisplayName": "{{i18n:floor.DisplayName}}",
+          "Description": "{{i18n:floor.Description}}",
           "Type": "Crafting",
           "Category": -24,
           "Price": 1,
@@ -26,9 +26,9 @@
       "Action": "EditData",
       "Target": "Data/FloorsAndPaths",
       "Entries": {
-        "{{ModId}}_FloorTerrain": {
-          "Id": "{{ModId}}_FloorTerrain",
-          "ItemId": "{{ModId}}_FloorItem",
+        "{{ModId}}_FireflyPath": {
+          "Id": "{{ModId}}_FireflyPath",
+          "ItemId": "{{ModId}}_FireflyPathItem",
           "Texture": "{{ModId}}/floor",
           "Corner": {
             "X": 0,
@@ -36,18 +36,25 @@
           },
           "WinterTexture": "{{ModId}}/floor",
           "WinterCorner": {
-            "X": 64,
+            "X": 0,
             "Y": 0
           },
-          "PlacementSound": "axchop",
-          "RemovalSound": null,
-          "RemovalDebrisType": 12,
-          "FootstepSound": "woodyStep",
-          "ConnectType": "Default",
-          "ShadowType": "Square",
-          "CornerSize": 4,
+          "PlacementSound": "coin",
+          "RemovalSound": "coin",
+          "RemovalDebrisType": 14,
+          "FootstepSound": "grassyStep",
+          "ConnectType": "Random",
+          "ShadowType": "None",
+          "CornerSize": 0,
           "FarmSpeedBuff": -1.0
         },
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "assets/props.json",
+      "LocalTokens": {
+        "L@TargetFloor": "{{ModId}}_FireflyPath"
       }
     }
   ]
