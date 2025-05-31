@@ -118,6 +118,12 @@ And Game State Queries
 - Ideally this is set on the tile sheet, rather than on a per tile data basis.
 - This is disabled if the player has `bcmpinc.GrassGrowth` installed since that mod simply skips the `Diggable` check entirely.
 
+#### Back layer: mushymato.MMAP_Paddy T|I
+
+- If set, make this tile a paddy for paddy crops (such as rice). Does not make this tile diggable by itself.
+- Ideally this is set on the tile sheet, rather than on a per tile data basis.
+- Using `I` allows this tile to work on indoor pots on this tile as well.
+
 #### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext] <a name="mushymato.MMAP_Light"></a>
 
 - Add a light source at the center of this tile.
@@ -271,7 +277,27 @@ To give furniture some properties, add an entry to custom asset `mushymato.MMAP/
 
 You can give paths (`Data/FloorsAndPaths`) tile properties (including action and tile actions) using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions.
 
-To give floor and path some properties, add an entry to custom asset `mushymato.MMAP/FloorPathProperties`. Please see [example here](./[CP]%20MMAP%20Examples/floor_path_properties.json).
+To give floor and path some properties, add an entry to custom asset `mushymato.MMAP/FloorPathProperties`. Example:
+```js
+{
+  "Action": "EditData",
+  "Target": "mushymato.MMAP/FloorPathProperties",
+  "Entries": {
+    // unqualified Data/FloorsAndPaths Id
+    "{{ModId}}_FloorTerrain": {
+      // Layer
+      "Back": {
+        // property: value
+        "mushymato.MMAP_Light": "1 White 4",
+        "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+      },
+      "Buildings": {
+        "Action": "Message Test"
+      }
+    }
+  }
+}
+```
 
 ### Data/Buildings Metadata
 
