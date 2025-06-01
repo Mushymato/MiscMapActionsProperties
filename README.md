@@ -317,7 +317,7 @@ Buildings Metadata are like CustomFields, except they also appear on skins and c
 - `type|texture` is either a light id (1-10 except for 3) or a texture (must be loaded).
 - Use `offsetX` and `offsetY` to further adjust the position of the light.
 
-#### mushymato.MMAP/DrawLayer.{DrawLayerId}.{override}
+#### mushymato.MMAP/DrawLayer.{DrawLayerId}.{override} <a name="drawlayerext"></a>
 
 Various draw layer overriding fields, can be used with regular draw layer things.
 

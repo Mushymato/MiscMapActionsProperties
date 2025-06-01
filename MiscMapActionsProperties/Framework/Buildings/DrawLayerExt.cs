@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
@@ -79,8 +80,10 @@ internal record DLExtInfo(
 internal static class DrawLayerExt
 {
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
-    private static readonly Dictionary<string, DLExtInfo> dlExtInfoCache = [];
-    private static readonly Dictionary<string, DLExtInfo> dlExtInfoInMenu = [];
+    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoCacheImpl = new() { Value = [] };
+    private static Dictionary<string, DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value;
+    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoInMenuImpl = new() { Value = [] };
+    private static Dictionary<string, DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value;
 
     internal static void Register()
     {
@@ -150,7 +153,7 @@ internal static class DrawLayerExt
     private static void OnMenuChanged(object? sender, MenuChangedEventArgs e)
     {
         if (e.OldMenu is CarpenterMenu)
-            dlExtInfoInMenu.Clear();
+            DlExtInfoInMenu.Clear();
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -160,23 +163,23 @@ internal static class DrawLayerExt
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        dlExtInfoCache.Clear();
+        DlExtInfoCache.Clear();
         AddBuildingDrawLayer(e.NewLocation);
     }
 
     private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
-        foreach (DLExtInfo value in dlExtInfoCache.Values)
+        foreach (DLExtInfo value in DlExtInfoCache.Values)
             value.UpdateTicked();
-        foreach (DLExtInfo value in dlExtInfoInMenu.Values)
+        foreach (DLExtInfo value in DlExtInfoInMenu.Values)
             value.UpdateTicked();
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
     {
-        foreach (DLExtInfo value in dlExtInfoCache.Values)
+        foreach (DLExtInfo value in DlExtInfoCache.Values)
             value.TimeChanged();
-        foreach (DLExtInfo value in dlExtInfoInMenu.Values)
+        foreach (DLExtInfo value in DlExtInfoInMenu.Values)
             value.TimeChanged();
     }
 
@@ -195,7 +198,7 @@ internal static class DrawLayerExt
                     continue;
 
                 if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
-                    dlExtInfoCache[$"{building.id.Value}/{drawLayer.Id}"] = dlExtInfo;
+                    DlExtInfoCache[$"{building.id.Value}/{drawLayer.Id}"] = dlExtInfo;
             }
         }
     }
@@ -282,7 +285,7 @@ internal static class DrawLayerExt
 
             if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
             {
-                dlExtInfoInMenu[$"{building.buildingType.Value}+{drawLayer.Id}"] = dlExtInfo;
+                DlExtInfoInMenu[$"{building.buildingType.Value}+{drawLayer.Id}"] = dlExtInfo;
                 ModEntry.LogOnce($"{building.buildingType.Value}+{drawLayer.Id}");
             }
         }
@@ -303,7 +306,7 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (dlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
+        if (DlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
         {
             value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
@@ -327,7 +330,7 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (dlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
+        if (DlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
         {
             value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;

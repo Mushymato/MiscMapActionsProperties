@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New tile/touch action mushymato.MMAP_WarpBuildingOut [X Y], mushymato.MMAP_MagicWarpBuildingOut [X Y], mushymato.MMAP_HoleWarpBuildingOut [X Y], to add additional nonstandard exits from building interior.
 - New tile/touch action mushymato.MMAP_If GSQ ## if-case ## else-case
 - New tile/trigger action mushymato.MMAP_ToggleTAS X Y \<tasId\>+
+- New touch action mushymato.MMAP_CountactTAS X Y \<tasId\>+
+- TAS LayerDepth calculations reworked
 - New feature mushymato.MMAP/FloorPathProperties which allows paths to get tile properties.
 - New tile data mushymato.MMAP_Paddy for making a tile valid for paddy.
 - mushymato.MMAP_Critter now supports Frog and LeaperFrog
