@@ -1,8 +1,10 @@
 # Furniture Properties
 
-To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, where the key is an **unqualified item id** of a furniture item. See examples in [furniture_tile_property.json](../[CP]%20MMAP%20Examples/furniture_properties.json)
+To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, where the key is an **unqualified item id** of a furniture item. See examples in [furniture_tile_property.json](../[CP]%20MMAP%20Examples/furniture_properties.json).
 
 This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Modding:Buildings) but only a few fields are actually read. More may be added later, if they make sense.
+
+Your furniture still needs to be [added to `Data/Furniture`](https://stardewvalleywiki.com/Modding:Furniture) first to make them a furniture item, before any `mushymato.MMAP/FurnitureProperties` can take effect.
 
 ### Fields Actually in Use
 
@@ -12,9 +14,10 @@ This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Mo
 | `AdditionalTilePropertyRadius` | int | 0 | Extra tile property radius, needed if any tile property should apply in a bound larger than the furniture's own bounding box. For example, having 1 in this field on a 1x1 furniture means the actual bounds checked is 3x3 starting with tile that's 1 left and 1 up from the furniture's placement tile. |
 | `CollisionMap` | string | _empty_ | Collision map string, e.g. `"XOX"` where `X` is impassable and `O` is passable. Rugs ignore this property. |
 | `Description` | string | _empty_ | Overrides the furniture description. |
-| `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to building draw layers, but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used. |
+| `SeasonOffset` | Point | 0,0 | Adjusts the source rectangle of the furniture plus any draw layers depending on the season. |
+| `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to building draw layers, but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used, and furniture draw in menu do not show draw layers. |
 | `DrawShadow` | bool | false | Because furniture do not have draw shadows in the first place, this field is repurposed to mean "when there are draw layers, do not draw the base furniture sprite". |
-| `CustomFields` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
+| `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
 
 #### TileProperties
 
@@ -27,6 +30,24 @@ This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Mo
 | `Value` | string | _null_ | Tile property value, e.g. `"Crab T 1"`. |
 | `Layer` | string | _empty_ | Which map layer this tile property belongs to, e.g. `"Back"`. |
 | `TileArea` | Rectangle | Rectangle.Empty | Which tiles this tile property should affect, relative to top left corner. |
+
+#### DrawLayers
+
+(This is same as vanilla `BuildingData.BuildingDrawLayers`, copied here for reference)
+
+| Property | Type | Default | Notes |
+| -------- | ---- | ------- | ----- |
+| `Id` | string | _empty_ | Unique string id for this draw layer. |
+| `Texture` | string | _null_ | Texture asset name, if different than the base texture. |
+| `SourceRect` | Rectangle | _null_ | Source rectangle of draw layer, when this layer is animated, only provide first frame. |
+| `DrawPosition` | Vector2 | _null_ | An offset to apply to the draw position (relative to top left corner of furniture sprite). |
+| `DrawInBackground` | bool | false | If this is true, draw with base layer depth = 0. |
+| `SortTileOffset` | float | 0f | How much to adjust layer depth by, according to Y tile based rules. Positive value is draw under, negative draw over. |
+| `FrameDuration`| int | 90 | Number of miliseconds between animation frames. |
+| `FrameCount`| int | 1 | Number of animation frames. |
+| `FramesPerRow`| int | -1 | Number frames per row, -1 for unlimited. |
+| `OnlyDrawIfChestHasContents`| string | _empty_ | Unused. |
+| `AnimalDoorOffset`| Point | 0,0 | Unused. |
 
 ### Caveats with Rotations
 

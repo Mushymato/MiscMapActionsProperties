@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,6 +32,7 @@ internal static class FurnitureProperties
     private static readonly PerScreen<DrawFurnitureWithLayerMode> IsDrawingFurnitureWithLayer =
         new() { Value = DrawFurnitureWithLayerMode.None };
     private static readonly PerScreen<List<float>> DrawFurnitureLayerDepths = new() { Value = [] };
+    private static readonly Regex IdIsRotation = new(@"_Rotation.(\d+)");
 
     private sealed record FurnitureDLState(
         BuildingData fpData,
@@ -47,6 +49,12 @@ internal static class FurnitureProperties
         {
             foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
             {
+                if (
+                    !string.IsNullOrEmpty(drawLayer.Id)
+                    && IdIsRotation.Match(drawLayer.Id) is Match match
+                    && match.Groups[1].Value == furniture.currentRotation.Value.ToString()
+                )
+                    continue;
                 float layerDepth =
                     (drawLayer.DrawInBackground ? 0f : furnitureLayerDepth) - (drawLayer.SortTileOffset * 64f / 10000f);
                 Rectangle sourceRect = drawLayer.GetSourceRect(
@@ -188,13 +196,6 @@ internal static class FurnitureProperties
                 ),
                 prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(SpriteBatch_Draw_Prefix))
             );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureProperties:\n{err}", LogLevel.Error);
-        }
-        try
-        {
             // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
@@ -203,7 +204,7 @@ internal static class FurnitureProperties
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch FurnitureProperties::Furniture.loadDescription:\n{err}", LogLevel.Warn);
+            ModEntry.Log($"Failed to patch FurnitureProperties:\n{err}", LogLevel.Error);
         }
     }
 

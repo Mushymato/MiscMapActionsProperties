@@ -274,7 +274,7 @@ Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu 
 
 ### Furniture Properties
 
-You can give furniture tile properties (including action and tile actions) and collision using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions. Besides this, you can also give a collision map to make the furniture passable on some tiles.
+You can give furniture tile properties (including action and tile actions) and collision using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions. Besides this, you can also give a collision map to make the furniture passable on some tiles and do animations via draw layers.
 
 To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, [more details here](./docs/furniture-properties.md).
 
@@ -303,6 +303,9 @@ To give floor and path some properties, add an entry to custom asset `mushymato.
   }
 }
 ```
+
+Your furniture still needs to be [added to `Data/FloorsAndPaths`](https://stardewvalleywiki.com/Modding:Floors_and_Paths) (and make a corresponding path object item) first to make them a floor/path item, before any `mushymato.MMAP/FloorPathProperties` can take effect.
+
 
 ### Data/Buildings Metadata
 
