@@ -52,7 +52,7 @@ internal static class FurnitureProperties
                 if (
                     !string.IsNullOrEmpty(drawLayer.Id)
                     && IdIsRotation.Match(drawLayer.Id) is Match match
-                    && match.Groups[1].Value == furniture.currentRotation.Value.ToString()
+                    && match.Groups[1].Value != furniture.currentRotation.Value.ToString()
                 )
                     continue;
                 float layerDepth =

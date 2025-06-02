@@ -49,6 +49,10 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `OnlyDrawIfChestHasContents`| string | _empty_ | Unused. |
 | `AnimalDoorOffset`| Point | 0,0 | Unused. |
 
+##### Using DrawLayers with Rotations
+
+To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case sensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0.
+
 ### Caveats with Rotations
 
 If your furniture has rotations, the tile property bounds needs to also cover the rotated shape, e.g. use a 2x2 bound for a 2x1 furniture that can rotate to 1x2. The extra tile is not a problem since the furniture's (rotated) bounds are checked first.
