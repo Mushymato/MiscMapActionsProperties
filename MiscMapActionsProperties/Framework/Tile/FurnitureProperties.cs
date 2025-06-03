@@ -32,10 +32,10 @@ internal static class FurnitureProperties
     private static readonly PerScreen<DrawFurnitureWithLayerMode> IsDrawingFurnitureWithLayer =
         new() { Value = DrawFurnitureWithLayerMode.None };
     private static readonly PerScreen<List<float>> DrawFurnitureLayerDepths = new() { Value = [] };
-    private static readonly Regex IdIsRotation = new(@"_Rotation.(\d+)");
+    private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
 
     private sealed record FurnitureDLState(
-        BuildingData fpData,
+        BuildingData FpData,
         List<(BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt)> LayerInfo
     )
     {
@@ -52,15 +52,18 @@ internal static class FurnitureProperties
                 if (
                     !string.IsNullOrEmpty(drawLayer.Id)
                     && IdIsRotation.Match(drawLayer.Id) is Match match
-                    && match.Groups[1].Value != furniture.currentRotation.Value.ToString()
+                    && match.Success
+                    && int.Parse(match.Groups[1].Value) == furniture.currentRotation.Value
                 )
+                {
                     continue;
+                }
                 float layerDepth =
                     (drawLayer.DrawInBackground ? 0f : furnitureLayerDepth) - (drawLayer.SortTileOffset * 64f / 10000f);
                 Rectangle sourceRect = drawLayer.GetSourceRect(
                     (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
                 );
-                sourceRect = AdjustSourceRectToSeason(fpData, furniture.Location, sourceRect);
+                sourceRect = AdjustSourceRectToSeason(FpData, furniture.Location, sourceRect);
                 ParsedItemData dataOrErrorItem = ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
                 Texture2D texture = dataOrErrorItem.GetTexture();
                 if (Game1.content.DoesAssetExist<Texture2D>(drawLayer.Texture))
@@ -176,7 +179,7 @@ internal static class FurnitureProperties
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
                 prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Postfix))
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(
@@ -326,7 +329,7 @@ internal static class FurnitureProperties
         return IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.BaseAndLayer;
     }
 
-    private static void Furniture_draw_Postfix(
+    private static void Furniture_draw_Finalizer(
         Furniture __instance,
         Netcode.NetVector2 ___drawPosition,
         SpriteBatch spriteBatch,

@@ -51,7 +51,7 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 
 ##### Using DrawLayers with Rotations
 
-To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case sensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0.
+To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case insensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0.
 
 ### Caveats with Rotations
 

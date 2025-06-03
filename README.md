@@ -151,7 +151,7 @@ And Game State Queries
 - Firefly: [color|T] [count]
 - Seagull: [texture|T] [count]
 - Crab: [texture|T] [count]
-- Birdies: [texture|<number>|T] [count]
+- Birdie: [texture|<number>|T] [count]
     - The number option allows you to give a start index for `TileSheet/critters` which has birdies starting at 25, 45, 125, 135, 165, and 175.
     - When using T, the birdie start index will be picked with logic similar to base game.
 - Butterfly: [texture|<number>|T] [count]

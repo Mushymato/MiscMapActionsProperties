@@ -32,7 +32,7 @@ internal enum SupportedCritter
 /// - Firefly: [color] [count]
 /// - Seagull: [texture|T] [count]
 /// - Crab: [texture|T] [count]
-/// - Birdies: [texture|<number>|T] [count]
+/// - Birdie: [texture|<number>|T] [count]
 /// - Butterfly: [texture|<number>|T] [count]
 /// - Frog: [T|F] [count]
 /// </summary>
