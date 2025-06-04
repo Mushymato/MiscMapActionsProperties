@@ -262,6 +262,7 @@ Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu 
 - `Question` (`string`, _empty_): Question string to display, or none.
 - `Condition` (`string`, _empty_): A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this dialogue should be enabled.
 - `ResponseEntries` (`Dictionary<string, QuestionDialogueEntry>`, _empty_): Response data.
+- `Pagination`(`int`, -1): Paginate this question dialogue with this many entries per page.
 
 ##### QuestionDialogueEntry
 

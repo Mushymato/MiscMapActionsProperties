@@ -31,7 +31,7 @@
           },
           "Layer": "Buildings",
           "SetProperties": {
-            "Action": "mushymato.MMAP_QuestionDialogue {{ModId}}_GoToClint"
+            "Action": "mushymato.MMAP_QuestionDialogue {{ModId}}_Paginated"
           }
         }
       ]
@@ -112,6 +112,78 @@
               "Label": "go to clint",
               "TouchActions": [
                 "Warp Blacksmith 4 4"
+              ]
+            },
+            "Cancel": {}
+          }
+        },
+        "{{ModId}}_Paginated": {
+          "Speaker": "Clint",
+          "SpeakerPortrait": "Portraits/Gil",
+          "DialogueBefore": "How are your tools holding up?#$b#If they ever need repairs, just come by my shop. I guarantee these tools for life!",
+          "Question": "Location?",
+          "Pagination": 3,
+          "ResponseEntries": {
+            "Horseradish1": {
+              "Label": "Wild horseradish 1!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 1"
+              ],
+            },
+            "Horseradish2": {
+              "Label": "Wild horseradish 2!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 2"
+              ],
+            },
+            "Horseradish3": {
+              "Label": "Wild horseradish 3!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 3"
+              ],
+            },
+            "Horseradish4": {
+              "Label": "Wild horseradish 4!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 4"
+              ],
+            },
+            "Horseradish5": {
+              "Label": "Wild horseradish 5!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 5"
+              ],
+            },
+            "Horseradish6": {
+              "Label": "Wild horseradish 6!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 6"
+              ],
+            },
+            "Horseradish7": {
+              "Label": "Wild horseradish 7!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 7"
+              ],
+            },
+            "Horseradish8": {
+              "Label": "Wild horseradish 8!",
+              // both actions run
+              "Actions": [
+                "AddItem (O)16 8"
+              ],
+            },
+            "Recursive": {
+              "Label": "Recursive",
+              "TileActions": [
+                "mushymato.MMAP_QuestionDialogue {{ModId}}_Paginated"
               ]
             },
             "Cancel": {}

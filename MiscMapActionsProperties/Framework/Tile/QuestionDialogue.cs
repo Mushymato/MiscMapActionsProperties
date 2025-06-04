@@ -7,7 +7,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
-using StardewValley.Menus;
 using StardewValley.TokenizableStrings;
 using StardewValley.Triggers;
 
@@ -212,18 +211,53 @@ internal static class QuestionDialogue
         if (location.afterQuestion != null)
             heldAfterQuestionBehavior.Value = afterQBehavior;
 
-        location.createQuestionDialogue(
-            TokenParser.ParseText(qdData.Question) ?? "",
-            validEntries.Select(MakeResponse).ToArray(),
-            afterQBehavior,
-            speaker: speaker
-        );
+        string question = TokenParser.ParseText(qdData.Question) ?? "";
+        if (qdData.Pagination > 0)
+        {
+            bool addCancel = false;
+            var finalResponse = validEntries.Values.Last();
+            List<KeyValuePair<string, string>> keyValuePairs;
+            if (
+                finalResponse.Condition == null
+                && finalResponse.Actions == null
+                && finalResponse.TileActions == null
+                && finalResponse.TouchActions == null
+            )
+            {
+                addCancel = true;
+                keyValuePairs = validEntries.SkipLast(1).Select(MakeResponseKeyValuePair).ToList();
+            }
+            else
+            {
+                keyValuePairs = validEntries.Select(MakeResponseKeyValuePair).ToList();
+            }
+            location.ShowPagedResponses(
+                question,
+                keyValuePairs,
+                (response) => afterQBehavior(farmer, response),
+                addCancel: addCancel,
+                itemsPerPage: qdData.Pagination
+            );
+        }
+        else
+        {
+            location.createQuestionDialogue(
+                question,
+                validEntries.Select(MakeResponse).ToArray(),
+                afterQBehavior,
+                speaker: speaker
+            );
+        }
 
         return true;
     }
 
     public static Response MakeResponse(KeyValuePair<string, QuestionDialogueEntry> qde) =>
         new(qde.Key, TokenParser.ParseText(qde.Value.Label));
+
+    public static KeyValuePair<string, string> MakeResponseKeyValuePair(
+        KeyValuePair<string, QuestionDialogueEntry> qde
+    ) => new(qde.Key, TokenParser.ParseText(qde.Value.Label));
 
     /// <summary>functools.partial my dead girlfriend...</summary>
     internal static void AfterQuestionBehavior(
@@ -307,6 +341,9 @@ public sealed class QuestionDialogueData
 
     /// <summary>Speaking NPC Portrait</summary>
     public string? SpeakerPortrait = null;
+
+    /// <summary>Number of entries to show before displaying a "next" button to go to next page.</summary>
+    public int Pagination = -1;
 
     /// <summary>List of responses</summary>
     public Dictionary<string, QuestionDialogueEntry> ResponseEntries = [];
