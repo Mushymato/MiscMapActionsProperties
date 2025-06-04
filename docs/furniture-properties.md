@@ -84,7 +84,7 @@ These MMAP tile properties are supported and guarenteed to update as soon as fur
 - `mushymato.MMAP_Light`
 - `mushymato.MMAP_Critter`
 
-This MMAP tile property **does not** support usage with furniture.
+These MMAP tile properties **do not** support usage with furniture.
 - `mushymato.MMAP_AnimalSpot`: Never checks furniture or building tile properties, this is intentional.
 - `mushymato.MMAP_GrassSpread`: Grass cannot spread onto a tile that is blocked by furniture, regardless of property.
 
