@@ -33,12 +33,13 @@ All map properties are also `Data/Location` custom fields. In the case where bot
 - The texture can be changed for something else.
 - Setting `T` gives the default texture of `LooseSprites\\LightRays`.
 
-#### mushymato.MMAP_WoodsLighting T|Color
+#### mushymato.MMAP_WoodsLighting \<T|day color\> [T|night color] [true|false]
 
-- Forces a certain ambiant lighting color, identical logic to vanilla lighting in the secret woods.
-- Colors are inverted, much like for light
-- Setting `T` gives the default color of #967832 (equivalent to setting #6987cd as argument).
-- **Note:** woods lighting causes map lights to turn off at night, this affects the `Light` map property and path layer lights. To keep your lights on at night, use [mushymato.MMAP_Light](#mushymato.MMAP_Light) with these arguments:
+- Forces a certain ambiant day color (and optionally night color)
+- Colors are inverted, much like for light, so that "Red" will give red ambiant light.
+- For day color, `T` gives the default color #6987cd.
+- For night color, `T` gives the default night color which is normally #0000ff but #0a1e55 in the winter.
+- **Note:** woods lighting causes map lights to turn off at night, this mainly affects the `Light` map property and path layer lights. To keep your lights on at night you can either set the third argument to `false`, or use [mushymato.MMAP_Light](#mushymato.MMAP_Light) with these arguments:
     - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile's TileData, Back or Front layer.
     - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile's TileData, Back or Front layer.
 

@@ -84,7 +84,7 @@ internal static class WoodsLighting
                     allowBlank: false,
                     "string dayColorStr"
                 )
-                || !ArgUtility.TryGetOptional(args, 1, out string nightColorStr, out error, "string nightColorStr")
+                || !ArgUtility.TryGetOptional(args, 1, out string nightColorStr, out error, defaultValue: "T", allowBlank: true, name: "string nightColorStr")
                 || !ArgUtility.TryGetOptionalBool(
                     args,
                     2,
