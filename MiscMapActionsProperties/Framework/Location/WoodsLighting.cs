@@ -12,106 +12,116 @@ using StardewValley.Locations;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-/// Add new map property mushymato.MMAP_WoodsLighting T|Color
+/// Add new map property mushymato.MMAP_WoodsLighting T|Color [T|Color true]
 /// If set to T, uses the default ambiant lighting (equiv to setting #6987cd, and thus has actual appearance of  #967832)
 /// Otherwise, pass in an ambiant light color, which is inverted
 /// </summary>
 internal static class WoodsLighting
 {
-    internal sealed record WoodsLightingCtx(Color Color);
+    internal sealed record WoodsLightingCtx(Color DayColor, Color NightColor, bool AffectMapLights);
 
     internal const string MapProp_WoodsLighting = $"{ModEntry.ModId}_WoodsLighting";
     private static readonly PerScreen<WoodsLightingCtx?> woodsLightingCtx = new();
-    private static Color _ambientLightColor = Color.White;
 
     internal static void Register()
     {
-        try
-        {
-            Harmony.ReversePatch(
-                AccessTools.DeclaredMethod(typeof(Woods), "_updateWoodsLighting"),
-                new(typeof(WoodsLighting), nameof(Woods_updateWoodsLighting_ReversePatch))
-                {
-                    reversePatchType = HarmonyReversePatchType.Original,
-                },
-                AccessTools.DeclaredMethod(
-                    typeof(WoodsLighting),
-                    nameof(Woods_updateWoodsLighting_RevesePatchTranspiler)
-                )
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch WoodsLighting:\n{err}", LogLevel.Error);
-        }
-        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocationFinalizer += GameLocation_UpdateWhenCurrentLocation_Finalizer;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void Woods_updateWoodsLighting_ReversePatch(GameLocation location)
+    private static void ApplyLighting(GameLocation location, WoodsLightingCtx ctx)
     {
-        ModEntry.Log(
-            $"Woods_updateWoodsLighting_ReversePatch failed, deactivated {MapProp_WoodsLighting}",
-            LogLevel.Error
-        );
-        CommonPatch.GameLocation_UpdateWhenCurrentLocation -= GameLocation_UpdateWhenCurrentLocation_Prefix;
-        CommonPatch.GameLocation_resetLocalState -= GameLocation_resetLocalState_Postfix;
-        woodsLightingCtx.Value = null;
-    }
+        if (Game1.currentLocation != location)
+            return;
 
-    private static IEnumerable<CodeInstruction> Woods_updateWoodsLighting_RevesePatchTranspiler(
-        IEnumerable<CodeInstruction> instructions
-    )
-    {
-        CodeInstruction ldfld_ambientLightColor =
-            new(OpCodes.Ldflda, AccessTools.Field(typeof(WoodsLighting), nameof(_ambientLightColor)));
-        FieldInfo amb = AccessTools.Field(typeof(Woods), "_ambientLightColor");
-        foreach (CodeInstruction inst in instructions)
+        int moderatedarkmin60 = Utility.ConvertTimeToMinutes(Game1.getModeratelyDarkTime(location)) - 60;
+        int trulydark = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
+        int startingtogetdark = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
+        int moderatedark = Utility.ConvertTimeToMinutes(Game1.getModeratelyDarkTime(location));
+        float current =
+            Utility.ConvertTimeToMinutes(Game1.timeOfDay)
+            + Game1.gameTimeInterval / (float)Game1.realMilliSecondsPerGameMinute;
+        float lerpc = Utility.Clamp((current - moderatedarkmin60) / (trulydark - moderatedarkmin60), 0f, 1f);
+
+        Game1.ambientLight.R = (byte)Utility.Lerp(ctx.DayColor.R, ctx.NightColor.R, lerpc);
+        Game1.ambientLight.G = (byte)Utility.Lerp(ctx.DayColor.G, ctx.NightColor.G, lerpc);
+        Game1.ambientLight.B = (byte)Utility.Lerp(ctx.DayColor.B, ctx.NightColor.B, lerpc);
+        Game1.ambientLight.A = (byte)Utility.Lerp(ctx.DayColor.A, ctx.NightColor.A, lerpc);
+
+        if (location.IsOutdoors && location.IsRainingHere())
+            Game1.outdoorLight = Game1.ambientLight;
+
+        if (!ctx.AffectMapLights)
+            return;
+
+        float lerpl = Utility.Clamp((current - startingtogetdark) / (moderatedark - startingtogetdark), 0f, 1f);
+        Color black = Color.Black;
+        black.A = (byte)Utility.Lerp(255f, 0f, lerpl);
+        foreach (LightSource value in Game1.currentLightSources.Values)
         {
-            if (inst.opcode == OpCodes.Ldflda && (FieldInfo)inst.operand == amb)
-                yield return ldfld_ambientLightColor;
-            else
-                yield return inst;
+            if (value.lightContext.Value == LightSource.LightContext.MapLight)
+            {
+                value.color.Value = black;
+            }
         }
     }
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
+        woodsLightingCtx.Value = null;
         if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_WoodsLighting, out string? colorValue)
-            && !string.IsNullOrWhiteSpace(colorValue)
+            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_WoodsLighting, out string? argString)
+            && !string.IsNullOrWhiteSpace(argString)
         )
         {
-            if (colorValue == "T")
+            string[] args = ArgUtility.SplitBySpace(argString);
+            if (
+                !ArgUtility.TryGet(
+                    args,
+                    0,
+                    out string dayColorStr,
+                    out string error,
+                    allowBlank: false,
+                    "string dayColorStr"
+                )
+                || !ArgUtility.TryGetOptional(args, 1, out string nightColorStr, out error, "string nightColorStr")
+                || !ArgUtility.TryGetOptionalBool(
+                    args,
+                    2,
+                    out bool affectMapLights,
+                    out error,
+                    defaultValue: true,
+                    "bool affectMapLights"
+                )
+            )
             {
-                _ambientLightColor = new Color(150, 120, 50);
-            }
-            else if (Utility.StringToColor(colorValue) is Color color)
-            {
-                _ambientLightColor = new Color(color.PackedValue ^ 0x00FFFFFF);
-            }
-            else
-            {
-                woodsLightingCtx.Value = null;
+                ModEntry.Log(error, LogLevel.Error);
                 return;
             }
-            woodsLightingCtx.Value = new(_ambientLightColor);
-            Woods_updateWoodsLighting_ReversePatch(location);
+            Color dayColor = new Color(150, 120, 50);
+            if (dayColorStr != "T" && Utility.StringToColor(dayColorStr) is Color color1)
+            {
+                dayColor = new Color(color1.PackedValue ^ 0x00FFFFFF);
+            }
+            Color nightColor = Game1.eveningColor;
+            if (nightColorStr != "T" && Utility.StringToColor(nightColorStr) is Color color2)
+            {
+                nightColor = new Color(color2.PackedValue ^ 0x00FFFFFF);
+            }
+            woodsLightingCtx.Value = new(dayColor, nightColor, affectMapLights);
+            ApplyLighting(location, woodsLightingCtx.Value);
             return;
         }
-        woodsLightingCtx.Value = null;
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(
+    private static void GameLocation_UpdateWhenCurrentLocation_Finalizer(
         object? sender,
         CommonPatch.UpdateWhenCurrentLocationArgs e
     )
     {
         if (woodsLightingCtx.Value != null)
         {
-            _ambientLightColor = woodsLightingCtx.Value.Color;
-            Woods_updateWoodsLighting_ReversePatch(e.Location);
+            ApplyLighting(e.Location, woodsLightingCtx.Value);
         }
     }
 }

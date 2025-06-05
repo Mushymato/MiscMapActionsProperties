@@ -4,8 +4,8 @@
       "Action": "EditMap",
       "Target": "Maps/Backwoods",
       "MapProperties": {
-        "mushymato.MMAP_WoodsLighting": "T",
-        "mushymato.MMAP_LightRays": "Buildings/Junimo Hut",
+        "mushymato.MMAP_WoodsLighting": "Red Green",
+        // "mushymato.MMAP_LightRays": "Buildings/Junimo Hut",
         "mushymato.MMAP_SteamOverlay": "T 1 0 DarkOrchid 0.4 4"
       }
     }

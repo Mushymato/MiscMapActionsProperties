@@ -19,7 +19,8 @@ public static class CommonPatch
 
     public record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
 
-    public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocation;
+    public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPrefix;
+    public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationFinalizer;
 
     public record DrawAboveAlwaysFrontLayerArgs(GameLocation Location, SpriteBatch B);
 
@@ -51,7 +52,11 @@ public static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
-                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix))
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix)),
+                finalizer: new HarmonyMethod(
+                    typeof(CommonPatch),
+                    nameof(GameLocation_UpdateWhenCurrentLocation_Finalizer)
+                )
             );
             ModEntry.harm.Patch(
                 // Map override_map, string override_key, Microsoft.Xna.Framework.Rectangle? source_rect = null, Microsoft.Xna.Framework.Rectangle? dest_rect = null, Action<Point> perTileCustomAction = null
@@ -289,7 +294,12 @@ public static class CommonPatch
 
     private static void GameLocation_UpdateWhenCurrentLocation_Prefix(GameLocation __instance, GameTime time)
     {
-        GameLocation_UpdateWhenCurrentLocation?.Invoke(null, new(__instance, time));
+        GameLocation_UpdateWhenCurrentLocationPrefix?.Invoke(null, new(__instance, time));
+    }
+
+    private static void GameLocation_UpdateWhenCurrentLocation_Finalizer(GameLocation __instance, GameTime time)
+    {
+        GameLocation_UpdateWhenCurrentLocationFinalizer?.Invoke(null, new(__instance, time));
     }
 
     private static void GameLocation_ApplyMapOverride_Prefix(

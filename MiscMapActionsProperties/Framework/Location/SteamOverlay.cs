@@ -65,7 +65,7 @@ internal static class SteamOverlay
     internal static void Register()
     {
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
-        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocationFinalizer += GameLocation_UpdateWhenCurrentLocation_Finalizer;
         ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
     }
 
@@ -107,7 +107,7 @@ internal static class SteamOverlay
         steamCtx.Value = null;
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Prefix(
+    private static void GameLocation_UpdateWhenCurrentLocation_Finalizer(
         object? sender,
         CommonPatch.UpdateWhenCurrentLocationArgs e
     )

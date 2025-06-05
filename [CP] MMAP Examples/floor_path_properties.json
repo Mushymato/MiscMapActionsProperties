@@ -4,8 +4,8 @@
     // Basic add new custom floor
     {
       "Action": "Load",
-      "Target": "{{ModId}}/floor",
-      "FromFile": "assets/floor.png"
+      "Target": "{{ModId}}/floor, {{ModId}}/squarelight",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
     },
     {
       "Action": "EditData",
@@ -66,6 +66,23 @@
           },
           "Buildings": {
             "Action": "Message Test"
+          }
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FloorPathProperties",
+      "Entries": {
+        "0": {
+          "Back": {
+            "mushymato.MMAP_Light": "0.5 #ffa500dd 1",
+            "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+          }
+        },
+        "1": {
+          "Back": {
+            "mushymato.MMAP_Light": "4 #5ba600 {{ModId}}/squarelight"
           }
         }
       }

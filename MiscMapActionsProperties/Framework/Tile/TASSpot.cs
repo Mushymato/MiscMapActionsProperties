@@ -43,7 +43,7 @@ internal static class TASSpot
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
-        CommonPatch.GameLocation_UpdateWhenCurrentLocation += GameLocation_UpdateWhenCurrentLocation_Prefix;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocationPrefix += GameLocation_UpdateWhenCurrentLocation_Prefix;
 
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
         TriggerActionManager.RegisterAction(TileProp_TAS, TriggerActionTAS);
