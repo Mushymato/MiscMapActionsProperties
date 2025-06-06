@@ -147,7 +147,7 @@ And Game State Queries
 
 #### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+
 
-- Spawn a certain kind of simple critter on this tile.
+- Spawn a certain kind of simple critter on this tile. The positions are slightly randomized within the tile's bounds.
 - Currently supports Firefly Seagull Crab
 - Firefly: [color|T] [count]
 - Seagull: [texture|T] [count]
@@ -160,10 +160,10 @@ And Game State Queries
     - When using texture, the bufferfly will follow summer butterfly rules (4 frames)
     - When using T, the birdie start index will be picked base game logic.
 - Frog: [T|F] [count]
-    - T and F decide if the leaper frog faces right or left, cannot retexture the frog.
+    - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
 - LeaperFrog: [T|F] [count]
-    - T and F decide if the leaper frog faces right or left, cannot retexture the frog.
-    - This frog will leap into a body of water (if it reaches one).
+    - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
+    - This frog jumps farther into water.
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a texture, they need to have same number of frames as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.
