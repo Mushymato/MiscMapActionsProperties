@@ -50,7 +50,8 @@ internal static class CritterSpot
     );
     private static readonly FieldInfo butterflyLightId = AccessTools.DeclaredField(typeof(Butterfly), "lightId");
 
-    internal static PerScreen<Dictionary<Point, List<Critter>>> TileDataSpawnedCritters = new() { Value = [] };
+    internal static PerScreen<Dictionary<Point, List<Critter>>> tileDataSpawnedCritters = new();
+    internal static Dictionary<Point, List<Critter>> TileDataSpawnedCritters => tileDataSpawnedCritters.Value ??= [];
 
     internal static void Register()
     {
@@ -92,7 +93,7 @@ internal static class CritterSpot
             SpawnLocationCritters(location);
             return;
         }
-        Dictionary<Point, List<Critter>> spawnedCritters = TileDataSpawnedCritters.Value;
+        Dictionary<Point, List<Critter>> spawnedCritters = TileDataSpawnedCritters;
         if (e.Item2 == null)
         {
             foreach (List<Critter> critters in spawnedCritters.Values)
@@ -132,14 +133,15 @@ internal static class CritterSpot
         if (location == null)
             return;
 
+        Dictionary<Point, List<Critter>> spawnedCritters = TileDataSpawnedCritters;
         if (
             location.critters != null
-            && TileDataSpawnedCritters.Value.Values.SelectMany(critter => critter).ToList() is List<Critter> critters
+            && spawnedCritters.Values.SelectMany(critter => critter).ToList() is List<Critter> critters
         )
         {
             RemoveTheseCritters(location, critters);
         }
-        TileDataSpawnedCritters.Value = [];
+        spawnedCritters.Clear();
 
         if (critterSpotsCache.GetTileData(location) is not Dictionary<Point, string[]> cacheEntry)
             return;
@@ -149,7 +151,7 @@ internal static class CritterSpot
             var spawned = SpawnCritter(location, pos, props, 0, out string _);
             if (spawned.Count > 0)
             {
-                TileDataSpawnedCritters.Value[pos] = spawned;
+                spawnedCritters[pos] = spawned;
             }
         }
     }

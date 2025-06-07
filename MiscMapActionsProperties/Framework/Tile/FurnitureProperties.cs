@@ -30,8 +30,9 @@ internal static class FurnitureProperties
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
     private static readonly PerScreen<DrawFurnitureWithLayerMode> IsDrawingFurnitureWithLayer =
-        new() { Value = DrawFurnitureWithLayerMode.None };
-    private static readonly PerScreen<List<float>> DrawFurnitureLayerDepths = new() { Value = [] };
+        new(() => DrawFurnitureWithLayerMode.None);
+    private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
+    private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
 
     private sealed record FurnitureDLState(
@@ -105,8 +106,8 @@ internal static class FurnitureProperties
         }
     }
 
-    private static readonly PerScreen<Dictionary<string, FurnitureDLState>> dlExtInfoCacheImpl = new() { Value = [] };
-    private static Dictionary<string, FurnitureDLState> DlExtInfoCache => dlExtInfoCacheImpl.Value;
+    private static readonly PerScreen<Dictionary<string, FurnitureDLState>> dlExtInfoCacheImpl = new();
+    private static Dictionary<string, FurnitureDLState> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
 
     /// <summary>Furniture tile property data (secretly building data)</summary>
     internal static Dictionary<string, BuildingData> FPData
@@ -325,7 +326,7 @@ internal static class FurnitureProperties
     {
         if (IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.None)
             return true;
-        DrawFurnitureLayerDepths.Value.Add(layerDepth);
+        DrawFurnitureLayerDepths.Add(layerDepth);
         return IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.BaseAndLayer;
     }
 
@@ -355,10 +356,10 @@ internal static class FurnitureProperties
                     ),
                 spriteBatch,
                 alpha,
-                DrawFurnitureLayerDepths.Value.Max() + 1 / 10000f
+                DrawFurnitureLayerDepths.Max() + 1 / 10000f
             );
         }
-        DrawFurnitureLayerDepths.Value.Clear();
+        DrawFurnitureLayerDepths.Clear();
         __instance.sourceRect.Value = __state;
         IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
     }

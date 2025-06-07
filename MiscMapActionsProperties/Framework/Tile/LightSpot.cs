@@ -45,8 +45,7 @@ internal static class LightSpot
     private static string FormLightId(Point pos) =>
         string.Concat(MapLightPrefix, pos.X.ToString(), ",", pos.Y.ToString());
 
-    private static readonly PerScreen<Dictionary<string, List<LightSource>>> conditionalLightSources =
-        new() { Value = [] };
+    private static readonly PerScreen<Dictionary<string, List<LightSource>>?> conditionalLightSources = new();
 
     internal static void Register()
     {
@@ -74,6 +73,8 @@ internal static class LightSpot
         {
             lightId = FormLightId(pos);
             Game1.currentLightSources.Remove(lightId);
+            if (conditionalLightSources.Value == null)
+                continue;
             foreach (List<LightSource> lights in conditionalLightSources.Value.Values)
             {
                 lights.RemoveWhere(light => light.Id == lightId);
@@ -152,7 +153,7 @@ internal static class LightSpot
             {
                 Game1.currentLightSources.Add(light);
             }
-            else
+            else if (conditionalLightSources.Value != null)
             {
                 string condTrim = condprop.Cond.Trim();
                 if (conditionalLightSources.Value.TryGetValue(condTrim, out List<LightSource>? lightSources))
@@ -169,6 +170,8 @@ internal static class LightSpot
 
     private static void UpdateConditionalLights(GameLocation location)
     {
+        if (conditionalLightSources.Value == null)
+            return;
         GameStateQueryContext context = new(location, Game1.player, null, null, null);
         foreach ((string cond, List<LightSource> lights) in conditionalLightSources.Value)
         {

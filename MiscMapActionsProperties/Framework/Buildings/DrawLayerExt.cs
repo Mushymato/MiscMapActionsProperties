@@ -80,10 +80,10 @@ internal record DLExtInfo(
 internal static class DrawLayerExt
 {
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
-    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoCacheImpl = new() { Value = [] };
-    private static Dictionary<string, DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value;
-    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoInMenuImpl = new() { Value = [] };
-    private static Dictionary<string, DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value;
+    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoCacheImpl = new();
+    private static Dictionary<string, DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoInMenuImpl = new();
+    private static Dictionary<string, DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value ??= [];
 
     internal static void Register()
     {

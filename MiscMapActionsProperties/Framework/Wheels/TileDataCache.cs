@@ -23,12 +23,12 @@ internal sealed class TileDataCache<TProps>
     private readonly string[] layers;
     internal event EventHandler<(GameLocation, HashSet<Point>?)>? TileDataCacheChanged;
 
-    private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new() { Value = [] };
-    private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value;
+    private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new();
+    private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value ??= [];
     internal Dictionary<GameLocation, HashSet<Point>?> nextTickChangedPoints = [];
 
-    private readonly PerScreen<bool> furniturePropertyJustInvalidated = new() { Value = false };
-    private readonly PerScreen<bool> floorPathPropertyJustInvalidated = new() { Value = false };
+    private readonly PerScreen<bool> furniturePropertyJustInvalidated = new(() => false);
+    private readonly PerScreen<bool> floorPathPropertyJustInvalidated = new(() => false);
 
     internal void PushChangedPoints(GameLocation location, HashSet<Point>? newPoints)
     {
