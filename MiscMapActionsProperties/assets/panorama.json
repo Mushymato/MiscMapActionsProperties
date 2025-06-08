@@ -94,7 +94,8 @@
         "RepeatX": true,
         "AlignY": "Start",
         "DrawViewportOffset": "-0.1,0",
-        "ShowDuring": "Night"
+        "ShowDuring": "Night",
+        "DrawInMapScreenshot": true
       },
       {
         "Id": "MMAP_RainFar",
