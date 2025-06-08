@@ -108,7 +108,7 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
         return new(data, texture, data.SourceRect.IsEmpty ? texture.Bounds : data.SourceRect);
     }
 
-    internal void UpdatePosition(xTile.Dimensions.Rectangle viewport, xTile.Layers.Layer layer)
+    internal void UpdatePosition(xTile.Dimensions.Rectangle viewport)
     {
         Position.X = Data.AlignX == ParallaxAlignMode.Start ? 0f : viewport.Width - ScaledWidth;
         Position.Y = Data.AlignY == ParallaxAlignMode.Start ? 0f : viewport.Height - ScaledHeight;
@@ -309,7 +309,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
         foreach (var pCtx in parallaxCtx)
         {
-            pCtx.UpdatePosition(viewport, layer);
+            pCtx.UpdatePosition(viewport);
         }
 
         // TAS
@@ -384,7 +384,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         }
 
         // backing
-        Rectangle viewportRect = new(0, 0, Game1.viewport.Width, Game1.viewport.Height);
+        Rectangle viewportRect = Game1.graphics.GraphicsDevice.Viewport.Bounds;
         if (Night == null)
         {
             Day?.Draw(b, viewportRect, 1f);
@@ -453,7 +453,19 @@ internal static class Panorama
             transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
         );
 
+        ModEntry.harm.Patch(
+            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.isOutdoorMapSmallerThanViewport)),
+            postfix: new HarmonyMethod(typeof(Panorama), nameof(Game1_isOutdoorMapSmallerThanViewport_Postfix))
+        );
         ModEntry.help.ConsoleCommands.Add("mmap.reset_bg", "Reload current area background", ConsoleReloadBg);
+    }
+
+    private static void Game1_isOutdoorMapSmallerThanViewport_Postfix(ref bool __result)
+    {
+        if (__result && Game1.background is PanoramaBackground)
+        {
+            __result = false;
+        }
     }
 
     private static void ConsoleReloadBg(string arg1, string[] arg2)
