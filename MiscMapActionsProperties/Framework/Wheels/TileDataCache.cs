@@ -101,11 +101,14 @@ internal sealed class TileDataCache<TProps>
         if (Game1.activeClickableMenu != null)
             return;
 
+        List<string> cacheKeys = Cache.Keys.ToList();
+
         if (furniturePropertyJustInvalidated.Value)
         {
-            foreach (string locName in Cache.Keys)
+            foreach (string locName in cacheKeys)
             {
                 GameLocation loc = Game1.getLocationFromName(locName);
+                ModEntry.Log($"furniturePropertyJustInvalidated: '{locName}' -> '{loc.NameOrUniqueName}'");
                 if (loc?.furniture.Any() ?? false)
                 {
                     foreach (Furniture furniture in loc.furniture)
@@ -119,11 +122,12 @@ internal sealed class TileDataCache<TProps>
 
         if (floorPathPropertyJustInvalidated.Value)
         {
-            foreach (string locName in Cache.Keys)
+            foreach (string locName in cacheKeys)
             {
                 GameLocation loc = Game1.getLocationFromName(locName);
                 if (loc?.terrainFeatures.Values.Any(tf => tf is Flooring) ?? false)
                 {
+                    ModEntry.Log($"floorPathPropertyJustInvalidated: '{locName}' -> '{loc.NameOrUniqueName}'");
                     foreach (TerrainFeature feature in loc.terrainFeatures.Values)
                     {
                         if (feature is Flooring flooring)
