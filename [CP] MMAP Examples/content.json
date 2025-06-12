@@ -89,7 +89,7 @@
           },
           "Layer": "Buildings",
           "SetProperties": {
-            "Action": "mushymato.MMAP_ShowConstructForCurrentLocation Robin"
+            "Action": "mushymato.MMAP_ShowConstructForCurrent Robin"
           }
         }
       ]

@@ -11,7 +11,7 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal record LightCondAndProps(string? Cond, string[] Props);
 
 /// <summary>
-/// Add new tile property mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY]
+/// Add new tile property mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [context]
 /// Place a light source on a tile.
 /// [type] is either a light id or a texture (must be loaded).
 /// A GSQ can be used to control the light, by setting mushymato.MMAP_LightCond "GSQ" on the same tile.

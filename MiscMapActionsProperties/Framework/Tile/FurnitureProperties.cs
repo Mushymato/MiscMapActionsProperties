@@ -176,6 +176,13 @@ internal static class FurnitureProperties
                     nameof(Furniture_IntersectsForCollision_Postfix)
                 )
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.AllowPlacementOnThisTile)),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_AllowPlacementOnThisTile_Postfix)
+                )
+            );
 
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
@@ -414,6 +421,18 @@ internal static class FurnitureProperties
             }
         }
         __result = false;
+    }
+
+    private static void Furniture_AllowPlacementOnThisTile_Postfix(
+        Furniture __instance,
+        int tile_x,
+        int tile_y,
+        ref bool __result
+    )
+    {
+        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        __result = fpData.IsTilePassable(tile_x, tile_y);
     }
 
     private static void Furniture_DoesTileHaveProperty_Postfix(
