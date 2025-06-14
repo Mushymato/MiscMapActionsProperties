@@ -36,6 +36,8 @@ Some temporary animated sprites are provided by default by this mod:
 | `AccelerationChange` | Vector2 | 0,0 | Amount of increase in acceleration on X and Y axis each tick. |
 | `Alpha` | float | 1f | Multiplier on Color, i.e. 0 is transparent. |
 | `PingPong` | bool | false | Makes animation frames go 0 1 2 3 2 1 0 instead of 0 1 2 3 0 1 2 3. |
+| `EndActions` | List\<string\> | _null_ | List of string [trigger actions](https://stardewvalleywiki.com/Modding:Trigger_actions) to run when the TAS finishes. For things with `SpawnInterval` defined, these actions will run multiple every time the TAS spawns and ends. |
+| `ApplyEndActionsOnForceRemove` | bool | false | `EndActions` only fire for natural ending of TAS, setting this to true also makes it fire on manual removals (like when moving around a building that has `mushymato.MMAP_TAS` tile property attached). |
 | `SpawnInterval` | double | -1 | How many miliseconds before a new copy of this TAS should be spawned, ideally used with some randomization. |
 | `SpawnDelay` | double | -1 | How many miliseconds before the first copy of this TAS should be spawned, `SpawnInterval` begins counting after `SpawnDelay` elapses. |
 | `RandMin` | TASExtRand | _null_ | Model used for randomizing certain fields. |
