@@ -79,7 +79,7 @@
           },
           "Interval": 50,
           "Frames": 8,
-          "Loops": 9999,
+          "Loops": 4,
           "Scale": 1,
           "ScaleChange": 0.02,
           "RotationChange": 0.02,
@@ -89,7 +89,10 @@
           },
           "RandMax": {
             "Motion": "4,4"
-          }
+          },
+          "EndActions": [
+            "AddMoney 10"
+          ]
         },
         "{{ModId}}_CauldronSmoke": {
           "Id": "{{ModId}}_CauldronSmoke",

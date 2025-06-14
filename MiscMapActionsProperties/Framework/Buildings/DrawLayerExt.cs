@@ -64,7 +64,7 @@ internal record DLExtInfo(
             color * Alpha,
             CurrRotate,
             Origin,
-            Scale,
+            scale / 4 * Scale,
             effects ^ Effect,
             layerDepth
         );

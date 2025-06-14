@@ -16,11 +16,12 @@ using StardewValley.TokenizableStrings;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
-public enum DrawFurnitureWithLayerMode
+[Flags]
+public enum FurnitureDrawMode
 {
     None,
-    BaseAndLayer,
-    OnlyLayer,
+    Base,
+    Layer,
 }
 
 /// <summary>
@@ -28,10 +29,10 @@ public enum DrawFurnitureWithLayerMode
 /// </summary>
 internal static class FurnitureProperties
 {
+    internal const float LAYER_OFFSET = 1E-06f;
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
-    private static readonly PerScreen<DrawFurnitureWithLayerMode> IsDrawingFurnitureWithLayer =
-        new(() => DrawFurnitureWithLayerMode.None);
+    private static readonly PerScreen<FurnitureDrawMode> FurnitureDraw = new(() => FurnitureDrawMode.None);
     private static readonly PerScreen<float> FurnitureLayerDepthOffset = new();
     private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
     private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
@@ -46,7 +47,7 @@ internal static class FurnitureProperties
         List<(BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt)> LayerInfo
     )
     {
-        public enum DrawSource
+        internal enum DrawSource
         {
             Normal,
             Menu,
@@ -103,6 +104,7 @@ internal static class FurnitureProperties
                         drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
                     }
                 }
+                layerDepth -= furniture.TileLocation.X * LAYER_OFFSET;
 
                 Rectangle sourceRect = drawLayer.GetSourceRect(
                     (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
@@ -147,8 +149,21 @@ internal static class FurnitureProperties
         }
     }
 
-    private static readonly PerScreen<Dictionary<string, FurnitureDLState>> dlExtInfoCacheImpl = new();
-    private static Dictionary<string, FurnitureDLState> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+    private static readonly PerScreen<Dictionary<string, FurnitureDLState?>> dlExtInfoCacheImpl = new();
+    private static Dictionary<string, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+    private static IEnumerable<FurnitureDLState> DlExtInfoCacheValues
+    {
+        get
+        {
+            if (dlExtInfoCacheImpl.Value == null)
+                yield break;
+            foreach (FurnitureDLState? state in dlExtInfoCacheImpl.Value.Values)
+            {
+                if (state != null)
+                    yield return state;
+            }
+        }
+    }
 
     /// <summary>Furniture tile property data (secretly building data)</summary>
     internal static Dictionary<string, BuildingData> FPData
@@ -165,6 +180,7 @@ internal static class FurnitureProperties
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
         {
             _fpData = null;
+            DlExtInfoCache.Clear();
         }
     }
 
@@ -193,7 +209,6 @@ internal static class FurnitureProperties
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         ModEntry.help.Events.Player.Warped += OnWarped;
-        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
         try
         {
             ModEntry.harm.Patch(
@@ -268,69 +283,45 @@ internal static class FurnitureProperties
         }
     }
 
-    private static FurnitureDLState? AddFurnitureToDLCache(Furniture furniture)
+    private static FurnitureDLState? TryAddFurnitureToDLCache(Furniture furniture, BuildingData fpData)
     {
-        if (!FPData.TryGetValue(furniture.ItemId, out BuildingData? fpData))
-            return null;
-
         if (fpData.DrawLayers == null)
+        {
+            DlExtInfoCache[furniture.ItemId] = null;
             return null;
+        }
+        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state))
+            return state;
 
-        FurnitureDLState state =
-            new(
-                fpData,
-                fpData
-                    .DrawLayers.Select(
-                        (drawLayer) =>
-                        {
-                            DrawLayerExt.TryGetDRExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
-                            return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
-                        }
-                    )
-                    .ToList()
-            );
+        state = new(
+            fpData,
+            fpData
+                .DrawLayers.Select(
+                    (drawLayer) =>
+                    {
+                        DrawLayerExt.TryGetDRExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
+                        return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
+                    }
+                )
+                .ToList()
+        );
         DlExtInfoCache[furniture.ItemId] = state;
         return state;
     }
 
-    private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
-    {
-        if (!e.IsCurrentLocation)
-            return;
-
-        foreach (Furniture furniture in e.Added)
-        {
-            AddFurnitureToDLCache(furniture);
-        }
-    }
-
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        if (e.NewLocation == null)
-            return;
-
         DlExtInfoCache.Clear();
-        foreach (Furniture furniture in e.NewLocation.furniture)
-        {
-            AddFurnitureToDLCache(furniture);
-        }
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
-        if (Game1.currentLocation == null)
-            return;
-
         DlExtInfoCache.Clear();
-        foreach (Furniture furniture in Game1.currentLocation.furniture)
-        {
-            AddFurnitureToDLCache(furniture);
-        }
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
     {
-        foreach (FurnitureDLState state in DlExtInfoCache.Values)
+        foreach (FurnitureDLState? state in DlExtInfoCacheValues)
         {
             foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
             {
@@ -341,7 +332,7 @@ internal static class FurnitureProperties
 
     private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
-        foreach (FurnitureDLState state in DlExtInfoCache.Values)
+        foreach (FurnitureDLState state in DlExtInfoCacheValues)
         {
             foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
             {
@@ -352,44 +343,38 @@ internal static class FurnitureProperties
 
     private static void Furniture_draw_Prefix(Furniture __instance, ref Rectangle __state)
     {
+        if (__instance.isTemporarilyInvisible || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+
         __state = __instance.sourceRect.Value;
-        if (!__instance.isTemporarilyInvisible)
+        FurnitureDraw.Value = FurnitureDrawMode.Base;
+        if (TryAddFurnitureToDLCache(__instance, fpData) is not null)
         {
-            if (DlExtInfoCache.ContainsKey(__instance.ItemId))
-            {
-                IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.BaseAndLayer;
-            }
-            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-            {
-                FurnitureLayerDepthOffset.Value = fpData.SortTileOffset * 64f / 10000f;
-                if (fpData.DrawShadow)
-                {
-                    __instance.sourceRect.Value = AdjustSourceRectToSeason(
-                        fpData,
-                        __instance.Location,
-                        __instance.sourceRect.Value
-                    );
-                }
-                else if (IsDrawingFurnitureWithLayer.Value != DrawFurnitureWithLayerMode.None)
-                {
-                    IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.OnlyLayer;
-                }
-            }
+            if (fpData.DrawShadow)
+                FurnitureDraw.Value |= FurnitureDrawMode.Layer;
+            else
+                FurnitureDraw.Value = FurnitureDrawMode.Layer;
         }
-        else
+        FurnitureLayerDepthOffset.Value =
+            fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
+        if (fpData.DrawShadow)
         {
-            FurnitureLayerDepthOffset.Value = 0;
-            IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
+            __instance.sourceRect.Value = AdjustSourceRectToSeason(
+                fpData,
+                __instance.Location,
+                __instance.sourceRect.Value
+            );
         }
     }
 
     private static bool SpriteBatch_Draw_Prefix(ref float layerDepth)
     {
-        layerDepth -= FurnitureLayerDepthOffset.Value;
-        if (IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.None)
+        if (FurnitureDraw.Value == FurnitureDrawMode.None)
             return true;
-        DrawFurnitureLayerDepths.Add(layerDepth);
-        return IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.BaseAndLayer;
+        if (FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Layer))
+            DrawFurnitureLayerDepths.Add(layerDepth);
+        layerDepth -= FurnitureLayerDepthOffset.Value;
+        return FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Base);
     }
 
     private static void Furniture_draw_Finalizer(
@@ -403,29 +388,30 @@ internal static class FurnitureProperties
     )
     {
         if (
-            IsDrawingFurnitureWithLayer.Value != DrawFurnitureWithLayerMode.None
-            && DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
+            FurnitureDraw.Value == FurnitureDrawMode.None
+            || !DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
+            || state == null
         )
-        {
-            IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
-            state.Draw(
-                __instance,
-                Furniture.isDrawingLocationFurniture
-                    ? ___drawPosition.Value
-                    : new Vector2(
-                        x * Game1.tileSize,
-                        y * Game1.tileSize - (__instance.sourceRect.Height * 4f - __instance.boundingBox.Height)
-                    ),
-                spriteBatch,
-                alpha,
-                DrawFurnitureLayerDepths.Max() + 1 / 10000f,
-                4f
-            );
-        }
+            return;
+
+        FurnitureDraw.Value = FurnitureDrawMode.None;
+        state.Draw(
+            __instance,
+            Furniture.isDrawingLocationFurniture
+                ? ___drawPosition.Value
+                : new Vector2(
+                    x * Game1.tileSize,
+                    y * Game1.tileSize - (__instance.sourceRect.Height * 4f - __instance.boundingBox.Height)
+                ),
+            spriteBatch,
+            alpha,
+            DrawFurnitureLayerDepths.Max(),
+            4f
+        );
         DrawFurnitureLayerDepths.Clear();
         FurnitureLayerDepthOffset.Value = 0;
+        FurnitureDraw.Value = FurnitureDrawMode.None;
         __instance.sourceRect.Value = __state;
-        IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
     }
 
     private static float TryGetScaleSize(Furniture furniture)
@@ -444,21 +430,22 @@ internal static class FurnitureProperties
         float layerDepth
     )
     {
-        if (
-            DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
-            || (state = AddFurnitureToDLCache(__instance)) is not null
-        )
+        if (!DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state))
         {
-            state.Draw(
-                __instance,
-                location,
-                spriteBatch,
-                transparency,
-                layerDepth,
-                TryGetScaleSize(__instance) * scaleSize,
-                drawSource: FurnitureDLState.DrawSource.Menu
-            );
+            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+                state = TryAddFurnitureToDLCache(__instance, fpData);
+            else
+                return;
         }
+        state?.Draw(
+            __instance,
+            location,
+            spriteBatch,
+            transparency,
+            layerDepth,
+            TryGetScaleSize(__instance) * scaleSize,
+            drawSource: FurnitureDLState.DrawSource.Menu
+        );
     }
 
     private static void Furniture_drawAtNonTileSpot_Finalizer(
@@ -469,21 +456,22 @@ internal static class FurnitureProperties
         float alpha
     )
     {
-        if (
-            DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
-            || (state = AddFurnitureToDLCache(__instance)) is not null
-        )
+        if (!DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state))
         {
-            state.Draw(
-                __instance,
-                location,
-                spriteBatch,
-                alpha,
-                layerDepth,
-                4f,
-                drawSource: FurnitureDLState.DrawSource.NonTile
-            );
+            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+                state = TryAddFurnitureToDLCache(__instance, fpData);
+            else
+                return;
         }
+        state?.Draw(
+            __instance,
+            location,
+            spriteBatch,
+            alpha,
+            layerDepth,
+            4f,
+            drawSource: FurnitureDLState.DrawSource.NonTile
+        );
     }
 
     private static bool Furniture_loadDescription_Prefix(Furniture __instance, ref string __result)
