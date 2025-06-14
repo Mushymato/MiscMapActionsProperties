@@ -31,6 +31,7 @@ internal static class FurnitureProperties
     private static Dictionary<string, BuildingData>? _fpData = null;
     private static readonly PerScreen<DrawFurnitureWithLayerMode> IsDrawingFurnitureWithLayer =
         new(() => DrawFurnitureWithLayerMode.None);
+    private static readonly PerScreen<float> FurnitureLayerDepthOffset = new();
     private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
     private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
@@ -71,7 +72,7 @@ internal static class FurnitureProperties
                 {
                     texture = Game1.content.Load<Texture2D>(drawLayer.Texture);
                 }
-                Vector2 drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition);
+                Vector2 drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * 4);
 
                 if (drawLayerExt != null)
                 {
@@ -309,6 +310,7 @@ internal static class FurnitureProperties
             }
             if (__instance.Location != null && FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             {
+                FurnitureLayerDepthOffset.Value = fpData.SortTileOffset * 64f / 10000f;
                 if (fpData.DrawShadow)
                 {
                     __instance.sourceRect.Value = AdjustSourceRectToSeason(
@@ -325,12 +327,14 @@ internal static class FurnitureProperties
         }
         else
         {
+            FurnitureLayerDepthOffset.Value = 0;
             IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
         }
     }
 
-    private static bool SpriteBatch_Draw_Prefix(float layerDepth)
+    private static bool SpriteBatch_Draw_Prefix(ref float layerDepth)
     {
+        layerDepth -= FurnitureLayerDepthOffset.Value;
         if (IsDrawingFurnitureWithLayer.Value == DrawFurnitureWithLayerMode.None)
             return true;
         DrawFurnitureLayerDepths.Add(layerDepth);
@@ -367,6 +371,7 @@ internal static class FurnitureProperties
             );
         }
         DrawFurnitureLayerDepths.Clear();
+        FurnitureLayerDepthOffset.Value = 0;
         __instance.sourceRect.Value = __state;
         IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
     }
