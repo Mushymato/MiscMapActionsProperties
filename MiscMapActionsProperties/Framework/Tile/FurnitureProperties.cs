@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -35,18 +36,31 @@ internal static class FurnitureProperties
     private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
     private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
+    private static readonly MethodInfo? Furniture_getScaleSize = AccessTools.DeclaredMethod(
+        typeof(Furniture),
+        "getScaleSize"
+    );
 
     private sealed record FurnitureDLState(
         BuildingData FpData,
         List<(BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt)> LayerInfo
     )
     {
+        public enum DrawSource
+        {
+            Normal,
+            Menu,
+            NonTile,
+        }
+
         internal void Draw(
             Furniture furniture,
             Vector2 drawPosition,
             SpriteBatch spriteBatch,
             float alpha,
-            float furnitureLayerDepth
+            float furnitureLayerDepth,
+            float scaleSize,
+            DrawSource drawSource = DrawSource.Normal
         )
         {
             foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
@@ -60,19 +74,45 @@ internal static class FurnitureProperties
                 {
                     continue;
                 }
-                float layerDepth =
-                    (drawLayer.DrawInBackground ? 0f : furnitureLayerDepth) - (drawLayer.SortTileOffset * 64f / 10000f);
+
+                ParsedItemData dataOrErrorItem = ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
+
+                float layerDepth;
+                Vector2 drawPos;
+                if (drawSource == DrawSource.Menu)
+                {
+                    layerDepth = 0f;
+                    Rectangle baseSrcRect = dataOrErrorItem.GetSourceRect();
+                    drawPos =
+                        drawPosition
+                        + new Vector2(32, 32)
+                        - new Vector2(baseSrcRect.Width / 2 * scaleSize, baseSrcRect.Height / 2 * scaleSize)
+                        + drawLayer.DrawPosition * scaleSize;
+                }
+                else
+                {
+                    layerDepth =
+                        (drawLayer.DrawInBackground ? 0f : furnitureLayerDepth)
+                        - (drawLayer.SortTileOffset * 64f / 10000f);
+                    if (drawSource == DrawSource.NonTile)
+                    {
+                        drawPos = drawPosition + drawLayer.DrawPosition * scaleSize;
+                    }
+                    else
+                    {
+                        drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
+                    }
+                }
+
                 Rectangle sourceRect = drawLayer.GetSourceRect(
                     (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
                 );
                 sourceRect = AdjustSourceRectToSeason(FpData, furniture.Location, sourceRect);
-                ParsedItemData dataOrErrorItem = ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
                 Texture2D texture = dataOrErrorItem.GetTexture();
                 if (Game1.content.DoesAssetExist<Texture2D>(drawLayer.Texture))
                 {
                     texture = Game1.content.Load<Texture2D>(drawLayer.Texture);
                 }
-                Vector2 drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * 4);
 
                 if (drawLayerExt != null)
                 {
@@ -84,7 +124,7 @@ internal static class FurnitureProperties
                         Color.White * alpha,
                         0f,
                         Vector2.Zero,
-                        4f,
+                        scaleSize,
                         SpriteEffects.None,
                         layerDepth
                     );
@@ -98,7 +138,7 @@ internal static class FurnitureProperties
                         Color.White * alpha,
                         0f,
                         Vector2.Zero,
-                        4f,
+                        scaleSize,
                         SpriteEffects.None,
                         layerDepth
                     );
@@ -208,6 +248,14 @@ internal static class FurnitureProperties
                 ),
                 prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(SpriteBatch_Draw_Prefix))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+            );
             // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
@@ -220,26 +268,29 @@ internal static class FurnitureProperties
         }
     }
 
-    private static void AddFurnitureToDLCache(Furniture furniture)
+    private static FurnitureDLState? AddFurnitureToDLCache(Furniture furniture)
     {
         if (!FPData.TryGetValue(furniture.ItemId, out BuildingData? fpData))
-            return;
+            return null;
 
         if (fpData.DrawLayers == null)
-            return;
+            return null;
 
-        DlExtInfoCache[furniture.ItemId] = new(
-            fpData,
-            fpData
-                .DrawLayers.Select(
-                    (drawLayer) =>
-                    {
-                        DrawLayerExt.TryGetDRExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
-                        return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
-                    }
-                )
-                .ToList()
-        );
+        FurnitureDLState state =
+            new(
+                fpData,
+                fpData
+                    .DrawLayers.Select(
+                        (drawLayer) =>
+                        {
+                            DrawLayerExt.TryGetDRExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
+                            return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
+                        }
+                    )
+                    .ToList()
+            );
+        DlExtInfoCache[furniture.ItemId] = state;
+        return state;
     }
 
     private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
@@ -308,7 +359,7 @@ internal static class FurnitureProperties
             {
                 IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.BaseAndLayer;
             }
-            if (__instance.Location != null && FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             {
                 FurnitureLayerDepthOffset.Value = fpData.SortTileOffset * 64f / 10000f;
                 if (fpData.DrawShadow)
@@ -367,13 +418,72 @@ internal static class FurnitureProperties
                     ),
                 spriteBatch,
                 alpha,
-                DrawFurnitureLayerDepths.Max() + 1 / 10000f
+                DrawFurnitureLayerDepths.Max() + 1 / 10000f,
+                4f
             );
         }
         DrawFurnitureLayerDepths.Clear();
         FurnitureLayerDepthOffset.Value = 0;
         __instance.sourceRect.Value = __state;
         IsDrawingFurnitureWithLayer.Value = DrawFurnitureWithLayerMode.None;
+    }
+
+    private static float TryGetScaleSize(Furniture furniture)
+    {
+        if (Furniture_getScaleSize?.Invoke(furniture, null) is float scaleSize)
+            return scaleSize;
+        return 1f;
+    }
+
+    private static void Furniture_drawInMenu_Finalizer(
+        Furniture __instance,
+        SpriteBatch spriteBatch,
+        Vector2 location,
+        float scaleSize,
+        float transparency,
+        float layerDepth
+    )
+    {
+        if (
+            DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
+            || (state = AddFurnitureToDLCache(__instance)) is not null
+        )
+        {
+            state.Draw(
+                __instance,
+                location,
+                spriteBatch,
+                transparency,
+                layerDepth,
+                TryGetScaleSize(__instance) * scaleSize,
+                drawSource: FurnitureDLState.DrawSource.Menu
+            );
+        }
+    }
+
+    private static void Furniture_drawAtNonTileSpot_Finalizer(
+        Furniture __instance,
+        SpriteBatch spriteBatch,
+        Vector2 location,
+        float layerDepth,
+        float alpha
+    )
+    {
+        if (
+            DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
+            || (state = AddFurnitureToDLCache(__instance)) is not null
+        )
+        {
+            state.Draw(
+                __instance,
+                location,
+                spriteBatch,
+                alpha,
+                layerDepth,
+                4f,
+                drawSource: FurnitureDLState.DrawSource.NonTile
+            );
+        }
     }
 
     private static bool Furniture_loadDescription_Prefix(Furniture __instance, ref string __result)

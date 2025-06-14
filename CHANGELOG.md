@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Make furniture properties SortTileOffset work for base furniture sprite.
 - Put furniture properties draw layer DrawPosition in 4x pixel scale.
+- Furniture draw layers now work in the menu.
 
 ## [1.8.4]
 
