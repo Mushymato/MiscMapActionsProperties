@@ -515,6 +515,8 @@ internal static class FurnitureProperties
     {
         if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
+        if (fpData.CollisionMap == null)
+            return;
 
         fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
         Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
@@ -546,6 +548,8 @@ internal static class FurnitureProperties
     )
     {
         if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        if (fpData.CollisionMap == null)
             return;
         __result = fpData.IsTilePassable(tile_x, tile_y);
     }
