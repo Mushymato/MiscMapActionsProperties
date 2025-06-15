@@ -211,24 +211,46 @@ internal static class FurnitureProperties
         ModEntry.help.Events.Player.Warped += OnWarped;
         try
         {
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.DoesTileHaveProperty)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(Furniture),
-                    nameof(Furniture.GetAdditionalTilePropertyRadius)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+            foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
+            {
+                if (
+                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.DoesTileHaveProperty))
+                    is MethodInfo origMethod1
                 )
+                {
+                    ModEntry.harm.Patch(
+                        original: origMethod1,
+                        postfix: new HarmonyMethod(
+                            typeof(FurnitureProperties),
+                            nameof(Furniture_DoesTileHaveProperty_Postfix)
+                        )
+                    );
+                }
+                if (
+                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
+                    is MethodInfo origMethod2
+                )
+                {
+                    ModEntry.harm.Patch(
+                        original: origMethod2,
+                        postfix: new HarmonyMethod(
+                            typeof(FurnitureProperties),
+                            nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+                        )
+                    );
+                }
+            }
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+            );
+
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
                 postfix: new HarmonyMethod(
@@ -245,11 +267,6 @@ internal static class FurnitureProperties
             );
 
             ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
-            );
-            ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(
                     typeof(SpriteBatch),
                     nameof(SpriteBatch.Draw),
@@ -260,7 +277,7 @@ internal static class FurnitureProperties
                         typeof(Color),
                         typeof(float),
                         typeof(Vector2),
-                        typeof(Vector2),
+                        typeof(float),
                         typeof(SpriteEffects),
                         typeof(float),
                     ]
@@ -345,8 +362,30 @@ internal static class FurnitureProperties
         }
     }
 
+    private static void BedFurniture_draw_Prefix(Furniture __instance, ref Rectangle __state)
+    {
+        if (Furniture.isDrawingLocationFurniture)
+            Furniture_draw_Prefix(__instance, ref __state);
+    }
+
+    private static void BedFurniture_draw_Finalizer(
+        Furniture __instance,
+        Netcode.NetVector2 ___drawPosition,
+        SpriteBatch spriteBatch,
+        int x,
+        int y,
+        float alpha,
+        ref Rectangle __state
+    )
+    {
+        if (Furniture.isDrawingLocationFurniture)
+            Furniture_draw_Finalizer(__instance, ___drawPosition, spriteBatch, x, y, alpha, ref __state);
+    }
+
     private static void Furniture_draw_Prefix(Furniture __instance, ref Rectangle __state)
     {
+        FurnitureDraw.Value = FurnitureDrawMode.None;
+        FurnitureLayerDepthOffset.Value = 0;
         if (__instance.isTemporarilyInvisible || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
 
@@ -371,13 +410,12 @@ internal static class FurnitureProperties
         }
     }
 
-    private static bool SpriteBatch_Draw_Prefix(ref float layerDepth)
+    private static bool SpriteBatch_Draw_Prefix(float layerDepth)
     {
         if (FurnitureDraw.Value == FurnitureDrawMode.None)
             return true;
         if (FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Layer))
             DrawFurnitureLayerDepths.Add(layerDepth);
-        layerDepth -= FurnitureLayerDepthOffset.Value;
         return FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Base);
     }
 
@@ -414,7 +452,6 @@ internal static class FurnitureProperties
         );
         DrawFurnitureLayerDepths.Clear();
         FurnitureLayerDepthOffset.Value = 0;
-        FurnitureDraw.Value = FurnitureDrawMode.None;
         __instance.sourceRect.Value = __state;
     }
 
@@ -543,7 +580,7 @@ internal static class FurnitureProperties
             return;
         if (fpData.CollisionMap == null)
             return;
-        __result = fpData.IsTilePassable(tile_x, tile_y);
+        __result = fpData.IsTilePassable((int)(tile_x - __instance.TileLocation.X), (int)(tile_y - __instance.TileLocation.Y));
     }
 
     private static void Furniture_DoesTileHaveProperty_Postfix(
