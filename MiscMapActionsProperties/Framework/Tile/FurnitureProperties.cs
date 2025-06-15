@@ -216,6 +216,10 @@ internal static class FurnitureProperties
                 postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
             );
             ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.DoesTileHaveProperty)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
+            );
+            ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(
                     typeof(Furniture),
                     nameof(Furniture.GetAdditionalTilePropertyRadius)
