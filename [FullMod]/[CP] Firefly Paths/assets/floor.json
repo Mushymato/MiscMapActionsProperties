@@ -42,8 +42,8 @@
           "PlacementSound": "coin",
           "RemovalSound": "coin",
           "RemovalDebrisType": 14,
-          "FootstepSound": "grassyStep",
-          "ConnectType": "Random",
+          "FootstepSound": "sandyStep",
+          "ConnectType": "Default",
           "ShadowType": "None",
           "CornerSize": 0,
           "FarmSpeedBuff": -1.0

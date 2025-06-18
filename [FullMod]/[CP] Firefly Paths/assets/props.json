@@ -8,7 +8,7 @@
       "Entries": {
         "{{L@TargetFloor}}": {
           "Back": {
-            "mushymato.MMAP_Light": "2 #ffffff40 1",
+            "mushymato.MMAP_Light": "4 #ffffff20 1",
             "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF",
             "TouchAction": "mushymato.MMAP_If mushymato.MMAP_TIME_IS_LIGHTS_OFF,RANDOM 0.1 ## mushymato.MMAP_Critter Firefly T 4"
           }

@@ -580,7 +580,10 @@ internal static class FurnitureProperties
             return;
         if (fpData.CollisionMap == null)
             return;
-        __result = fpData.IsTilePassable((int)(tile_x - __instance.TileLocation.X), (int)(tile_y - __instance.TileLocation.Y));
+        __result = fpData.IsTilePassable(
+            (int)(tile_x - __instance.TileLocation.X),
+            (int)(tile_y - __instance.TileLocation.Y)
+        );
     }
 
     private static void Furniture_DoesTileHaveProperty_Postfix(
