@@ -152,9 +152,10 @@ And Game State Queries
     - Firefly: [color|T] [count]
     - Seagull: [texture|T] [count]
     - Crab: [texture|T] [count]
-    - Birdie: [texture|<number>|T] [count]
+    - Birdie: [texture|<number>|T][:YOffset] [count]
         - The number option allows you to give a start index for `TileSheet/critters` which has birdies starting at 25, 45, 125, 135, 165, and 175.
         - When using T, the birdie start index will be picked with logic similar to base game.
+        - YOffset is a change on Y axis to the birdy's position, e.g. `T:-128` to make birdie appear 2 tiles above it's tile position.
     - Butterfly: [texture|<number>|T] [count]
         - The number option allows you to give a start index for `TileSheet/critters` (WIP: figure out the indicies)
         - When using texture, the bufferfly will follow summer butterfly rules (4 frames)
@@ -164,6 +165,8 @@ And Game State Queries
     - LeaperFrog: [T|F] [count]
         - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
         - This frog jumps farther into water.
+    - Rabbit: [texture|T][:T|F]
+        - When giving a texture, the first frame is the rabbit's standing frame, while the following 6 frames are the running frame
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a texture, they need to have same number of frames as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.

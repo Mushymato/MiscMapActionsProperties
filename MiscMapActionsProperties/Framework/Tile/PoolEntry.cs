@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
 
@@ -14,10 +15,10 @@ internal static class PoolEntry
 
     internal static void Register()
     {
-        GameLocation.RegisterTouchAction(TileAction_PoolEntry, DoPoolEntry);
+        CommonPatch.RegisterTileAndTouch(TileAction_PoolEntry, DoPoolEntry);
     }
 
-    private static void ConformXYPos(Farmer farmer, int direction, Vector2 tile, float added = 0f)
+    private static void ConformXYPos(Farmer farmer, int direction, Point tile, float added = 0f)
     {
         switch (direction)
         {
@@ -71,7 +72,7 @@ internal static class PoolEntry
         };
     }
 
-    private static void DoPoolEntry(GameLocation location, string[] args, Farmer farmer, Vector2 tile)
+    private static bool DoPoolEntry(GameLocation location, string[] args, Farmer farmer, Point tile)
     {
         if (
             !ArgUtility.TryGetOptionalInt(
@@ -102,7 +103,7 @@ internal static class PoolEntry
         )
         {
             ModEntry.Log(error, LogLevel.Error);
-            return;
+            return false;
         }
 
         if (farmer.bathingClothes.Value)
@@ -110,7 +111,7 @@ internal static class PoolEntry
             if (direction == -1)
                 direction = farmer.FacingDirection;
             else if ((direction = InvertDirection(direction)) != farmer.FacingDirection)
-                return;
+                return false;
             Game1.player.changeOutOfSwimSuit();
             Game1.player.jump();
             Game1.player.swimTimer = 800;
@@ -124,7 +125,7 @@ internal static class PoolEntry
             if (direction == -1)
                 direction = farmer.FacingDirection;
             else if (direction != farmer.FacingDirection)
-                return;
+                return false;
             Game1.player.changeIntoSwimsuit();
             Game1.player.swimTimer = 800;
             Game1.player.swimming.Value = true;
@@ -149,5 +150,6 @@ internal static class PoolEntry
             );
         }
         Game1.player.noMovementPause = 500;
+        return true;
     }
 }

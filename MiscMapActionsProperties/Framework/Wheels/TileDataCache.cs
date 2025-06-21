@@ -252,7 +252,8 @@ internal sealed class TileDataCache<TProps>
 
     private void UpdateLocationTileData(GameLocation location, Rectangle bounds, ref HashSet<Point> changedPoints)
     {
-        if (!Context.IsWorldReady)
+        // guarding all this stuff extra hard i guess
+        if (!Context.IsWorldReady || location == null || location.Map == null)
             return;
 
         if (GetTileData(location, onWarp: false) is not Dictionary<Point, TProps> cacheEntry)
@@ -313,7 +314,7 @@ internal sealed class TileDataCache<TProps>
 
     internal Dictionary<Point, TProps>? GetTileData(GameLocation location, bool onWarp = true)
     {
-        if (location == null || location.NameOrUniqueName is not string uniqueName)
+        if (!Context.IsWorldReady || location == null || location.NameOrUniqueName is not string uniqueName)
             return null;
 
         Dictionary<Point, TProps> cacheEntry;

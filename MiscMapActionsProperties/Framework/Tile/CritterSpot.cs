@@ -197,10 +197,10 @@ internal static class CritterSpot
                 break;
             }
             if (
-                !ArgUtility.TryGetOptional(args, firstIdx + 1, out string? arg1, out error, name: "string arg1")
+                !ArgUtility.TryGetOptional(args, i + 1, out string? arg1, out error, name: "string arg1")
                 || !ArgUtility.TryGetOptionalInt(
                     args,
-                    firstIdx + 2,
+                    i + 2,
                     out int count,
                     out error,
                     defaultValue: 1,
@@ -321,9 +321,13 @@ internal static class CritterSpot
         if (texture != null)
         {
             string[] parts = texture.Split(":");
-            if (parts.Length >= 2 && int.TryParse(parts[1], out yOffset))
+            if (parts.Length >= 2)
             {
                 texture = parts[0];
+                if (!int.TryParse(parts[1], out yOffset))
+                {
+                    yOffset = 0;
+                }
             }
             if (int.TryParse(texture, out startingIndex))
             {
@@ -465,44 +469,33 @@ internal static class CritterSpot
         int count
     )
     {
-        int baseFrame = -1;
         bool flipped = false;
         if (texture != null)
         {
             string[] parts = texture.Split(":");
-            if (parts.Length >= 2 && parts[1] == "F")
+            if (parts.Length >= 2)
             {
                 texture = parts[0];
+                flipped = parts[1] == "F";
             }
-            if (int.TryParse(texture, out baseFrame))
+            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
             {
                 texture = null;
-            }
-            else if (texture != "T" && Game1.content.DoesAssetExist<Texture2D>(texture))
-            {
-                baseFrame = 0;
-            }
-            else
-            {
-                texture = null;
-                baseFrame = -1;
             }
         }
         for (int i = 0; i < count; i++)
         {
-            Rabbit rabbit =
-                new(
-                    location,
-                    new Vector2(
-                        Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
-                        Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
-                    ),
-                    flipped
-                );
-            if (baseFrame > -1)
-                rabbit.baseFrame = baseFrame;
+            Rabbit rabbit = new(location, position.ToVector2(), flipped);
+            rabbit.position += new Vector2(
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
+                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
+            );
             if (texture != null)
+            {
                 rabbit.sprite.textureName.Value = texture;
+                rabbit.sprite.CurrentFrame = 0;
+                rabbit.baseFrame = 1;
+            }
             yield return rabbit;
         }
     }
