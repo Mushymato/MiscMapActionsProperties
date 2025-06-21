@@ -204,7 +204,7 @@
             {
               "Id": "{{ModId}}-PoolEntry",
               "Name": "TouchAction",
-              "Value": "mushymato.MMAP_PoolEntry 3",
+              "Value": "mushymato.MMAP_PoolEntry 3 8 yoba",
               "Layer": "Back",
               "TileArea": {
                 "X": 4,

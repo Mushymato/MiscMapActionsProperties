@@ -6,7 +6,7 @@ using StardewValley;
 namespace MiscMapActionsProperties.Framework.Tile;
 
 /// <summary>
-///  mushymato.MMAP_PoolEntry
+///  mushymato.MMAP_PoolEntry [direction] [velocity] [soundcue]
 /// Combined ChangeIntoSwimsuit/ChangeOutOfSwimsuit/PoolEntrance action
 /// </summary>
 internal static class PoolEntry
@@ -93,7 +93,7 @@ internal static class PoolEntry
             )
             || !ArgUtility.TryGetOptional(
                 args,
-                2,
+                3,
                 out string soundCue,
                 out error,
                 defaultValue: "pullItemFromWater",

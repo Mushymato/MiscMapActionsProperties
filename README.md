@@ -166,7 +166,8 @@ And Game State Queries
         - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
         - This frog jumps farther into water.
     - Rabbit: [texture|T][:T|F]
-        - When giving a texture, the first frame is the rabbit's standing frame, while the following 6 frames are the running frame
+        - When giving a texture, the first frame is the rabbit's standing frame, while the following 6 frames are the running frames
+        - T makes rabbit face right, F makes rabbit face left, e.g. `loadedRabbitTexture:F` gives a rabbit using the specific texture and facing left.
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a texture, they need to have same number of frames as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.
@@ -240,6 +241,31 @@ Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu 
 - Warps the player out of a building, optionally to a position other than the default 1 tile below HumanDoor.
 - X and Y arguments are relative to the building's top left tile, it can be negative.
 - There's **no guarentee** that the warp out tile is not occupied, it's recommended to use `AdditionalPlacementTiles` to enforce a cleared tile.
+
+#### mushymato.MMAP_WarpHere [X Y] [facingDirection] [fadeToBlack]
+
+- Can be used as either Action or TouchAction.
+- Warps the player within the current map.
+- This is primarily used to solve issues with warps within an instanced location, as a replacement to writing `X Y CurrentLocation X Y` warps.
+- `facingDirection` controls the player's facing direction after the warp
+    - 0: Up
+    - 1: Right
+    - 2: Down
+    - 3: Left
+- If `fadeToBlack` is false, teleport the player without doing normal warp fade to black, this also does not trigger any on warp effects.
+
+#### mushymato.MMAP_PoolEntry [facingDirection] [velocity] [soundcue]
+
+- Can be used as either Action or TouchAction.
+- Combines `ChangeIntoSwimsuit`/`ChangeOutOfSwimsuit`/`PoolEntrance` into one action so that a single tile is enough for entering a pool.
+- Use `facingDirection` to control which direction the player can enter from, it depends on the player's facing direction
+    - 0: Can enter pool while facing up
+    - 1: Can enter pool while facing right
+    - 2: Can enter pool while facing down
+    - 3: Can enter pool while facing left
+    - -1: Any direction is valid
+- Use `velocity` to increase how far the player shoots into/out of the pool, default 8
+- Use `soundcue` to change the sound of entering/exiting the pool, by default it is `pullItemFromWater`
 
 #### mushymato.MMAP_If \<GSQ\> ## \<if-case\> [## \<else-case\>]
 
