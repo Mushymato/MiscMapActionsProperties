@@ -115,7 +115,7 @@
     },
     {
       "Action": "Include",
-      "FromFile": "cr_rustic_warphere.json",
+      "FromFile": "cr_rustic_wrphere.json",
       "When": {
         "HasMod": "crystalinerose.RusticFarmhouse"
       }

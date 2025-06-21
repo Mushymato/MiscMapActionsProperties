@@ -252,6 +252,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
     - 1: Right
     - 2: Down
     - 3: Left
+    - -1: Keep original direction
 - If `fadeToBlack` is false, teleport the player without doing normal warp fade to black, this also does not trigger any on warp effects.
 
 #### mushymato.MMAP_PoolEntry [facingDirection] [velocity] [soundcue]
