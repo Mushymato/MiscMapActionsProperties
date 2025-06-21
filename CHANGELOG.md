@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New tile/touch action mushymato.MMAP_WarpHere which warps player within 1 location without requiring a target location name
 - Critter now supports Rabbit
 
+### Fixed
+- Hopefully fix NRE on save deserializer for real this time (sigh)
+
 ## [1.8.7]
 
 ### Added
