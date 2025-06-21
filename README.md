@@ -191,7 +191,7 @@ And Game State Queries
 - Does nothing if the current area is not buildable.
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
 
-#### mushymato.MMAP_HoleWarp \<location\> \<X\> \<Y\> [mailflag]
+#### mushymato.MMAP_HoleWrp \<location\> \<X\> \<Y\> [mailflag]
 
 - Can be used as either Action or TouchAction
 - Arguments are identical to vanilla warp tile actions.
@@ -221,9 +221,9 @@ And Game State Queries
 - Can be used as TouchAction.
 - Spawns the TAS while player is standing on the tile, removed if player moves off the tile.
 
-#### mushymato.MMAP_WarpBuilding [X Y]
+#### mushymato.MMAP_WrpBuilding [X Y]
 
-Also available as: `mushymato.MMAP_MagicWarpBuilding [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWarpBuilding [X Y]` (does the hole warp).
+Also available as: `mushymato.MMAP_MagicWrpBuilding [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWrpBuilding [X Y]` (does the hole warp).
 
 - Can be used as either Action or TouchAction, mainly for usage in building `ActionTiles` or `TileProperties`.
 - Warps the player into the building that is occupying this tile.
@@ -231,18 +231,18 @@ Also available as: `mushymato.MMAP_MagicWarpBuilding [X Y]` (does the biiiiu and
 - You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
 - The original human door tile will still work.
 
-_See [[CP] MMAP Examples/building_warp.json]([CP]%20MMAP%20Examples/building_warp.json) for examples of adding this to building tile data_
+_See [[CP] MMAP Examples/building_Wrp.json]([CP]%20MMAP%20Examples/building_Wrp.json) for examples of adding this to building tile data_
 
-#### mushymato.MMAP_WarpBuildingOut [X Y]
+#### mushymato.MMAP_WrpBuildingOut [X Y]
 
-Also available as: `mushymato.MMAP_MagicWarpBuildingOut [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWarpBuildingOut [X Y]` (does the hole warp).
+Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu and teleport effect), `mushymato.MMAP_HoleWrpBuildingOut [X Y]` (does the hole warp).
 
 - Can be used as either Action or TouchAction, only valid in a building interior map.
 - Warps the player out of a building, optionally to a position other than the default 1 tile below HumanDoor.
 - X and Y arguments are relative to the building's top left tile, it can be negative.
 - There's **no guarentee** that the warp out tile is not occupied, it's recommended to use `AdditionalPlacementTiles` to enforce a cleared tile.
 
-#### mushymato.MMAP_WarpHere [X Y] [facingDirection] [fadeToBlack]
+#### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack]
 
 - Can be used as either Action or TouchAction.
 - Warps the player within the current map.
@@ -411,7 +411,7 @@ If you need something from here ask me about it and I'll try to think of better 
 
 - For use in building maps.
 - Changes where the player arrives on entry, away from the default 1 tile above first warp.
-- DEPRECATED: you can now use action `mushymato.MMAP_WarpBuilding` or `mushymato.MMAP_MagicWarpBuilding` or `mushymato.MMAP_HoleWarpBuilding`
+- DEPRECATED: you can now use action `mushymato.MMAP_WrpBuilding` or `mushymato.MMAP_MagicWrpBuilding` or `mushymato.MMAP_HoleWrpBuilding`
 
 #### Map Property: mushymato.MMAP_HoeDirt: \<texture\>
 

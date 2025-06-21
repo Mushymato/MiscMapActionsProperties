@@ -79,19 +79,19 @@
             "Yes1": {
               "Label": "Yes",
               "TouchActions": [
-                "mushymato.MMAP_HoleWarp WitchHut 7 15"
+                "mushymato.MMAP_HoleWrp WitchHut 7 15"
               ]
             },
             "Yes2": {
               "Label": "Yes",
               // "TouchActions": [
-              //   "mushymato.MMAP_HoleWarp WitchHut 7 15"
+              //   "mushymato.MMAP_HoleWrp WitchHut 7 15"
               // ]
             },
             "Yes3": {
               "Label": "Yes",
               "TouchActions": [
-                "mushymato.MMAP_HoleWarp WitchHut 7 15"
+                "mushymato.MMAP_HoleWrp WitchHut 7 15"
               ]
             }
           }

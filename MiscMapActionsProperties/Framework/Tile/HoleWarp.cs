@@ -12,11 +12,11 @@ namespace MiscMapActionsProperties.Framework.Tile;
 /// Arguments are identical to vanilla warp tile actions.
 /// When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
 /// </summary>
-internal static class HoleWarp
+internal static class HoleWrp
 {
-    internal const string TileAction_HoleWarp = $"{ModEntry.ModId}_HoleWarp";
+    internal const string TileAction_HoleWrp = $"{ModEntry.ModId}_HoleWrp";
 
-    internal static void Register() => CommonPatch.RegisterTileAndTouch(TileAction_HoleWarp, DoHoleWarp);
+    internal static void Register() => CommonPatch.RegisterTileAndTouch(TileAction_HoleWrp, DoHoleWarp);
 
     private static bool DoHoleWarp(GameLocation location, string[] args, Farmer farmer, Point source)
     {
