@@ -5,10 +5,12 @@ using MiscMapActionsProperties.Framework.Wheels;
 using StardewValley;
 using StardewValley.Buildings;
 
-namespace MiscMapActionsProperties.Framework.Buildings;
+namespace MiscMapActionsProperties.Framework.Entities;
 
 /// <summary>
-/// Adds a new tile/touch action mushymato.MMAP_MagicWarpBuilding
+/// Adds a number of warps for use in building and instance locations
+/// mushymato.MMAP_WarpBuilding - warp building
+///
 /// </summary>
 internal static class HumanDoorExt
 {
@@ -19,6 +21,7 @@ internal static class HumanDoorExt
     internal const string Action_WarpOut = $"{ModEntry.ModId}_WarpBuildingOut";
     internal const string Action_MagicWarpOut = $"{ModEntry.ModId}_MagicWarpBuildingOut";
     internal const string Action_HoleWarpOut = $"{HoleWarp.TileAction_HoleWarp}BuildingOut";
+    internal const string Action_WarpHere = $"{ModEntry.ModId}_WarpHere";
 
     internal static void Register()
     {
@@ -29,6 +32,8 @@ internal static class HumanDoorExt
         CommonPatch.RegisterTileAndTouch(Action_WarpOut, DoWarpBuildingOut);
         CommonPatch.RegisterTileAndTouch(Action_MagicWarpOut, DoMagicWarpBuildingOut);
         CommonPatch.RegisterTileAndTouch(Action_HoleWarpOut, DoHoleWarpBuildingOut);
+
+        CommonPatch.RegisterTileAndTouch(Action_WarpHere, DoWarpHere);
     }
 
     private static bool DoWarpBuilding(GameLocation location, string[] args, Farmer who, Point point)
@@ -89,6 +94,46 @@ internal static class HumanDoorExt
             return true;
         }
         return false;
+    }
+
+    private static bool DoWarpHere(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (
+            !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out string error, name: "string toPoint")
+            || !ArgUtility.TryGetOptionalInt(
+                args,
+                3,
+                out int direction,
+                out error,
+                defaultValue: -1,
+                name: "int direction"
+            )
+            || !ArgUtility.TryGetOptionalBool(
+                args,
+                4,
+                out bool fadeToBlack,
+                out error,
+                defaultValue: true,
+                name: "string fadeToBlack"
+            )
+        )
+        {
+            ModEntry.LogOnce(error);
+            return false;
+        }
+        if (fadeToBlack)
+        {
+            if (direction == -1)
+                direction = farmer.FacingDirection;
+            Game1.warpFarmer(location.NameOrUniqueName, toPoint.X, toPoint.Y, direction);
+        }
+        else
+        {
+            farmer.Position = new Vector2(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
+            if (direction != -1)
+                farmer.FacingDirection = direction;
+        }
+        return true;
     }
 
     private static bool TryGetWarpArgs(

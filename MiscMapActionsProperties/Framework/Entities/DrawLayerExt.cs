@@ -12,34 +12,52 @@ using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
 using StardewValley.Menus;
 
-namespace MiscMapActionsProperties.Framework.Buildings;
+namespace MiscMapActionsProperties.Framework.Entities;
+
+internal sealed record FloatRange(float Min, float? Max)
+{
+    internal float Value { get; set; } = Min;
+
+    internal void Recheck()
+    {
+        Value = Max == null ? Min : Random.Shared.NextSingle(Min, Max.Value);
+    }
+}
 
 /// <summary>Holds info about draw layer</summary>
 /// <param name="RotateRate"></param>
 /// <param name="OriginX"></param>
 /// <param name="OriginY"></param>
-internal record DLExtInfo(
-    float Alpha,
-    float Rotate,
-    float RotateRate,
+internal sealed record DLExtInfo(
+    FloatRange Alpha,
+    FloatRange Rotate,
+    FloatRange RotateRate,
     Vector2 Origin,
-    float Scale,
+    FloatRange Scale,
     SpriteEffects Effect,
     string? GSQ
 )
 {
     internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
-    internal float CurrRotate { get; private set; } = Rotate;
+    internal float CurrRotate { get; private set; } = Rotate.Value;
 
     internal void UpdateTicked()
     {
-        if (RotateRate > 0)
-            CurrRotate = (CurrRotate + RotateRate / 60f) % MathF.Tau;
+        if (RotateRate.Value > 0)
+            CurrRotate = (CurrRotate + RotateRate.Value / 60f) % MathF.Tau;
     }
 
     internal void TimeChanged()
     {
         ShouldDraw = GSQ == null || GameStateQuery.CheckConditions(GSQ);
+    }
+
+    internal void RecheckRands()
+    {
+        Alpha.Recheck();
+        Rotate.Recheck();
+        RotateRate.Recheck();
+        Scale.Recheck();
     }
 
     internal void Draw(
@@ -61,10 +79,10 @@ internal record DLExtInfo(
             texture,
             position,
             sourceRectangle,
-            color * Alpha,
+            color * Alpha.Value,
             CurrRotate,
             Origin,
-            scale / 4 * Scale,
+            scale / 4 * Scale.Value,
             effects ^ Effect,
             layerDepth
         );
@@ -90,6 +108,7 @@ internal static class DrawLayerExt
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.Display.MenuChanged += OnMenuChanged;
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
@@ -144,6 +163,11 @@ internal static class DrawLayerExt
         }
     }
 
+    private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
+    {
+        DlExtInfoCache.Clear();
+    }
+
     private static void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
         if (e.IsCurrentLocation)
@@ -163,7 +187,8 @@ internal static class DrawLayerExt
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        DlExtInfoCache.Clear();
+        foreach (DLExtInfo value in DlExtInfoCache.Values)
+            value.RecheckRands();
         AddBuildingDrawLayer(e.NewLocation);
     }
 
@@ -203,26 +228,47 @@ internal static class DrawLayerExt
         }
     }
 
-    private static bool TryGetFloatOrRandom(
+    private static bool TryGetFloatRange(
         this Dictionary<string, string> dict,
         string key,
-        out float value,
+        [NotNullWhen(true)] out FloatRange value,
         float defaultValue
     )
     {
-        value = defaultValue;
         if (dict.TryGetValue(key, out string? valueStr))
         {
             string[] args = ArgUtility.SplitBySpace(valueStr);
-            if (ArgUtility.TryGetFloat(args, 0, out float randMin, out _, name: "float randMin"))
-                value = randMin;
-            else
+            if (
+                !ArgUtility.TryGetOptionalFloat(
+                    args,
+                    0,
+                    out float randMin,
+                    out string error,
+                    defaultValue: defaultValue,
+                    name: "float randMin"
+                )
+                || !ArgUtility.TryGetOptionalFloat(
+                    args,
+                    1,
+                    out float randMax,
+                    out error,
+                    defaultValue: randMin - 1,
+                    name: "float randMax"
+                )
+            )
+            {
+                ModEntry.Log(error, LogLevel.Error);
+                value = new FloatRange(defaultValue, null);
+                value.Recheck();
                 return false;
-            if (ArgUtility.TryGetFloat(args, 1, out float randMax, out _, name: "float randMax"))
-                value = Random.Shared.NextSingle(randMin, randMax);
+            }
+            value = new FloatRange(randMin, randMax < randMin ? null : randMax);
+            value.Recheck();
             return true;
         }
-        return false;
+        value = new FloatRange(defaultValue, null);
+        value.Recheck();
+        return true;
     }
 
     internal static bool TryGetDRExtInfo(
@@ -237,15 +283,19 @@ internal static class DrawLayerExt
         Vector2 origin = Vector2.Zero;
         SpriteEffects effect = SpriteEffects.None;
 
-        bool hasChange = data.Metadata.TryGetFloatOrRandom(
+        bool hasChange = data.Metadata.TryGetFloatRange(
             string.Concat(drawRotatePrefix, "alpha"),
-            out float alpha,
+            out FloatRange alpha,
             1f
         );
-        hasChange |= data.Metadata.TryGetFloatOrRandom(string.Concat(drawRotatePrefix, "rotate"), out float rotate, 0f);
-        hasChange |= data.Metadata.TryGetFloatOrRandom(
+        hasChange |= data.Metadata.TryGetFloatRange(
+            string.Concat(drawRotatePrefix, "rotate"),
+            out FloatRange rotate,
+            0f
+        );
+        hasChange |= data.Metadata.TryGetFloatRange(
             string.Concat(drawRotatePrefix, "rotateRate"),
-            out float rotateRate,
+            out FloatRange rotateRate,
             0f
         );
         if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "origin"), out string? valueStr))
@@ -260,7 +310,7 @@ internal static class DrawLayerExt
                 name: "Vector2 origin"
             );
         }
-        hasChange |= data.Metadata.TryGetFloatOrRandom(string.Concat(drawRotatePrefix, "scale"), out float scale, 4f);
+        hasChange |= data.Metadata.TryGetFloatRange(string.Concat(drawRotatePrefix, "scale"), out FloatRange scale, 4f);
         hasChange |=
             data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "effect"), out valueStr)
             && SpriteEffects.TryParse(valueStr, out effect);

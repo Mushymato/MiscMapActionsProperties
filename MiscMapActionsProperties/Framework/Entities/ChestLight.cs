@@ -9,7 +9,7 @@ using StardewValley.GameData.Buildings;
 using StardewValley.Inventories;
 using StardewValley.Objects;
 
-namespace MiscMapActionsProperties.Framework.Buildings;
+namespace MiscMapActionsProperties.Framework.Entities;
 
 /// <summary>
 /// Add new BuildingData.Metadata mushymato.MMAP/ChestLight.<ChestId>: [radius] [color] [type|texture] [offsetX] [offsetY]

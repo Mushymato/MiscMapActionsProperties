@@ -9,7 +9,7 @@ using FloorPathPropDict = System.Collections.Generic.Dictionary<
     System.Collections.Generic.Dictionary<string, string>
 >;
 
-namespace MiscMapActionsProperties.Framework.Tile;
+namespace MiscMapActionsProperties.Framework.Entities;
 
 /// <summary>
 /// Allow furniture to get tile data, using the same format as building tile data

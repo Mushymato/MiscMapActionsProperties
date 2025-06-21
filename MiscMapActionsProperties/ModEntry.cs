@@ -30,9 +30,11 @@ public class ModEntry : Mod
         TAS = new(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Register();
 
-        Framework.Buildings.ChestLight.Register();
-        Framework.Buildings.DrawLayerExt.Register();
-        Framework.Buildings.HumanDoorExt.Register();
+        Framework.Entities.ChestLight.Register();
+        Framework.Entities.DrawLayerExt.Register();
+        Framework.Entities.FloorPathProperties.Register();
+        Framework.Entities.FurnitureProperties.Register();
+        Framework.Entities.HumanDoorExt.Register();
 
         Framework.Location.CribPosition.Register();
         Framework.Location.DayToNightTiming.Register();
@@ -48,12 +50,11 @@ public class ModEntry : Mod
         Framework.Tile.ActionCond.Register();
         Framework.Tile.AnimalSpot.Register();
         Framework.Tile.CritterSpot.Register();
-        Framework.Tile.FloorPathProperties.Register();
-        Framework.Tile.FurnitureProperties.Register();
         Framework.Tile.GrassSpread.Register();
         Framework.Tile.HoleWarp.Register();
         Framework.Tile.LightSpot.Register();
         Framework.Tile.PaddySpot.Register();
+        Framework.Tile.PoolEntry.Register();
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.ShowGlobalInventory.Register();

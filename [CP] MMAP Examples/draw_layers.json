@@ -50,9 +50,9 @@
         // day chimkin
         "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.alpha": "0.5 1.0",
         "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotate": "0 3.0",
-        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotateRate": 1,
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotateRate": "-3 3",
         "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.origin": "8 8",
-        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.scale": "12 16.0",
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.scale": "2 16.0",
         "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.effect": "FlipHorizontally",
         "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.condition": "!mushymato.MMAP_TIME_IS_LIGHTS_OFF",
         // night chimkin

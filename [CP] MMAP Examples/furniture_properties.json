@@ -136,8 +136,8 @@
           "TileProperties": [
             {
               "Id": "{{ModId}}-mushymato.Trough",
-              "Name": "Action",
-              "Value": "mushymato.MMAP_Sit",
+              "Name": "Trough",
+              "Value": "T",
               "Layer": "Buildings",
               "TileArea": {
                 "X": 0,
@@ -198,6 +198,47 @@
             "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.condition": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
           }
         },
+        "StarryMoonRug": {
+          "AdditionalTilePropertyRadius": 1,
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}-PoolEntry",
+              "Name": "TouchAction",
+              "Value": "mushymato.MMAP_PoolEntry 3",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 4,
+                "Y": 1,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            {
+              "Id": "{{ModId}}-Pool",
+              "Name": "WaterSource",
+              "Value": "T",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 4,
+                "Height": 3
+              }
+            },
+            {
+              "Id": "{{ModId}}-FacingPassable",
+              "Name": "mushymato.MMAP_FacingPassable",
+              "Value": "02",
+              "Layer": "Back",
+              "TileArea": {
+                "X": 0,
+                "Y": -1,
+                "Width": 5,
+                "Height": 1
+              }
+            }
+          ],
+        }
       }
     }
   ]

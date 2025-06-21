@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MiscMapActionsProperties.Framework.Buildings;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -14,7 +13,7 @@ using StardewValley.ItemTypeDefinitions;
 using StardewValley.Objects;
 using StardewValley.TokenizableStrings;
 
-namespace MiscMapActionsProperties.Framework.Tile;
+namespace MiscMapActionsProperties.Framework.Entities;
 
 [Flags]
 public enum FurnitureDrawMode
@@ -205,10 +204,10 @@ internal static class FurnitureProperties
     {
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         ModEntry.help.Events.Player.Warped += OnWarped;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
         try
         {
             foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
@@ -304,6 +303,11 @@ internal static class FurnitureProperties
         }
     }
 
+    private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
+    {
+        DlExtInfoCache.Clear();
+    }
+
     private static FurnitureDLState? TryAddFurnitureToDLCache(Furniture furniture, BuildingData fpData)
     {
         if (fpData.DrawLayers == null)
@@ -332,12 +336,13 @@ internal static class FurnitureProperties
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        DlExtInfoCache.Clear();
-    }
-
-    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
-    {
-        DlExtInfoCache.Clear();
+        foreach (FurnitureDLState? state in DlExtInfoCacheValues)
+        {
+            foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
+            {
+                dLExtInfo?.RecheckRands();
+            }
+        }
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)

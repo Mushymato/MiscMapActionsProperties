@@ -1,5 +1,5 @@
 using Microsoft.Xna.Framework;
-using MiscMapActionsProperties.Framework.Tile;
+using MiscMapActionsProperties.Framework.Entities;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;

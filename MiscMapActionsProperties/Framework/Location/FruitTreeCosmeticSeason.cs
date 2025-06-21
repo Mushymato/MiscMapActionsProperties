@@ -16,6 +16,9 @@ internal static class FruitTreeCosmeticSeason
 
     internal static void Register()
     {
+        // This mod is an unconditional and stronger patch on the same thing, disable my patch
+        if (ModEntry.help.ModRegistry.IsLoaded("Esper89.FruitTreeSeasons"))
+            return;
         try
         {
             ModEntry.harm.Patch(

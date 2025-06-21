@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -24,6 +23,7 @@ internal enum SupportedCritter
     Butterfly,
     Frog,
     LeaperFrog,
+    Rabbit,
 }
 
 /// <summary>
@@ -32,9 +32,11 @@ internal enum SupportedCritter
 /// - Firefly: [color] [count]
 /// - Seagull: [texture|T] [count]
 /// - Crab: [texture|T] [count]
-/// - Birdie: [texture|<number>|T] [count]
+/// - Birdie: [texture|<number>|T](:height)? [count]
 /// - Butterfly: [texture|<number>|T] [count]
 /// - Frog: [T|F] [count]
+/// - LeaperFrog: [T|F] [count]
+/// - Rabbit: [texture|<number>](:T|F)? [count]
 /// </summary>
 internal static class CritterSpot
 {
@@ -219,6 +221,7 @@ internal static class CritterSpot
                 SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, arg1, count),
                 SupportedCritter.Frog => SpawnCritterFrog(location, position, arg1, count),
                 SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, position, arg1, count),
+                SupportedCritter.Rabbit => SpawnCritterRabbit(location, position, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)
@@ -314,8 +317,14 @@ internal static class CritterSpot
     )
     {
         int startingIndex = -1;
+        int yOffset = 0;
         if (texture != null)
         {
+            string[] parts = texture.Split(":");
+            if (parts.Length >= 2 && int.TryParse(parts[1], out yOffset))
+            {
+                texture = parts[0];
+            }
             if (int.TryParse(texture, out startingIndex))
             {
                 texture = null;
@@ -362,6 +371,7 @@ internal static class CritterSpot
                 Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
                 Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
             );
+            birdie.yOffset = yOffset;
             if (texture != null)
             {
                 birdie.sprite.textureName.Value = texture;
@@ -445,6 +455,55 @@ internal static class CritterSpot
             );
             frog.flip = arg1 == "F";
             yield return frog;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterRabbit(
+        GameLocation location,
+        Point position,
+        string? texture,
+        int count
+    )
+    {
+        int baseFrame = -1;
+        bool flipped = false;
+        if (texture != null)
+        {
+            string[] parts = texture.Split(":");
+            if (parts.Length >= 2 && parts[1] == "F")
+            {
+                texture = parts[0];
+            }
+            if (int.TryParse(texture, out baseFrame))
+            {
+                texture = null;
+            }
+            else if (texture != "T" && Game1.content.DoesAssetExist<Texture2D>(texture))
+            {
+                baseFrame = 0;
+            }
+            else
+            {
+                texture = null;
+                baseFrame = -1;
+            }
+        }
+        for (int i = 0; i < count; i++)
+        {
+            Rabbit rabbit =
+                new(
+                    location,
+                    new Vector2(
+                        Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
+                        Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
+                    ),
+                    flipped
+                );
+            if (baseFrame > -1)
+                rabbit.baseFrame = baseFrame;
+            if (texture != null)
+                rabbit.sprite.textureName.Value = texture;
+            yield return rabbit;
         }
     }
 }
