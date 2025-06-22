@@ -224,18 +224,6 @@
                 "Width": 4,
                 "Height": 3
               }
-            },
-            {
-              "Id": "{{ModId}}-FacingPassable",
-              "Name": "mushymato.MMAP_FacingPassable",
-              "Value": "02",
-              "Layer": "Back",
-              "TileArea": {
-                "X": 0,
-                "Y": -1,
-                "Width": 5,
-                "Height": 1
-              }
             }
           ],
         }
