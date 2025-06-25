@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -32,7 +33,7 @@ internal static class FurnitureProperties
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
     private static readonly PerScreen<FurnitureDrawMode> FurnitureDraw = new(() => FurnitureDrawMode.None);
-    private static readonly PerScreen<float> FurnitureLayerDepthOffset = new();
+    // private static readonly PerScreen<float> FurnitureLayerDepthOffset = new();
     private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
     private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
@@ -240,17 +241,6 @@ internal static class FurnitureProperties
                 }
             }
             ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
-            );
-
-            ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
                 postfix: new HarmonyMethod(
                     typeof(FurnitureProperties),
@@ -264,31 +254,56 @@ internal static class FurnitureProperties
                     nameof(Furniture_AllowPlacementOnThisTile_Postfix)
                 )
             );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties:\n{err}", LogLevel.Error);
+        }
 
+        try
+        {
+            // ModEntry.harm.Patch(
+            //     original: AccessTools.DeclaredMethod(
+            //         typeof(SpriteBatch),
+            //         nameof(SpriteBatch.Draw),
+            //         [
+            //             typeof(Texture2D),
+            //             typeof(Vector2),
+            //             typeof(Rectangle?),
+            //             typeof(Color),
+            //             typeof(float),
+            //             typeof(Vector2),
+            //             typeof(float),
+            //             typeof(SpriteEffects),
+            //             typeof(float),
+            //         ]
+            //     ),
+            //     prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(SpriteBatch_Draw_Prefix))
+            // );
+            HarmonyMethod drawReplacer = new(typeof(FurnitureProperties), nameof(Furniture_draw_Transpiler))
+            {
+                priority = Priority.Last
+            };
             ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(SpriteBatch),
-                    nameof(SpriteBatch.Draw),
-                    [
-                        typeof(Texture2D),
-                        typeof(Vector2),
-                        typeof(Rectangle?),
-                        typeof(Color),
-                        typeof(float),
-                        typeof(Vector2),
-                        typeof(float),
-                        typeof(SpriteEffects),
-                        typeof(float),
-                    ]
-                ),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(SpriteBatch_Draw_Prefix))
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
+                transpiler: drawReplacer,
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
+                transpiler: drawReplacer,
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
+                transpiler: drawReplacer,
                 finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
+                transpiler: drawReplacer,
                 finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
             );
             // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
@@ -390,7 +405,7 @@ internal static class FurnitureProperties
     private static void Furniture_draw_Prefix(Furniture __instance, ref Rectangle __state)
     {
         FurnitureDraw.Value = FurnitureDrawMode.None;
-        FurnitureLayerDepthOffset.Value = 0;
+        // FurnitureLayerDepthOffset.Value = 0;
         if (__instance.isTemporarilyInvisible || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
 
@@ -403,8 +418,8 @@ internal static class FurnitureProperties
             else
                 FurnitureDraw.Value = FurnitureDrawMode.Layer;
         }
-        FurnitureLayerDepthOffset.Value =
-            fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
+        // FurnitureLayerDepthOffset.Value =
+        //     fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
         if (fpData.DrawShadow)
         {
             __instance.sourceRect.Value = AdjustSourceRectToSeason(
@@ -415,13 +430,80 @@ internal static class FurnitureProperties
         }
     }
 
-    private static bool SpriteBatch_Draw_Prefix(float layerDepth)
+    internal static void DrawReplace(
+        SpriteBatch b,
+        Texture2D texture,
+        Vector2 position,
+        Rectangle? sourceRectangle,
+        Color color,
+        float rotation,
+        Vector2 origin,
+        float scale,
+        SpriteEffects effects,
+        float layerDepth
+    )
     {
-        if (FurnitureDraw.Value == FurnitureDrawMode.None)
-            return true;
-        if (FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Layer))
-            DrawFurnitureLayerDepths.Add(layerDepth);
-        return FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Base);
+        if (FurnitureDraw.Value != FurnitureDrawMode.None)
+        {
+            if (FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Layer))
+                DrawFurnitureLayerDepths.Add(layerDepth);
+            if (!FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Base))
+                return;
+        }
+        b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
+    }
+
+    private static IEnumerable<CodeInstruction> Furniture_draw_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+
+            int foundDraw = 0;
+            MethodInfo replacedDraw = AccessTools.DeclaredMethod(typeof(FurnitureProperties), nameof(DrawReplace));
+            CodeMatch[] callvirtDraw =
+            [
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.DeclaredMethod(
+                        typeof(SpriteBatch),
+                        nameof(SpriteBatch.Draw),
+                        [
+                            typeof(Texture2D),
+                            typeof(Vector2),
+                            typeof(Rectangle?),
+                            typeof(Color),
+                            typeof(float),
+                            typeof(Vector2),
+                            typeof(float),
+                            typeof(SpriteEffects),
+                            typeof(float),
+                        ]
+                    )
+                ),
+            ];
+            matcher
+                .MatchStartForward(callvirtDraw)
+                .Repeat(match =>
+                {
+                    matcher.Opcode = OpCodes.Call;
+                    matcher.Operand = replacedDraw;
+                    match.Advance(1);
+                    foundDraw++;
+                });
+
+            ModEntry.Log($"Furniture_draw_Transpiler: Replaced {foundDraw} SpriteBatch.Draw calls.");
+
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
+        }
     }
 
     private static void Furniture_draw_Finalizer(
@@ -441,6 +523,16 @@ internal static class FurnitureProperties
         )
             return;
 
+        float layerDepth = 1f;
+        if (DrawFurnitureLayerDepths.Any())
+        {
+            layerDepth = DrawFurnitureLayerDepths.Max();
+        }
+        else
+        {
+            ModEntry.LogOnce($"Got no layerDepth for {__instance.QualifiedItemId} ({__instance.TileLocation})");
+        }
+
         FurnitureDraw.Value = FurnitureDrawMode.None;
         state.Draw(
             __instance,
@@ -452,11 +544,11 @@ internal static class FurnitureProperties
                 ),
             spriteBatch,
             alpha,
-            DrawFurnitureLayerDepths.Max(),
+            layerDepth,
             4f
         );
         DrawFurnitureLayerDepths.Clear();
-        FurnitureLayerDepthOffset.Value = 0;
+        // FurnitureLayerDepthOffset.Value = 0;
         __instance.sourceRect.Value = __state;
     }
 
