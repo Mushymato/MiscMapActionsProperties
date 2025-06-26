@@ -8,6 +8,13 @@
         // "mushymato.MMAP_LightRays": "Buildings/Junimo Hut",
         // "mushymato.MMAP_SteamOverlay": "T 1 0 DarkOrchid 0.4 4"
       }
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Farm",
+      "MapProperties": {
+        "mushymato.MMAP_WaterColor": "Red"
+      }
     }
   ]
 }

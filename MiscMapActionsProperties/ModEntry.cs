@@ -45,6 +45,7 @@ public class ModEntry : Mod
         Framework.Location.Panorama.Register();
         Framework.Location.ProtectTree.Register();
         Framework.Location.SteamOverlay.Register();
+        Framework.Location.WaterColor.Register();
         Framework.Location.WoodsLighting.Register();
 
         Framework.Tile.ActionCond.Register();
