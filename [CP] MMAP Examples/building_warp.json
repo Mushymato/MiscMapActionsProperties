@@ -87,6 +87,21 @@
               }
             }
           ],
+          "DrawLayers": [
+            {
+              "Id": "{{ModId}}_ShakeWheat",
+              "SourceRect": {
+                "X": 0,
+                "Y": 0,
+                "Width": 16,
+                "Height": 32
+              },
+              "DrawPosition": "8,24"
+            },
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "1",
+          }
         }
       }
     }

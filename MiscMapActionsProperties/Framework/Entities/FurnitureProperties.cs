@@ -186,71 +186,27 @@ internal static class FurnitureProperties
         }
     }
 
-    private sealed record DLShakeState
+    internal static ConditionalWeakTable<DLExtInfo, DLShakeState> CreateDLShakeStates(Furniture furniture)
     {
-        internal bool Left { get; private set; } = false;
-        internal float Rotate { get; private set; } = 0f;
-        internal float RotateMax { get; private set; } = 0f;
-        internal float RotateRate { get; private set; } = 0f;
-
-        internal void UpdateTicked()
+        ConditionalWeakTable<DLExtInfo, DLShakeState> shakeStates = [];
+        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state) && state != null)
         {
-            if (RotateMax > 0f)
+            foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
             {
-                if (Left)
+                if (dLExtInfo is not null && dLExtInfo.ShakeRotate.Value != 0)
                 {
-                    Rotate -= RotateRate;
-                    if (Math.Abs(Rotate) >= RotateMax)
-                    {
-                        Left = false;
-                    }
+                    shakeStates.GetValue(dLExtInfo, (dLExtInfo) => new());
                 }
-                else
-                {
-                    Rotate += RotateRate;
-                    if (Rotate >= RotateMax)
-                    {
-                        Left = true;
-                        Rotate -= RotateRate;
-                    }
-                }
-                RotateMax = Math.Max(0f, RotateMax - (float)Math.PI / 300f);
             }
         }
-
-        internal void StartShaking(float speedOfCollision, bool left, FloatRange shakeRotate)
-        {
-            if (RotateMax > 0f || shakeRotate.Value == 0)
-                return;
-
-            Rotate = 0f;
-            RotateRate = (float)(Math.PI / 80f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
-            RotateMax = (float)(Math.PI / 8f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
-            Left = left;
-        }
-
-        internal static ConditionalWeakTable<DLExtInfo, DLShakeState> CreateDLShakeStates(Furniture furniture)
-        {
-            ConditionalWeakTable<DLExtInfo, DLShakeState> shakeStates = [];
-            if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state) && state != null)
-            {
-                foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
-                {
-                    if (dLExtInfo is not null && dLExtInfo.ShakeRotate.Value != 0)
-                    {
-                        shakeStates.GetValue(dLExtInfo, (dLExtInfo) => new());
-                    }
-                }
-            }
-            return shakeStates;
-        }
+        return shakeStates;
     }
 
     private static readonly PerScreen<
         ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>>
-    > dlShakeCache = new();
+    > dlShakeCacheImpl = new();
     private static ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>> DLShakeCache =>
-        dlShakeCache.Value ??= [];
+        dlShakeCacheImpl.Value ??= [];
 
     /// <summary>Furniture tile property data (secretly building data)</summary>
     internal static Dictionary<string, BuildingData> FPData
@@ -783,10 +739,14 @@ internal static class FurnitureProperties
             }
         }
         __result = false;
-        // tries to shake draw layers // character.speed + character.addedSpeed
-        float speed = Game1.player.Speed + Game1.player.addedSpeed;
-        if (speed == 0)
+
+        if (!Game1.player.isMoving())
             return;
+
+        // tries to shake draw layers // character.speed + character.addedSpeed
+        float speed = Game1.player.getMovementSpeed();
+        ModEntry.LogOnce($"Furniture_GetAdditionalTilePropertyRadius_Postfix/speed: {speed}");
+
         Rectangle furniBounds =
             new(
                 bounds.X * Game1.tileSize,
@@ -804,7 +764,7 @@ internal static class FurnitureProperties
             bool left = playerBounds.Center.X > furniBounds.Center.X;
             ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes = DLShakeCache.GetValue(
                 __instance,
-                DLShakeState.CreateDLShakeStates
+                CreateDLShakeStates
             );
             if (!dlShakes.Any())
                 return;

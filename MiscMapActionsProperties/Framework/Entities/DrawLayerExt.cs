@@ -41,6 +41,7 @@ internal sealed record DLExtInfo(
 {
     internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     internal float CurrRotate { get; private set; } = Rotate.Value;
+    internal DLShakeState? ShakeState = null;
 
     internal void UpdateTicked()
     {
@@ -48,6 +49,7 @@ internal sealed record DLExtInfo(
         {
             CurrRotate = (CurrRotate + RotateRate.Value / 60f) % MathF.Tau;
         }
+        ShakeState?.UpdateTicked();
     }
 
     internal void TimeChanged()
@@ -94,6 +96,56 @@ internal sealed record DLExtInfo(
     }
 }
 
+internal sealed record DLShakeState
+{
+    internal bool Left { get; private set; } = false;
+    internal float Rotate { get; private set; } = 0f;
+    internal float RotateMax { get; private set; } = 0f;
+    internal float RotateRate { get; private set; } = 0f;
+
+    internal void UpdateTicked()
+    {
+        if (RotateMax > 0f)
+        {
+            if (Left)
+            {
+                Rotate -= RotateRate;
+                if (Math.Abs(Rotate) >= RotateMax)
+                {
+                    Left = false;
+                }
+            }
+            else
+            {
+                Rotate += RotateRate;
+                if (Rotate >= RotateMax)
+                {
+                    Left = true;
+                    Rotate -= RotateRate;
+                }
+            }
+            RotateMax = Math.Max(0f, RotateMax - (float)Math.PI / 300f);
+            if (RotateMax <= 0)
+            {
+                Rotate = 0;
+                RotateMax = 0;
+                RotateRate = 0;
+            }
+        }
+    }
+
+    internal void StartShaking(float speedOfCollision, bool left, FloatRange shakeRotate)
+    {
+        if (RotateMax > 0f || shakeRotate.Value == 0)
+            return;
+
+        Rotate = 0f;
+        RotateRate = (float)(Math.PI / 80f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
+        RotateMax = (float)(Math.PI / 8f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
+        Left = left;
+    }
+}
+
 /// <summary>
 /// Add new BuildingData.Metadata mushymato.MMAP/DrawLayer.<DrawLayerId>: <rotation> <originX> <originY>
 /// Rotates the layer by rotation every second (rotation/60 every tick) around originX, originY
@@ -102,10 +154,10 @@ internal sealed record DLExtInfo(
 internal static class DrawLayerExt
 {
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
-    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoCacheImpl = new();
-    private static Dictionary<string, DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
-    private static readonly PerScreen<Dictionary<string, DLExtInfo>> dlExtInfoInMenuImpl = new();
-    private static Dictionary<string, DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value ??= [];
+    private static readonly PerScreen<Dictionary<(Guid, string), DLExtInfo>> dlExtInfoCacheImpl = new();
+    private static Dictionary<(Guid, string), DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+    private static readonly PerScreen<Dictionary<(string, string), DLExtInfo>> dlExtInfoInMenuImpl = new();
+    private static Dictionary<(string, string), DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value ??= [];
 
     internal static void Register()
     {
@@ -113,6 +165,7 @@ internal static class DrawLayerExt
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetsInvalidated;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.Display.MenuChanged += OnMenuChanged;
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
@@ -121,18 +174,22 @@ internal static class DrawLayerExt
         {
             // map draws
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.draw)),
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.draw)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
                 {
                     after = ["mouahrara.FlipBuildings"],
                 }
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawBackground)),
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.drawBackground)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
                 {
                     after = ["mouahrara.FlipBuildings"],
                 }
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.isTilePassable)),
+                postfix: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_isTilePassable_Postfix))
             );
         }
         catch (Exception err)
@@ -145,15 +202,15 @@ internal static class DrawLayerExt
         {
             // method draws
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInConstruction)),
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.drawInConstruction)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_draw_Transpiler))
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(typeof(Building), nameof(Building.drawInMenu)),
+                original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.drawInMenu)),
                 transpiler: new HarmonyMethod(typeof(DrawLayerExt), nameof(Building_drawInMenu_Transpiler))
             );
             ModEntry.harm.Patch(
-                original: AccessTools.Method(
+                original: AccessTools.DeclaredMethod(
                     typeof(CarpenterMenu),
                     nameof(CarpenterMenu.SetNewActiveBlueprint),
                     [typeof(int)]
@@ -170,6 +227,14 @@ internal static class DrawLayerExt
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
         DlExtInfoCache.Clear();
+    }
+
+    private static void OnAssetsInvalidated(object? sender, AssetsInvalidatedEventArgs e)
+    {
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo("Data/Buildings")))
+        {
+            DlExtInfoCache.Clear();
+        }
     }
 
     private static void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
@@ -227,7 +292,7 @@ internal static class DrawLayerExt
                     continue;
 
                 if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
-                    DlExtInfoCache[$"{building.id.Value}/{drawLayer.Id}"] = dlExtInfo;
+                    DlExtInfoCache[new(building.id.Value, drawLayer.Id)] = dlExtInfo;
             }
         }
     }
@@ -347,8 +412,7 @@ internal static class DrawLayerExt
 
             if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
             {
-                DlExtInfoInMenu[$"{building.buildingType.Value}+{drawLayer.Id}"] = dlExtInfo;
-                ModEntry.LogOnce($"{building.buildingType.Value}+{drawLayer.Id}");
+                DlExtInfoInMenu[new(building.buildingType.Value, drawLayer.Id)] = dlExtInfo;
             }
         }
     }
@@ -368,8 +432,12 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (DlExtInfoCache.TryGetValue($"{building.id.Value}/{drawLayer.Id}", out DLExtInfo? value))
+        if (DlExtInfoCache.TryGetValue(new(building.id.Value, drawLayer.Id), out DLExtInfo? value))
         {
+            if (value.ShakeState != null)
+            {
+                rotation += value.ShakeState.Rotate;
+            }
             value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
         }
@@ -392,7 +460,7 @@ internal static class DrawLayerExt
         BuildingDrawLayer drawLayer
     )
     {
-        if (DlExtInfoInMenu.TryGetValue($"{building.buildingType.Value}+{drawLayer.Id}", out DLExtInfo? value))
+        if (DlExtInfoInMenu.TryGetValue(new(building.buildingType.Value, drawLayer.Id), out DLExtInfo? value))
         {
             value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
@@ -493,6 +561,49 @@ internal static class DrawLayerExt
         {
             ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
+        }
+    }
+
+    private static void Building_isTilePassable_Postfix(Building __instance, ref bool __result)
+    {
+        if (!__result)
+            return;
+        if (!Game1.player.isMoving())
+            return;
+
+        BuildingData data = __instance.GetData();
+        if (data == null || data.DrawLayers == null)
+            return;
+
+        float speed = Game1.player.getMovementSpeed();
+        ModEntry.LogOnce($"Building_isTilePassable_Postfix/speed: {speed}");
+
+        Rectangle buildingBounds =
+            new(
+                __instance.tileX.Value * Game1.tileSize,
+                __instance.tileY.Value * Game1.tileSize,
+                __instance.tilesWide.Value * Game1.tileSize,
+                __instance.tilesHigh.Value * Game1.tileSize
+            );
+        Rectangle playerBounds = Game1.player.GetBoundingBox();
+
+        if (!playerBounds.Intersects(buildingBounds))
+            return;
+        bool left = playerBounds.Center.X > buildingBounds.Center.X;
+
+        foreach (BuildingDrawLayer drawLayer in data.DrawLayers)
+        {
+            if (drawLayer.Id == null)
+                continue;
+
+            if (
+                DlExtInfoCache.TryGetValue(new(__instance.id.Value, drawLayer.Id), out DLExtInfo? dlExt)
+                && dlExt.ShakeRotate.Value != 0
+            )
+            {
+                dlExt.ShakeState ??= new();
+                dlExt.ShakeState.StartShaking(speed, left, dlExt.ShakeRotate);
+            }
         }
     }
 }
