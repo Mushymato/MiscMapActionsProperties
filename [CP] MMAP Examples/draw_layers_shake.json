@@ -1,0 +1,43 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModID}}/WHEAT",
+      "FromFile": "assets/wheat.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_WHEAT": "WHEAT/decor/1 2/1 1/2/250/-1/WHEAT/0/{{ModID}}\\WHEAT/true",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_WHEAT": {
+          "CollisionMap": "O",
+          "DrawShadow": false,
+          "DrawLayers": [
+            {
+              "Id": "{{ModId}}_ShakeWheat",
+              "SourceRect": {
+                "X": 0,
+                "Y": 0,
+                "Width": 16,
+                "Height": 32
+              },
+              "DrawPosition": "8,24"
+            },
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.origin": "8 24",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "1",
+          }
+        },
+      }
+    }
+  ]
+}

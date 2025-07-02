@@ -35,7 +35,8 @@ internal sealed record DLExtInfo(
     Vector2 Origin,
     FloatRange Scale,
     SpriteEffects Effect,
-    string? GSQ
+    string? GSQ,
+    FloatRange ShakeRotate
 )
 {
     internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
@@ -44,7 +45,9 @@ internal sealed record DLExtInfo(
     internal void UpdateTicked()
     {
         if (RotateRate.Value > 0)
+        {
             CurrRotate = (CurrRotate + RotateRate.Value / 60f) % MathF.Tau;
+        }
     }
 
     internal void TimeChanged()
@@ -58,6 +61,7 @@ internal sealed record DLExtInfo(
         Rotate.Recheck();
         RotateRate.Recheck();
         Scale.Recheck();
+        ShakeRotate.Recheck();
     }
 
     internal void Draw(
@@ -80,7 +84,7 @@ internal sealed record DLExtInfo(
             position,
             sourceRectangle,
             color * Alpha.Value,
-            CurrRotate,
+            CurrRotate + rotation,
             Origin,
             scale / 4 * Scale.Value,
             effects ^ Effect,
@@ -298,6 +302,7 @@ internal static class DrawLayerExt
             out FloatRange rotateRate,
             0f
         );
+
         if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "origin"), out string? valueStr))
         {
             string[] args = ArgUtility.SplitBySpace(valueStr);
@@ -313,11 +318,18 @@ internal static class DrawLayerExt
         hasChange |= data.Metadata.TryGetFloatRange(string.Concat(drawRotatePrefix, "scale"), out FloatRange scale, 4f);
         hasChange |=
             data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "effect"), out valueStr)
-            && SpriteEffects.TryParse(valueStr, out effect);
+            && Enum.TryParse(valueStr, out effect);
+
         hasChange |= data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "condition"), out string? GSQ);
 
+        hasChange |= data.Metadata.TryGetFloatRange(
+            string.Concat(drawRotatePrefix, "shakeRotate"),
+            out FloatRange shakeRotate,
+            0f
+        );
+
         if (hasChange)
-            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ);
+            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ, shakeRotate);
 
         return hasChange;
     }

@@ -149,25 +149,6 @@
       "FromFile": "furniture_properties.json"
     },
     {
-      "Action": "EditMap",
-      "Target": "Maps/FarmHouse2_marriage",
-      "MapProperties": {
-        // move the crib
-        "mushymato.MMAP_CribPosition": "41 24",
-        // move the fridge (without requiring matching to tilesheet)
-        "mushymato.MMAP_FridgePosition": "18 22",
-        // makes fridge door sprite bobbers :)
-        "mushymato.MMAP_FridgeDoorSprite": "TileSheets/bobbers"
-      }
-    },
-    // makes the crib renovations not have any wall/floor
-    {
-      "Action": "Load",
-      "Target": "Maps/FarmHouse_Crib_0,Maps/FarmHouse_Crib_1",
-      "FromFile": "assets/{{TargetWithoutPath}}.tmx",
-      "Priority": "Low"
-    },
-    {
       "Action": "Include",
       "FromFile": "bag_inventory.json"
     },
@@ -178,6 +159,14 @@
     {
       "Action": "Include",
       "FromFile": "floor_path_properties.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "farmhouse.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "draw_layers_shake.json"
     }
   ]
 }

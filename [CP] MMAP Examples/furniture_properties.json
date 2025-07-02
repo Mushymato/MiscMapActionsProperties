@@ -204,7 +204,7 @@
             {
               "Id": "{{ModId}}-PoolEntry",
               "Name": "TouchAction",
-              "Value": "mushymato.MMAP_PoolEntry 3 8 yoba",
+              "Value": "mushymato.MMAP_PoolEntry",
               "Layer": "Back",
               "TileArea": {
                 "X": 4,
@@ -213,18 +213,18 @@
                 "Height": 1
               }
             },
-            {
-              "Id": "{{ModId}}-Pool",
-              "Name": "WaterSource",
-              "Value": "T",
-              "Layer": "Back",
-              "TileArea": {
-                "X": 0,
-                "Y": 0,
-                "Width": 4,
-                "Height": 3
-              }
-            }
+            // {
+            //   "Id": "{{ModId}}-Pool",
+            //   "Name": "WaterSource",
+            //   "Value": "T",
+            //   "Layer": "Back",
+            //   "TileArea": {
+            //     "X": 0,
+            //     "Y": 0,
+            //     "Width": 4,
+            //     "Height": 3
+            //   }
+            // }
           ],
         }
       }

@@ -44,6 +44,7 @@ public class ModEntry : Mod
         Framework.Location.MapChangeRelocate.Register();
         Framework.Location.Panorama.Register();
         Framework.Location.ProtectTree.Register();
+        Framework.Location.FarmHouseFurniture.Register();
         Framework.Location.SteamOverlay.Register();
         Framework.Location.WaterColor.Register();
         Framework.Location.WoodsLighting.Register();

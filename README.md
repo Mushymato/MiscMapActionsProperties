@@ -271,7 +271,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 #### mushymato.MMAP_If \<GSQ\> ## \<if-case\> [## \<else-case\>]
 
 - Can be used as either Action or TouchAction
-- Works like Trigger Action If, blocks the `if-case` Action behind a GSQ.
+- Works like Trigger Action `If`, blocks the `if-case` Action behind a GSQ.
 - Optionally allows a `else-case` Action.
 - The action provided must match the usescase, e.g. if this If is on a TileAction, both the if-case and else-case actions should also be tile actions.
 

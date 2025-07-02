@@ -19,7 +19,8 @@
     {
       "Action": "Load",
       "Target": "Maps/FarmCave",
-      "FromFile": "assets/{{TargetWithoutPath}}.tmx"
+      "FromFile": "assets/{{TargetWithoutPath}}.tmx",
+      "Priority": "Low"
     },
     {
       "Action": "EditMap",
