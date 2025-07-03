@@ -44,7 +44,7 @@ internal static class FarmHouseFurniture
             )
         )
         {
-            ModEntry.Log($"{MapProp_FarmHouseFurnitureRemove}:{propStr1}");
+            ModEntry.Log($"{MapProp_FarmHouseFurnitureRemove}: {propStr1}");
             if (propStr1 == "ALL")
             {
                 __instance.furniture.Clear();
@@ -89,7 +89,7 @@ internal static class FarmHouseFurniture
             CommonPatch.TryGetCustomFieldsOrMapProperty(__instance, MapProp_FarmHouseFurnitureAdd, out string? propStr2)
         )
         {
-            ModEntry.Log($"{MapProp_FarmHouseFurnitureAdd}:{propStr2}");
+            ModEntry.Log($"{MapProp_FarmHouseFurnitureAdd}: {propStr2}");
             string[] mapPropertySplitBySpaces = ArgUtility.SplitBySpaceQuoteAware(propStr2);
             if (!mapPropertySplitBySpaces.Any())
                 return;

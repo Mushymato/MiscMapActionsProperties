@@ -14,16 +14,16 @@
             "mushymato.MMAP_TAS": "{{ModId}}_Swirly"
           }
         },
-        {
-          "Position": {
-            "X": 14,
-            "Y": 23
-          },
-          "Layer": "Back",
-          "SetProperties": {
-            "mushymato.MMAP_TAS": "{{ModId}}_CauldronSmoke"
-          }
-        },
+        // {
+        //   "Position": {
+        //     "X": 14,
+        //     "Y": 23
+        //   },
+        //   "Layer": "Back",
+        //   "SetProperties": {
+        //     "mushymato.MMAP_TAS": "{{ModId}}_CauldronSmoke"
+        //   }
+        // },
         {
           "Position": {
             "X": 28,
@@ -65,7 +65,7 @@
           "Scale": 2,
           "RotationChange": 0.05,
           "LayerDepth": 0,
-          "SpawnDelay": 1000,
+          "SpawnDelay": 10000,
           "LightRadius": 4
         },
         "{{ModId}}_StarDrop": {
@@ -125,6 +125,18 @@
             "LayerDepth": 0.01,
             "RotationChange": 0.0736310778185
           }
+        },
+        "{{ModId}}_Door": {
+          "Id": "{{ModId}}_Door",
+          "Texture": "{{InternalAssetKey: assets/door.png}}",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 48
+          },
+          "Frames": 4,
+          "Loops": 10
         }
       }
     }

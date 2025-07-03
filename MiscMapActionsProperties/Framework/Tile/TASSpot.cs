@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using Mushymato.ExtendedTAS;
@@ -32,12 +31,12 @@ internal static class TASSpot
         Dictionary<Point, List<TASContext>> Respawning
     );
 
-    private record ContatTASDefs(Point Pos, List<TASContext> Onetime, List<TASContext> Respawning);
+    private record ContactTASDefs(Point Pos, List<TASContext> Onetime, List<TASContext> Respawning);
 
     private static readonly PerScreen<LocationTASDefs?> locationTASDefs = new();
     private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
     private static readonly PerScreen<Dictionary<string, (List<TASContext>, List<TASContext>)>?> toggleTASDefs = new();
-    private static readonly PerScreen<ContatTASDefs?> contactTASDefs = new();
+    private static readonly PerScreen<ContactTASDefs?> contactTASDefs = new();
 
     internal static void Register()
     {

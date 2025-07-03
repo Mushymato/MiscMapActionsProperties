@@ -492,11 +492,17 @@ internal static class Panorama
 
             foreach ((string key, PanoramaData panorama) in _bgData)
             {
-                if (!string.IsNullOrEmpty(panorama.BasedOn) && _bgData.TryGetValue(panorama.BasedOn, out PanoramaData? basedOn))
+                if (
+                    !string.IsNullOrEmpty(panorama.BasedOn)
+                    && _bgData.TryGetValue(panorama.BasedOn, out PanoramaData? basedOn)
+                )
                 {
                     if (!string.IsNullOrEmpty(basedOn.BasedOn))
                     {
-                        ModEntry.Log($"Panorama '{key}' has BasedOn={panorama.BasedOn} refering to a panorama that has it's own BasedOn, no copying of fields performed", LogLevel.Warn);
+                        ModEntry.Log(
+                            $"Panorama '{key}' has BasedOn={panorama.BasedOn} refering to a panorama that has it's own BasedOn, no copying of fields performed",
+                            LogLevel.Warn
+                        );
                     }
                     else
                     {

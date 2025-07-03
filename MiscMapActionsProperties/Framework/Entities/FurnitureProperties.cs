@@ -745,7 +745,6 @@ internal static class FurnitureProperties
 
         // tries to shake draw layers // character.speed + character.addedSpeed
         float speed = Game1.player.getMovementSpeed();
-        ModEntry.LogOnce($"Furniture_GetAdditionalTilePropertyRadius_Postfix/speed: {speed}");
 
         Rectangle furniBounds =
             new(

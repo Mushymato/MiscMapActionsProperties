@@ -576,7 +576,6 @@ internal static class DrawLayerExt
             return;
 
         float speed = Game1.player.getMovementSpeed();
-        ModEntry.LogOnce($"Building_isTilePassable_Postfix/speed: {speed}");
 
         Rectangle buildingBounds =
             new(
