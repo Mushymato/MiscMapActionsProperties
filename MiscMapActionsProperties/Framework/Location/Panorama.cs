@@ -490,16 +490,23 @@ internal static class Panorama
         {
             _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
 
-            foreach (PanoramaData panorama in _bgData.Values)
+            foreach ((string key, PanoramaData panorama) in _bgData)
             {
-                if (panorama.BasedOn != null && _bgData.TryGetValue(panorama.BasedOn, out PanoramaData? basedOn))
+                if (!string.IsNullOrEmpty(panorama.BasedOn) && _bgData.TryGetValue(panorama.BasedOn, out PanoramaData? basedOn))
                 {
-                    panorama.BackingDay ??= basedOn.BackingDay;
-                    panorama.BackingSunset ??= basedOn.BackingSunset;
-                    panorama.BackingNight ??= basedOn.BackingNight;
-                    panorama.ParallaxLayers ??= basedOn.ParallaxLayers;
-                    panorama.OnetimeTAS ??= basedOn.OnetimeTAS;
-                    panorama.RespawnTAS ??= basedOn.RespawnTAS;
+                    if (!string.IsNullOrEmpty(basedOn.BasedOn))
+                    {
+                        ModEntry.Log($"Panorama '{key}' has BasedOn={panorama.BasedOn} refering to a panorama that has it's own BasedOn, no copying of fields performed", LogLevel.Warn);
+                    }
+                    else
+                    {
+                        panorama.BackingDay ??= basedOn.BackingDay;
+                        panorama.BackingSunset ??= basedOn.BackingSunset;
+                        panorama.BackingNight ??= basedOn.BackingNight;
+                        panorama.ParallaxLayers ??= basedOn.ParallaxLayers;
+                        panorama.OnetimeTAS ??= basedOn.OnetimeTAS;
+                        panorama.RespawnTAS ??= basedOn.RespawnTAS;
+                    }
                 }
             }
 
