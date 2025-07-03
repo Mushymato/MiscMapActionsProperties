@@ -47,7 +47,7 @@
             "AlwaysActive": false
           },
           "CustomFields": {
-            "mushymato.MMAP_Panorama": "MMAP_MountainView",
+            "mushymato.MMAP_Panorama": "{{ModId}}_BonchMountain",
           }
         },
       }
@@ -64,7 +64,6 @@
               "Color": "Red",
               "RepeatX": true,
               "Repeaty": true,
-              "ParallaxRate": "2,1",
               "Velocity": "0.1,0.1"
             },
             {
@@ -72,12 +71,30 @@
               "Color": "Blue",
               "RepeatX": true,
               "Repeaty": true,
-              "ParallaxRate": "2,1",
+              "Velocity": "-0.1,0.2"
+            }
+          ],
+        },
+        "{{ModId}}_BonchMountain": {
+          "BasedOn": "MMAP_MountainView",
+          "ParallaxLayers": [
+            {
+              "Texture": "Portraits/Bouncer",
+              "Color": "Red",
+              "RepeatX": true,
+              "Repeaty": true,
+              "Velocity": "0.1,0.1"
+            },
+            {
+              "Texture": "Portraits/Bouncer",
+              "Color": "Blue",
+              "RepeatX": true,
+              "Repeaty": true,
               "Velocity": "-0.1,0.2"
             }
           ],
         }
       }
-    }
+    },
   ]
 }

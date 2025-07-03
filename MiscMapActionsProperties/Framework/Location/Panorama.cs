@@ -78,6 +78,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
 
 public sealed class PanoramaData
 {
+    public string? BasedOn = null;
     public List<BackingData>? BackingDay = null;
     public List<BackingData>? BackingSunset = null;
     public List<BackingData>? BackingNight = null;
@@ -93,6 +94,16 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     private readonly Color TxColor = Utility.StringToColor(Data.Color) ?? Color.White;
     private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
     private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
+
+    internal static IEnumerable<ParallaxLayerData> GetAllMatchingData(
+        List<ParallaxLayerData>? dataList,
+        GameStateQueryContext context
+    )
+    {
+        if (dataList == null)
+            return [];
+        return dataList.Where(data => GameStateQuery.CheckConditions(data.Condition, context));
+    }
 
     internal static ParallaxContext? FromData(ParallaxLayerData data, GameStateQueryContext context)
     {
@@ -199,11 +210,10 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
 
 internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, Color Color)
 {
-    internal static TArgs? GetFirstMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
-        where TArgs : PanoramaSharedData
+    internal static BackingData? GetFirstMatchingData(List<BackingData>? dataList, GameStateQueryContext context)
     {
-        if (dataList == null)
-            return default;
+        if (dataList == null || !dataList.Any())
+            return null;
         return dataList.FirstOrDefault(data => GameStateQuery.CheckConditions(data.Condition, context));
     }
 
@@ -265,14 +275,6 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         Game1.getTrulyDarkTime(location)
     );
 
-    internal static IEnumerable<TArgs> GetAllMatchingData<TArgs>(List<TArgs>? dataList, GameStateQueryContext context)
-        where TArgs : PanoramaSharedData
-    {
-        if (dataList == null)
-            return [];
-        return dataList.Where(data => GameStateQuery.CheckConditions(data.Condition, context));
-    }
-
     internal void SetData(PanoramaData data, GameStateQueryContext context)
     {
         Day = BackingContext.FromDataList(data.BackingDay, context);
@@ -280,7 +282,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         Night = BackingContext.FromDataList(data.BackingNight, context);
 
         parallaxCtx.Clear();
-        foreach (var parallax in GetAllMatchingData(data.ParallaxLayers, context))
+        foreach (var parallax in ParallaxContext.GetAllMatchingData(data.ParallaxLayers, context))
         {
             if (ParallaxContext.FromData(parallax, context) is ParallaxContext pCtx)
             {
@@ -482,8 +484,28 @@ internal static class Panorama
     }
 
     private static Dictionary<string, PanoramaData>? _bgData = null;
-    internal static Dictionary<string, PanoramaData> BgData =>
-        _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
+    internal static Dictionary<string, PanoramaData> BgData
+    {
+        get
+        {
+            _bgData ??= Game1.content.Load<Dictionary<string, PanoramaData>>(Asset_Panorama);
+
+            foreach (PanoramaData panorama in _bgData.Values)
+            {
+                if (panorama.BasedOn != null && _bgData.TryGetValue(panorama.BasedOn, out PanoramaData? basedOn))
+                {
+                    panorama.BackingDay ??= basedOn.BackingDay;
+                    panorama.BackingSunset ??= basedOn.BackingSunset;
+                    panorama.BackingNight ??= basedOn.BackingNight;
+                    panorama.ParallaxLayers ??= basedOn.ParallaxLayers;
+                    panorama.OnetimeTAS ??= basedOn.OnetimeTAS;
+                    panorama.RespawnTAS ??= basedOn.RespawnTAS;
+                }
+            }
+
+            return _bgData;
+        }
+    }
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
     {
