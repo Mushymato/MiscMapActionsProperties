@@ -48,16 +48,16 @@
     },
     {
       "Action": "EditMap",
-      "Target": "Maps/FarmCave",
+      "Target": "Maps/Farm",
       "MapTiles": [
         {
           "Position": {
-            "X": 5,
-            "Y": 7
+            "X": 40,
+            "Y": 30
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_TAS": "{{ModId}}_Swirly"
+            "mushymato.MMAP_TAS": "{{ModId}}_CauldronSmoke"
           }
         },
       ]
@@ -113,6 +113,7 @@
         "{{ModId}}_CauldronSmoke": {
           "Id": "{{ModId}}_CauldronSmoke",
           "Texture": "LooseSprites/Cursors",
+          "DrawAboveAlwaysFront": true,
           "SourceRect": {
             "X": 372,
             "Y": 1956,

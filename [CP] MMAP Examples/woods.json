@@ -13,7 +13,7 @@
       "Action": "EditMap",
       "Target": "Maps/Farm",
       "MapProperties": {
-        "mushymato.MMAP_WaterColor": "Red",
+        "mushymato.MMAP_WaterColor": "Red Green Blue Yellow",
         "mushymato.MMAP_FarmHouseStarterBedPosition": "4 4"
       }
     }

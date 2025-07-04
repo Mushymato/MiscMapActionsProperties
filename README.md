@@ -6,7 +6,7 @@ See `[CP] MMAP Examples` for samples.
 
 ### Map Property
 
-All map properties are also `Data/Location` custom fields. In the case where both map property and `Data/Location` custom fields exist, custom fields are prioritized.
+All map properties are also `Data/Location` CustomFields. In the case where both map property and `Data/Location` CustomFields exist, CustomFields are used.
 
 #### mushymato.MMAP_ProtectTree [T|message]
 
@@ -49,24 +49,16 @@ All map properties are also `Data/Location` custom fields. In the case where bot
 - If `velocityX` and/or `velocityY` are given, move the texture by that many pixels every tick to create scrolling effect.
 - By default, `color` is 80% white, `alpha` is 1 by default, and `scale` is 4 by default
 
-#### mushymato.MMAP_CribPosition: \<X\> \<Y\>
+#### mushymato.MMAP_WaterColor: \<color\> [color|T] [color|T] [color|T]
 
-- Farmhouse only, repositions the crib (vanilla is 30 12), size is still 3x4.
-- The default farmhouse has a crib baked in, which needs to be removed if you don't want duplicate cribs.
-- For wall and floor, there are 2 options:
-    1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
-    2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
-- For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
-
-#### mushymato.MMAP_FridgePosition: \<X\> \<Y\>
-
-- Farmhouse only, repositions the fridge independent of the map check for `untitled tile sheet` tile id 173 fridge.
-- The vanilla fridge logic still works and this position does not add or change map tiles, so you would actually need corresponding edit to make use of this.
-
-#### mushymato.MMAP_FridgeDoorSprite: \<F|texture\> [offsetX] [offsetY]
-
-- Farmhouse only, changes the fridge door's open sprite.
-- Only required if you need a fridge door larger than the vanilla 16x32 rectangle.
+- Changes the current location's water overlay draw color, does not change the water texture.
+- Can provide up to 4 colors, for each season.
+- If you don't provide any color or write `T` in any slot, water will fall back to the spring color (first color) if provided.
+- The vanilla seasonal colors are:
+    - #3c6e7f spring
+    - #1e787f summer
+    - #7f4164 fall
+    - #41287F winter
 
 #### mushymato.MMAP_Panorama \<panoramaId\>
 
@@ -102,6 +94,36 @@ And Game State Queries
 - mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time
 - mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after window lights turn off and lamp lights turn on.
 - mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time
+
+#### mushymato.MMAP_CribPosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the crib (vanilla is 30 12), size is still 3x4.
+- The default farmhouse has a crib baked in, which needs to be removed if you don't want duplicate cribs.
+- For wall and floor, there are 2 options:
+    1. Place the renovation below a row of tiles that have `WallID`, and make sure `FloorID` matches the room it is in.
+    2. Completely remove `FloorID` and all the wall/floor tiles from `FarmHouse_Crib_0` and `FarmHouse_Crib_1`
+- For option 2, there are sample edited crib tmx that can be used for your own mods in `[CP] MMAP Examples/assets/` (`FarmHouse_Crib_0.tmx` and `FarmHouse_Crib_1.tmx`)
+
+#### mushymato.MMAP_FridgePosition: \<X\> \<Y\>
+
+- Farmhouse only, repositions the fridge independent of the map check for `untitled tile sheet` tile id 173 fridge.
+- The vanilla fridge logic still works and this position does not add or change map tiles, so you would actually need corresponding edit to make use of this.
+
+#### mushymato.MMAP_FridgeDoorSprite: \<F|texture\> [offsetX] [offsetY]
+
+- Farmhouse only, changes the fridge door's open sprite.
+- Only required if you need a fridge door larger than the vanilla 16x32 rectangle.
+
+#### mushymato.MMAP_FarmHouseFurnitureRemove ALL|[\<X\> \<Y\>]+
+
+- Farmhouse only, remove certain furniture from initial farmhouse (`Maps/FarmHouse`).
+- Takes either a list of coordinates, or special value `ALL` to remove all furniture.
+
+#### mushymato.MMAP_FarmHouseFurnitureAdd [\<furnitureId\> \<X\> \<Y\> \<rotate\>]+
+
+- Farmhouse only, add certain furniture to the initial farmhouse (`Maps/FarmHouse`).
+- Works just like `FarmHouseFurniture` which is on the farm map property rather than on the house.
+- Should there be no BedFurniture after `mushymato.MMAP_FarmHouseFurnitureRemove` and `mushymato.MMAP_FarmHouseFurnitureAdd` are applied, a bed will be added to tile 9 8, just like vanilla.
 
 ### Tile Data
 
@@ -268,6 +290,11 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - Use `velocity` to increase how far the player shoots into/out of the pool, default 8
 - Use `soundcue` to change the sound of entering/exiting the pool, by default it is `pullItemFromWater`
 
+#### mushymato.MMAP_FarmHouseUpgrade
+
+- Can be used as TriggerAction
+- Makes the farmhouse upgrade overnight, as if robin finished constructing it today.
+
 #### mushymato.MMAP_If \<GSQ\> ## \<if-case\> [## \<else-case\>]
 
 - Can be used as either Action or TouchAction
@@ -355,6 +382,7 @@ Buildings Metadata are like CustomFields, except they also appear on skins and c
 #### mushymato.MMAP/DrawLayer.{DrawLayerId}.{override} <a name="drawlayerext"></a>
 
 Various draw layer overriding fields, can be used with regular draw layer things.
+These also work with draw layers added via [furniture properties](./docs/furniture-properties.md).
 
 ##### string values
 
@@ -368,6 +396,7 @@ These are all support passing either `0.1` float, or `"0.1 0.4"` for random valu
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotate`: rotation (0 to 6.28318), around the origin.
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotateRate`: rotation change per second, positive is clockwise, negative is counter clockwise.
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.scale`: draw scale (default 4f)
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.shake`: collision shake amount when player walks through (default 0f), does not sync across multiplayer.
 
 ##### Vector2 values
 

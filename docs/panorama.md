@@ -20,7 +20,7 @@ There are some some panoramas provided by MMAP that can be used out of the box.
 | `BackingNight` | List<BackingData> | _null_ | List of [parallax](panorama.md#parallax) data. |
 | `OnetimeTAS` | List<MapWideTAS> | _null_ | List of [parallax](panorama.md#tas) data. |
 | `BackingNight` | List<BackingData> | _null_ | List of [parallax](panorama.md#tas) data. |
-
+| `BasedOn` | string | _null_ | If this is set, replace any null values in this panorama with the values from another panorama. Can only do 1 layer, i.e. the BasedOn may not have BasedOn. To clear a specific value, set them to empty list (`[]`). |
 
 MMAP's panorama system is separated into 3 main layers, which will be explained in each section.
 
