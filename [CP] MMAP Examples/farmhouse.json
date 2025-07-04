@@ -24,7 +24,7 @@
       "Action": "EditMap",
       "Target": "Maps/FarmHouse",
       "MapProperties": {
-        "mushymato.MMAP_FarmHouseFurnitureRemove": "9 8",
+        "mushymato.MMAP_FarmHouseFurnitureRemove": "ALL",
         "mushymato.MMAP_FarmHouseFurnitureAdd": "2048 4 6 0"
       }
     }

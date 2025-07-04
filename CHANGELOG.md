@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.0] (wip)
+## [1.9.0]
 
 ### Added
 - New map property mushymato.MMAP_WaterColor that allows setting the water color for a location.
 - Draw layers on furniture and buildings can now shake when player passes through their collision. Does not sync in multiplayer.
 - Panorama now has BasedOn field, which will allow reuse of the top level fields from a different panorama. This only goes 1 layer deep and will refuse to resolve if the BasedOn panorama itself has a BasedOn.
+- New map property mushymato.MMAP_FarmHouseFurnitureAdd and mushymato.MMAP_FarmHouseFurnitureRemove for dealing with starting furniture
+- New trigger action mushymato.MMAP_FarmHouseUpgrade to upgrade farmhouse without going through robin
 
 ## [1.8.9]
 

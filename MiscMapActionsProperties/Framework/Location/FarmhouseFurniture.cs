@@ -11,10 +11,12 @@ using StardewValley.Triggers;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-/// mushymato.MMAP_FarmHouseUpgrade
-/// Add new map property mushymato.MMAP_FarmHouseFurniture <furniture>
-/// Add farmhouse furniture
-/// A bed is added only if the list doesn't already provide bed
+/// New map property mushymato.MMAP_FarmHouseFurnitureAdd <furniture>
+/// Add farmhouse furniture, works just like FarmHouseFurniture
+/// New map property mushymato.MMAP_FarmHouseFurnitureRemove <coordinates>
+/// Remove furniture at these coords, or all furniture if set to ALL
+/// If the final furniture list has no bed, a bed will be added to the default position
+/// New trigger action mushymato.MMAP_FarmHouseUpgrade, makes farmhouse upgrade tomorrow without going to robin's
 /// </summary>
 internal static class FarmHouseFurniture
 {
