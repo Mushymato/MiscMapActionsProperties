@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New map property mushymato.MMAP_FarmHouseFurnitureAdd and mushymato.MMAP_FarmHouseFurnitureRemove for dealing with starting furniture
 - New trigger action mushymato.MMAP_FarmHouseUpgrade to upgrade farmhouse without going through robin
 - Draw layers on furniture and buildings can now shake when player passes through their collision. Does not sync in multiplayer.
+- [ExtendedTAS] add AlphaFadeFade and DrawAboveAlwaysFront
 
 ## [1.8.9]
 
