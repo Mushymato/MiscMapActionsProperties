@@ -3,23 +3,28 @@ using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Delegates;
 using StardewValley.Locations;
 using StardewValley.Objects;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
+/// mushymato.MMAP_FarmHouseUpgrade
 /// Add new map property mushymato.MMAP_FarmHouseFurniture <furniture>
 /// Add farmhouse furniture
 /// A bed is added only if the list doesn't already provide bed
 /// </summary>
 internal static class FarmHouseFurniture
 {
+    internal const string Action_FarmHouseUpgrade = $"{ModEntry.ModId}_FarmHouseUpgrade";
     internal const string MapProp_FarmHouseFurnitureAdd = $"{ModEntry.ModId}_FarmHouseFurnitureAdd";
     internal const string MapProp_FarmHouseFurnitureRemove = $"{ModEntry.ModId}_FarmHouseFurnitureRemove";
 
     internal static void Register()
     {
+        TriggerActionManager.RegisterAction(Action_FarmHouseUpgrade, DoFarmHouseUpgrade);
         try
         {
             ModEntry.harm.Patch(
@@ -30,6 +35,21 @@ internal static class FarmHouseFurniture
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch FarmHouseFurniture:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static bool DoFarmHouseUpgrade(string[] args, TriggerActionContext context, out string error)
+    {
+        if (Context.IsWorldReady)
+        {
+            error = null!;
+            Game1.player.daysUntilHouseUpgrade.Value = 1;
+            return true;
+        }
+        else
+        {
+            error = "Must have loaded a save.";
+            return false;
         }
     }
 
