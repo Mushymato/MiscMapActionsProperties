@@ -25,13 +25,12 @@ Some temporary animated sprites are provided by default by this mod:
 | `LayerDepth` | float | 0 | Absolute layer depth for determining whether sprite is above or below other sprites. |
 | `SortOffset` | float | 0f | If this is set to a non-zero value, do an offset on layer depth relative to the Y position of the sprite + SortOffset, useful when using this TAS at various different positions. |
 | `DrawAboveAlwaysFront` | bool | false | If true, draw sprite above always front layer of map |
-| `AlphaFade` | float | 0f | Amount of additional transparency every frame. Set this to make the sprite fade away over time. |
 | `Scale` | float | 1f | Draw scale, applied on top of the default 4x scale. |
 | `ScaleChange` | float | 0f | Amount of additional scale every frame. Set this to make sprite enlarge/shrink over time. |
 | `Rotation` | float | 0f | Amount of rotation on the sprite. |
 | `RotationChange` | float | 0f | Amount of additional rotation every frame. Set this to make the sprite spin. |
-| `Color` | string | _null_ | Color to apply on draw, for use with grayscale sprites.<br>Aside from RGB and hex values, monogame accepts [named colors](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html). |
 | `ScaleChangeChange` | float | 0 | A change upon `ScaleChange`, i.e. acceleration but for scale. |
+| `Color` | string | _null_ | Color to apply on draw, for use with grayscale sprites.<br>Aside from RGB and hex values, monogame accepts [named colors](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html). |
 | `Motion` | Vector2 | 0,0 | Amount of movement in pixels to do on X and Y axis each tick. |
 | `Acceleration` | Vector2 | 0,0 | Amount of increase in motion on X and Y axis each tick. |
 | `AccelerationChange` | Vector2 | 0,0 | Amount of increase in acceleration on X and Y axis each tick. |
