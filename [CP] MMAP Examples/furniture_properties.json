@@ -148,10 +148,10 @@
             }
           ],
         },
-        "1305": {
+        "1391": {
           "DrawLayers": [
             {
-              "Id": "{{ModId}}_Chimkin",
+              "Id": "{{ModId}}_Chimkin_Rotation.0",
               "Texture": "Animals\\White Chicken",
               "SourceRect": {
                 "X": 0,
@@ -165,7 +165,7 @@
               "FramesPerRow": 4,
             },
             {
-              "Id": "{{ModId}}_VoidChimkin",
+              "Id": "{{ModId}}_VoidChimkin_Rotation.2",
               "Texture": "Animals\\Void Chicken",
               "SourceRect": {
                 "X": 0,
@@ -182,20 +182,20 @@
           ],
           "Metadata": {
             // day chimkin
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.alpha": "0.5 1.0",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotate": "0 3.0",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.rotateRate": 1,
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.origin": "8 8",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.scale": "12 16.0",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.effect": "FlipHorizontally",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.condition": "!mushymato.MMAP_TIME_IS_LIGHTS_OFF",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.alpha": "0.5 1.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.rotate": "0 3.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.rotateRate": 1,
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.origin": "8 8",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.scale": "12 16.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin_Rotation.0.effect": "FlipHorizontally",
+            // "mushymato.MMAP/DrawLayer.{{ModId}}_Chimkin.condition": "!mushymato.MMAP_TIME_IS_LIGHTS_OFF",
             // night chimkin
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.alpha": "0.5 1.0",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.rotate": "0 3.0",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.rotateRate": 1,
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.origin": "8 8",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.scale": 16.0,
-            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.condition": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin_Rotation.2.alpha": "0.5 1.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin_Rotation.2.rotate": "0 3.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin_Rotation.2.rotateRate": 1,
+            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin_Rotation.2.origin": "8 8",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin_Rotation.2.scale": 16.0,
+            // "mushymato.MMAP/DrawLayer.{{ModId}}_VoidChimkin.condition": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
           }
         },
         "StarryMoonRug": {

@@ -76,7 +76,7 @@ internal static class FurnitureProperties
                     !string.IsNullOrEmpty(drawLayer.Id)
                     && IdIsRotation.Match(drawLayer.Id) is Match match
                     && match.Success
-                    && int.Parse(match.Groups[1].Value) == furniture.currentRotation.Value
+                    && int.Parse(match.Groups[1].Value) != furniture.currentRotation.Value
                 )
                 {
                     continue;
