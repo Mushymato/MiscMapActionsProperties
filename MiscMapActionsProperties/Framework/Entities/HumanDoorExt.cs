@@ -1,11 +1,7 @@
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Emit;
-using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Tile;
 using MiscMapActionsProperties.Framework.Wheels;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 
@@ -25,23 +21,6 @@ internal static class HumanDoorExt
     internal const string Action_HoleWrpOut = $"{HoleWrp.TileAction_HoleWrp}BuildingOut";
     internal const string Action_WrpHere = $"{ModEntry.ModId}_WrpHere";
 
-    internal static Lazy<ImmutableHashSet<string>> MMAP_Wrps =
-        new(() =>
-        {
-            HashSet<string> WrpsSet =
-            [
-                Action_Wrp,
-                Action_MagicWrp,
-                Action_HoleWrp,
-                Action_WrpOut,
-                Action_MagicWrpOut,
-                Action_HoleWrpOut,
-                Action_WrpHere,
-                HoleWrp.TileAction_HoleWrp,
-            ];
-            return WrpsSet.ToImmutableHashSet();
-        });
-
     internal static void Register()
     {
         CommonPatch.RegisterTileAndTouch(Action_Wrp, DoWrpBuilding);
@@ -55,60 +34,9 @@ internal static class HumanDoorExt
         CommonPatch.RegisterTileAndTouch(Action_WrpHere, DoWrpHere);
     }
 
-    private static bool IsMMAPWrp(string WrpStr) => MMAP_Wrps.Value.Contains(WrpStr);
-
-    private static IEnumerable<CodeInstruction> GameLocation_updateDoors_Transpiler(
-        IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator
-    )
-    {
-        try
-        {
-            // IL_016d: ldloc.s 8
-            // IL_016f: ldstr "WrpWomensLocker"
-            // IL_0174: call bool [System.Runtime]System.String::op_Equality(string, string)
-            // IL_0179: brtrue.s IL_01e3
-            // IL_017b: br IL_0237
-
-            CodeMatcher matcher = new(instructions, generator);
-            matcher.MatchStartForward(
-                [
-                    new(inst => inst.IsLdloc()),
-                    new(OpCodes.Ldstr, "Wrp_Sunroom_Door"),
-                    new(OpCodes.Call),
-                    new(OpCodes.Brtrue_S),
-                    new(OpCodes.Br),
-                ]
-            );
-            CodeInstruction WrpLoc = new(matcher.Opcode, matcher.Operand);
-            matcher.Advance(3);
-            CodeInstruction brtrueS = new(matcher.Opcode, matcher.Operand);
-            matcher.Advance(1);
-            CodeInstruction br = new(matcher.Opcode, matcher.Operand);
-            matcher.Advance(5);
-            matcher.Insert(
-                [
-                    WrpLoc,
-                    new(OpCodes.Call, AccessTools.DeclaredMethod(typeof(HumanDoorExt), nameof(IsMMAPWrp))),
-                    brtrueS,
-                    br,
-                ]
-            );
-            return matcher.Instructions();
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log(
-                $"Failed to patch GameLocation_updateDoors_Transpiler for HumanDoorExt, this patch is optional:\n{err}",
-                LogLevel.Warn
-            );
-            return instructions;
-        }
-    }
-
     private static bool DoWrpBuilding(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (TryGetWrpArgs("Wrp", location, args, who, point, out string[]? WrpArgs))
+        if (TryGetWrpArgs("Warp", location, args, who, point, out string[]? WrpArgs))
         {
             location.performTouchAction(WrpArgs, who.getStandingPosition());
             return true;
@@ -118,7 +46,7 @@ internal static class HumanDoorExt
 
     private static bool DoMagicWrpBuilding(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (TryGetWrpArgs("MagicWrp", location, args, who, point, out string[]? WrpArgs))
+        if (TryGetWrpArgs("MagicWarp", location, args, who, point, out string[]? WrpArgs))
         {
             location.performTouchAction(WrpArgs, who.getStandingPosition());
             return true;
@@ -138,7 +66,7 @@ internal static class HumanDoorExt
 
     private static bool DoWrpBuildingOut(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (TryGetWrpOutArgs("Wrp", location, args, out string[]? WrpOutArgs))
+        if (TryGetWrpOutArgs("Warp", location, args, out string[]? WrpOutArgs))
         {
             location.performTouchAction(WrpOutArgs, who.getStandingPosition());
             return true;
@@ -148,7 +76,7 @@ internal static class HumanDoorExt
 
     private static bool DoMagicWrpBuildingOut(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (TryGetWrpOutArgs("MagicWrp", location, args, out string[]? WrpOutArgs))
+        if (TryGetWrpOutArgs("MagicWarp", location, args, out string[]? WrpOutArgs))
         {
             location.performTouchAction(WrpOutArgs, who.getStandingPosition());
             return true;

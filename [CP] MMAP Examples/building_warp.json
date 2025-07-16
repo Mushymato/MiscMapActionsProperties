@@ -43,20 +43,20 @@
           "IndoorMapType": "StardewValley.Shed",
           // normal built-in human door
           "HumanDoor": {
-            "X": 0,
-            "Y": 2
+            "X": 1,
+            "Y": 1
           },
           "DrawShadow": false,
-          "CollisionMap": "XOX\nOXO\nXOX",
+          // "CollisionMap": "XOX\nOXO\nXOX",
           "ActionTiles": [
             {
               // special alternate door
               "Id": "{{ModId}}_WrpBuilding",
               "Tile": {
-                "X": 2,
+                "X": 0,
                 "Y": 2
               },
-              "Action": "mushymato.MMAP_WrpBuilding"
+              "Action": "mushymato.MMAP_WrpBuilding 4 4"
             }
           ],
           "TileProperties": [

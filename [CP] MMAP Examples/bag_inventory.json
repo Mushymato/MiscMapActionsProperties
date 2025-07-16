@@ -12,7 +12,7 @@
           "Layer": "Buildings",
           "SetProperties": {
             "Action": "mushymato.MMAP_ShowBag TestBag1 BigChest"
-          }
+          },
         }
       ]
     },

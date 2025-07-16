@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Buildings;
 using StardewValley.Delegates;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -23,10 +24,14 @@ internal static class FarmHouseFurniture
     internal const string Action_FarmHouseUpgrade = $"{ModEntry.ModId}_FarmHouseUpgrade";
     internal const string MapProp_FarmHouseFurnitureAdd = $"{ModEntry.ModId}_FarmHouseFurnitureAdd";
     internal const string MapProp_FarmHouseFurnitureRemove = $"{ModEntry.ModId}_FarmHouseFurnitureRemove";
+    internal const string Action_SetFlooring = $"{ModEntry.ModId}_SetFlooring";
+    internal const string Action_SetWallpaper = $"{ModEntry.ModId}_SetWallpaper";
 
     internal static void Register()
     {
         TriggerActionManager.RegisterAction(Action_FarmHouseUpgrade, DoFarmHouseUpgrade);
+        TriggerActionManager.RegisterAction(Action_SetFlooring, DoSetFlooring);
+        TriggerActionManager.RegisterAction(Action_SetWallpaper, DoSetWallpaper);
         try
         {
             ModEntry.harm.Patch(
@@ -40,12 +45,51 @@ internal static class FarmHouseFurniture
         }
     }
 
+    private static bool DoSetWallpaper(string[] args, TriggerActionContext context, out string error)
+    {
+        if (
+            !ArgUtility.TryGet(args, 1, out string wallpaper, out error, allowBlank: false, name: "string wallpaper")
+            || !ArgUtility.TryGetOptional(args, 2, out string wallId, out error, name: "string wallId")
+        )
+        {
+            return false;
+        }
+        FarmHouse farmHouse = Utility.getHomeOfFarmer(Game1.player);
+        farmHouse.SetWallpaper(wallpaper, wallId);
+        return true;
+    }
+
+    private static bool DoSetFlooring(string[] args, TriggerActionContext context, out string error)
+    {
+        if (
+            !ArgUtility.TryGet(args, 1, out string flooring, out error, allowBlank: false, name: "string flooring")
+            || !ArgUtility.TryGetOptional(args, 2, out string floorId, out error, name: "string floorId")
+        )
+        {
+            return false;
+        }
+        FarmHouse farmHouse = Utility.getHomeOfFarmer(Game1.player);
+        farmHouse.SetFloor(flooring, floorId);
+        return true;
+    }
+
     private static bool DoFarmHouseUpgrade(string[] args, TriggerActionContext context, out string error)
     {
         if (Context.IsWorldReady)
         {
+            if (
+                !ArgUtility.TryGetOptionalInt(
+                    args,
+                    1,
+                    out int daysUntil,
+                    out error,
+                    defaultValue: 1,
+                    name: "int daysUntil"
+                )
+            )
+                return false;
             error = null!;
-            Game1.player.daysUntilHouseUpgrade.Value = 1;
+            Game1.player.daysUntilHouseUpgrade.Value = daysUntil;
             return true;
         }
         else
