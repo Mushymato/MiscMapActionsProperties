@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [1.9.2]
 
 ### Added
-- Action to set wallpaper and flooring for farmhouse
+- mushymato.MMAP_SetFlooring [flooringId] [floorId] to set flooring for farmhouse
+- mushymato.MMAP_SetWallpaper [wallpaperId] [wallId] to set wallpaper for farmhouse
 - mushymato.MMAP_FarmHouseUpgrade now optionally accepts a day until upgrade, default 1
 
 ### Fixed
