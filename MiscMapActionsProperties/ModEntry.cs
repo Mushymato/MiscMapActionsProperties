@@ -1,12 +1,21 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
 using HarmonyLib;
+using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
+using StardewValley;
+using StardewValley.Objects;
 
 namespace MiscMapActionsProperties;
 
 public class ModEntry : Mod
 {
+    public class ModConfig
+    {
+        public bool DisableDrawPatches { get; set; } = false;
+    }
+
 #if DEBUG
     private const LogLevel DEFAULT_LOG_LEVEL = LogLevel.Debug;
 #else
@@ -18,6 +27,8 @@ public class ModEntry : Mod
     internal static Harmony harm = null!;
     internal static TASAssetManager TAS = null!;
 
+    internal static ModConfig Config = null!;
+
     internal const string ModId = "mushymato.MMAP";
 
     public override void Entry(IModHelper helper)
@@ -26,6 +37,8 @@ public class ModEntry : Mod
         manifest = ModManifest;
         help = helper;
         harm = new(ModId);
+        Config = helper.ReadConfig<ModConfig>();
+        helper.ConsoleCommands.Add("mmap.chaired", "Spawn chairs", ConsoleChaired);
 
         TAS = new(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Register();
@@ -61,6 +74,19 @@ public class ModEntry : Mod
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.ShowGlobalInventory.Register();
         Framework.Tile.TASSpot.Register();
+    }
+
+    private void ConsoleChaired(string arg1, string[] arg2)
+    {
+        if (Game1.currentLocation is not GameLocation location)
+            return;
+        foreach ((Vector2 pos, MapTile tile) in CommonPatch.IterateMapTiles(location.Map, "Back"))
+        {
+            if (location.isTilePlaceable(pos))
+            {
+                location.furniture.Add(ItemRegistry.Create<Furniture>("PlasticLawnChair").SetPlacement(pos));
+            }
+        }
     }
 
     internal static void Log(string msg, LogLevel level = DEFAULT_LOG_LEVEL)

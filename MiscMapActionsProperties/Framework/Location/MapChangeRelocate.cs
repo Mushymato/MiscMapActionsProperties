@@ -116,10 +116,6 @@ internal static class MapChangeRelocate
         if (gameLocation == null)
             return false;
         ModEntry.Log($"{gameLocation.NameOrUniqueName}: {source} -> {target} ({area})");
-        foreach (Furniture furniture in gameLocation.furniture)
-        {
-            ModEntry.Log($"{furniture.QualifiedItemId}: {furniture.DisplayName}");
-        }
 
         Point delta = target - source;
         Rectangle bounds = new(source.X, source.Y, area.X, area.Y);

@@ -33,11 +33,10 @@ internal static class FurnitureProperties
     internal const float LAYER_OFFSET = 1E-06f;
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
-    private static readonly PerScreen<FurnitureDrawMode> FurnitureDraw = new(() => FurnitureDrawMode.None);
+    private static FurnitureDrawMode FurnitureDraw = FurnitureDrawMode.None;
+    private static float FurnitureLayerDepthOffset = 0f;
 
-    private static readonly PerScreen<float> FurnitureLayerDepthOffset = new();
-    private static readonly PerScreen<List<float>> drawFurnitureLayerDepths = new();
-    private static List<float> DrawFurnitureLayerDepths => drawFurnitureLayerDepths.Value ??= [];
+    private static readonly List<float> DrawFurnitureLayerDepths = [];
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
     private static readonly MethodInfo? Furniture_getScaleSize = AccessTools.DeclaredMethod(
         typeof(Furniture),
@@ -311,6 +310,9 @@ internal static class FurnitureProperties
             ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
         }
 
+        if (ModEntry.Config.DisableDrawPatches)
+            return;
+
         try
         {
             ModEntry.harm.Patch(
@@ -441,22 +443,21 @@ internal static class FurnitureProperties
 
     private static void Furniture_draw_Prefix(Furniture __instance, ref Rectangle __state)
     {
-        FurnitureDraw.Value = FurnitureDrawMode.None;
-        FurnitureLayerDepthOffset.Value = 0;
+        FurnitureDraw = FurnitureDrawMode.None;
+        FurnitureLayerDepthOffset = 0;
         if (__instance.isTemporarilyInvisible || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
 
         __state = __instance.sourceRect.Value;
-        FurnitureDraw.Value = FurnitureDrawMode.Base;
+        FurnitureDraw = FurnitureDrawMode.Base;
         if (TryAddFurnitureToDLCache(__instance, fpData) is not null)
         {
             if (fpData.DrawShadow)
-                FurnitureDraw.Value |= FurnitureDrawMode.Layer;
+                FurnitureDraw |= FurnitureDrawMode.Layer;
             else
-                FurnitureDraw.Value = FurnitureDrawMode.Layer;
+                FurnitureDraw = FurnitureDrawMode.Layer;
         }
-        FurnitureLayerDepthOffset.Value =
-            fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
+        FurnitureLayerDepthOffset = fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
         if (fpData.DrawShadow)
         {
             __instance.sourceRect.Value = AdjustSourceRectToSeason(
@@ -481,14 +482,15 @@ internal static class FurnitureProperties
     )
     {
         float overrideLayerDepth = layerDepth;
-        if (FurnitureDraw.Value != FurnitureDrawMode.None)
+        FurnitureDrawMode mode = FurnitureDraw;
+        if (mode != FurnitureDrawMode.None)
         {
-            if (FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Layer))
+            if (mode.HasFlag(FurnitureDrawMode.Layer))
                 DrawFurnitureLayerDepths.Add(layerDepth);
-            if (!FurnitureDraw.Value.HasFlag(FurnitureDrawMode.Base))
+            if (!mode.HasFlag(FurnitureDrawMode.Base))
                 return;
             if (Furniture.isDrawingLocationFurniture)
-                overrideLayerDepth += FurnitureLayerDepthOffset.Value;
+                overrideLayerDepth += FurnitureLayerDepthOffset;
         }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, overrideLayerDepth);
     }
@@ -592,7 +594,7 @@ internal static class FurnitureProperties
     )
     {
         if (
-            FurnitureDraw.Value == FurnitureDrawMode.None
+            FurnitureDraw == FurnitureDrawMode.None
             || !DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
             || state == null
         )
@@ -608,7 +610,7 @@ internal static class FurnitureProperties
             ModEntry.LogOnce($"Got no layerDepth for {__instance.QualifiedItemId} ({__instance.TileLocation})");
         }
 
-        FurnitureDraw.Value = FurnitureDrawMode.None;
+        FurnitureDraw = FurnitureDrawMode.None;
         state.Draw(
             __instance,
             Furniture.isDrawingLocationFurniture
@@ -623,7 +625,7 @@ internal static class FurnitureProperties
             4f
         );
         DrawFurnitureLayerDepths.Clear();
-        FurnitureLayerDepthOffset.Value = 0;
+        FurnitureLayerDepthOffset = 0;
         __instance.sourceRect.Value = __state;
     }
 
