@@ -55,6 +55,29 @@ internal static class FurnitureProperties
             NonTile,
         }
 
+        private readonly Dictionary<string, int?> parsedRotations = [];
+
+        internal bool CheckRotation(string drawLayerId, int currentRotation)
+        {
+            if (!parsedRotations.TryGetValue(drawLayerId, out int? rotation))
+            {
+                if (
+                    !string.IsNullOrEmpty(drawLayerId)
+                    && IdIsRotation.Match(drawLayerId) is Match match
+                    && match.Success
+                )
+                {
+                    rotation = int.Parse(match.Groups[1].Value);
+                }
+                else
+                {
+                    rotation = null;
+                }
+                parsedRotations[drawLayerId] = rotation;
+            }
+            return rotation == null || rotation == currentRotation;
+        }
+
         internal void Draw(
             Furniture furniture,
             Vector2 drawPosition,
@@ -71,23 +94,19 @@ internal static class FurnitureProperties
             );
             foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
             {
-                if (
-                    !string.IsNullOrEmpty(drawLayer.Id)
-                    && IdIsRotation.Match(drawLayer.Id) is Match match
-                    && match.Success
-                    && int.Parse(match.Groups[1].Value) != furniture.currentRotation.Value
-                )
+                if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value))
                 {
                     continue;
                 }
 
-                ParsedItemData dataOrErrorItem = ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
+                ParsedItemData? dataOrErrorItem = null;
 
                 float layerDepth;
                 Vector2 drawPos;
                 if (drawSource == DrawSource.Menu)
                 {
                     layerDepth = 0f;
+                    dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
                     Rectangle baseSrcRect = dataOrErrorItem.GetSourceRect();
                     drawPos =
                         drawPosition
@@ -115,10 +134,15 @@ internal static class FurnitureProperties
                     (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
                 );
                 sourceRect = AdjustSourceRectToSeason(FpData, furniture.Location, sourceRect);
-                Texture2D texture = dataOrErrorItem.GetTexture();
+                Texture2D texture;
                 if (Game1.content.DoesAssetExist<Texture2D>(drawLayer.Texture))
                 {
                     texture = Game1.content.Load<Texture2D>(drawLayer.Texture);
+                }
+                else
+                {
+                    dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
+                    texture = dataOrErrorItem.GetTexture();
                 }
 
                 if (drawLayerExt != null)
@@ -309,9 +333,6 @@ internal static class FurnitureProperties
         {
             ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
         }
-
-        if (ModEntry.Config.DisableDrawPatches)
-            return;
 
         try
         {

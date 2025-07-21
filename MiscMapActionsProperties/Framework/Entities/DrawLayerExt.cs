@@ -161,9 +161,6 @@ internal static class DrawLayerExt
 
     internal static void Register()
     {
-        if (ModEntry.Config.DisableDrawPatches)
-            return;
-
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
