@@ -29,7 +29,12 @@ public class ModEntry : Mod
         manifest = ModManifest;
         help = helper;
         harm = new(ModId);
-        helper.ConsoleCommands.Add("mmap.chaired", "Spawn stuff", ConsoleChaired);
+
+        helper.ConsoleCommands.Add(
+            "mmap.chaired",
+            "Spawn a chair at every tile in the current map for performance testing, do not use in normal gameplay",
+            ConsoleChaired
+        );
 
         TAS = new(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Register();
@@ -71,13 +76,11 @@ public class ModEntry : Mod
     {
         if (Game1.currentLocation is not GameLocation location)
             return;
-        foreach ((Vector2 pos, MapTile tile) in Framework.Wheels.CommonPatch.IterateMapTiles(location.Map, "Back"))
+        foreach ((Vector2 pos, _) in Framework.Wheels.CommonPatch.IterateMapTiles(location.Map, "Back"))
         {
             if (location.isTilePlaceable(pos))
             {
-                location.furniture.Add(
-                    ItemRegistry.Create<Furniture>("Umganil.Wherewindsmeet_Qinghe_lamp2").SetPlacement(pos)
-                );
+                location.furniture.Add(ItemRegistry.Create<Furniture>("PlasticLawnChair").SetPlacement(pos));
             }
         }
     }

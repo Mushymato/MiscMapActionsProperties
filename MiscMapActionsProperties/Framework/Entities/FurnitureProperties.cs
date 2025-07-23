@@ -321,13 +321,11 @@ internal static class FurnitureProperties
                     nameof(Furniture_AllowPlacementOnThisTile_Postfix)
                 )
             );
-#if SDV1615
             // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
                 prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
             );
-#endif
         }
         catch (Exception err)
         {
