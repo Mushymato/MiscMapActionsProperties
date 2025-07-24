@@ -293,19 +293,19 @@ internal static class FurnitureProperties
                         )
                     );
                 }
-                // if (
-                //     AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
-                //     is MethodInfo origMethod2
-                // )
-                // {
-                //     ModEntry.harm.Patch(
-                //         original: origMethod2,
-                //         postfix: new HarmonyMethod(
-                //             typeof(FurnitureProperties),
-                //             nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
-                //         )
-                //     );
-                // }
+                if (
+                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
+                    is MethodInfo origMethod2
+                )
+                {
+                    ModEntry.harm.Patch(
+                        original: origMethod2,
+                        postfix: new HarmonyMethod(
+                            typeof(FurnitureProperties),
+                            nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+                        )
+                    );
+                }
             }
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
@@ -327,79 +327,79 @@ internal static class FurnitureProperties
             ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
         }
 
-        // #region obsolete_1.6.16
-        // // these should be removed in 1.6.16
-        // try
-        // {
-        //     // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
-        //         prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
-        //     );
-        //     // custom TV is a feature to be eaten by 1.6.16 but i'll add it here for now
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetFurnitureInstance)),
-        //         postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetFurnitureInstance_Postfix))
-        //     );
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenPosition)),
-        //         postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenPosition_Postfix))
-        //     );
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenSizeModifier)),
-        //         postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenSizeModifier_Postfix))
-        //     );
-        // }
-        // catch (Exception err)
-        // {
-        //     ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
-        // }
-        // #endregion
+        #region obsolete_1.6.16
+        // these should be removed in 1.6.16
+        try
+        {
+            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
+            );
+            // custom TV is a feature to be eaten by 1.6.16 but i'll add it here for now
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetFurnitureInstance)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetFurnitureInstance_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenPosition)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenPosition_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenSizeModifier)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenSizeModifier_Postfix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
+        }
+        #endregion
 
-        // try
-        // {
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
-        //         prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
-        //         transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Transpiler))
-        //         {
-        //             priority = Priority.Last,
-        //         },
-        //         finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
-        //     );
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
-        //         prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
-        //         transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Transpiler))
-        //         {
-        //             priority = Priority.Last,
-        //         },
-        //         finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
-        //     );
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
-        //         transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Transpiler))
-        //         {
-        //             priority = Priority.Last,
-        //         },
-        //         finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
-        //     );
-        //     ModEntry.harm.Patch(
-        //         original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
-        //         transpiler: new HarmonyMethod(
-        //             typeof(FurnitureProperties),
-        //             nameof(Furniture_drawAtNonTileSpot_Transpiler)
-        //         )
-        //         {
-        //             priority = Priority.Last,
-        //         },
-        //         finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
-        //     );
-        // }
-        // catch (Exception err)
-        // {
-        //     ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
-        // }
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
+                transpiler: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_drawAtNonTileSpot_Transpiler)
+                )
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
+        }
     }
 
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
@@ -800,11 +800,20 @@ internal static class FurnitureProperties
     }
     #endregion
 
+    public const int MMAP_SpecialVariableOffset = 28423000;
+
+    /// <summary>Furniture.GetAdditionalTilePropertyRadius doing a dict lookup is big perf hit for some odd reason</summary>
     private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
     {
+        if (__instance.SpecialVariable >= MMAP_SpecialVariableOffset)
+        {
+            __result = __instance.SpecialVariable - MMAP_SpecialVariableOffset;
+            return;
+        }
         if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
         __result = Math.Max(0, fpData.AdditionalTilePropertyRadius);
+        __instance.SpecialVariable = MMAP_SpecialVariableOffset + __result;
     }
 
     private static void Furniture_IntersectsForCollision_Postfix(
