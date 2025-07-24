@@ -18,6 +18,7 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to building draw layers, but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used, and furniture draw in menu do not show draw layers. |
 | `DrawShadow` | bool | false | Because furniture do not have draw shadows in the first place, this field is repurposed to mean "when there are draw layers, do not draw the base furniture sprite". |
 | `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
+| `CustomFields["TV"]` | string | _empty_ | Sets this furniture as a TV with screen defined as `[posX] [posY] [scale]`. |
 
 #### TileProperties
 

@@ -32,7 +32,7 @@ public class ModEntry : Mod
 
         helper.ConsoleCommands.Add(
             "mmap.chaired",
-            "Spawn a chair at every tile in the current map for performance testing, do not use in normal gameplay",
+            "Spawn stuff at every tile in the current map for performance testing, DO NOT USE IN NORMAL GAMEPLAY",
             ConsoleChaired
         );
 
@@ -80,7 +80,7 @@ public class ModEntry : Mod
         {
             if (location.isTilePlaceable(pos))
             {
-                location.furniture.Add(ItemRegistry.Create<Furniture>("PlasticLawnChair").SetPlacement(pos));
+                location.furniture.Add(ItemRegistry.Create<Furniture>(arg2[0]).SetPlacement(pos));
             }
         }
     }
