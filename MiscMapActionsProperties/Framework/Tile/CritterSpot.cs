@@ -41,6 +41,7 @@ internal enum SupportedCritter
 internal static class CritterSpot
 {
     internal const string TileProp_Critter = $"{ModEntry.ModId}_Critter";
+    internal const string Action_CritterRandom = $"{ModEntry.ModId}_CritterRandom";
     private static readonly TileDataCache<string[]> critterSpotsCache = CommonPatch.GetSimpleTileDataCache(
         [TileProp_Critter],
         "Back"
@@ -61,6 +62,7 @@ internal static class CritterSpot
         ModEntry.help.Events.Player.Warped += OnWarped;
         CommonPatch.RegisterTileAndTouch(TileProp_Critter, TileAndTouchCritter);
         TriggerActionManager.RegisterAction(TileProp_Critter, TriggerActionCritter);
+        TriggerActionManager.RegisterAction(Action_CritterRandom, TriggerActionCritterRandom);
 
         critterSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
@@ -163,6 +165,25 @@ internal static class CritterSpot
         if (!ArgUtility.TryGetPoint(args, 1, out Point position, out error, "Point position"))
             return false;
         return SpawnCritter(Game1.currentLocation, position, args, 3, out error).Count > 0;
+    }
+
+    private static bool TriggerActionCritterRandom(string[] args, TriggerActionContext context, out string error)
+    {
+        if (!ArgUtility.TryGetFloat(args, 1, out float chance, out error, "float name"))
+            return false;
+        if (Game1.currentLocation?.Map == null)
+        {
+            error = "Current location/map is null";
+            return false;
+        }
+
+        bool res = false;
+        foreach ((Vector2 pos, _) in CommonPatch.IterateMapTiles(Game1.currentLocation.Map, "Back"))
+        {
+            if (Random.Shared.NextSingle() <= chance)
+                res = SpawnCritter(Game1.currentLocation, pos.ToPoint(), args, 2, out error).Count > 0 || res;
+        }
+        return res;
     }
 
     private static bool TileAndTouchCritter(GameLocation location, string[] args, Farmer farmer, Point source)
