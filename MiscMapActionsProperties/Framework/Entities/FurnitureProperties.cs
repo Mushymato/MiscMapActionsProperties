@@ -30,18 +30,434 @@ public enum FurnitureDrawMode
 /// </summary>
 internal static class FurnitureProperties
 {
-    internal const float LAYER_OFFSET = 1E-06f;
+    internal static void Register()
+    {
+        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
+        ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+        ModEntry.help.Events.Player.Warped += OnWarped;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
+
+        // property patches
+        Patch_Properties();
+
+        // these should be removed in 1.6.16
+        Patch_Obsolete1616();
+
+        // drawing patches
+        Patch_Drawing();
+    }
+
+    #region properties
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
+    private static readonly PerScreen<Dictionary<string, FurnitureDLState?>> dlExtInfoCacheImpl = new();
+    private static Dictionary<string, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+
+    /// <summary>Furniture property data (secretly building data)</summary>
+    internal static Dictionary<string, BuildingData> FPData
+    {
+        get
+        {
+            _fpData ??= Game1.content.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperties);
+            return _fpData;
+        }
+    }
+
+    private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
+    {
+        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
+        {
+            _fpData = null;
+            DlExtInfoCache.Clear();
+            DLShakeCache.Clear();
+        }
+    }
+
+    private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
+    {
+        if (e.Name.IsEquivalentTo(Asset_FurnitureProperties))
+            e.LoadFrom(() => new Dictionary<string, BuildingData>(), AssetLoadPriority.Exclusive);
+    }
+
+    private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
+    {
+        DlExtInfoCache.Clear();
+    }
+
+    private static void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        {
+            dLExtInfo.RecheckRands();
+        }
+    }
+
+    private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
+    {
+        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        {
+            dLExtInfo.TimeChanged();
+        }
+    }
+
+    private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
+    {
+        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        {
+            dLExtInfo.UpdateTicked();
+        }
+        foreach ((_, ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes) in DLShakeCache)
+        {
+            foreach ((_, DLShakeState shake) in dlShakes)
+            {
+                shake.UpdateTicked();
+            }
+        }
+    }
+
+    private static void Patch_Properties()
+    {
+        try
+        {
+            foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
+            {
+                if (
+                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.DoesTileHaveProperty))
+                    is MethodInfo origMethod1
+                )
+                {
+                    ModEntry.harm.Patch(
+                        original: origMethod1,
+                        postfix: new HarmonyMethod(
+                            typeof(FurnitureProperties),
+                            nameof(Furniture_DoesTileHaveProperty_Postfix)
+                        )
+                    );
+                }
+                if (
+                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
+                    is MethodInfo origMethod2
+                )
+                {
+                    ModEntry.harm.Patch(
+                        original: origMethod2,
+                        postfix: new HarmonyMethod(
+                            typeof(FurnitureProperties),
+                            nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+                        )
+                    );
+                }
+            }
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_IntersectsForCollision_Postfix)
+                )
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.AllowPlacementOnThisTile)),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_AllowPlacementOnThisTile_Postfix)
+                )
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static void Furniture_AllowPlacementOnThisTile_Postfix(
+        Furniture __instance,
+        int tile_x,
+        int tile_y,
+        ref bool __result
+    )
+    {
+        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        if (fpData.CollisionMap == null)
+            return;
+        __result = fpData.IsTilePassable(
+            (int)(tile_x - __instance.TileLocation.X),
+            (int)(tile_y - __instance.TileLocation.Y)
+        );
+    }
+
+    private static void Furniture_DoesTileHaveProperty_Postfix(
+        Furniture __instance,
+        int tile_x,
+        int tile_y,
+        string property_name,
+        string layer_name,
+        ref string property_value,
+        ref bool __result
+    )
+    {
+        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        __result = fpData.HasPropertyAtTile(
+            (int)(tile_x - __instance.TileLocation.X),
+            (int)(tile_y - __instance.TileLocation.Y),
+            property_name,
+            layer_name,
+            ref property_value
+        );
+    }
+
+    public const int MMAP_SpecialVariableOffset = 28423000;
+
+    /// <summary>Furniture.GetAdditionalTilePropertyRadius doing a dict lookup is big perf hit for some odd reason</summary>
+    private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
+    {
+        if (__instance.SpecialVariable >= MMAP_SpecialVariableOffset)
+        {
+            __result = __instance.SpecialVariable - MMAP_SpecialVariableOffset;
+            return;
+        }
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        __result = Math.Max(0, fpData.AdditionalTilePropertyRadius);
+        __instance.SpecialVariable = MMAP_SpecialVariableOffset + __result;
+    }
+
+    private static void Furniture_IntersectsForCollision_Postfix(
+        Furniture __instance,
+        Rectangle rect,
+        ref bool __result
+    )
+    {
+        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+        if (fpData.CollisionMap == null)
+            return;
+
+        fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
+        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
+
+        for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
+        {
+            for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
+            {
+                if (
+                    bounds.Contains(j, i)
+                    && !fpData.IsTilePassable(
+                        (int)(j - __instance.TileLocation.X),
+                        (int)(i - __instance.TileLocation.Y)
+                    )
+                )
+                {
+                    return;
+                }
+            }
+        }
+        __result = false;
+
+        if (!Game1.player.isMoving())
+            return;
+
+        Rectangle furniBounds =
+            new(
+                bounds.X * Game1.tileSize,
+                bounds.Y * Game1.tileSize,
+                bounds.Width * Game1.tileSize,
+                bounds.Height * Game1.tileSize
+            );
+        Rectangle playerBounds = Game1.player.GetBoundingBox();
+        if (
+            playerBounds.Intersects(furniBounds)
+            && DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
+            && state != null
+        )
+        {
+            // tries to shake draw layers // character.speed + character.addedSpeed
+            float speed = Game1.player.getMovementSpeed();
+
+            bool left = playerBounds.Center.X > furniBounds.Center.X;
+            ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes = DLShakeCache.GetValue(
+                __instance,
+                CreateDLShakeStates
+            );
+            if (!dlShakes.Any())
+                return;
+            foreach ((DLExtInfo dlExt, DLShakeState dlShake) in dlShakes)
+            {
+                dlShake.StartShaking(speed, left, dlExt.ShakeRotate.Value);
+            }
+        }
+    }
+    #endregion
+
+    #region obsolete_1.6.16
+    private static void Patch_Obsolete1616()
+    {
+        try
+        {
+            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
+            );
+            // custom TV is a feature to be eaten by 1.6.16 but i'll add it here for now
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetFurnitureInstance)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetFurnitureInstance_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenPosition)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenPosition_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenSizeModifier)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenSizeModifier_Postfix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static bool Furniture_loadDescription_Prefix(Furniture __instance, ref string __result)
+    {
+        if (
+            FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData)
+            && !string.IsNullOrEmpty(fpData.Description)
+            && TokenParser.ParseText(fpData.Description) is string furniDesc
+        )
+        {
+            __result = Game1.parseText(furniDesc, Game1.smallFont, 320);
+            return false;
+        }
+        return true;
+    }
+
+    internal const string CustomFields_TV = "TV";
+
+    private record TVScreenShape(float PosX, float PosY, float Scale);
+
+    private static readonly ConditionalWeakTable<TV, TVScreenShape?> TVScreens = [];
+
+    private static void Furniture_GetFurnitureInstance_Postfix(string itemId, ref Furniture __result)
+    {
+        if (__result is TV)
+            return;
+        if (!FPData.TryGetValue(__result.ItemId, out BuildingData? fpData))
+            return;
+        if (fpData.CustomFields?.ContainsKey(CustomFields_TV) ?? false)
+        {
+            __result = new TV(itemId, __result.TileLocation);
+            return;
+        }
+    }
+
+    private static TVScreenShape? GetTVScreenShape(TV tv)
+    {
+        if (
+            FPData.TryGetValue(tv.ItemId, out BuildingData? fpData)
+            && (fpData.CustomFields?.TryGetValue(CustomFields_TV, out string? tvRect) ?? false)
+        )
+        {
+            string[] args = ArgUtility.SplitBySpace(tvRect);
+            if (
+                !ArgUtility.TryGetVector2(args, 0, out Vector2 pos, out string error, name: "Vector2 pos")
+                || !ArgUtility.TryGetFloat(args, 2, out float scale, out error, name: "float scale")
+            )
+            {
+                ModEntry.Log(error, LogLevel.Error);
+                return null;
+            }
+            return new(pos.X, pos.Y, scale);
+        }
+        return null;
+    }
+
+    public static void TV_getScreenPosition_Postfix(TV __instance, ref Vector2 __result)
+    {
+        if (TVScreens.GetValue(__instance, GetTVScreenShape) is TVScreenShape shape)
+        {
+            __result = new(__instance.boundingBox.X + shape.PosX, __instance.boundingBox.Y + shape.PosY);
+        }
+    }
+
+    public static void TV_getScreenSizeModifier_Postfix(TV __instance, ref float __result)
+    {
+        if (TVScreens.GetValue(__instance, GetTVScreenShape) is TVScreenShape shape)
+        {
+            __result = shape.Scale;
+        }
+    }
+    #endregion
+
+    #region drawing
+    internal const float LAYER_OFFSET = 1E-06f;
     private static FurnitureDrawMode FurnitureDraw = FurnitureDrawMode.None;
     private static float FurnitureLayerDepthOffset = 0f;
-
     private static float DrawFurnitureLayerDepthMax = 0f;
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
     private static readonly MethodInfo? Furniture_getScaleSize = AccessTools.DeclaredMethod(
         typeof(Furniture),
         "getScaleSize"
     );
+
+    private static float TryGetScaleSize(Furniture furniture)
+    {
+        if (Furniture_getScaleSize?.Invoke(furniture, null) is float scaleSize)
+            return scaleSize;
+        return 1f;
+    }
+
+    private static void Patch_Drawing()
+    {
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
+                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Transpiler))
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
+                transpiler: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(Furniture_drawAtNonTileSpot_Transpiler)
+                )
+                {
+                    priority = Priority.Last,
+                },
+                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
+        }
+    }
 
     private sealed record FurnitureDLState(
         BuildingData FpData,
@@ -186,9 +602,6 @@ internal static class FurnitureProperties
         }
     }
 
-    private static readonly PerScreen<Dictionary<string, FurnitureDLState?>> dlExtInfoCacheImpl = new();
-    private static Dictionary<string, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
-
     internal static IEnumerable<DLExtInfo> DLStatesIter
     {
         get
@@ -208,204 +621,11 @@ internal static class FurnitureProperties
             }
         }
     }
-
-    internal static ConditionalWeakTable<DLExtInfo, DLShakeState> CreateDLShakeStates(Furniture furniture)
-    {
-        ConditionalWeakTable<DLExtInfo, DLShakeState> shakeStates = [];
-        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state) && state != null)
-        {
-            foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
-            {
-                if (dLExtInfo is not null && dLExtInfo.ShakeRotate.Value != 0)
-                {
-                    shakeStates.GetValue(dLExtInfo, (dLExtInfo) => new());
-                }
-            }
-        }
-        return shakeStates;
-    }
-
     private static readonly PerScreen<
         ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>>
     > dlShakeCacheImpl = new();
     private static ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>> DLShakeCache =>
         dlShakeCacheImpl.Value ??= [];
-
-    /// <summary>Furniture tile property data (secretly building data)</summary>
-    internal static Dictionary<string, BuildingData> FPData
-    {
-        get
-        {
-            _fpData ??= Game1.content.Load<Dictionary<string, BuildingData>>(Asset_FurnitureProperties);
-            return _fpData;
-        }
-    }
-
-    private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
-    {
-        if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FurnitureProperties)))
-        {
-            _fpData = null;
-            DlExtInfoCache.Clear();
-            DLShakeCache.Clear();
-        }
-    }
-
-    private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
-    {
-        if (e.Name.IsEquivalentTo(Asset_FurnitureProperties))
-            e.LoadFrom(() => new Dictionary<string, BuildingData>(), AssetLoadPriority.Exclusive);
-    }
-
-    internal static Rectangle AdjustSourceRectToSeason(BuildingData fpData, GameLocation location, Rectangle sourceRect)
-    {
-        if (fpData.SeasonOffset != Point.Zero)
-        {
-            int seasonIndexForLocation = Game1.GetSeasonIndexForLocation(location);
-            sourceRect.X += fpData.SeasonOffset.X * seasonIndexForLocation;
-            sourceRect.Y += fpData.SeasonOffset.Y * seasonIndexForLocation;
-        }
-        return sourceRect;
-    }
-
-    internal static void Register()
-    {
-        ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
-        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
-        ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
-        ModEntry.help.Events.Player.Warped += OnWarped;
-        ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
-        try
-        {
-            foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
-            {
-                if (
-                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.DoesTileHaveProperty))
-                    is MethodInfo origMethod1
-                )
-                {
-                    ModEntry.harm.Patch(
-                        original: origMethod1,
-                        postfix: new HarmonyMethod(
-                            typeof(FurnitureProperties),
-                            nameof(Furniture_DoesTileHaveProperty_Postfix)
-                        )
-                    );
-                }
-                if (
-                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
-                    is MethodInfo origMethod2
-                )
-                {
-                    ModEntry.harm.Patch(
-                        original: origMethod2,
-                        postfix: new HarmonyMethod(
-                            typeof(FurnitureProperties),
-                            nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
-                        )
-                    );
-                }
-            }
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_IntersectsForCollision_Postfix)
-                )
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.AllowPlacementOnThisTile)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_AllowPlacementOnThisTile_Postfix)
-                )
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
-        }
-
-        #region obsolete_1.6.16
-        // these should be removed in 1.6.16
-        try
-        {
-            // This patch targets a function earlier than spacecore (which patches at Furniture.getDescription), so spacecore description will override it.
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), "loadDescription"),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_loadDescription_Prefix))
-            );
-            // custom TV is a feature to be eaten by 1.6.16 but i'll add it here for now
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetFurnitureInstance)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetFurnitureInstance_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenPosition)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenPosition_Postfix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(TV), nameof(TV.getScreenSizeModifier)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TV_getScreenSizeModifier_Postfix))
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
-        }
-        #endregion
-
-        try
-        {
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.draw)),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Prefix)),
-                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Transpiler))
-                {
-                    priority = Priority.Last,
-                },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
-                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Prefix)),
-                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Transpiler))
-                {
-                    priority = Priority.Last,
-                },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
-                transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Transpiler))
-                {
-                    priority = Priority.Last,
-                },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
-                transpiler: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_drawAtNonTileSpot_Transpiler)
-                )
-                {
-                    priority = Priority.Last,
-                },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureProperties Draw:\n{err}", LogLevel.Error);
-        }
-    }
-
-    private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
-    {
-        DlExtInfoCache.Clear();
-    }
 
     private static FurnitureDLState? TryAddFurnitureToDLCache(Furniture furniture, BuildingData fpData)
     {
@@ -433,57 +653,34 @@ internal static class FurnitureProperties
         return state;
     }
 
-    private static void OnWarped(object? sender, WarpedEventArgs e)
+    private static ConditionalWeakTable<DLExtInfo, DLShakeState> CreateDLShakeStates(Furniture furniture)
     {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        ConditionalWeakTable<DLExtInfo, DLShakeState> shakeStates = [];
+        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state) && state != null)
         {
-            dLExtInfo.RecheckRands();
-        }
-    }
-
-    private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
-    {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
-        {
-            dLExtInfo.TimeChanged();
-        }
-    }
-
-    private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
-    {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
-        {
-            dLExtInfo.UpdateTicked();
-        }
-        foreach ((_, ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes) in DLShakeCache)
-        {
-            foreach ((_, DLShakeState shake) in dlShakes)
+            foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
             {
-                shake.UpdateTicked();
+                if (dLExtInfo is not null && dLExtInfo.ShakeRotate.Value != 0)
+                {
+                    shakeStates.GetValue(dLExtInfo, (dLExtInfo) => new());
+                }
             }
         }
+        return shakeStates;
     }
 
-    private static void BedFurniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
+    private static Rectangle AdjustSourceRectToSeason(BuildingData fpData, GameLocation location, Rectangle sourceRect)
     {
-        if (Furniture.isDrawingLocationFurniture)
-            Furniture_draw_Prefix(__instance, ref __state);
+        if (fpData.SeasonOffset != Point.Zero)
+        {
+            int seasonIndexForLocation = Game1.GetSeasonIndexForLocation(location);
+            sourceRect.X += fpData.SeasonOffset.X * seasonIndexForLocation;
+            sourceRect.Y += fpData.SeasonOffset.Y * seasonIndexForLocation;
+        }
+        return sourceRect;
     }
 
-    private static void BedFurniture_draw_Finalizer(
-        Furniture __instance,
-        Netcode.NetVector2 ___drawPosition,
-        SpriteBatch spriteBatch,
-        int x,
-        int y,
-        float alpha,
-        ref (Rectangle?, FurnitureDLState?)? __state
-    )
-    {
-        if (Furniture.isDrawingLocationFurniture)
-            Furniture_draw_Finalizer(__instance, ___drawPosition, spriteBatch, x, y, alpha, ref __state);
-    }
-
+    // general furniture draw patch
     private static void Furniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
     {
         __state = null;
@@ -644,6 +841,27 @@ internal static class FurnitureProperties
         return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.draw");
     }
 
+    // bed furniture draw patch
+    private static void BedFurniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
+    {
+        if (Furniture.isDrawingLocationFurniture)
+            Furniture_draw_Prefix(__instance, ref __state);
+    }
+
+    private static void BedFurniture_draw_Finalizer(
+        Furniture __instance,
+        Netcode.NetVector2 ___drawPosition,
+        SpriteBatch spriteBatch,
+        int x,
+        int y,
+        float alpha,
+        ref (Rectangle?, FurnitureDLState?)? __state
+    )
+    {
+        if (Furniture.isDrawingLocationFurniture)
+            Furniture_draw_Finalizer(__instance, ___drawPosition, spriteBatch, x, y, alpha, ref __state);
+    }
+
     private static IEnumerable<CodeInstruction> BedFurniture_draw_Transpiler(
         IEnumerable<CodeInstruction> instructions,
         ILGenerator generator
@@ -652,20 +870,13 @@ internal static class FurnitureProperties
         return Furniture_draw_Transpiler_Inner(instructions, generator, "BedFurniture.draw");
     }
 
+    // draw in menu patch
     private static IEnumerable<CodeInstruction> Furniture_drawInMenu_Transpiler(
         IEnumerable<CodeInstruction> instructions,
         ILGenerator generator
     )
     {
         return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.drawInMenu");
-    }
-
-    private static IEnumerable<CodeInstruction> Furniture_drawAtNonTileSpot_Transpiler(
-        IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator
-    )
-    {
-        return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.drawAtNonTileSpot");
     }
 
     private static void Furniture_drawInMenu_Finalizer(
@@ -695,11 +906,13 @@ internal static class FurnitureProperties
         );
     }
 
-    private static float TryGetScaleSize(Furniture furniture)
+    // draw at non tile spot patch
+    private static IEnumerable<CodeInstruction> Furniture_drawAtNonTileSpot_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
     {
-        if (Furniture_getScaleSize?.Invoke(furniture, null) is float scaleSize)
-            return scaleSize;
-        return 1f;
+        return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.drawAtNonTileSpot");
     }
 
     private static void Furniture_drawAtNonTileSpot_Finalizer(
@@ -727,196 +940,5 @@ internal static class FurnitureProperties
             drawSource: FurnitureDLState.DrawSource.NonTile
         );
     }
-
-    #region obsolete_1.6.16
-    private static bool Furniture_loadDescription_Prefix(Furniture __instance, ref string __result)
-    {
-        if (
-            FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData)
-            && !string.IsNullOrEmpty(fpData.Description)
-            && TokenParser.ParseText(fpData.Description) is string furniDesc
-        )
-        {
-            __result = Game1.parseText(furniDesc, Game1.smallFont, 320);
-            return false;
-        }
-        return true;
-    }
-
-    internal const string CustomFields_TV = "TV";
-
-    private record TVScreenShape(float PosX, float PosY, float Scale);
-
-    private static readonly ConditionalWeakTable<TV, TVScreenShape?> TVScreens = [];
-
-    private static void Furniture_GetFurnitureInstance_Postfix(string itemId, ref Furniture __result)
-    {
-        if (__result is TV)
-            return;
-        if (!FPData.TryGetValue(__result.ItemId, out BuildingData? fpData))
-            return;
-        if (fpData.CustomFields?.ContainsKey(CustomFields_TV) ?? false)
-        {
-            __result = new TV(itemId, __result.TileLocation);
-            return;
-        }
-    }
-
-    private static TVScreenShape? GetTVScreenShape(TV tv)
-    {
-        if (
-            FPData.TryGetValue(tv.ItemId, out BuildingData? fpData)
-            && (fpData.CustomFields?.TryGetValue(CustomFields_TV, out string? tvRect) ?? false)
-        )
-        {
-            string[] args = ArgUtility.SplitBySpace(tvRect);
-            if (
-                !ArgUtility.TryGetVector2(args, 0, out Vector2 pos, out string error, name: "Vector2 pos")
-                || !ArgUtility.TryGetFloat(args, 2, out float scale, out error, name: "float scale")
-            )
-            {
-                ModEntry.Log(error, LogLevel.Error);
-                return null;
-            }
-            return new(pos.X, pos.Y, scale);
-        }
-        return null;
-    }
-
-    public static void TV_getScreenPosition_Postfix(TV __instance, ref Vector2 __result)
-    {
-        if (TVScreens.GetValue(__instance, GetTVScreenShape) is TVScreenShape shape)
-        {
-            __result = new(__instance.boundingBox.X + shape.PosX, __instance.boundingBox.Y + shape.PosY);
-        }
-    }
-
-    public static void TV_getScreenSizeModifier_Postfix(TV __instance, ref float __result)
-    {
-        if (TVScreens.GetValue(__instance, GetTVScreenShape) is TVScreenShape shape)
-        {
-            __result = shape.Scale;
-        }
-    }
     #endregion
-
-    public const int MMAP_SpecialVariableOffset = 28423000;
-
-    /// <summary>Furniture.GetAdditionalTilePropertyRadius doing a dict lookup is big perf hit for some odd reason</summary>
-    private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
-    {
-        if (__instance.SpecialVariable >= MMAP_SpecialVariableOffset)
-        {
-            __result = __instance.SpecialVariable - MMAP_SpecialVariableOffset;
-            return;
-        }
-        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-            return;
-        __result = Math.Max(0, fpData.AdditionalTilePropertyRadius);
-        __instance.SpecialVariable = MMAP_SpecialVariableOffset + __result;
-    }
-
-    private static void Furniture_IntersectsForCollision_Postfix(
-        Furniture __instance,
-        Rectangle rect,
-        ref bool __result
-    )
-    {
-        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-            return;
-        if (fpData.CollisionMap == null)
-            return;
-
-        fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
-        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
-
-        for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
-        {
-            for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
-            {
-                if (
-                    bounds.Contains(j, i)
-                    && !fpData.IsTilePassable(
-                        (int)(j - __instance.TileLocation.X),
-                        (int)(i - __instance.TileLocation.Y)
-                    )
-                )
-                {
-                    return;
-                }
-            }
-        }
-        __result = false;
-
-        if (!Game1.player.isMoving())
-            return;
-
-        Rectangle furniBounds =
-            new(
-                bounds.X * Game1.tileSize,
-                bounds.Y * Game1.tileSize,
-                bounds.Width * Game1.tileSize,
-                bounds.Height * Game1.tileSize
-            );
-        Rectangle playerBounds = Game1.player.GetBoundingBox();
-        if (
-            playerBounds.Intersects(furniBounds)
-            && DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
-            && state != null
-        )
-        {
-            // tries to shake draw layers // character.speed + character.addedSpeed
-            float speed = Game1.player.getMovementSpeed();
-
-            bool left = playerBounds.Center.X > furniBounds.Center.X;
-            ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes = DLShakeCache.GetValue(
-                __instance,
-                CreateDLShakeStates
-            );
-            if (!dlShakes.Any())
-                return;
-            foreach ((DLExtInfo dlExt, DLShakeState dlShake) in dlShakes)
-            {
-                dlShake.StartShaking(speed, left, dlExt.ShakeRotate.Value);
-            }
-        }
-    }
-
-    private static void Furniture_AllowPlacementOnThisTile_Postfix(
-        Furniture __instance,
-        int tile_x,
-        int tile_y,
-        ref bool __result
-    )
-    {
-        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-            return;
-        if (fpData.CollisionMap == null)
-            return;
-        __result = fpData.IsTilePassable(
-            (int)(tile_x - __instance.TileLocation.X),
-            (int)(tile_y - __instance.TileLocation.Y)
-        );
-    }
-
-    private static void Furniture_DoesTileHaveProperty_Postfix(
-        Furniture __instance,
-        int tile_x,
-        int tile_y,
-        string property_name,
-        string layer_name,
-        ref string property_value,
-        ref bool __result
-    )
-    {
-        if (__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-            return;
-        __result = fpData.HasPropertyAtTile(
-            (int)(tile_x - __instance.TileLocation.X),
-            (int)(tile_y - __instance.TileLocation.Y),
-            property_name,
-            layer_name,
-            ref property_value
-        );
-    }
 }
