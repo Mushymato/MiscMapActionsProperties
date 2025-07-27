@@ -75,6 +75,7 @@ internal static class FurnitureProperties
             _fpData = null;
             DlExtInfoCache.Clear();
             DLShakeCache.Clear();
+            SeatPositionCache.Clear();
         }
     }
 
@@ -172,7 +173,150 @@ internal static class FurnitureProperties
         {
             ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
         }
+        try
+        {
+            // seats
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetSeatCapacity)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetSeatCapacity_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetSeatPositions)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetSeatPositions_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetSittingDirection)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetSittingDirection_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Farmer), nameof(Farmer.ShowSitting)),
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Farmer_ShowSitting_Postfix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Seats:\n{err}", LogLevel.Error);
+        }
     }
+
+    #region seats
+    internal sealed record FurnitureSeat(Point Pos, float XOffset, float YOffset, int Direction);
+
+    private static readonly ConditionalWeakTable<Furniture, List<FurnitureSeat>?> SeatPositionCache = [];
+
+    private static List<FurnitureSeat>? CreateSeatPositions(Furniture furniture)
+    {
+        if (!FPData.TryGetValue(furniture.ItemId, out BuildingData? fpData) || !(fpData.ActionTiles?.Any() ?? false))
+            return null;
+        List<FurnitureSeat> seatPositions = [];
+        string error;
+        foreach (BuildingActionTile actionTile in fpData.ActionTiles)
+        {
+            string[] args = ArgUtility.SplitBySpace(actionTile.Action);
+            if (!ArgUtility.TryGet(args, 0, out string value, out error, allowBlank: false, name: "string Action"))
+            {
+                ModEntry.Log(error, LogLevel.Error);
+                continue;
+            }
+            if (value == "Seat")
+            {
+                if (
+                    !ArgUtility.TryGetOptionalFloat(
+                        args,
+                        1,
+                        out float xOffset,
+                        out error,
+                        defaultValue: 0,
+                        name: "float yOffset"
+                    )
+                    || !ArgUtility.TryGetOptionalFloat(
+                        args,
+                        2,
+                        out float yOffset,
+                        out error,
+                        defaultValue: 0,
+                        name: "float yOffset"
+                    )
+                    || !ArgUtility.TryGetOptionalInt(
+                        args,
+                        3,
+                        out int direction,
+                        out error,
+                        defaultValue: 0,
+                        name: "int direction"
+                    )
+                )
+                {
+                    ModEntry.Log(error, LogLevel.Error);
+                    continue;
+                }
+                seatPositions.Add(new(actionTile.Tile, xOffset, yOffset, direction));
+            }
+        }
+        return seatPositions;
+    }
+
+    private static void Furniture_GetSeatCapacity_Postfix(Furniture __instance, ref int __result)
+    {
+        if (SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions)
+            return;
+        __result = seatPositions.Count;
+    }
+
+    private static void Furniture_GetSeatPositions_Postfix(Furniture __instance, ref List<Vector2> __result)
+    {
+        if (SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions)
+            return;
+        __result = seatPositions.Select(seat => __instance.TileLocation + seat.Pos.ToVector2()).ToList();
+    }
+
+    private static void Furniture_GetSittingDirection_Postfix(Furniture __instance, ref int __result)
+    {
+        if (
+             SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions
+            || !__instance.sittingFarmers.TryGetValue(Game1.player.UniqueMultiplayerID, out int seatIdx)
+            || seatIdx >= seatPositions.Count
+        )
+            return;
+
+        FurnitureSeat seatInfo = seatPositions[seatIdx];
+        int direction = seatInfo.Direction;
+        if (direction > 0 && direction < 4)
+        {
+            __result = direction;
+        }
+        else if (direction == -1)
+        {
+            __result = Game1.player.FacingDirection;
+        }
+    }
+
+    private static void Farmer_ShowSitting_Postfix(Farmer __instance)
+    {
+        if (
+            !__instance.IsSitting()
+            || __instance.sittingFurniture is not Furniture seatFurniture
+            || SeatPositionCache.GetValue(seatFurniture, CreateSeatPositions) is not List<FurnitureSeat> seatPositions
+            || !seatFurniture.sittingFarmers.TryGetValue(__instance.UniqueMultiplayerID, out int seatIdx)
+            || seatIdx >= seatPositions.Count
+        )
+        {
+            return;
+        }
+        FurnitureSeat seatInfo = seatPositions[seatIdx];
+        if (__instance.yJumpOffset != 0)
+        {
+            __instance.xOffset = -seatInfo.XOffset;
+            __instance.yOffset = -seatInfo.YOffset;
+        }
+        else
+        {
+            __instance.xOffset -= seatInfo.XOffset;
+            __instance.yOffset -= seatInfo.YOffset;
+        }
+    }
+
+    #endregion
 
     private static void Furniture_AllowPlacementOnThisTile_Postfix(
         Furniture __instance,
@@ -686,7 +830,10 @@ internal static class FurnitureProperties
     }
 
     // general furniture draw patch
-    private static void Furniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
+    private static void Furniture_draw_Prefix(
+        Furniture __instance,
+        ref (FurnitureDLState?, FurnitureDrawMode, Rectangle?)? __state
+    )
     {
         __state = null;
         FurnitureLayerDepthOffset = 0;
@@ -695,6 +842,8 @@ internal static class FurnitureProperties
 
         Rectangle? oldSourceRect = null;
         FurnitureDLState? dlState;
+        FurnitureDrawMode prevDraw = FurnitureDraw;
+
         FurnitureDraw |= FurnitureDrawMode.Base;
         if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
         {
@@ -702,7 +851,9 @@ internal static class FurnitureProperties
             if (!fpData.DrawShadow)
                 FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
+
         FurnitureLayerDepthOffset = fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
+
         if (fpData.DrawShadow)
         {
             oldSourceRect = __instance.sourceRect.Value;
@@ -712,7 +863,7 @@ internal static class FurnitureProperties
                 __instance.sourceRect.Value
             );
         }
-        __state = new(oldSourceRect, dlState);
+        __state = new(dlState, prevDraw, oldSourceRect);
     }
 
     private static void Furniture_draw_Finalizer(
@@ -722,16 +873,16 @@ internal static class FurnitureProperties
         int x,
         int y,
         float alpha,
-        ref (Rectangle?, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode, Rectangle?)? __state
     )
     {
         if (__state == null)
             return;
 
-        if (__state.Value.Item2 is FurnitureDLState state)
+        if (__state.Value.Item1 is FurnitureDLState state)
         {
             float layerDepth = DrawFurnitureLayerDepthMax;
-            FurnitureDraw = FurnitureDrawMode.None;
+            FurnitureDraw &= ~FurnitureDrawMode.None;
             state.Draw(
                 __instance,
                 Furniture.isDrawingLocationFurniture
@@ -747,10 +898,12 @@ internal static class FurnitureProperties
             );
         }
 
+        FurnitureDraw = __state.Value.Item2;
+
         DrawFurnitureLayerDepthMax = 0;
         FurnitureLayerDepthOffset = 0;
 
-        if (__state.Value.Item1 is Rectangle sourceRect)
+        if (__state.Value.Item3 is Rectangle sourceRect)
             __instance.sourceRect.Value = sourceRect;
     }
 
@@ -776,7 +929,7 @@ internal static class FurnitureProperties
             if (!mode.HasFlag(FurnitureDrawMode.Base))
                 return;
             if (Furniture.isDrawingLocationFurniture)
-                overrideLayerDepth += FurnitureLayerDepthOffset;
+                overrideLayerDepth -= FurnitureLayerDepthOffset;
         }
         b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, overrideLayerDepth);
     }
@@ -846,7 +999,10 @@ internal static class FurnitureProperties
     }
 
     // bed furniture draw patch
-    private static void BedFurniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
+    private static void BedFurniture_draw_Prefix(
+        Furniture __instance,
+        ref (FurnitureDLState?, FurnitureDrawMode, Rectangle?)? __state
+    )
     {
         if (Furniture.isDrawingLocationFurniture)
             Furniture_draw_Prefix(__instance, ref __state);
@@ -859,7 +1015,7 @@ internal static class FurnitureProperties
         int x,
         int y,
         float alpha,
-        ref (Rectangle?, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode, Rectangle?)? __state
     )
     {
         if (Furniture.isDrawingLocationFurniture)
@@ -877,7 +1033,7 @@ internal static class FurnitureProperties
     // draw in menu patch
     private static void Furniture_drawInMenu_Prefix(
         Furniture __instance,
-        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode)? __state
     )
     {
         __state = null;
@@ -887,6 +1043,8 @@ internal static class FurnitureProperties
         FurnitureDrawMode prevDraw = FurnitureDraw;
         FurnitureDLState? dlState;
 
+        if (FurnitureDraw == FurnitureDrawMode.None)
+            FurnitureDraw = FurnitureDrawMode.Base;
         FurnitureDraw |= FurnitureDrawMode.Menu;
         if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
         {
@@ -895,7 +1053,7 @@ internal static class FurnitureProperties
                 FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
 
-        __state = new(prevDraw, dlState);
+        __state = new(dlState, prevDraw);
     }
 
     private static IEnumerable<CodeInstruction> Furniture_drawInMenu_Transpiler(
@@ -913,14 +1071,13 @@ internal static class FurnitureProperties
         float scaleSize,
         float transparency,
         float layerDepth,
-        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode)? __state
     )
     {
         if (__state == null)
             return;
 
-        FurnitureDraw &= __state.Value.Item1;
-        __state.Value.Item2?.Draw(
+        __state.Value.Item1?.Draw(
             __instance,
             location,
             spriteBatch,
@@ -929,12 +1086,13 @@ internal static class FurnitureProperties
             TryGetScaleSize(__instance) * scaleSize,
             drawSource: FurnitureDLState.DrawSource.Menu
         );
+        FurnitureDraw &= __state.Value.Item2;
     }
 
     // draw at non tile spot patch
     private static void Furniture_drawAtNonTileSpot_Prefix(
         Furniture __instance,
-        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode)? __state
     )
     {
         __state = null;
@@ -944,6 +1102,8 @@ internal static class FurnitureProperties
         FurnitureDrawMode prevDraw = FurnitureDraw;
         FurnitureDLState? dlState;
 
+        if (FurnitureDraw == FurnitureDrawMode.None)
+            FurnitureDraw = FurnitureDrawMode.Base;
         FurnitureDraw |= FurnitureDrawMode.NonTile;
         if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
         {
@@ -952,7 +1112,7 @@ internal static class FurnitureProperties
                 FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
 
-        __state = new(prevDraw, dlState);
+        __state = new(dlState, prevDraw);
     }
 
     private static IEnumerable<CodeInstruction> Furniture_drawAtNonTileSpot_Transpiler(
@@ -969,14 +1129,13 @@ internal static class FurnitureProperties
         Vector2 location,
         float layerDepth,
         float alpha,
-        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+        ref (FurnitureDLState?, FurnitureDrawMode)? __state
     )
     {
         if (__state == null)
             return;
 
-        FurnitureDraw &= __state.Value.Item1;
-        __state.Value.Item2?.Draw(
+        __state.Value.Item1?.Draw(
             __instance,
             location,
             spriteBatch,
@@ -985,6 +1144,7 @@ internal static class FurnitureProperties
             4f,
             drawSource: FurnitureDLState.DrawSource.NonTile
         );
+        FurnitureDraw &= __state.Value.Item2;
     }
     #endregion
 }
