@@ -34,7 +34,7 @@
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.origin": "8 24",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "1",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "-1",
           }
         },
       }

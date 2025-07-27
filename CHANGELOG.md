@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] - wip
+
+### Added
+- New traction
+
+### Fixed
+- more small perf improvements
+
 ## [1.9.3]
 
 ### Fixed
@@ -31,7 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New map property mushymato.MMAP_WaterColor that allows setting the water color for a location.
 - Panorama now has BasedOn field, which will allow reuse of the top level fields from a different panorama. This only goes 1 layer deep and will refuse to resolve if the BasedOn panorama itself has a BasedOn.
 - New map property mushymato.MMAP_FarmHouseFurnitureAdd and mushymato.MMAP_FarmHouseFurnitureRemove for dealing with starting furniture
-- New trigger action mushymato.MMAP_FarmHouseUpgrade to upgrade farmhouse without going through robin
+- New traction mushymato.MMAP_FarmHouseUpgrade to upgrade farmhouse without going through robin
 - Draw layers on furniture and buildings can now shake when player passes through their collision. Does not sync in multiplayer.
 - [ExtendedTAS] add AlphaFadeFade and DrawAboveAlwaysFront
 
@@ -64,7 +72,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [1.8.6]
 
 ### Added
-- Add new EndActions and ApplyEndActionsOnForceRemove fields to allow trigger actions to be used on TAS ending.
+- Add new EndActions and ApplyEndActionsOnForceRemove fields to allow tractions to be used on TAS ending.
 
 ### Fixed
 - Fix z-fighting with furniture layerdepth somewhat.
@@ -107,7 +115,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New tile/touch action mushymato.MMAP_HoleWarpBuilding [X Y], warp that will put player into the building on this tile, for use with buildings.
 - New tile/touch action mushymato.MMAP_WarpBuildingOut [X Y], mushymato.MMAP_MagicWarpBuildingOut [X Y], mushymato.MMAP_HoleWarpBuildingOut [X Y], to add additional nonstandard exits from building interior.
 - New tile/touch action mushymato.MMAP_If GSQ ## if-case ## else-case
-- New tile/trigger action mushymato.MMAP_ToggleTAS X Y \<tasId\>+
+- New tile/traction mushymato.MMAP_ToggleTAS X Y \<tasId\>+
 - New touch action mushymato.MMAP_CountactTAS X Y \<tasId\>+
 - TAS LayerDepth calculations reworked
 - New feature mushymato.MMAP/FloorPathProperties which allows paths to get tile properties.
@@ -155,7 +163,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     - "Cellar" will now pick the player's own Cellar, though assignments don't seem to quite work in multiplayer.
 
 ### Added
-- New tile action/trigger action mushymato.MMAP_ShowBag, opens a global inventory.
+- New tile action/traction mushymato.MMAP_ShowBag, opens a global inventory.
 - New furniture properties system that allows (some) tile properties to take effect for furniture.
 
 ## [1.6.0]

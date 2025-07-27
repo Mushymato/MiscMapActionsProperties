@@ -490,7 +490,7 @@ internal static class CritterSpot
         int count
     )
     {
-        bool flipped = false;
+        bool flipped = Random.Shared.NextBool();
         if (texture != null)
         {
             string[] parts = texture.Split(":");

@@ -134,14 +134,20 @@ internal sealed record DLShakeState
         }
     }
 
-    internal void StartShaking(float speedOfCollision, bool left, FloatRange shakeRotate)
+    internal void StartShaking(float speedOfCollision, bool left, float shakeRotate)
     {
-        if (RotateMax > 0f || shakeRotate.Value == 0)
+        if (RotateMax > 0f || shakeRotate == 0)
             return;
 
+        if (shakeRotate < 0)
+        {
+            left = !left;
+            shakeRotate = Math.Abs(shakeRotate);
+        }
+
         Rotate = 0f;
-        RotateRate = (float)(Math.PI / 80f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
-        RotateMax = (float)(Math.PI / 8f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate.Value);
+        RotateRate = (float)(Math.PI / 80f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate);
+        RotateMax = (float)(Math.PI / 8f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate);
         Left = left;
     }
 }
@@ -601,7 +607,7 @@ internal static class DrawLayerExt
             )
             {
                 dlExt.ShakeState ??= new();
-                dlExt.ShakeState.StartShaking(speed, left, dlExt.ShakeRotate);
+                dlExt.ShakeState.StartShaking(speed, left, dlExt.ShakeRotate.Value);
             }
         }
     }

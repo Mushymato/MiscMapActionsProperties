@@ -877,7 +877,7 @@ internal static class FurnitureProperties
                 return;
             foreach ((DLExtInfo dlExt, DLShakeState dlShake) in dlShakes)
             {
-                dlShake.StartShaking(speed, left, dlExt.ShakeRotate);
+                dlShake.StartShaking(speed, left, dlExt.ShakeRotate.Value);
             }
         }
     }
