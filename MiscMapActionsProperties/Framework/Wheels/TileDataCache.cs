@@ -129,7 +129,10 @@ internal sealed class TileDataCache<TProps>
         {
             foreach (Furniture furniture in curLoc.furniture)
             {
-                OnFurnitureMoved(null, furniture);
+                OnFurnitureMoved(
+                    null,
+                    new(furniture, new(furniture.Location, CommonPatch.GetFurnitureTileDataBounds(furniture)))
+                );
             }
             furniturePropertyJustInvalidated.Value.Remove(uniqueName);
         }
@@ -177,17 +180,13 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-    private void OnFurnitureMoved(object? sender, Furniture furniture)
+    private void OnFurnitureMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
     {
         HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(
-            furniture.Location,
-            CommonPatch.GetFurnitureTileDataBounds(furniture),
-            ref changedPoints
-        );
+        UpdateLocationTileData(e.Placement.Location, e.Placement.Bounds, ref changedPoints);
         if (changedPoints.Any())
         {
-            PushChangedPoints(furniture.Location, changedPoints);
+            PushChangedPoints(e.Placement.Location, changedPoints);
         }
     }
 

@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
@@ -34,7 +36,9 @@ public static class CommonPatch
 
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
-    public static event EventHandler<Furniture>? Furniture_OnMoved;
+    public record OnFurnitureMovedArgs(Furniture Furniture, PlacementInfo Placement);
+
+    public static event EventHandler<OnFurnitureMovedArgs>? Furniture_OnMoved;
 
     public static event EventHandler<Flooring>? Flooring_OnMoved;
 
@@ -76,14 +80,18 @@ public static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
             );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnRemoved)),
-                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnRemoved_Prefix))
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnAdded)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnAdded_Finalizer))
-            );
+
+            // // looks like this gets inlined on mac, pain
+            // ModEntry.harm.Patch(
+            //     original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnRemoved)),
+            //     prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnRemoved_Prefix))
+            // );
+            // ModEntry.harm.Patch(
+            //     original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnAdded)),
+            //     finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnAdded_Finalizer))
+            // );
+            ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
+
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
@@ -230,15 +238,41 @@ public static class CommonPatch
         }
     }
 
-    private static void Furniture_OnAdded_Finalizer(Furniture __instance)
+    public sealed record PlacementInfo(GameLocation Location, Rectangle Bounds);
+
+    private static readonly ConditionalWeakTable<Furniture, PlacementInfo> FurnitureRectCache = [];
+
+    private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
+        new(furniture.Location, GetFurnitureTileDataBounds(furniture));
+
+    private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
     {
-        Furniture_OnMoved?.Invoke(null, __instance);
+        foreach (Furniture added in e.Added)
+        {
+            Furniture_OnMoved?.Invoke(
+                null,
+                new(added, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
+            );
+        }
+        foreach (Furniture removed in e.Removed)
+        {
+            Furniture_OnMoved?.Invoke(
+                null,
+                new(removed, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
+            );
+            FurnitureRectCache.Remove(removed);
+        }
     }
 
-    private static void Furniture_OnRemoved_Prefix(Furniture __instance)
-    {
-        Furniture_OnMoved?.Invoke(null, __instance);
-    }
+    // private static void Furniture_OnAdded_Finalizer(Furniture __instance)
+    // {
+    //     Furniture_OnMoved?.Invoke(null, __instance);
+    // }
+
+    // private static void Furniture_OnRemoved_Prefix(Furniture __instance)
+    // {
+    //     Furniture_OnMoved?.Invoke(null, __instance);
+    // }
 
     private static void Building_OnStartMove_Prefix(Building __instance)
     {

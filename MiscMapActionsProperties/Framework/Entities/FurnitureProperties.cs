@@ -273,7 +273,7 @@ internal static class FurnitureProperties
     private static void Furniture_GetSittingDirection_Postfix(Furniture __instance, ref int __result)
     {
         if (
-             SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions
+            SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions
             || !__instance.sittingFarmers.TryGetValue(Game1.player.UniqueMultiplayerID, out int seatIdx)
             || seatIdx >= seatPositions.Count
         )
