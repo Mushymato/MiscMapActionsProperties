@@ -87,38 +87,37 @@ internal static class CritterSpot
         }
     }
 
-    private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
+    private static void OnCacheChanged(object? sender, TileDataCacheChangedArgs e)
     {
-        GameLocation location = e.Item1;
-        if (location != Game1.currentLocation)
+        if (e.Location != Game1.currentLocation)
             return;
-        if (location.critters == null)
+        if (e.Location.critters == null)
         {
-            SpawnLocationCritters(location);
+            SpawnLocationCritters(e.Location);
             return;
         }
         Dictionary<Point, List<Critter>> spawnedCritters = TileDataSpawnedCritters;
-        if (e.Item2 == null)
+        if (e.Points == null)
         {
             foreach (List<Critter> critters in spawnedCritters.Values)
-                RemoveTheseCritters(location, critters);
-            SpawnLocationCritters(location);
+                RemoveTheseCritters(e.Location, critters);
+            SpawnLocationCritters(e.Location);
             return;
         }
 
-        if (critterSpotsCache.GetTileData(location) is not Dictionary<Point, string[]> cacheEntry)
+        if (critterSpotsCache.GetTileData(e.Location) is not Dictionary<Point, string[]> cacheEntry)
             return;
 
-        foreach (Point pos in e.Item2)
+        foreach (Point pos in e.Points)
         {
             if (spawnedCritters.TryGetValue(pos, out List<Critter>? critters))
             {
-                RemoveTheseCritters(location, critters);
+                RemoveTheseCritters(e.Location, critters);
                 spawnedCritters.Remove(pos);
             }
             if (cacheEntry.TryGetValue(pos, out string[]? props))
             {
-                var spawned = SpawnCritter(location, pos, props, 0, out string _);
+                var spawned = SpawnCritter(e.Location, pos, props, 0, out string _);
                 if (spawned.Count > 0)
                 {
                     spawnedCritters[pos] = spawned;

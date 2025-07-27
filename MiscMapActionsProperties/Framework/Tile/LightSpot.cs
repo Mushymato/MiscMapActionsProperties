@@ -56,20 +56,20 @@ internal static class LightSpot
         lightSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
 
-    private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
+    private static void OnCacheChanged(object? sender, TileDataCacheChangedArgs e)
     {
-        if (e.Item1 != Game1.currentLocation)
+        if (e.Location != Game1.currentLocation)
             return;
 
-        if (e.Item2 == null)
+        if (e.Points == null)
         {
             Game1.currentLightSources.RemoveWhere(kv => kv.Key.StartsWith(MapLightPrefix));
-            SpawnLocationLights(e.Item1);
+            SpawnLocationLights(e.Location);
             return;
         }
 
         string lightId;
-        foreach (Point pos in e.Item2)
+        foreach (Point pos in e.Points)
         {
             lightId = FormLightId(pos);
             Game1.currentLightSources.Remove(lightId);
@@ -81,8 +81,8 @@ internal static class LightSpot
             }
         }
 
-        UpdateLocationLightsForCache(e.Item1, e.Item2, lightSpotsCache);
-        UpdateConditionalLights(e.Item1);
+        UpdateLocationLightsForCache(e.Location, e.Points, lightSpotsCache);
+        UpdateConditionalLights(e.Location);
     }
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>

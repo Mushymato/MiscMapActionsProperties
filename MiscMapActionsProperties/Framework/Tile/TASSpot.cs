@@ -55,12 +55,12 @@ internal static class TASSpot
         tasSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
 
-    private static void OnCacheChanged(object? sender, (GameLocation, HashSet<Point>?) e)
+    private static void OnCacheChanged(object? sender, TileDataCacheChangedArgs e)
     {
-        if (e.Item1 != Game1.currentLocation)
+        if (e.Location != Game1.currentLocation)
             return;
 
-        if (e.Item2 == null || locationTASDefs.Value == null)
+        if (e.Points == null || locationTASDefs.Value == null)
         {
             if (locationTASDefs.Value != null)
             {
@@ -82,7 +82,7 @@ internal static class TASSpot
 
         Dictionary<Point, List<TASContext>> target;
         List<TASContext> newCtxList = [];
-        foreach (Point pos in e.Item2)
+        foreach (Point pos in e.Points)
         {
             if (locationTASDefs.Value.Onetime.TryGetValue(pos, out List<TASContext>? ctxList1))
             {

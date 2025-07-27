@@ -303,6 +303,7 @@ internal static class FurnitureProperties
         {
             return;
         }
+        // Note: does not sync in multiplayer rn, unclear why
         FurnitureSeat seatInfo = seatPositions[seatIdx];
         if (__instance.yJumpOffset != 0)
         {

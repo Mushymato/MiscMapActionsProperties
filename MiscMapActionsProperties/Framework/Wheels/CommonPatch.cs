@@ -19,30 +19,30 @@ public static class CommonPatch
 
     public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
 
-    public record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
+    public sealed record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
 
     public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPrefix;
     public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationFinalizer;
 
-    public record DrawAboveAlwaysFrontLayerArgs(GameLocation Location, SpriteBatch B);
+    public sealed record DrawAboveAlwaysFrontLayerArgs(GameLocation Location, SpriteBatch B);
 
-    public record ApplyMapOverrideArgs(GameLocation Location, Rectangle DestRect);
+    public sealed record ApplyMapOverrideArgs(GameLocation Location, Rectangle DestRect);
 
     public static event EventHandler<ApplyMapOverrideArgs>? GameLocation_ApplyMapOverride;
 
     public static event EventHandler<GameLocation>? GameLocation_ReloadMap;
 
-    public record OnBuildingMovedArgs(GameLocation Location, Building Building, Rectangle PreviousBounds);
+    public sealed record OnBuildingMovedArgs(GameLocation Location, Building Building, Rectangle PreviousBounds);
 
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
-    public record OnFurnitureMovedArgs(Furniture Furniture, PlacementInfo Placement);
+    public sealed record OnFurnitureMovedArgs(Furniture Furniture, PlacementInfo Placement);
 
     public static event EventHandler<OnFurnitureMovedArgs>? Furniture_OnMoved;
 
     public static event EventHandler<Flooring>? Flooring_OnMoved;
 
-    public record MapTilePropChangedArgs(GameLocation Location, Point DestPoint, string Layer);
+    public sealed record MapTilePropChangedArgs(GameLocation Location, Point DestPoint, string Layer);
 
     public static event EventHandler<MapTilePropChangedArgs>? GameLocation_MapTilePropChanged;
 

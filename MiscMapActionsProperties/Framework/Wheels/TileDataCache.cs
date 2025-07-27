@@ -11,6 +11,8 @@ using StardewValley.TerrainFeatures;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
+public sealed record TileDataCacheChangedArgs(GameLocation Location, HashSet<Point>? Points);
+
 /// <summary>
 /// CWT cache for tile data props
 /// </summary>
@@ -21,7 +23,8 @@ internal sealed class TileDataCache<TProps>
     private readonly Func<TProps?, TProps?, bool> propsValueComparer;
 
     private readonly string[] layers;
-    internal event EventHandler<(GameLocation, HashSet<Point>?)>? TileDataCacheChanged;
+
+    internal event EventHandler<TileDataCacheChangedArgs>? TileDataCacheChanged;
 
     private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new();
     private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value ??= [];
