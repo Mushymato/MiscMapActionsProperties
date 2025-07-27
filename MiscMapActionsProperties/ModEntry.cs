@@ -80,7 +80,10 @@ public class ModEntry : Mod
         {
             if (location.isTilePlaceable(pos))
             {
-                location.furniture.Add(ItemRegistry.Create<Furniture>(arg2[0]).SetPlacement(pos));
+                Furniture newFurni = ItemRegistry.Create<Furniture>(arg2[0]).SetPlacement(pos);
+                if (arg2.Length >= 2)
+                    newFurni.SetHeldObject(ItemRegistry.Create<Furniture>(arg2[1]));
+                location.furniture.Add(newFurni);
             }
         }
     }

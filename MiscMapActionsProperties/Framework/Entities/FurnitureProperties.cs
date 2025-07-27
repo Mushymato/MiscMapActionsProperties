@@ -20,9 +20,12 @@ namespace MiscMapActionsProperties.Framework.Entities;
 [Flags]
 public enum FurnitureDrawMode
 {
-    None,
-    Base,
-    Layer,
+    None = 0,
+    Base = 1 << 0,
+    Layer = 1 << 1,
+    World = 1 << 2,
+    Menu = 1 << 3,
+    NonTile = 1 << 4,
 }
 
 /// <summary>
@@ -435,6 +438,7 @@ internal static class FurnitureProperties
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Prefix)),
                 transpiler: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Transpiler))
                 {
                     priority = Priority.Last,
@@ -443,6 +447,7 @@ internal static class FurnitureProperties
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Prefix)),
                 transpiler: new HarmonyMethod(
                     typeof(FurnitureProperties),
                     nameof(Furniture_drawAtNonTileSpot_Transpiler)
@@ -532,15 +537,15 @@ internal static class FurnitureProperties
                 }
                 else
                 {
-                    layerDepth =
-                        (drawLayer.DrawInBackground ? 0f : furnitureLayerDepth)
-                        - (drawLayer.SortTileOffset * 64f / 10000f);
+                    layerDepth = drawLayer.DrawInBackground ? 0f : furnitureLayerDepth;
                     if (drawSource == DrawSource.NonTile)
                     {
+                        layerDepth = furnitureLayerDepth;
                         drawPos = drawPosition + drawLayer.DrawPosition * scaleSize;
                     }
                     else
                     {
+                        layerDepth -= drawLayer.SortTileOffset * 64f / 10000f;
                         drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
                     }
                 }
@@ -684,20 +689,18 @@ internal static class FurnitureProperties
     private static void Furniture_draw_Prefix(Furniture __instance, ref (Rectangle?, FurnitureDLState?)? __state)
     {
         __state = null;
-        FurnitureDraw = FurnitureDrawMode.None;
         FurnitureLayerDepthOffset = 0;
         if (__instance.isTemporarilyInvisible || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
 
         Rectangle? oldSourceRect = null;
-        FurnitureDLState? dlInfoCache;
-        FurnitureDraw = FurnitureDrawMode.Base;
-        if ((dlInfoCache = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        FurnitureDLState? dlState;
+        FurnitureDraw |= FurnitureDrawMode.Base;
+        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
         {
-            if (fpData.DrawShadow)
-                FurnitureDraw |= FurnitureDrawMode.Layer;
-            else
-                FurnitureDraw = FurnitureDrawMode.Layer;
+            FurnitureDraw |= FurnitureDrawMode.Layer;
+            if (!fpData.DrawShadow)
+                FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
         FurnitureLayerDepthOffset = fpData.SortTileOffset * 64f / 10000f + __instance.TileLocation.X * LAYER_OFFSET;
         if (fpData.DrawShadow)
@@ -709,7 +712,7 @@ internal static class FurnitureProperties
                 __instance.sourceRect.Value
             );
         }
-        __state = new(oldSourceRect, dlInfoCache);
+        __state = new(oldSourceRect, dlState);
     }
 
     private static void Furniture_draw_Finalizer(
@@ -722,7 +725,7 @@ internal static class FurnitureProperties
         ref (Rectangle?, FurnitureDLState?)? __state
     )
     {
-        if (FurnitureDraw == FurnitureDrawMode.None || __state == null)
+        if (__state == null)
             return;
 
         if (__state.Value.Item2 is FurnitureDLState state)
@@ -768,7 +771,8 @@ internal static class FurnitureProperties
         FurnitureDrawMode mode = FurnitureDraw;
         if (mode != FurnitureDrawMode.None)
         {
-            DrawFurnitureLayerDepthMax = Math.Max(layerDepth, DrawFurnitureLayerDepthMax);
+            if (!mode.HasFlag(FurnitureDrawMode.NonTile) && !mode.HasFlag(FurnitureDrawMode.Menu))
+                DrawFurnitureLayerDepthMax = Math.Max(layerDepth, DrawFurnitureLayerDepthMax);
             if (!mode.HasFlag(FurnitureDrawMode.Base))
                 return;
             if (Furniture.isDrawingLocationFurniture)
@@ -871,6 +875,29 @@ internal static class FurnitureProperties
     }
 
     // draw in menu patch
+    private static void Furniture_drawInMenu_Prefix(
+        Furniture __instance,
+        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+    )
+    {
+        __state = null;
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+
+        FurnitureDrawMode prevDraw = FurnitureDraw;
+        FurnitureDLState? dlState;
+
+        FurnitureDraw |= FurnitureDrawMode.Menu;
+        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        {
+            FurnitureDraw |= FurnitureDrawMode.Layer;
+            if (!fpData.DrawShadow)
+                FurnitureDraw &= ~FurnitureDrawMode.Base;
+        }
+
+        __state = new(prevDraw, dlState);
+    }
+
     private static IEnumerable<CodeInstruction> Furniture_drawInMenu_Transpiler(
         IEnumerable<CodeInstruction> instructions,
         ILGenerator generator
@@ -885,17 +912,15 @@ internal static class FurnitureProperties
         Vector2 location,
         float scaleSize,
         float transparency,
-        float layerDepth
+        float layerDepth,
+        ref (FurnitureDrawMode, FurnitureDLState?)? __state
     )
     {
-        if (!DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state))
-        {
-            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-                state = TryAddFurnitureToDLCache(__instance, fpData);
-            else
-                return;
-        }
-        state?.Draw(
+        if (__state == null)
+            return;
+
+        FurnitureDraw &= __state.Value.Item1;
+        __state.Value.Item2?.Draw(
             __instance,
             location,
             spriteBatch,
@@ -907,6 +932,29 @@ internal static class FurnitureProperties
     }
 
     // draw at non tile spot patch
+    private static void Furniture_drawAtNonTileSpot_Prefix(
+        Furniture __instance,
+        ref (FurnitureDrawMode, FurnitureDLState?)? __state
+    )
+    {
+        __state = null;
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+
+        FurnitureDrawMode prevDraw = FurnitureDraw;
+        FurnitureDLState? dlState;
+
+        FurnitureDraw |= FurnitureDrawMode.NonTile;
+        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        {
+            FurnitureDraw |= FurnitureDrawMode.Layer;
+            if (!fpData.DrawShadow)
+                FurnitureDraw &= ~FurnitureDrawMode.Base;
+        }
+
+        __state = new(prevDraw, dlState);
+    }
+
     private static IEnumerable<CodeInstruction> Furniture_drawAtNonTileSpot_Transpiler(
         IEnumerable<CodeInstruction> instructions,
         ILGenerator generator
@@ -920,17 +968,15 @@ internal static class FurnitureProperties
         SpriteBatch spriteBatch,
         Vector2 location,
         float layerDepth,
-        float alpha
+        float alpha,
+        ref (FurnitureDrawMode, FurnitureDLState?)? __state
     )
     {
-        if (!DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state))
-        {
-            if (FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
-                state = TryAddFurnitureToDLCache(__instance, fpData);
-            else
-                return;
-        }
-        state?.Draw(
+        if (__state == null)
+            return;
+
+        FurnitureDraw &= __state.Value.Item1;
+        __state.Value.Item2?.Draw(
             __instance,
             location,
             spriteBatch,
