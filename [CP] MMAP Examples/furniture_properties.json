@@ -148,6 +148,11 @@
             }
           ],
         },
+        "LightLeafyWallPanel": {
+          "CustomFields": {
+            "TV": "12 -96 4"
+          }
+        },
         "1391": {
           "DrawLayers": [
             {
