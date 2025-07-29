@@ -227,7 +227,7 @@ internal static class FurnitureProperties
                         out float xOffset,
                         out error,
                         defaultValue: 0,
-                        name: "float yOffset"
+                        name: "float xOffset"
                     )
                     || !ArgUtility.TryGetOptionalFloat(
                         args,
@@ -303,7 +303,7 @@ internal static class FurnitureProperties
         {
             return;
         }
-        // Note: does not sync in multiplayer rn, unclear why
+        // Note: does not sync in multiplayer rn because __instance.sittingFurniture does not sync
         FurnitureSeat seatInfo = seatPositions[seatIdx];
         if (__instance.yJumpOffset != 0)
         {

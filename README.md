@@ -93,6 +93,7 @@ And Game State Queries
 - mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time
 - mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time
 - mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after window lights turn off and lamp lights turn on.
+- mushymato.MMAP_WINDOW_LIGHTS: true when window lights should be on (e.g. !mushymato.MMAP_TIME_IS_LIGHTS_OFF and not raining).
 - mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time
 
 #### mushymato.MMAP_CribPosition: \<X\> \<Y\>
@@ -197,6 +198,7 @@ And Game State Queries
     - Building layer Action: spawns critter at this tile on interact
     - Back layer TouchAction: spawns critter at this tile when player walks over
     - TriggerAction: takes a coordinate as the first 2 arguments (i.e. `mushymato.MMAP_Critter <X> <Y> [\<critterType\> [type dependent args]]+`)
+- Related TriggerAction `mushymato.MMAP_CritterRandom [chance] [\<critterType\> [type dependent args]]+`: spawns critter at random tiles in current map, for usage with location changed.
 
 ### Action
 
@@ -290,10 +292,21 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - Use `velocity` to increase how far the player shoots into/out of the pool, default 8
 - Use `soundcue` to change the sound of entering/exiting the pool, by default it is `pullItemFromWater`
 
-#### mushymato.MMAP_FarmHouseUpgrade
+#### mushymato.MMAP_FarmHouseUpgrade [upgradeDays]
 
 - Can be used as TriggerAction
 - Makes the farmhouse upgrade overnight, as if robin finished constructing it today.
+- Upgrade days will set number of days required
+
+### mushymato.MMAP_SetFlooring [flooringId] [floorId]
+
+- Can be used as TriggerAction
+- Sets the flooring of farmhouse
+
+### mushymato.MMAP_SetWallpaper [wallpaperId] [floorId]
+
+- Can be used as TriggerAction
+- Sets the wallpaper of farmhouse
 
 #### mushymato.MMAP_If \<GSQ\> ## \<if-case\> [## \<else-case\>]
 

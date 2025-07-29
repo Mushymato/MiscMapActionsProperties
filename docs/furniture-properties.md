@@ -2,7 +2,7 @@
 
 To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, where the key is an **unqualified item id** of a furniture item. See examples in [furniture_tile_property.json](../[CP]%20MMAP%20Examples/furniture_properties.json).
 
-This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Modding:Buildings) but only a few fields are actually read. More may be added later, if they make sense.
+This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Modding:Buildings) but only a few fields are actually read and their meaning may not be the same. More may be added later, if they make sense.
 
 Your furniture still needs to be [added to `Data/Furniture`](https://stardewvalleywiki.com/Modding:Furniture) first to make them a furniture item, before any `mushymato.MMAP/FurnitureProperties` can take effect.
 
@@ -17,6 +17,7 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `SeasonOffset` | Point | 0,0 | Adjusts the source rectangle of the furniture plus any draw layers depending on the season. |
 | `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to building draw layers, but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used, and furniture draw in menu do not show draw layers. |
 | `DrawShadow` | bool | false | Because furniture do not have draw shadows in the first place, this field is repurposed to mean "when there are draw layers, do not draw the base furniture sprite". |
+| `ActionTiles` | List\<BuildingActionTiles\> _empty_ | List of special action tiles. | 
 | `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
 | `CustomFields["TV"]` | string | _empty_ | Sets this furniture as a TV with screen defined as `[posX] [posY] [scale]`. |
 
@@ -31,6 +32,25 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `Value` | string | _null_ | Tile property value, e.g. `"Crab T 1"`. |
 | `Layer` | string | _empty_ | Which map layer this tile property belongs to, e.g. `"Back"`. |
 | `TileArea` | Rectangle | Rectangle.Empty | Which tiles this tile property should affect, relative to top left corner. |
+
+#### ActionTiles
+
+(This is same as vanilla `BuildingData.ActionTiles`, copied here for reference)
+
+Unlike vanilla these are not map tile actions and instead special interaction tied to the furniture.
+
+| Property | Type | Default | Notes |
+| -------- | ---- | ------- | ----- |
+| `Id` | string | _empty_ | Unique string id for this action. |
+| `Tile` | Point | 0,0 | Interaction point. |
+| `Action` | string | _null_ | Tile action string, e.g. `Seat 0 -256 -1`. |
+
+You can use these values in `Action`:
+- `Seat [xOffset] [yOffset] [direction]`
+    - Gives this furniture a seat.
+    - The offset and direction affect farmer appearance appears once seated.
+    - Having any `Seat` action tiles will override the vanilla seat logic.
+    - Not compatible with furniture rotations atm.
 
 #### DrawLayers
 

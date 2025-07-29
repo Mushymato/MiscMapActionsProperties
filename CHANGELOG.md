@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.4] - wip
+## [1.9.4]
 
 ### Added
-- New traction
+- New GSQ mushymato.MMAP_WINDOW_LIGHTS
+- New traction mushymato.MMAP_CritterRandom, spawn critter at random Back tiles across the map
+- Furniture action tiles for seats
+- Furniture CustomFields TV
 
 ### Fixed
 - more small perf improvements
