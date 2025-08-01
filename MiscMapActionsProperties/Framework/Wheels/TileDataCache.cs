@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Entities;
 using StardewModdingAPI;
@@ -5,7 +7,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
-using StardewValley.Extensions;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
@@ -28,31 +29,11 @@ internal sealed class TileDataCache<TProps>
 
     private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new();
     private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value ??= [];
-    internal PerScreen<HashSet<Point>?> nextTickChangedPoints = new();
+    internal PerScreen<ConditionalWeakTable<GameLocation, HashSet<Point>>> pointsToUpdate = new(() => []);
 
     private readonly PerScreen<HashSet<string>> buildingPropertyJustInvalidated = new(() => []);
     private readonly PerScreen<HashSet<string>> furniturePropertyJustInvalidated = new(() => []);
     private readonly PerScreen<HashSet<string>> floorPathPropertyJustInvalidated = new(() => []);
-
-    internal void PushChangedPoints(GameLocation location, HashSet<Point>? newPoints)
-    {
-        if (location != Game1.currentLocation)
-            return;
-
-        if (newPoints == null)
-        {
-            nextTickChangedPoints.Value = [];
-            return;
-        }
-        if (nextTickChangedPoints.Value != null)
-        {
-            nextTickChangedPoints.Value.AddRange(newPoints);
-        }
-        else
-        {
-            nextTickChangedPoints.Value = newPoints;
-        }
-    }
 
     internal TileDataCache(
         string[] propKeys,
@@ -105,6 +86,38 @@ internal sealed class TileDataCache<TProps>
 
     private void ClearCache(object? sender, EventArgs e) => Cache.Clear();
 
+    private static HashSet<Point> MakePointSet(GameLocation loc) => [];
+
+    private void ClearNextPointsToUpdate(GameLocation location)
+    {
+        if (pointsToUpdate.Value.TryGetValue(location, out HashSet<Point>? pointsSet))
+        {
+            pointsSet.Clear();
+        }
+    }
+
+    private void PushNextPointsToUpdate(GameLocation location, Point point)
+    {
+        if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
+        {
+            pointsSet.Add(point);
+        }
+    }
+
+    private void PushNextPointsToUpdate(GameLocation location, Rectangle bounds)
+    {
+        if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
+        {
+            for (int x = bounds.Left; x < bounds.Right; x++)
+            {
+                for (int y = bounds.Top; y < bounds.Bottom; y++)
+                {
+                    pointsSet.Add(new(x, y));
+                }
+            }
+        }
+    }
+
     private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
         if (!Context.IsWorldReady)
@@ -113,112 +126,105 @@ internal sealed class TileDataCache<TProps>
         if (Game1.activeClickableMenu != null)
             return;
 
-        // only do invalidation handling for current location
-        if (Game1.currentLocation is not GameLocation curLoc || curLoc.NameOrUniqueName is not string uniqueName)
+        // try to do all the updates
+        UpdateQueuedPoints();
+    }
+
+    private void UpdateQueuedPoints([CallerMemberName] string? callerMemberName = null, bool changedSignal = false)
+    {
+        if (!pointsToUpdate.Value.Any(kv => kv.Value.Any()))
             return;
 
-        if (buildingPropertyJustInvalidated.Value.Contains(uniqueName))
+#if DEBUG
+        Stopwatch stopwatch = Stopwatch.StartNew();
+#endif
+
+        foreach ((GameLocation loc, HashSet<Point> points) in pointsToUpdate.Value)
         {
+            if (
+                loc.NameOrUniqueName == null
+                || !Cache.TryGetValue(loc.NameOrUniqueName, out Dictionary<Point, TProps>? cacheEntry)
+            )
+                continue;
+
             HashSet<Point> changedPoints = [];
-            foreach (Building building in curLoc.buildings)
+            foreach (Point pnt in points)
             {
-                UpdateLocationTileData(curLoc, CommonPatch.GetBuildingTileDataBounds(building), ref changedPoints);
-                if (changedPoints.Any())
-                    PushChangedPoints(curLoc, changedPoints);
-            }
-            buildingPropertyJustInvalidated.Value.Remove(uniqueName);
-        }
-        if (furniturePropertyJustInvalidated.Value.Contains(uniqueName))
-        {
-            foreach (Furniture furniture in curLoc.furniture)
-            {
-                OnFurnitureMoved(
-                    null,
-                    new(furniture, new(furniture.Location, CommonPatch.GetFurnitureTileDataBounds(furniture)))
-                );
-            }
-            furniturePropertyJustInvalidated.Value.Remove(uniqueName);
-        }
-        if (floorPathPropertyJustInvalidated.Value.Contains(uniqueName))
-        {
-            foreach (TerrainFeature feature in curLoc.terrainFeatures.Values)
-            {
-                if (feature is Flooring flooring)
+                bool hasPrevious = cacheEntry.TryGetValue(pnt, out TProps? previous);
+                bool found = false;
+                foreach (string layer in layers)
                 {
-                    OnFlooringMoved(null, flooring);
+                    if (
+                        propsValueTransformer(
+                            propKeys.Select(propKey => loc.doesTileHaveProperty(pnt.X, pnt.Y, propKey, layer)).ToArray()
+                        )
+                        is TProps result
+                    )
+                    {
+                        if (!propsValueComparer(result, previous))
+                        {
+                            changedPoints.Add(pnt);
+                        }
+                        cacheEntry[pnt] = result;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found && hasPrevious)
+                {
+                    changedPoints.Add(pnt);
+                    cacheEntry.Remove(pnt);
                 }
             }
-            floorPathPropertyJustInvalidated.Value.Remove(uniqueName);
+
+            if (changedSignal && changedPoints.Any())
+                TileDataCacheChanged?.Invoke(this, new(loc, changedPoints));
+
+            points.Clear();
         }
 
-        if (nextTickChangedPoints.Value != null)
-        {
-            TileDataCacheChanged?.Invoke(
-                this,
-                new(curLoc, nextTickChangedPoints.Value.Any() ? nextTickChangedPoints.Value : null)
-            );
-            nextTickChangedPoints.Value = null;
-        }
+#if DEBUG
+        ModEntry.Log(
+            $"{stopwatch.Elapsed}: UpdateQueuedPoints (from {callerMemberName}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
+        );
+#endif
     }
 
     private void OnMapTilePropChanged(object? sender, CommonPatch.MapTilePropChangedArgs e)
     {
         if (!layers.Contains(e.Layer))
             return;
-        HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(e.Location, new(e.DestPoint, new(1, 1)), ref changedPoints);
-        if (changedPoints.Any())
-        {
-            PushChangedPoints(e.Location, changedPoints);
-        }
+
+        PushNextPointsToUpdate(e.Location, e.DestPoint);
     }
 
     private void OnFlooringMoved(object? sender, Flooring flooring)
     {
-        HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(flooring.Location, new(flooring.Tile.ToPoint(), new(1, 1)), ref changedPoints);
-        if (changedPoints.Any())
-        {
-            PushChangedPoints(flooring.Location, changedPoints);
-        }
+        PushNextPointsToUpdate(flooring.Location, flooring.Tile.ToPoint());
     }
 
     private void OnFurnitureMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
     {
-        HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(e.Placement.Location, e.Placement.Bounds, ref changedPoints);
-        if (changedPoints.Any())
-        {
-            PushChangedPoints(e.Placement.Location, changedPoints);
-        }
+        PushNextPointsToUpdate(e.Placement.Location, e.Placement.Bounds);
     }
 
     private void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)
     {
-        HashSet<Point> changedPoints = [];
         foreach (Building building in e.Removed.Concat(e.Added))
         {
-            UpdateLocationTileData(e.Location, CommonPatch.GetBuildingTileDataBounds(building), ref changedPoints);
+            PushNextPointsToUpdate(e.Location, CommonPatch.GetBuildingTileDataBounds(building));
         }
-        if (changedPoints.Any())
-            PushChangedPoints(e.Location, changedPoints);
     }
 
     private void OnBuildingEndMove(object? sender, CommonPatch.OnBuildingMovedArgs e)
     {
-        HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(e.Location, e.PreviousBounds, ref changedPoints);
-        UpdateLocationTileData(e.Location, CommonPatch.GetBuildingTileDataBounds(e.Building), ref changedPoints);
-        if (changedPoints.Any())
-            PushChangedPoints(e.Location, changedPoints);
+        PushNextPointsToUpdate(e.Location, e.PreviousBounds);
+        PushNextPointsToUpdate(e.Location, CommonPatch.GetBuildingTileDataBounds(e.Building));
     }
 
     private void OnApplyMapOverride(object? sender, CommonPatch.ApplyMapOverrideArgs e)
     {
-        HashSet<Point> changedPoints = [];
-        UpdateLocationTileData(e.Location, e.DestRect, ref changedPoints);
-        if (changedPoints.Any())
-            PushChangedPoints(e.Location, changedPoints);
+        PushNextPointsToUpdate(e.Location, e.DestRect);
     }
 
     private void OnReloadMap(object? sender, GameLocation location)
@@ -226,7 +232,7 @@ internal sealed class TileDataCache<TProps>
         if (HasTileData(location))
         {
             Cache.Remove(location.NameOrUniqueName);
-            PushChangedPoints(location, null);
+            ClearNextPointsToUpdate(location);
         }
     }
 
@@ -252,72 +258,21 @@ internal sealed class TileDataCache<TProps>
         return cacheEntry;
     }
 
-    private void UpdateLocationTileData(GameLocation location, Rectangle bounds, ref HashSet<Point> changedPoints)
-    {
-        // guarding all this stuff extra hard i guess
-        if (!Context.IsWorldReady || location == null || location.Map == null)
-            return;
-
-        if (GetTileData(location, onWarp: false) is not Dictionary<Point, TProps> cacheEntry)
-            return;
-
-        DoUpdateLocationTileData(location, bounds, ref changedPoints, ref cacheEntry);
-    }
-
-    private void DoUpdateLocationTileData(
-        GameLocation location,
-        Rectangle bounds,
-        ref HashSet<Point> changedPoints,
-        ref Dictionary<Point, TProps> cacheEntry
-    )
-    {
-        for (int x = Math.Max(bounds.X, 0); x < Math.Min(bounds.X + bounds.Width, location.Map.DisplayWidth / 64); x++)
-        {
-            for (
-                int y = Math.Max(bounds.Y, 0);
-                y < Math.Min(bounds.Y + bounds.Height, location.Map.DisplayHeight / 64);
-                y++
-            )
-            {
-                Point pos = new(x, y);
-                bool hasPrevious = cacheEntry.TryGetValue(pos, out TProps? previous);
-                bool found = false;
-                foreach (string layer in layers)
-                {
-                    if (
-                        propsValueTransformer(
-                            propKeys.Select(propKey => location.doesTileHaveProperty(x, y, propKey, layer)).ToArray()
-                        )
-                        is TProps result
-                    )
-                    {
-                        if (!propsValueComparer(result, previous))
-                        {
-                            changedPoints.Add(pos);
-                        }
-                        cacheEntry[pos] = result;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found && hasPrevious)
-                {
-                    changedPoints.Add(pos);
-                    cacheEntry.Remove(pos);
-                }
-            }
-        }
-    }
-
     internal bool HasTileData(GameLocation location)
     {
         return location != null && location.NameOrUniqueName != null && Cache.ContainsKey(location.NameOrUniqueName);
     }
 
-    internal Dictionary<Point, TProps>? GetTileData(GameLocation location, bool onWarp = true)
+    internal Dictionary<Point, TProps>? GetTileData(
+        GameLocation location,
+        bool onWarp = true,
+        [CallerMemberName] string? callerMemberName = null
+    )
     {
         if (!Context.IsWorldReady || location == null || location.NameOrUniqueName is not string uniqueName)
             return null;
+
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         Dictionary<Point, TProps> cacheEntry;
         if (Cache.ContainsKey(uniqueName))
@@ -326,17 +281,11 @@ internal sealed class TileDataCache<TProps>
             if (onWarp)
             {
                 // handle invalidated situations
-                HashSet<Point> changedPoints = [];
                 if (buildingPropertyJustInvalidated.Value.Contains(uniqueName))
                 {
                     foreach (Building building in location.buildings)
                     {
-                        DoUpdateLocationTileData(
-                            location,
-                            CommonPatch.GetBuildingTileDataBounds(building),
-                            ref changedPoints,
-                            ref cacheEntry
-                        );
+                        PushNextPointsToUpdate(location, CommonPatch.GetBuildingTileDataBounds(building));
                     }
                     buildingPropertyJustInvalidated.Value.Remove(uniqueName);
                 }
@@ -344,12 +293,7 @@ internal sealed class TileDataCache<TProps>
                 {
                     foreach (Furniture furniture in location.furniture)
                     {
-                        DoUpdateLocationTileData(
-                            furniture.Location,
-                            CommonPatch.GetFurnitureTileDataBounds(furniture),
-                            ref changedPoints,
-                            ref cacheEntry
-                        );
+                        PushNextPointsToUpdate(location, CommonPatch.GetFurnitureTileDataBounds(furniture));
                     }
                     furniturePropertyJustInvalidated.Value.Remove(uniqueName);
                 }
@@ -359,16 +303,13 @@ internal sealed class TileDataCache<TProps>
                     {
                         if (feature is Flooring flooring)
                         {
-                            DoUpdateLocationTileData(
-                                flooring.Location,
-                                new(flooring.Tile.ToPoint(), new(1, 1)),
-                                ref changedPoints,
-                                ref cacheEntry
-                            );
+                            PushNextPointsToUpdate(location, flooring.Tile.ToPoint());
                         }
                     }
                     floorPathPropertyJustInvalidated.Value.Remove(uniqueName);
                 }
+
+                UpdateQueuedPoints(changedSignal: false);
             }
         }
         else
@@ -376,6 +317,11 @@ internal sealed class TileDataCache<TProps>
             cacheEntry = CreateLocationTileData(location);
             Cache[uniqueName] = cacheEntry;
         }
+
+        ModEntry.Log(
+            $"{stopwatch.Elapsed}: GetTileData (from {callerMemberName}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
+        );
+
         return cacheEntry;
     }
 }

@@ -61,7 +61,7 @@ internal static class FloorPathProperties
         }
     }
 
-    private static void GameLocation_doesTileHaveProperty_Postfix(
+    internal static void GameLocation_doesTileHaveProperty_Postfix(
         GameLocation __instance,
         int xTile,
         int yTile,
