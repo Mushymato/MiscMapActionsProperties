@@ -43,6 +43,10 @@ All map properties are also `Data/Location` CustomFields. In the case where both
     - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile's TileData, Back or Front layer.
     - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile's TileData, Back or Front layer.
 
+#### mushymato.MMAP_WoodsDebris T
+
+- Spawn leaves on this map and ignore global debris weather effects.
+
 #### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
 
 - Adds a tiling overlay drawn above the map.

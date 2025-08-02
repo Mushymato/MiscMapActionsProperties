@@ -294,9 +294,9 @@ internal sealed class TileDataCache<TProps>
 
     internal Dictionary<Point, TProps>? GetTileData(
         GameLocation location,
-        bool onWarp = true,
+        bool onWarp = true
 #if DEBUG
-        [CallerMemberName] string? callerMemberName = null
+       , [CallerMemberName] string? callerMemberName = null
 #endif
     )
     {
