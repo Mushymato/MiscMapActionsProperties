@@ -56,6 +56,7 @@ public class ModEntry : Mod
         Framework.Location.FarmHouseFurniture.Register();
         Framework.Location.SteamOverlay.Register();
         Framework.Location.WaterColor.Register();
+        Framework.Location.WoodsDebris.Register();
         Framework.Location.WoodsLighting.Register();
 
         Framework.Tile.ActionCond.Register();
