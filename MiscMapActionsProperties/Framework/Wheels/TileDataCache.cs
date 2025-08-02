@@ -96,18 +96,39 @@ internal sealed class TileDataCache<TProps>
         }
     }
 
-    private void PushNextPointsToUpdate(GameLocation location, Point point)
+    private void PushNextPointsToUpdate(
+        GameLocation location,
+        Point point
+#if DEBUG
+        ,
+        [CallerMemberName] string? callerMemberName = null
+#endif
+    )
     {
         if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
+#if DEBUG
+            ModEntry.Log($"{callerMemberName} add point {point} ({string.Join('+', propKeys)}, {string.Join('+', layers)})");
+#endif
             pointsSet.Add(point);
         }
     }
 
-    private void PushNextPointsToUpdate(GameLocation location, Rectangle bounds)
+    private void PushNextPointsToUpdate(
+        GameLocation location,
+        Rectangle bounds
+#if DEBUG
+        ,
+        [CallerMemberName] string? callerMemberName = null
+#endif
+    )
     {
         if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
+#if DEBUG
+            ModEntry.Log($"{callerMemberName} add rect {bounds} ({string.Join('+', propKeys)}, {string.Join('+', layers)})");
+#endif
+
             for (int x = bounds.Left; x < bounds.Right; x++)
             {
                 for (int y = bounds.Top; y < bounds.Bottom; y++)
@@ -130,22 +151,29 @@ internal sealed class TileDataCache<TProps>
         UpdateQueuedPoints();
     }
 
-    private void UpdateQueuedPoints([CallerMemberName] string? callerMemberName = null, bool changedSignal = false)
+    private void UpdateQueuedPoints(bool signalChanged = true)
     {
-        if (!pointsToUpdate.Value.Any(kv => kv.Value.Any()))
-            return;
 
 #if DEBUG
         Stopwatch stopwatch = Stopwatch.StartNew();
+        List<string> hasDoneUpdate = [];
 #endif
 
         foreach ((GameLocation loc, HashSet<Point> points) in pointsToUpdate.Value)
         {
             if (
-                loc.NameOrUniqueName == null
+                !points.Any()
+                || loc.NameOrUniqueName == null
                 || !Cache.TryGetValue(loc.NameOrUniqueName, out Dictionary<Point, TProps>? cacheEntry)
             )
+            {
+                points.Clear();
                 continue;
+            }
+
+#if DEBUG
+            hasDoneUpdate.Add(loc.NameOrUniqueName);
+#endif
 
             HashSet<Point> changedPoints = [];
             foreach (Point pnt in points)
@@ -177,16 +205,17 @@ internal sealed class TileDataCache<TProps>
                 }
             }
 
-            if (changedSignal && changedPoints.Any())
+            if (signalChanged && changedPoints.Any())
                 TileDataCacheChanged?.Invoke(this, new(loc, changedPoints));
 
             points.Clear();
         }
 
 #if DEBUG
-        ModEntry.Log(
-            $"{stopwatch.Elapsed}: UpdateQueuedPoints (from {callerMemberName}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
-        );
+        if (hasDoneUpdate.Any())
+            ModEntry.Log(
+                $"{stopwatch.Elapsed}: UpdateQueuedPoints (locations {string.Join(',', hasDoneUpdate)}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
+            );
 #endif
     }
 
@@ -243,9 +272,9 @@ internal sealed class TileDataCache<TProps>
         Dictionary<Point, TProps> cacheEntry = [];
         foreach (string layer in layers)
         {
-            for (int x = 0; x < location.Map.DisplayWidth / 64; x++)
+            for (int x = 0; x < location.Map.DisplayWidth / Game1.tileSize; x++)
             {
-                for (int y = 0; y < location.Map.DisplayHeight / 64; y++)
+                for (int y = 0; y < location.Map.DisplayHeight / Game1.tileSize; y++)
                 {
                     TProps? result = propsValueTransformer(
                         propKeys.Select(propKey => location.doesTileHaveProperty(x, y, propKey, layer)).ToArray()
@@ -266,13 +295,17 @@ internal sealed class TileDataCache<TProps>
     internal Dictionary<Point, TProps>? GetTileData(
         GameLocation location,
         bool onWarp = true,
+#if DEBUG
         [CallerMemberName] string? callerMemberName = null
+#endif
     )
     {
         if (!Context.IsWorldReady || location == null || location.NameOrUniqueName is not string uniqueName)
             return null;
 
+#if DEBUG
         Stopwatch stopwatch = Stopwatch.StartNew();
+#endif
 
         Dictionary<Point, TProps> cacheEntry;
         if (Cache.ContainsKey(uniqueName))
@@ -309,7 +342,7 @@ internal sealed class TileDataCache<TProps>
                     floorPathPropertyJustInvalidated.Value.Remove(uniqueName);
                 }
 
-                UpdateQueuedPoints(changedSignal: false);
+                UpdateQueuedPoints(signalChanged: false);
             }
         }
         else
@@ -318,9 +351,11 @@ internal sealed class TileDataCache<TProps>
             Cache[uniqueName] = cacheEntry;
         }
 
+#if DEBUG
         ModEntry.Log(
             $"{stopwatch.Elapsed}: GetTileData (from {callerMemberName}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
         );
+#endif
 
         return cacheEntry;
     }

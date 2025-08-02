@@ -8,6 +8,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
+using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
@@ -336,6 +337,13 @@ public static class CommonPatch
         GameLocation_UpdateWhenCurrentLocationFinalizer?.Invoke(null, new(__instance, time));
     }
 
+    private static readonly ConditionalWeakTable<
+        GameLocation,
+        Dictionary<string, WeakReference<xTile.Map>>
+    > RenovationMaps = [];
+
+    private static Dictionary<string, WeakReference<xTile.Map>> CreatePerLocRenovations(GameLocation location) => [];
+
     private static void GameLocation_ApplyMapOverride_Prefix(
         HashSet<string> ____appliedMapOverrides,
         string override_key,
@@ -348,6 +356,7 @@ public static class CommonPatch
     private static void GameLocation_ApplyMapOverride_Finalizer(
         GameLocation __instance,
         HashSet<string> ____appliedMapOverrides,
+        xTile.Map override_map,
         string override_key,
         ref Rectangle? dest_rect,
         bool __state
@@ -357,6 +366,24 @@ public static class CommonPatch
             return;
         if (__state == ____appliedMapOverrides.Contains(override_key))
             return;
+        if (
+            RenovationMaps.GetValue(__instance, CreatePerLocRenovations)
+            is Dictionary<string, WeakReference<xTile.Map>> perLocRenovations
+        )
+        {
+            if (perLocRenovations.TryGetValue(override_key, out WeakReference<xTile.Map>? mapRef))
+            {
+                if (mapRef.TryGetTarget(out xTile.Map? knownMap) && override_map == knownMap)
+                {
+                    return;
+                }
+                mapRef.SetTarget(override_map);
+            }
+            else
+            {
+                perLocRenovations[override_key] = new(override_map);
+            }
+        }
         GameLocation_ApplyMapOverride?.Invoke(null, new(__instance, (Rectangle)dest_rect));
     }
 
