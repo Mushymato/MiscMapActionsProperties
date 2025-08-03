@@ -55,8 +55,8 @@ internal static class FurnitureProperties
     #region properties
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
-    private static readonly PerScreen<Dictionary<string, FurnitureDLState?>> dlExtInfoCacheImpl = new();
-    private static Dictionary<string, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
+    private static readonly PerScreen<ConditionalWeakTable<Furniture, FurnitureDLState?>> dlExtInfoCacheImpl = new();
+    private static ConditionalWeakTable<Furniture, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
 
     /// <summary>Furniture property data (secretly building data)</summary>
     internal static Dictionary<string, BuildingData> FPData
@@ -74,7 +74,6 @@ internal static class FurnitureProperties
         {
             _fpData = null;
             DlExtInfoCache.Clear();
-            DLShakeCache.Clear();
             SeatPositionCache.Clear();
         }
     }
@@ -111,13 +110,6 @@ internal static class FurnitureProperties
         foreach (DLExtInfo dLExtInfo in DLStatesIter)
         {
             dLExtInfo.UpdateTicked();
-        }
-        foreach ((_, ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes) in DLShakeCache)
-        {
-            foreach ((_, DLShakeState shake) in dlShakes)
-            {
-                shake.UpdateTicked();
-            }
         }
     }
 
@@ -418,23 +410,16 @@ internal static class FurnitureProperties
         Rectangle playerBounds = Game1.player.GetBoundingBox();
         if (
             playerBounds.Intersects(furniBounds)
-            && DlExtInfoCache.TryGetValue(__instance.ItemId, out FurnitureDLState? state)
-            && state != null
+            && DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState) is FurnitureDLState state
         )
         {
             // tries to shake draw layers // character.speed + character.addedSpeed
             float speed = Game1.player.getMovementSpeed();
 
             bool left = playerBounds.Center.X > furniBounds.Center.X;
-            ConditionalWeakTable<DLExtInfo, DLShakeState> dlShakes = DLShakeCache.GetValue(
-                __instance,
-                CreateDLShakeStates
-            );
-            if (!dlShakes.Any())
-                return;
-            foreach ((DLExtInfo dlExt, DLShakeState dlShake) in dlShakes)
+            foreach ((_, DLExtInfo? dlExt) in state.LayerInfo)
             {
-                dlShake.StartShaking(speed, left, dlExt.ShakeRotate.Value);
+                dlExt?.StartContact(furniBounds, speed, left);
             }
         }
     }
@@ -621,6 +606,30 @@ internal static class FurnitureProperties
             NonTile,
         }
 
+        internal static FurnitureDLState? GetFurnitureDLState(Furniture furniture)
+        {
+            if (!FPData.TryGetValue(furniture.ItemId, out BuildingData? fpData))
+            {
+                return null;
+            }
+            if (fpData.DrawLayers == null)
+            {
+                return null;
+            }
+            return new(
+                fpData,
+                fpData
+                    .DrawLayers.Select(
+                        (drawLayer) =>
+                        {
+                            DrawLayerExt.TryGetDLExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
+                            return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
+                        }
+                    )
+                    .ToList()
+            );
+        }
+
         private readonly Dictionary<string, int?> parsedRotations = [];
 
         internal bool CheckRotation(string drawLayerId, int currentRotation)
@@ -654,10 +663,6 @@ internal static class FurnitureProperties
             DrawSource drawSource = DrawSource.Normal
         )
         {
-            bool hasShakes = DLShakeCache.TryGetValue(
-                furniture,
-                out ConditionalWeakTable<DLExtInfo, DLShakeState>? dlShakes
-            );
             foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
             {
                 if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value))
@@ -713,13 +718,12 @@ internal static class FurnitureProperties
 
                 if (drawLayerExt != null)
                 {
-                    float rotate = 0f;
-                    if (hasShakes && dlShakes != null)
+                    float rotation = 0f;
+                    if (drawLayerExt.ContactState is DLContactState contactState)
                     {
-                        if (dlShakes.TryGetValue(drawLayerExt, out DLShakeState? shakeState))
-                        {
-                            rotate = shakeState.Rotate;
-                        }
+                        rotation += contactState.Rotate;
+                        if (contactState.OpenPhase != DLContactState.Phase.None)
+                            sourceRect = drawLayer.GetSourceRect(contactState.AnimTime);
                     }
                     drawLayerExt.Draw(
                         spriteBatch,
@@ -727,7 +731,7 @@ internal static class FurnitureProperties
                         drawPos,
                         sourceRect,
                         Color.White * alpha,
-                        rotate,
+                        rotation,
                         Vector2.Zero,
                         scaleSize,
                         SpriteEffects.None,
@@ -758,7 +762,7 @@ internal static class FurnitureProperties
         {
             if (dlExtInfoCacheImpl.Value == null)
                 yield break;
-            foreach (FurnitureDLState? state in dlExtInfoCacheImpl.Value.Values)
+            foreach ((_, FurnitureDLState? state) in dlExtInfoCacheImpl.Value)
             {
                 if (state != null)
                 {
@@ -770,53 +774,6 @@ internal static class FurnitureProperties
                 }
             }
         }
-    }
-    private static readonly PerScreen<
-        ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>>
-    > dlShakeCacheImpl = new();
-    private static ConditionalWeakTable<Furniture, ConditionalWeakTable<DLExtInfo, DLShakeState>> DLShakeCache =>
-        dlShakeCacheImpl.Value ??= [];
-
-    private static FurnitureDLState? TryAddFurnitureToDLCache(Furniture furniture, BuildingData fpData)
-    {
-        if (fpData.DrawLayers == null)
-        {
-            DlExtInfoCache[furniture.ItemId] = null;
-            return null;
-        }
-        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state))
-            return state;
-
-        state = new(
-            fpData,
-            fpData
-                .DrawLayers.Select(
-                    (drawLayer) =>
-                    {
-                        DrawLayerExt.TryGetDRExtInfo(fpData, drawLayer, out DLExtInfo? dlExtInfo);
-                        return new ValueTuple<BuildingDrawLayer, DLExtInfo?>(drawLayer, dlExtInfo);
-                    }
-                )
-                .ToList()
-        );
-        DlExtInfoCache[furniture.ItemId] = state;
-        return state;
-    }
-
-    private static ConditionalWeakTable<DLExtInfo, DLShakeState> CreateDLShakeStates(Furniture furniture)
-    {
-        ConditionalWeakTable<DLExtInfo, DLShakeState> shakeStates = [];
-        if (DlExtInfoCache.TryGetValue(furniture.ItemId, out FurnitureDLState? state) && state != null)
-        {
-            foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
-            {
-                if (dLExtInfo is not null && dLExtInfo.ShakeRotate.Value != 0)
-                {
-                    shakeStates.GetValue(dLExtInfo, (dLExtInfo) => new());
-                }
-            }
-        }
-        return shakeStates;
     }
 
     private static Rectangle AdjustSourceRectToSeason(BuildingData fpData, GameLocation location, Rectangle sourceRect)
@@ -846,7 +803,7 @@ internal static class FurnitureProperties
         FurnitureDrawMode prevDraw = FurnitureDraw;
 
         FurnitureDraw |= FurnitureDrawMode.Base;
-        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        if ((dlState = DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState)) is not null)
         {
             FurnitureDraw |= FurnitureDrawMode.Layer;
             if (!fpData.DrawShadow)
@@ -1047,7 +1004,7 @@ internal static class FurnitureProperties
         if (FurnitureDraw == FurnitureDrawMode.None)
             FurnitureDraw = FurnitureDrawMode.Base;
         FurnitureDraw |= FurnitureDrawMode.Menu;
-        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        if ((dlState = DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState)) is not null)
         {
             FurnitureDraw |= FurnitureDrawMode.Layer;
             if (!fpData.DrawShadow)
@@ -1106,7 +1063,7 @@ internal static class FurnitureProperties
         if (FurnitureDraw == FurnitureDrawMode.None)
             FurnitureDraw = FurnitureDrawMode.Base;
         FurnitureDraw |= FurnitureDrawMode.NonTile;
-        if ((dlState = TryAddFurnitureToDLCache(__instance, fpData)) is not null)
+        if ((dlState = DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState)) is not null)
         {
             FurnitureDraw |= FurnitureDrawMode.Layer;
             if (!fpData.DrawShadow)

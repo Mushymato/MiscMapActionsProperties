@@ -36,12 +36,13 @@ internal sealed record DLExtInfo(
     FloatRange Scale,
     SpriteEffects Effect,
     string? GSQ,
-    FloatRange ShakeRotate
+    FloatRange ShakeRotate,
+    bool OpenAnim
 )
 {
     internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
     internal float CurrRotate { get; private set; } = Rotate.Value;
-    internal DLShakeState? ShakeState = null;
+    internal DLContactState? ContactState = null;
 
     internal void UpdateTicked()
     {
@@ -49,12 +50,26 @@ internal sealed record DLExtInfo(
         {
             CurrRotate = (CurrRotate + RotateRate.Value / 60f) % MathF.Tau;
         }
-        ShakeState?.UpdateTicked();
+        ContactState?.UpdateTicked();
     }
 
     internal void TimeChanged()
     {
         ShouldDraw = GSQ == null || GameStateQuery.CheckConditions(GSQ);
+    }
+
+    internal void StartContact(Rectangle contactBounds, float speed, bool left)
+    {
+        if (ShakeRotate.Value != 0)
+        {
+            ContactState ??= new();
+            ContactState.StartShaking(speed, left, ShakeRotate.Value);
+        }
+        if (OpenAnim)
+        {
+            ContactState ??= new();
+            ContactState.StartOpen(contactBounds);
+        }
     }
 
     internal void RecheckRands()
@@ -96,12 +111,28 @@ internal sealed record DLExtInfo(
     }
 }
 
-internal sealed record DLShakeState
+internal sealed class DLContactState
 {
+    // shake
     internal bool Left { get; private set; } = false;
     internal float Rotate { get; private set; } = 0f;
     internal float RotateMax { get; private set; } = 0f;
     internal float RotateRate { get; private set; } = 0f;
+    internal int OpenAnimTimeMax { get; private set; } = 0;
+
+    // open/close
+    internal enum Phase
+    {
+        None,
+        Closed,
+        Opening,
+        Opened,
+        Closing,
+    }
+
+    internal Phase OpenPhase = Phase.None;
+    internal Rectangle OpenBounds = Rectangle.Empty;
+    internal int AnimTime = 0;
 
     internal void UpdateTicked()
     {
@@ -132,6 +163,41 @@ internal sealed record DLShakeState
                 RotateRate = 0;
             }
         }
+
+        if (OpenPhase != Phase.None)
+        {
+            switch (OpenPhase)
+            {
+                case Phase.Opened:
+                    if (!Game1.player.GetBoundingBox().Intersects(OpenBounds))
+                    {
+                        OpenPhase = Phase.Closing;
+                    }
+                    break;
+                case Phase.Opening:
+                    if (AnimTime < OpenAnimTimeMax)
+                    {
+                        AnimTime += Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                    }
+                    else
+                    {
+                        AnimTime = OpenAnimTimeMax;
+                        OpenPhase = Phase.Opened;
+                    }
+                    break;
+                case Phase.Closing:
+                    if (AnimTime > 0f)
+                    {
+                        AnimTime -= Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                    }
+                    else
+                    {
+                        AnimTime = 0;
+                        OpenPhase = Phase.Closed;
+                    }
+                    break;
+            }
+        }
     }
 
     internal void StartShaking(float speedOfCollision, bool left, float shakeRotate)
@@ -149,6 +215,18 @@ internal sealed record DLShakeState
         RotateRate = (float)(Math.PI / 80f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate);
         RotateMax = (float)(Math.PI / 8f / Math.Min(1f, 5f / speedOfCollision) * shakeRotate);
         Left = left;
+    }
+
+    internal void SetOpenAnim(int openAnimTimeMax)
+    {
+        OpenAnimTimeMax = openAnimTimeMax;
+        OpenPhase = Phase.Closed;
+    }
+
+    internal void StartOpen(Rectangle contactBounds)
+    {
+        OpenPhase = Phase.Opening;
+        OpenBounds = contactBounds;
     }
 }
 
@@ -297,7 +375,7 @@ internal static class DrawLayerExt
                 if (drawLayer.Id == null)
                     continue;
 
-                if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
+                if (TryGetDLExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
                     DlExtInfoCache[new(building.id.Value, drawLayer.Id)] = dlExtInfo;
             }
         }
@@ -346,7 +424,7 @@ internal static class DrawLayerExt
         return true;
     }
 
-    internal static bool TryGetDRExtInfo(
+    internal static bool TryGetDLExtInfo(
         BuildingData data,
         BuildingDrawLayer drawLayer,
         [NotNullWhen(true)] out DLExtInfo? dlExtInfo
@@ -398,9 +476,21 @@ internal static class DrawLayerExt
             out FloatRange shakeRotate,
             0f
         );
+        bool openAnim = false;
+        if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "openAnim"), out string? openAnimStr))
+        {
+            hasChange |= bool.TryParse(openAnimStr, out openAnim);
+        }
 
         if (hasChange)
-            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ, shakeRotate);
+        {
+            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ, shakeRotate, openAnim);
+            if (openAnim)
+            {
+                dlExtInfo.ContactState = new();
+                dlExtInfo.ContactState.SetOpenAnim(drawLayer.FrameDuration * drawLayer.FrameCount);
+            }
+        }
 
         return hasChange;
     }
@@ -416,7 +506,7 @@ internal static class DrawLayerExt
             if (drawLayer.Id == null)
                 continue;
 
-            if (TryGetDRExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
+            if (TryGetDLExtInfo(data, drawLayer, out DLExtInfo? dlExtInfo))
             {
                 DlExtInfoInMenu[new(building.buildingType.Value, drawLayer.Id)] = dlExtInfo;
             }
@@ -440,9 +530,11 @@ internal static class DrawLayerExt
     {
         if (DlExtInfoCache.TryGetValue(new(building.id.Value, drawLayer.Id), out DLExtInfo? value))
         {
-            if (value.ShakeState != null)
+            if (value.ContactState is DLContactState contactState)
             {
-                rotation += value.ShakeState.Rotate;
+                rotation += contactState.Rotate;
+                if (contactState.OpenPhase != DLContactState.Phase.None)
+                    sourceRectangle = drawLayer.GetSourceRect(contactState.AnimTime);
             }
             value.Draw(b, texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
             return;
@@ -601,13 +693,9 @@ internal static class DrawLayerExt
             if (drawLayer.Id == null)
                 continue;
 
-            if (
-                DlExtInfoCache.TryGetValue(new(__instance.id.Value, drawLayer.Id), out DLExtInfo? dlExt)
-                && dlExt.ShakeRotate.Value != 0
-            )
+            if (DlExtInfoCache.TryGetValue(new(__instance.id.Value, drawLayer.Id), out DLExtInfo? dlExt))
             {
-                dlExt.ShakeState ??= new();
-                dlExt.ShakeState.StartShaking(speed, left, dlExt.ShakeRotate.Value);
+                dlExt.StartContact(buildingBounds, speed, left);
             }
         }
     }

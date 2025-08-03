@@ -108,7 +108,9 @@ internal sealed class TileDataCache<TProps>
         if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
 #if DEBUG
-            ModEntry.Log($"{callerMemberName} add point {point} ({string.Join('+', propKeys)}, {string.Join('+', layers)})");
+            ModEntry.Log(
+                $"{callerMemberName} add point {point} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
+            );
 #endif
             pointsSet.Add(point);
         }
@@ -126,7 +128,9 @@ internal sealed class TileDataCache<TProps>
         if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
 #if DEBUG
-            ModEntry.Log($"{callerMemberName} add rect {bounds} ({string.Join('+', propKeys)}, {string.Join('+', layers)})");
+            ModEntry.Log(
+                $"{callerMemberName} add rect {bounds} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
+            );
 #endif
 
             for (int x = bounds.Left; x < bounds.Right; x++)
@@ -153,7 +157,6 @@ internal sealed class TileDataCache<TProps>
 
     private void UpdateQueuedPoints(bool signalChanged = true)
     {
-
 #if DEBUG
         Stopwatch stopwatch = Stopwatch.StartNew();
         List<string> hasDoneUpdate = [];
@@ -296,7 +299,8 @@ internal sealed class TileDataCache<TProps>
         GameLocation location,
         bool onWarp = true
 #if DEBUG
-       , [CallerMemberName] string? callerMemberName = null
+        ,
+        [CallerMemberName] string? callerMemberName = null
 #endif
     )
     {
