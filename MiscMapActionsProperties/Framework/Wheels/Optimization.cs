@@ -83,7 +83,6 @@ internal static class Optimization
             {
                 if (furni.DoesTileHaveProperty(xTile, yTile, propertyName, layerName, ref propertyValue))
                 {
-                    ModEntry.Log($"{xTile},{yTile},{propertyName},{layerName} => {propertyValue}");
                     break;
                 }
             }
@@ -149,11 +148,6 @@ internal static class Optimization
                     new(OpCodes.Ldarg_0),
                 ]
             );
-
-        foreach (CodeInstruction inst in matcher.Instructions())
-        {
-            Console.WriteLine(inst);
-        }
 
         return matcher.Instructions();
     }
