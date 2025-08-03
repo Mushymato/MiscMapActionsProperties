@@ -175,22 +175,16 @@ internal sealed class DLContactState
                     }
                     break;
                 case Phase.Opening:
-                    if (AnimTime < OpenAnimTimeMax)
-                    {
-                        AnimTime += Game1.currentGameTime.ElapsedGameTime.Milliseconds;
-                    }
-                    else
+                    AnimTime += Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                    if (AnimTime >= OpenAnimTimeMax)
                     {
                         AnimTime = OpenAnimTimeMax;
                         OpenPhase = Phase.Opened;
                     }
                     break;
                 case Phase.Closing:
-                    if (AnimTime > 0f)
-                    {
-                        AnimTime -= Game1.currentGameTime.ElapsedGameTime.Milliseconds;
-                    }
-                    else
+                    AnimTime -= Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                    if (AnimTime <= 0)
                     {
                         AnimTime = 0;
                         OpenPhase = Phase.Closed;
@@ -219,7 +213,7 @@ internal sealed class DLContactState
 
     internal void SetOpenAnim(int openAnimTimeMax)
     {
-        OpenAnimTimeMax = openAnimTimeMax;
+        OpenAnimTimeMax = openAnimTimeMax - 1;
         OpenPhase = Phase.Closed;
     }
 

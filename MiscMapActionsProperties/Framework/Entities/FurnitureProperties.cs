@@ -415,8 +415,8 @@ internal static class FurnitureProperties
         {
             // tries to shake draw layers // character.speed + character.addedSpeed
             float speed = Game1.player.getMovementSpeed();
-
             bool left = playerBounds.Center.X > furniBounds.Center.X;
+
             foreach ((_, DLExtInfo? dlExt) in state.LayerInfo)
             {
                 dlExt?.StartContact(furniBounds, speed, left);

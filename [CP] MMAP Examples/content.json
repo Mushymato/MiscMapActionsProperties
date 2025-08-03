@@ -167,6 +167,10 @@
     {
       "Action": "Include",
       "FromFile": "draw_layers_shake.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "draw_layer_opening.json"
     }
   ]
 }
