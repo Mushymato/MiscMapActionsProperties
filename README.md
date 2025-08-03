@@ -2,7 +2,19 @@
 
 Adds a few map related features, no strong design theme just whatever I happen to want.
 
-**This is a framework mod for other mods to use, installing it by itself does nothing for players.**
+**This is a framework mod for other mods to use, it has exactly one player facing feature.**
+
+## Config: Enable_doesTileHaveProperty_Optimization
+
+This config option can only be set in `config.json` because it cannot be changed in-game.
+When `true`, enables a transpiler that improves `GameLocation.doesTileHaveProperty` performance.
+Change this to `false` if you encounter issues in game.
+
+```json
+{
+  "Enable_doesTileHaveProperty_Optimization": true
+}
+```
 
 ## Documentation
 

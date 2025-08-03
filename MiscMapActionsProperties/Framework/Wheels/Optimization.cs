@@ -25,7 +25,7 @@ internal static class Optimization
         catch (Exception err)
         {
             ModEntry.Log(
-                $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work but slower in some cases:\n{err}",
+                $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work just slower in some cases:\n{err}",
                 LogLevel.Warn
             );
             return;
