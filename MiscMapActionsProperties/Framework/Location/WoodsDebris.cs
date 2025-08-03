@@ -3,6 +3,7 @@ using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using StardewValley.Locations;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -25,10 +26,12 @@ internal static class WoodsDebris
 
     private static void GameLocation_resetLocalState(object? sender, GameLocation e)
     {
+        WeatherDebris.Clear();
         if (CommonPatch.TryGetCustomFieldsOrMapProperty(e, MapProp_WoodsDebris, out string? prop))
         {
             if (prop != "T")
             {
+                e.ignoreDebrisWeather.Value = false;
                 return;
             }
             if (e.IsRainingHere())
@@ -66,10 +69,6 @@ internal static class WoodsDebris
                     );
                 }
             }
-        }
-        else
-        {
-            WeatherDebris.Clear();
         }
     }
 

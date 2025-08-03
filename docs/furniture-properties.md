@@ -1,5 +1,7 @@
 # Furniture Properties
 
+You can give furniture tile properties (including action and tile actions) and collision using this feature. This would let you use all the previous tile properties/actions/touch actions listed with furniture, plus various vanilla properties and actions. Besides this, you can also give a collision map to make the furniture passable on some tiles and do animations via draw layers.
+
 To give furniture some properties, add an entry to custom asset `mushymato.MMAP/FurnitureProperties`, where the key is an **unqualified item id** of a furniture item. See examples in [furniture_tile_property.json](../[CP]%20MMAP%20Examples/furniture_properties.json).
 
 This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Modding:Buildings) but only a few fields are actually read and their meaning may not be the same. More may be added later, if they make sense.
@@ -72,7 +74,7 @@ You can use these values in `Action`:
 
 ##### Using DrawLayers with Rotations
 
-To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case insensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0.
+To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case insensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0. You can check current rotation in game with [lookup anything (datamining fields on)](https://www.nexusmods.com/stardewvalley/mods/541).
 
 ### Caveats with Rotations
 
@@ -109,4 +111,4 @@ These MMAP tile properties **do not** support usage with furniture.
 - `mushymato.MMAP_AnimalSpot`: Never checks furniture or building tile properties, this is intentional.
 - `mushymato.MMAP_GrassSpread`: Grass cannot spread onto a tile that is blocked by furniture, regardless of property.
 
-Other modded tile properties depends on their implemenations, in particular whether they implement any sort of furniture changed check. For example, custom companion tile properties will only update when player leave and re-enter the map.
+Other modded tile properties depends on their implemenations, in particular whether they implement any sort of furniture changed check. For example, custom companion tile properties will only update when player leave and re-enter the map and thus do not work with this.

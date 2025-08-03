@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.5]
+
+### Added
+- Draw layers can now have open animation behavior, kind of like shipping bin lid
+- New map property mushymato.MMAP_WoodsDebris T, spawn leaves
+
+### Fixed
+- more small perf improvements (it never ends)
+
 ## [1.9.4]
 
 ### Added

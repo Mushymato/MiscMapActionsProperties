@@ -61,7 +61,7 @@ internal static class ChestLight
             foreach (Chest buildingChest in building.buildingChests)
             {
                 string lightName = $"{Metadata_ChestLight_Prefix}{buildingChest.Name}";
-                if (!data.Metadata.TryGetValue(lightName, out string? lightProps))
+                if (building.GetMetadata(lightName) is not string lightProps)
                     continue;
                 var watch = watchers.GetValue(
                     buildingChest,
