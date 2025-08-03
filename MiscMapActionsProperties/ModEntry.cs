@@ -8,7 +8,12 @@ using StardewValley.Objects;
 
 namespace MiscMapActionsProperties;
 
-public class ModEntry : Mod
+public sealed class ModConfig
+{
+    public bool Enable_doesTileHaveProperty_Optimization = true;
+}
+
+public sealed class ModEntry : Mod
 {
 #if DEBUG
     private const LogLevel DEFAULT_LOG_LEVEL = LogLevel.Debug;
@@ -25,6 +30,8 @@ public class ModEntry : Mod
 
     public override void Entry(IModHelper helper)
     {
+        ModConfig config = helper.ReadConfig<ModConfig>();
+
         mon = Monitor;
         manifest = ModManifest;
         help = helper;
@@ -38,6 +45,10 @@ public class ModEntry : Mod
 
         TAS = new(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Register();
+        if (config.Enable_doesTileHaveProperty_Optimization)
+        {
+            Framework.Wheels.Optimization.Register();
+        }
 
         Framework.Entities.ChestLight.Register();
         Framework.Entities.DrawLayerExt.Register();
