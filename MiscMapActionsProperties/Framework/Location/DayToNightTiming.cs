@@ -26,6 +26,7 @@ internal static class DayToNightTiming
     internal const string GSQ_TIME_IS_LIGHTS_OFF = $"{ModEntry.ModId}_TIME_IS_LIGHTS_OFF";
     internal const string GSQ_TIME_IS_NIGHT = $"{ModEntry.ModId}_TIME_IS_NIGHT";
     internal const string GSQ_WINDOW_LIGHTS = $"{ModEntry.ModId}_WINDOW_LIGHTS";
+    internal const string GSQ_RAINING_HERE = $"{ModEntry.ModId}_RAINING_HERE";
 
     internal static void Register()
     {
@@ -37,8 +38,9 @@ internal static class DayToNightTiming
         GameStateQuery.Register(GSQ_TIME_IS_DAY, TIME_IS_DAY);
         GameStateQuery.Register(GSQ_TIME_IS_SUNSET, TIME_IS_SUNSET);
         GameStateQuery.Register(GSQ_TIME_IS_LIGHTS_OFF, TIME_IS_LIGHTS_OFF);
-        GameStateQuery.Register(GSQ_WINDOW_LIGHTS, WINDOW_LIGHTS);
         GameStateQuery.Register(GSQ_TIME_IS_NIGHT, TIME_IS_NIGHT);
+        GameStateQuery.Register(GSQ_WINDOW_LIGHTS, WINDOW_LIGHTS);
+        GameStateQuery.Register(GSQ_RAINING_HERE, RAINING_HERE);
         try
         {
             ModEntry.harm.Patch(
@@ -81,11 +83,13 @@ internal static class DayToNightTiming
     private static bool TIME_IS_LIGHTS_OFF(string[] query, GameStateQueryContext context) =>
         Game1.isTimeToTurnOffLighting(context.Location);
 
+    private static bool TIME_IS_NIGHT(string[] query, GameStateQueryContext context) =>
+        Game1.isDarkOut(context.Location);
+
     private static bool WINDOW_LIGHTS(string[] query, GameStateQueryContext context) =>
         !Game1.IsRainingHere() && !Game1.isTimeToTurnOffLighting(context.Location);
 
-    private static bool TIME_IS_NIGHT(string[] query, GameStateQueryContext context) =>
-        Game1.isDarkOut(context.Location);
+    private static bool RAINING_HERE(string[] query, GameStateQueryContext context) => Game1.IsRainingHere();
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {

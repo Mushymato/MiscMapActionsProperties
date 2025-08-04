@@ -29,45 +29,87 @@ internal static class WoodsDebris
         WeatherDebris.Clear();
         if (CommonPatch.TryGetCustomFieldsOrMapProperty(e, MapProp_WoodsDebris, out string? prop))
         {
-            if (prop != "T")
+            Season season = e.GetSeason();
+            bool shouldDebris;
+            int which;
+            if (prop == "T")
+            {
+                shouldDebris = !e.IsRainingHere() && season != Season.Winter;
+                which = season == Season.Fall ? 2 : 1;
+            }
+            else
+            {
+                string[] args = ArgUtility.SplitBySpaceQuoteAware(prop);
+                if (
+                    !ArgUtility.TryGetInt(args, 0, out which, out string err, name: "int which")
+                    || !ArgUtility.TryGetOptional(
+                        args,
+                        1,
+                        out string gsq,
+                        out err,
+                        defaultValue: "TRUE",
+                        allowBlank: false,
+                        name: "string gsq"
+                    )
+                )
+                {
+                    ModEntry.Log(err, StardewModdingAPI.LogLevel.Error);
+                    shouldDebris = false;
+                }
+                else
+                {
+                    shouldDebris = GameStateQuery.CheckConditions(gsq, e);
+                    if (which == -1)
+                    {
+                        which = season switch
+                        {
+                            Season.Fall => 2,
+                            Season.Winter => 3,
+                            Season.Summer => 1,
+                            _ => 0,
+                        };
+                    }
+                    else if (which == -2)
+                    {
+                        which = season switch
+                        {
+                            Season.Fall => 2,
+                            Season.Winter => 3,
+                            _ => 1,
+                        };
+                    }
+                }
+            }
+            if (shouldDebris)
             {
                 e.ignoreDebrisWeather.Value = false;
                 return;
             }
-            if (e.IsRainingHere())
-                return;
+
             Random random = Utility.CreateDaySaveRandom();
             int num = 25 + random.Next(0, 75);
             e.ignoreDebrisWeather.Value = true;
-            Season season = e.GetSeason();
-            if (season != Season.Winter)
+            int num2 = 192;
+
+            for (int j = 0; j < num; j++)
             {
-                int num2 = 192;
-                int which = 1;
-                if (season == Season.Fall)
-                {
-                    which = 2;
-                }
-                for (int j = 0; j < num; j++)
-                {
-                    WeatherDebris.Add(
-                        new WeatherDebris(
-                            new Vector2(
-                                j * num2 % Game1.graphics.GraphicsDevice.Viewport.Width + Game1.random.Next(num2),
-                                j
-                                    * num2
-                                    / Game1.graphics.GraphicsDevice.Viewport.Width
-                                    * num2
-                                    % Game1.graphics.GraphicsDevice.Viewport.Height
-                                    + Game1.random.Next(num2)
-                            ),
-                            which,
-                            Game1.random.Next(15) / 500f,
-                            Game1.random.Next(-10, 0) / 50f,
-                            Game1.random.Next(10) / 50f
-                        )
-                    );
-                }
+                WeatherDebris.Add(
+                    new WeatherDebris(
+                        new Vector2(
+                            j * num2 % Game1.graphics.GraphicsDevice.Viewport.Width + Game1.random.Next(num2),
+                            j
+                                * num2
+                                / Game1.graphics.GraphicsDevice.Viewport.Width
+                                * num2
+                                % Game1.graphics.GraphicsDevice.Viewport.Height
+                                + Game1.random.Next(num2)
+                        ),
+                        which,
+                        Game1.random.Next(15) / 500f,
+                        Game1.random.Next(-10, 0) / 50f,
+                        Game1.random.Next(10) / 50f
+                    )
+                );
             }
         }
     }

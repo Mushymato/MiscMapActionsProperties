@@ -37,9 +37,21 @@ All map properties are also usable as entry in `Data/Location` `CustomFields`. I
     - `Light`: `mushymato.MMAP_Light 1 White <light index> 0 0 None` on the desired tile's TileData, Back or Front layer.
     - Path light: `mushymato.MMAP_Light 1 White 4 0 0 None` on the desired tile's TileData, Back or Front layer.
 
-#### mushymato.MMAP_WoodsDebris T
+#### mushymato.MMAP_WoodsDebris T | [debrisKind] [gsq]
 
 - Spawn leaves on this map and ignore global debris weather effects.
+- When the value given is simply `T`, follow vanilla secret woods logic:
+    - use summer leaves for spring and summer, fall leaves for fall
+    - no leaves when raining or in winter
+- When the value given is formatted like `-1 "RANDOM 0.5"` where -1 is `debrisKind` and `\"RANDOM 0.5\"` is a game state query
+    - `debrisKind` determines kind of leaf
+        - -2: use summer leaves for spring and summer, fall leaves for fall, winter snow particles for winter
+        - -1: use seasonal debris
+        - 0: spring leaves
+        - 1: summer leaves
+        - 2: fall leaves
+        - 3: winter snow particles
+
 
 #### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
 
@@ -88,11 +100,12 @@ There are also related Triggers for use in Data/TriggerActions
 - mushymato.MMAP_NightTimeTruly: raised at night truly time
 
 And Game State Queries
-- mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time
-- mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time
+- mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time.
+- mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time.
 - mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after window lights turn off and lamp lights turn on.
+- mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time.
 - mushymato.MMAP_WINDOW_LIGHTS: true when window lights should be on (e.g. !mushymato.MMAP_TIME_IS_LIGHTS_OFF and not raining).
-- mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time
+- mushymato.MMAP_RAINING_HERE: true when current location is raining.
 
 #### mushymato.MMAP_CribPosition: \<X\> \<Y\>
 
