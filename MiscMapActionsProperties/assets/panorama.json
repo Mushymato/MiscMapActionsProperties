@@ -3,7 +3,7 @@
     "BackingDay": [
       {
         "Id": "MMAP_Raining",
-        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Condition": "mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 640,
@@ -83,7 +83,7 @@
     "ParallaxLayers": [
       {
         "Id": "MMAP_NightStars",
-        "Condition": "!WEATHER Here Rain Storm GreenRain",
+        "Condition": "!mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -102,7 +102,7 @@
     "BackingDay": [
       {
         "Id": "MMAP_Raining",
-        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Condition": "mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 640,
@@ -182,7 +182,7 @@
     "ParallaxLayers": [
       {
         "Id": "MMAP_NightStars",
-        "Condition": "!WEATHER Here Rain Storm GreenRain",
+        "Condition": "!mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -198,7 +198,7 @@
       },
       {
         "Id": "MMAP_RainFar",
-        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Condition": "mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
         "Scale": 3.0,
@@ -215,7 +215,7 @@
       },
       {
         "Id": "MMAP_RainNear",
-        "Condition": "WEATHER Here Rain Storm GreenRain",
+        "Condition": "mushymato.MMAP_RAINING_HERE",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -229,7 +229,7 @@
       },
       {
         "Id": "MMAP_NormalFar",
-        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer Fall",
+        "Condition": "!mushymato.MMAP_RAINING_HERE, SEASON Spring Summer Fall",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
         "Scale": 3.0,
@@ -246,7 +246,7 @@
       },
       {
         "Id": "MMAP_NormalNear",
-        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Spring Summer Fall",
+        "Condition": "!mushymato.MMAP_RAINING_HERE, SEASON Spring Summer Fall",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,
@@ -260,7 +260,7 @@
       },
       {
         "Id": "MMAP_WinterFar",
-        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Winter",
+        "Condition": "!mushymato.MMAP_RAINING_HERE, SEASON Winter",
         "Texture": "LooseSprites/Cursors",
         "Color": "#808080",
         "Scale": 3.0,
@@ -277,7 +277,7 @@
       },
       {
         "Id": "MMAP_WinterNear",
-        "Condition": "!WEATHER Here Rain Storm GreenRain, SEASON Winter",
+        "Condition": "!mushymato.MMAP_RAINING_HERE, SEASON Winter",
         "Texture": "LooseSprites/Cursors",
         "SourceRect": {
           "X": 0,

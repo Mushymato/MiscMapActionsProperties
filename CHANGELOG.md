@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New map property `mushymato.MMAP_WoodsDebris`, spawn leaves like secret woods
 - Added a more significant `GameLocation.doesTileHaveProperty` optimization, this can be disabled via config.json in case of compatibility problems
 - New action `mushymato.MMAP_AddItemToBag` adds an item to MMAP global inventory
+- New gsq `mushymato.MMAP_RAINING_HERE` checks current location for raining-ness
 
 ### Fixed
 - more small perf improvements (it never ends)
