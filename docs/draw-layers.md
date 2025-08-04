@@ -20,7 +20,7 @@ These are all support passing either `0.1` float, or `"0.1 0.4"` for random valu
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotate`: rotation (0 to 6.28318), around the origin.
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.rotateRate`: rotation change per second, positive is clockwise, negative is counter clockwise.
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.scale`: draw scale (default 4f)
-- `mushymato.MMAP/DrawLayer.{DrawLayerId}.shake`: collision shake amount when player walks through (default 0f). Does not sync across multiplayer.
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.shake`: collision shake amount when player walks through (default 0f). Does not sync across multiplayer. This radius is affected by `AdditionalTilePropertyRadius` on building and furniture property data.
 
 #### Vector2 values
 
