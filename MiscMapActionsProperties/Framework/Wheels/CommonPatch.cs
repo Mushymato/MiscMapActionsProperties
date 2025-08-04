@@ -452,25 +452,25 @@ public static class CommonPatch
         return false;
     }
 
-    internal static Rectangle GetBuildingTileDataBounds(Building building)
+    internal static Rectangle GetBuildingTileDataBounds(Building building, int scale = 1)
     {
         int radius = building.GetAdditionalTilePropertyRadius();
         return new(
-            building.tileX.Value - radius,
-            building.tileY.Value - radius,
-            building.tilesWide.Value + 2 * radius,
-            building.tilesHigh.Value + 2 * radius
+            (building.tileX.Value - radius) * scale,
+            (building.tileY.Value - radius) * scale,
+            (building.tilesWide.Value + 2 * radius) * scale,
+            (building.tilesHigh.Value + 2 * radius) * scale
         );
     }
 
-    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture)
+    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture, int scale = 1)
     {
         int radius = furniture.GetAdditionalTilePropertyRadius();
         return new(
-            (int)furniture.TileLocation.X - radius,
-            (int)furniture.TileLocation.Y - radius,
-            furniture.getTilesWide() + 2 * radius,
-            furniture.getTilesHigh() + 2 * radius
+            ((int)furniture.TileLocation.X - radius) * scale,
+            ((int)furniture.TileLocation.Y - radius) * scale,
+            (furniture.getTilesWide() + 2 * radius) * scale,
+            (furniture.getTilesHigh() + 2 * radius) * scale
         );
     }
 

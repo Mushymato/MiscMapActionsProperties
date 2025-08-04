@@ -10,7 +10,7 @@
       "Action": "EditData",
       "Target": "Data/Furniture",
       "Entries": {
-        "{{ModId}}_DOOR": "DOOR/decor/1 3/1 2/2/250/2/DOOR/0/{{ModID}}\\DOOR/true",
+        "{{ModId}}_DOOR": "DOOR/decor/1 3/1 1/2/250/2/DOOR/0/{{ModID}}\\DOOR/true",
       }
     },
     {
@@ -20,6 +20,7 @@
         "{{ModId}}_DOOR": {
           "CollisionMap": "O",
           "DrawShadow": false,
+          "AdditionalTilePropertyRadius": 1,
           "DrawLayers": [
             {
               "Id": "{{ModId}}_Open_Rotation.0",
@@ -31,8 +32,6 @@
               },
               "FrameCount": 4,
               "FrameDuration": 90,
-              "DrawPosition": "0,-16",
-              "SortTileOffset": 1
             },
             {
               "Id": "{{ModId}}_Open_Rotation.2",
@@ -44,8 +43,6 @@
               },
               "FrameCount": 4,
               "FrameDuration": 90,
-              "DrawPosition": "0,-16",
-              "SortTileOffset": 1
             },
           ],
           "Metadata": {

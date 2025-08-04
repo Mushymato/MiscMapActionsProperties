@@ -41,6 +41,7 @@ internal static class FurnitureProperties
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
+        ModEntry.help.Events.GameLoop.Saving += OnSaving;
 
         // property patches
         Patch_Properties();
@@ -87,11 +88,28 @@ internal static class FurnitureProperties
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
         DlExtInfoCache.Clear();
+        SeatPositionCache.Clear();
+    }
+
+    private static void OnSaving(object? sender, SavingEventArgs e)
+    {
+        Utility.ForEachLocation(location =>
+        {
+            foreach (Furniture furniture in location.furniture)
+            {
+                int specialVariable = furniture.SpecialVariable;
+                if (specialVariable >= MMAP_SpecialVariableOffset && specialVariable < MMAP_SpecialVariableLimit)
+                {
+                    furniture.SpecialVariable = 0;
+                }
+            }
+            return true;
+        });
     }
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        foreach (DLExtInfo dLExtInfo in CurrentLocationDLStatesIter)
         {
             dLExtInfo.RecheckRands();
         }
@@ -99,7 +117,7 @@ internal static class FurnitureProperties
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
     {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        foreach (DLExtInfo dLExtInfo in CurrentLocationDLStatesIter)
         {
             dLExtInfo.TimeChanged();
         }
@@ -107,7 +125,7 @@ internal static class FurnitureProperties
 
     private static void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
     {
-        foreach (DLExtInfo dLExtInfo in DLStatesIter)
+        foreach (DLExtInfo dLExtInfo in CurrentLocationDLStatesIter)
         {
             dLExtInfo.UpdateTicked();
         }
@@ -350,13 +368,15 @@ internal static class FurnitureProperties
     }
 
     public const int MMAP_SpecialVariableOffset = 28423000;
+    public const int MMAP_SpecialVariableLimit = 28424000;
 
-    /// <summary>Furniture.GetAdditionalTilePropertyRadius doing a dict lookup is big perf hit for some odd reason</summary>
+    /// <summary>Furniture.GetAdditionalTilePropertyRadius doing a dict lookup is big perf hit</summary>
     private static void Furniture_GetAdditionalTilePropertyRadius_Postfix(Furniture __instance, ref int __result)
     {
-        if (__instance.SpecialVariable >= MMAP_SpecialVariableOffset)
+        int specialVariable = __instance.SpecialVariable;
+        if (specialVariable >= MMAP_SpecialVariableOffset && specialVariable < MMAP_SpecialVariableLimit)
         {
-            __result = __instance.SpecialVariable - MMAP_SpecialVariableOffset;
+            __result = specialVariable - MMAP_SpecialVariableOffset;
             return;
         }
         if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
@@ -371,57 +391,51 @@ internal static class FurnitureProperties
         ref bool __result
     )
     {
-        if (!__result || !FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+        bool playerIsMoving = Game1.player.isMoving();
+        if (!__result && !playerIsMoving)
             return;
+
+        if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
+            return;
+
+        Rectangle furniBounds = CommonPatch.GetFurnitureTileDataBounds(__instance, Game1.tileSize);
+        if (!furniBounds.Intersects(rect))
+            return;
+
+        // check contact effects with furniture
+        if (playerIsMoving)
+        {
+            Rectangle playerBounds = Game1.player.GetBoundingBox();
+            if (
+                furniBounds.Intersects(playerBounds)
+                && DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState) is FurnitureDLState state
+            )
+            {
+                float speed = Game1.player.getMovementSpeed();
+                bool left = playerBounds.Center.X > furniBounds.Center.X;
+
+                foreach ((_, DLExtInfo? dlExt) in state.LayerInfo)
+                {
+                    dlExt?.StartContact(furniBounds, speed, left);
+                }
+            }
+        }
+
         if (fpData.CollisionMap == null)
             return;
 
         fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
-        Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(__instance);
-
         for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
         {
             for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
             {
-                if (
-                    bounds.Contains(j, i)
-                    && !fpData.IsTilePassable(
-                        (int)(j - __instance.TileLocation.X),
-                        (int)(i - __instance.TileLocation.Y)
-                    )
-                )
+                if (!fpData.IsTilePassable((int)(j - __instance.TileLocation.X), (int)(i - __instance.TileLocation.Y)))
                 {
                     return;
                 }
             }
         }
         __result = false;
-
-        if (!Game1.player.isMoving())
-            return;
-
-        Rectangle furniBounds =
-            new(
-                bounds.X * Game1.tileSize,
-                bounds.Y * Game1.tileSize,
-                bounds.Width * Game1.tileSize,
-                bounds.Height * Game1.tileSize
-            );
-        Rectangle playerBounds = Game1.player.GetBoundingBox();
-        if (
-            playerBounds.Intersects(furniBounds)
-            && DlExtInfoCache.GetValue(__instance, FurnitureDLState.GetFurnitureDLState) is FurnitureDLState state
-        )
-        {
-            // tries to shake draw layers // character.speed + character.addedSpeed
-            float speed = Game1.player.getMovementSpeed();
-            bool left = playerBounds.Center.X > furniBounds.Center.X;
-
-            foreach ((_, DLExtInfo? dlExt) in state.LayerInfo)
-            {
-                dlExt?.StartContact(furniBounds, speed, left);
-            }
-        }
     }
     #endregion
 
@@ -756,15 +770,18 @@ internal static class FurnitureProperties
         }
     }
 
-    internal static IEnumerable<DLExtInfo> DLStatesIter
+    internal static IEnumerable<DLExtInfo> CurrentLocationDLStatesIter
     {
         get
         {
-            if (dlExtInfoCacheImpl.Value == null)
+            if (Game1.currentLocation == null)
                 yield break;
-            foreach ((_, FurnitureDLState? state) in dlExtInfoCacheImpl.Value)
+            var cacheImpl = dlExtInfoCacheImpl.Value;
+            if (cacheImpl == null)
+                yield break;
+            foreach (Furniture furniture in Game1.currentLocation.furniture)
             {
-                if (state != null)
+                if (cacheImpl.TryGetValue(furniture, out FurnitureDLState? state) && state != null)
                 {
                     foreach ((_, DLExtInfo? dLExtInfo) in state.LayerInfo)
                     {

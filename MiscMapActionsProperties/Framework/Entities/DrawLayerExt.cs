@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MiscMapActionsProperties.Framework.Wheels;
 using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -329,13 +330,13 @@ internal static class DrawLayerExt
 
     private static void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
+        DlExtInfoCache.Clear();
         AddBuildingDrawLayer(Game1.currentLocation);
     }
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        foreach (DLExtInfo value in DlExtInfoCache.Values)
-            value.RecheckRands();
+        DlExtInfoCache.Clear();
         AddBuildingDrawLayer(e.NewLocation);
     }
 
@@ -669,13 +670,7 @@ internal static class DrawLayerExt
 
         float speed = Game1.player.getMovementSpeed();
 
-        Rectangle buildingBounds =
-            new(
-                __instance.tileX.Value * Game1.tileSize,
-                __instance.tileY.Value * Game1.tileSize,
-                __instance.tilesWide.Value * Game1.tileSize,
-                __instance.tilesHigh.Value * Game1.tileSize
-            );
+        Rectangle buildingBounds = CommonPatch.GetBuildingTileDataBounds(__instance, Game1.tileSize);
         Rectangle playerBounds = Game1.player.GetBoundingBox();
 
         if (!playerBounds.Intersects(buildingBounds))
