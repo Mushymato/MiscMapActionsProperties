@@ -82,9 +82,9 @@ All map properties are also usable as entry in `Data/Location` `CustomFields`. I
 #### mushymato.MMAP_NightTime* \<time\> <a name="mushymato.MMAP_NightTime"></a>
 
 There are 3 similar map properties for setting phases of day transitioning to night.
-1. mushymato.MMAP_NightTimeStarting
-2. mushymato.MMAP_NightTimeModerate
-3. mushymato.MMAP_NightTimeTruly
+1. `mushymato.MMAP_NightTimeStarting`
+2. `mushymato.MMAP_NightTimeModerate`
+3. `mushymato.MMAP_NightTimeTruly`
 
 - All 3 of these take time in the typical military time format (0600) used by many SDV things.
 - The vanilla values are
@@ -94,18 +94,18 @@ There are 3 similar map properties for setting phases of day transitioning to ni
 - If you only set starting, the other two will be calculated according to vanilla logic.
 
 There are also related Triggers for use in Data/TriggerActions
-- mushymato.MMAP_NightTimeStarting: raised at night starting time
-- mushymato.MMAP_NightTimeModerate: raised at night moderate time
-- mushymato.MMAP_NightTimeLightsOff: raised 100 before night truly time, this is when lights turn off
-- mushymato.MMAP_NightTimeTruly: raised at night truly time
+- `mushymato.MMAP_NightTimeStarting`: raised at night starting time
+- `mushymato.MMAP_NightTimeModerate`: raised at night moderate time
+- `mushymato.MMAP_NightTimeLightsOff`: raised 100 before night truly time, this is when lights turn off
+- `mushymato.MMAP_NightTimeTruly`: raised at night truly time
 
 And Game State Queries
-- mushymato.MMAP_TIME_IS_DAY: true when time of day is less than night starting time.
-- mushymato.MMAP_TIME_IS_SUNSET: true when time of day is during night starting and truly time.
-- mushymato.MMAP_TIME_IS_LIGHTS_OFF: true when time of day is after window lights turn off and lamp lights turn on.
-- mushymato.MMAP_TIME_IS_NIGHT: true when time of day is later than night truly time.
-- mushymato.MMAP_WINDOW_LIGHTS: true when window lights should be on (e.g. !mushymato.MMAP_TIME_IS_LIGHTS_OFF and not raining).
-- mushymato.MMAP_RAINING_HERE: true when current location is raining.
+- `mushymato.MMAP_TIME_IS_DAY`: true when time of day is less than night starting time.
+- `mushymato.MMAP_TIME_IS_SUNSET`: true when time of day is during night starting and truly time.
+- `mushymato.MMAP_TIME_IS_LIGHTS_OFF`: true when time of day is after window lights turn off and lamp lights turn on.
+- `mushymato.MMAP_TIME_IS_NIGHT`: true when time of day is later than night truly time.
+- `mushymato.MMAP_WINDOW_LIGHTS`: true when window lights should be on (e.g. `!mushymato.MMAP_TIME_IS_LIGHTS_OFF` and not raining).
+- `mushymato.MMAP_RAINING_HERE`: true when current location is raining.
 
 #### mushymato.MMAP_CribPosition: \<X\> \<Y\>
 

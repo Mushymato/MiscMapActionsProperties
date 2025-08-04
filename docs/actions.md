@@ -28,8 +28,14 @@ Each action will note what they can be used as:
 
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Opens a global inventory with the given inventory id. This id is always prefixed with `mushymato.MMAP#`, but it is recommended to prefix it with your own mod id too.
-- This can be used to create junimo chest like containers, though automate will not work with it.
-- Bag kind will allow you to make this chest a big chest with 70 slots, but it is up to the mod to consistently use `BigChest` for all places where this bag is accessible.
+- This can be used to create junimo chest like containers, though automate will not work with it since they are not true "Chest" entities.
+- Using `BigChest` as bag kind will make this chest a big chest with 70 slots, but it is up to the mod to consistently use `BigChest` for all places where this bag is accessible.
+- Related GSQ: `mushymato.MMAP_BAG_HAS_ITEM [bagInvId] [itemId] [minCount] [maxCount]`: check that bag has some amount of an item.
+
+### mushymato.MMAP_AddItemToBag \<bagInventoryId\> \<qualifiedItemId\> [amount] [quality]
+
+- Can be used as either `Action` or `TouchAction` or `TriggerAction`.
+- Adds an item to a specific MMAP global inventory bag.
 
 ### mushymato.MMAP_TAS \<X\> \<Y\> \<tasId\>+
 

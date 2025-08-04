@@ -87,9 +87,10 @@ internal static class DayToNightTiming
         Game1.isDarkOut(context.Location);
 
     private static bool WINDOW_LIGHTS(string[] query, GameStateQueryContext context) =>
-        !Game1.IsRainingHere() && !Game1.isTimeToTurnOffLighting(context.Location);
+        !Game1.IsRainingHere(context.Location) && !Game1.isTimeToTurnOffLighting(context.Location);
 
-    private static bool RAINING_HERE(string[] query, GameStateQueryContext context) => Game1.IsRainingHere();
+    private static bool RAINING_HERE(string[] query, GameStateQueryContext context) =>
+        Game1.IsRainingHere(context.Location);
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {

@@ -8,7 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - Draw layers can now have open animation behavior, kind of like shipping bin lid
-- New map property mushymato.MMAP_WoodsDebris T, spawn leaves
+- New map property `mushymato.MMAP_WoodsDebris`, spawn leaves like secret woods
+- Added a more significant `GameLocation.doesTileHaveProperty` optimization, this can be disabled via config.json in case of compatibility problems
+- New action `mushymato.MMAP_AddItemToBag` adds an item to MMAP global inventory
 
 ### Fixed
 - more small perf improvements (it never ends)

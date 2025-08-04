@@ -6,9 +6,21 @@ To give furniture some properties, add an entry to custom asset `mushymato.MMAP/
 
 This asset is secretly reusing [buildings data](https://stardewvalleywiki.com/Modding:Buildings) but only a few fields are actually read and their meaning may not be the same. More may be added later, if they make sense.
 
-Your furniture still needs to be [added to `Data/Furniture`](https://stardewvalleywiki.com/Modding:Furniture) first to make them a furniture item, before any `mushymato.MMAP/FurnitureProperties` can take effect.
+Your furniture still needs to be [added to `Data/Furniture`](https://stardewvalleywiki.com/Modding:Furniture) first to make them a furniture item, before any `mushymato.MMAP/FurnitureProperties` can take effect. At the same time this means uninstalling MMAP won't turn your furniture into error items.
 
-### Fields Actually in Use
+### What can you do with Furniture Properties?
+
+Some of these features overlap with other framework mods, usually they don't conflict and you may use both together.
+
+- Add furniture descriptions (`Description`).
+- Add various tile actions and properties (`TileProperties`), which can be used for a variety of purposes like creating catalogues, functional jukeboxes, lights, etc.
+- Add seats (`ActionTiles`).
+- Create custom TV furniture.
+- Make furniture obey seasons via `SeasonOffset`, compared to using the `{{Season}}` token, this feature respects the location's season override.
+- Change furniture collision to make non-rugs passable (but not make rugs impassable).
+- Various advanced drawing controls via `DrawLayers`, see also the [draw layers extension documentation](docs/draw-layers.md).
+
+## Fields Actually in Use
 
 | Property | Type | Default | Notes |
 | -------- | ---- | ------- | ----- |
@@ -23,7 +35,7 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
 | `CustomFields["TV"]` | string | _empty_ | Sets this furniture as a TV with screen defined as `[posX] [posY] [scale]`. |
 
-#### TileProperties
+### TileProperties
 
 (This is same as vanilla `BuildingData.TileProperties`, copied here for reference)
 
@@ -35,7 +47,7 @@ Your furniture still needs to be [added to `Data/Furniture`](https://stardewvall
 | `Layer` | string | _empty_ | Which map layer this tile property belongs to, e.g. `"Back"`. |
 | `TileArea` | Rectangle | Rectangle.Empty | Which tiles this tile property should affect, relative to top left corner. |
 
-#### ActionTiles
+### ActionTiles
 
 (This is same as vanilla `BuildingData.ActionTiles`, copied here for reference)
 
@@ -54,7 +66,7 @@ You can use these values in `Action`:
     - Having any `Seat` action tiles will override the vanilla seat logic.
     - Not compatible with furniture rotations atm.
 
-#### DrawLayers
+### DrawLayers
 
 (This is same as vanilla `BuildingData.BuildingDrawLayers`, copied here for reference)
 
@@ -72,11 +84,13 @@ You can use these values in `Action`:
 | `OnlyDrawIfChestHasContents`| string | _empty_ | Unused. |
 | `AnimalDoorOffset`| Point | 0,0 | Unused. |
 
-##### Using DrawLayers with Rotations
+`DrawLayers` are not affected by "Alternative Textures", should you attempt to use them together the MMAP draw layers will simply appear over/under AT's draw.
+
+#### Using DrawLayers with Rotations
 
 To make a particular draw layer only appear for a certain rotation, use an `Id` with this format (case insensitive): `.*_Rotation.(\d+)` where the number after `Rotation.` is the in-game rotation index. What number this will be depends on the kind of rotation but usually it starts counting up from 0. You can check current rotation in game with [lookup anything (datamining fields on)](https://www.nexusmods.com/stardewvalley/mods/541).
 
-### Caveats with Rotations
+## Caveats with Rotations
 
 If your furniture has rotations, the tile property bounds needs to also cover the rotated shape, e.g. use a 2x2 bound for a 2x1 furniture that can rotate to 1x2. The extra tile is not a problem since the furniture's (rotated) bounds are checked first.
 
@@ -89,19 +103,19 @@ XOO
 OOO
 ```
 
-### Tile Property Support
+## Tile Property Support
 
 (This section is mainly for C# modders hoping to implement their own tile properties)
 
 Whether a particular Tile Property is supported depends on usage of `GameLocation.doesTileHaveProperty` which is where `Furniture.DoesTileHaveProperty` gets called.
 Most vanilla properties do call this, but they might not actually take effect for other reasons such as tile being occupied by furniture or the overall map lacking a certain property.
 
-#### Vanilla Tile Properties known to Not Work
+### Vanilla Tile Properties Known to Not Work
 - `Passable`
 - `Diggable`
 - `Water` requires the map to generally support water, i.e. `Outdoors` or `indoorWater` map properties.
 
-#### Modded Tile Properties
+### Modded Tile Properties
 These MMAP tile properties are supported and guarenteed to update as soon as furniture is moved (this is also true of buildings tile properties).
 - `mushymato.MMAP_TAS`
 - `mushymato.MMAP_Light`
