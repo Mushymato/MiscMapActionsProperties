@@ -1,0 +1,123 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.7.0",
+  "DynamicTokens": [
+    {
+      "Name": "TurbineRotateRate",
+      "Value": "{{Random: 0.1, 0.15, 0.2}}",
+    },
+    {
+      "Name": "TurbineRotateRate",
+      "Value": " 0.4",
+      "When": {
+        "Weather": "Rain, GreenRain"
+      }
+    },
+    {
+      "Name": "TurbineRotateRate",
+      "Value": "0.6",
+      "When": {
+        "Weather": "Wind, Storm"
+      }
+    }
+  ],
+  "Changes": [
+    {
+      "LogName": "Load wind turbine texture",
+      "Action": "Load",
+      "Target": "{{ModId}}_Texture",
+      "FromFile": "assets/turbine.png"
+    },
+    {
+      "LogName": "LocalizedText default",
+      "Action": "Load",
+      "Target": "{{ModId}}.i18n",
+      "FromFile": "i18n/default.json",
+      "Priority": "Low"
+    },
+    {
+      "LogName": "LocalizedText translation",
+      "Action": "Load",
+      "Target": "{{ModId}}.i18n",
+      "FromFile": "i18n/{{Language}}.json",
+      "Priority": "Medium",
+      "When": {
+        "HasFile:{{FromFile}}": true
+      }
+    },
+    {
+      "LogName": "Add wind turbine furniture",
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_WindTurbine": "{{ModId}}_WindTurbine/decor/1 8/1 1/1/5000/-1/[LocalizedText {{ModId}}.i18n:WindTurbine.Name]/0/{{ModId}}_Texture/true"
+      }
+    },
+    {
+      "LogName": "Add wind turbine machine rules",
+      "Action": "EditData",
+      "Target": "Data/Machines",
+      "Entries": {
+        "(F){{ModId}}_WindTurbine": {
+          "OutputRules": [
+            {
+              "Id": "Default",
+              "Triggers": [
+                {
+                  "Id": "DayUpdate",
+                  "Trigger": "DayUpdate",
+                  "Condition": "LOCATION_IS_OUTDOORS Here, SYNCED_RANDOM day {{ModId}}_WindTurbine 0.35"
+                }
+              ],
+              "OutputItem": [
+                {
+                  "Id": "(O)787",
+                  "ItemId": "(O)787",
+                  "MinStack": 1,
+                  "MaxStack": 1,
+                },
+              ],
+            }
+          ],
+          "WobbleWhileWorking": false,
+        },
+      }
+    },
+    {
+      "LogName": "Add wind turbine crafting recipe",
+      "Action": "EditData",
+      "Target": "Data/CraftingRecipes",
+      "Entries": {
+        "{{ModId}}_WindTurbine": "335 10 338 10 767 15/Home/(F){{ModId}}_WindTurbine/false/s Foraging 7/",
+      }
+    },
+    {
+      "LogName": "Add wind turbine spinnnning effects",
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_WindTurbine": {
+          "DrawLayers": [
+            {
+              "Id": "{{ModId}}_Blades",
+              "SourceRect": {
+                "X": 16,
+                "Y": 0,
+                "Width": 96,
+                "Height": 96
+              },
+              "FrameCount": 1,
+              "DrawPosition": "8, 10",
+              "SortTileOffset": -1
+            },
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Blades.rotate": "0.0 6.0",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Blades.rotateRate": "{{TurbineRotateRate}}",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_Blades.origin": "48 48",
+          }
+        }
+      }
+    }
+  ]
+}

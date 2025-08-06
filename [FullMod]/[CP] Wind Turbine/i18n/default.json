@@ -1,0 +1,5 @@
+{
+  "$schema": "https://smapi.io/schemas/i18n.json",
+  "WindTurbine.Name": "Wind Turbine",
+  "WindTurbine.Description": "Gathers wind power when placed outside, generates one battery pack every few days."
+}

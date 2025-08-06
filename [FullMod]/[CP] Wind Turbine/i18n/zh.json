@@ -1,0 +1,5 @@
+{
+  "$schema": "https://smapi.io/schemas/i18n.json",
+  "WindTurbine.Name": "风力涡轮机",
+  "WindTurbine.Description": "放置在室外可收集风能，每几天生产一个电池组。"
+}

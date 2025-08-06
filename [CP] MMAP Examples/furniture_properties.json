@@ -161,19 +161,8 @@
           ]
         },
         "LargeWizardBookcase": {
-          "Action": "EditData",
-          "Target": "mushymato.MMAP/FurnitureProperties",
-          "Entries": {
-            "{{ModId}}_PlasmaTV_01": {
-              "CustomFields": {
-                "TV": "12 -96 4"
-              }
-            },
-            "{{ModId}}_PlasmaTV_02": {
-              "CustomFields": {
-                "TV": "12 -96 4"
-              }
-            }
+          "CustomFields": {
+            "TV": "12 -96 4"
           }
         },
         "1391": {
