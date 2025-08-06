@@ -86,9 +86,25 @@
     {
       "LogName": "Add wind turbine crafting recipe",
       "Action": "EditData",
-      "Target": "Data/CraftingRecipes",
+      "Target": "Data/Shops",
+      "TargetField": [
+        "Carpenter",
+        "Items"
+      ],
       "Entries": {
-        "{{ModId}}_WindTurbine": "335 10 338 10 767 15/Home/(F){{ModId}}_WindTurbine/false/s Foraging 7/",
+        "(F){{ModId}}_WindTurbine.Buy": {
+          "Id": "(F){{ModId}}_WindTurbine.Buy",
+          "ItemId": "(F){{ModId}}_WindTurbine",
+          "TradeItemId": "(BC)9",
+          "TradeItemAmount": 4,
+        },
+        "(F){{ModId}}_WindTurbine.Sell": {
+          "Id": "(F){{ModId}}_WindTurbine.Sell",
+          "ItemId": "(BC)9",
+          "MinStack": 4,
+          "TradeItemId": "(F){{ModId}}_WindTurbine",
+          "TradeItemAmount": 1,
+        }
       }
     },
     {
