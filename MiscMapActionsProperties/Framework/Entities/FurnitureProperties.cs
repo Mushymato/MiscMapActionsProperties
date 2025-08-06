@@ -398,13 +398,22 @@ internal static class FurnitureProperties
         if (!FPData.TryGetValue(__instance.ItemId, out BuildingData? fpData))
             return;
 
-        Rectangle furniBounds = CommonPatch.GetFurnitureTileDataBounds(__instance, Game1.tileSize);
-        if (!furniBounds.Intersects(rect))
-            return;
-
+        Rectangle boundingBox = __instance.boundingBox.Value;
         // check contact effects with furniture
         if (playerIsMoving)
         {
+            int radius = __instance.GetAdditionalTilePropertyRadius() * Game1.tileSize;
+
+            Rectangle furniBounds =
+                new(
+                    boundingBox.X - radius,
+                    boundingBox.Y - radius,
+                    boundingBox.Width + 2 * radius,
+                    boundingBox.Height + 2 * radius
+                );
+            if (!furniBounds.Intersects(rect))
+                return;
+
             Rectangle playerBounds = Game1.player.GetBoundingBox();
             if (
                 furniBounds.Intersects(playerBounds)
@@ -421,15 +430,16 @@ internal static class FurnitureProperties
             }
         }
 
-        if (fpData.CollisionMap == null)
+        // check actual collision
+        if (!__result || fpData.CollisionMap == null)
             return;
 
-        fpData.Size = new Point(__instance.getTilesWide(), __instance.getTilesHigh());
+        Point boundingBoxPos = new(boundingBox.X / Game1.tileSize, boundingBox.Y / Game1.tileSize);
         for (int i = rect.Top / 64; i <= rect.Bottom / 64; i++)
         {
             for (int j = rect.Left / 64; j <= rect.Right / 64; j++)
             {
-                if (!fpData.IsTilePassable((int)(j - __instance.TileLocation.X), (int)(i - __instance.TileLocation.Y)))
+                if (!fpData.IsTilePassable(j - boundingBoxPos.X, i - boundingBoxPos.Y))
                 {
                     return;
                 }
@@ -713,7 +723,6 @@ internal static class FurnitureProperties
                         drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
                     }
                 }
-                layerDepth -= furniture.TileLocation.X * LAYER_OFFSET;
 
                 Rectangle sourceRect = drawLayer.GetSourceRect(
                     (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
