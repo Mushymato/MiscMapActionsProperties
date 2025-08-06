@@ -192,7 +192,10 @@ internal static class FurnitureProperties
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetSeatPositions)),
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetSeatPositions_Postfix))
+                prefix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_GetSeatPositions_Prefix))
+                {
+                    before = ["Espy.PreciseFurniture"],
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetSittingDirection)),
@@ -273,11 +276,14 @@ internal static class FurnitureProperties
         __result = seatPositions.Count;
     }
 
-    private static void Furniture_GetSeatPositions_Postfix(Furniture __instance, ref List<Vector2> __result)
+    private static bool Furniture_GetSeatPositions_Prefix(Furniture __instance, ref List<Vector2> __result)
     {
         if (SeatPositionCache.GetValue(__instance, CreateSeatPositions) is not List<FurnitureSeat> seatPositions)
-            return;
-        __result = seatPositions.Select(seat => __instance.TileLocation + seat.Pos.ToVector2()).ToList();
+            return true;
+        Rectangle boundingBox = __instance.boundingBox.Value;
+        Vector2 boundingBoxPos = new(boundingBox.X / 64f, boundingBox.Y / 64f);
+        __result = seatPositions.Select(seat => boundingBoxPos + seat.Pos.ToVector2()).ToList();
+        return false;
     }
 
     private static void Furniture_GetSittingDirection_Postfix(Furniture __instance, ref int __result)
