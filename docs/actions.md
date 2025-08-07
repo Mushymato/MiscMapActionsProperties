@@ -37,7 +37,7 @@ Each action will note what they can be used as:
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Adds an item to a specific MMAP global inventory bag.
 
-### mushymato.MMAP_TAS \<X\> \<Y\> \<tasId\>+
+### mushymato.MMAP_TAS \<X\> \<Y\> \<tasId\>+ <a name="mushymato.MMAP_TAS"></a>
 
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Spawns [TAS](temporary-animated-sprites.md) on the specified tile.
@@ -54,7 +54,7 @@ Each action will note what they can be used as:
 - Can be used as `TouchAction`.
 - Spawns the TAS while player is standing on the tile, removed if player moves off the tile.
 
-### mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+
+### mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+ <a name="mushymato.MMAP_Critter"></a>
 
 - Can be used as `Action` or `TouchAction`.
 - Does not take any coordinates, i.e. accept same arguments as the tile property version.

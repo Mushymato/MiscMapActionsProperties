@@ -41,8 +41,9 @@ Map properties can be set on the map or through building/furniture/floor path.
 - Add a temporary animated sprite at this tile.
 - The layer depth is based on the tile position.
 - The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
+- There are several actions related to this tile property, see [actions mushymato.MMAP_TAS](actions.md#mushymato.MMAP_TAS) for details.
 
-#### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+  <a name="mushymato.MMAP_Critter"></a>
+#### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+ <a name="mushymato.MMAP_Critter"></a>
 
 - Spawn a certain kind of simple critter on this tile. The positions are slightly randomized within the tile's bounds.
 - Currently supports the following critter types:
@@ -68,3 +69,4 @@ Map properties can be set on the map or through building/furniture/floor path.
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a custom texture, they need to have same dimensions as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.
+- There are several actions related to this tile property, see [actions mushymato.MMAP_Critter](actions.md#mushymato.MMAP_Critter) for details.
