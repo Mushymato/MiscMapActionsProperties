@@ -55,9 +55,15 @@ Map properties can be set on the map or through building/furniture/floor path.
         - When using T, the birdie start index will be picked with logic similar to base game.
         - YOffset is a change on Y axis to the birdy's position, e.g. `T:-128` to make birdie appear 2 tiles above it's tile position.
     - Butterfly: [texture|<number>|T] [count]
-        - The number option allows you to give a start index for `TileSheet/critters` (WIP: figure out the indicies)
+        - The number option allows you to give a start index for `TileSheet/critters`
+            - winter butterflies: 397
+            - spring butterflies: 160, 163, 166, 180, 183, 186
+            - summer butterflies: 128, 132, 136, 148, 152, 156
+            - island butterflies: 364, 368, 372, 376
+            - prismatic butterfly (color mask): 394
+            - unused: 428, 432, 480, 484
         - When using texture, the bufferfly will follow summer butterfly rules (4 frames)
-        - When using T, the birdie start index will be picked base game logic.
+        - When using T, the butterfly start index will be picked by base game logic, this covers the winter/spring/summer/island butterfly sets.
     - Frog: [T|F] [count]
         - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
     - LeaperFrog: [T|F] [count]
