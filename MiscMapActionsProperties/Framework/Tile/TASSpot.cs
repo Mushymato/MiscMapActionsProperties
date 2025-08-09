@@ -194,7 +194,7 @@ internal static class TASSpot
 
     private static bool TileAndTouchTAS(GameLocation location, string[] args, Farmer farmer, Point source)
     {
-        return SpawnTAS(location, args, out _);
+        return SpawnTAS(location, args, out _, defaultPos: source);
     }
 
     private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string error)
@@ -263,15 +263,26 @@ internal static class TASSpot
         AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
     }
 
-    private static bool SpawnTAS(GameLocation location, string[] args, out string error)
+    private static bool SpawnTAS(GameLocation location, string[] args, out string error, Point? defaultPos = null)
     {
         error = "Not enough arguments.";
         if (args.Length < 4 || !ArgUtility.TryGetPoint(args, 1, out Point pos, out error, "Point spawnPos"))
         {
-            ModEntry.Log(error);
             return false;
         }
 
+        if (pos.X == -1000 && pos.Y == -1000)
+        {
+            if (defaultPos.HasValue)
+            {
+                pos = defaultPos.Value;
+            }
+            else
+            {
+                error = $"Invalid position {pos}";
+                return false;
+            }
+        }
         if (!CreateTASDefsFromArgs(args, 3, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
         {
             return false;
