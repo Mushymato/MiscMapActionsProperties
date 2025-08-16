@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7]
+
+### Added
+- Micro-syntax for GSQ critters `Crab:FALSE:1:3`. [NEEDS DOCS]
+- Special -1000 -1000 coord for "at this tile" TAS [NEEDS DOCS]
+
+### Fixed
+- Fixed woods debris not actually working oops.
+- The draw layers are fighting again
+
 ## [1.9.6]
 
 ### Changed

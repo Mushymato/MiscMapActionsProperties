@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -725,7 +724,7 @@ internal static class FurnitureProperties
                     }
                     else
                     {
-                        layerDepth -= drawLayer.SortTileOffset * 64f / 10000f;
+                        layerDepth -= drawLayer.SortTileOffset * 64f / 10000f + furniture.TileLocation.X * LAYER_OFFSET;
                         drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
                     }
                 }

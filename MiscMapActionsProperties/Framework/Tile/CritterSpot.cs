@@ -201,6 +201,7 @@ internal static class CritterSpot
         error = "";
         List<Critter> spawned = [];
         location.instantiateCrittersList();
+        Point pntOffset = Point.Zero;
         for (int i = firstIdx; i <= args.Length - 3; i += 3)
         {
             if (
@@ -211,10 +212,32 @@ internal static class CritterSpot
                     out error,
                     allowBlank: false,
                     name: "string critterKind"
-                ) || !Enum.TryParse(critterKindStr, true, out SupportedCritter critterKind)
+                )
             )
             {
                 break;
+            }
+            if (!Enum.TryParse(critterKindStr, true, out SupportedCritter critterKind))
+            {
+                string[] critterKindArgs = critterKindStr.Split(":");
+                if (
+                    !ArgUtility.TryGetEnum(critterKindArgs, 0, out critterKind, out error, name: "enum critterKind")
+                    || !ArgUtility.TryGetOptional(
+                        critterKindArgs,
+                        1,
+                        out string gsq,
+                        out error,
+                        name: "string critterGSQ"
+                    )
+                )
+                {
+                    break;
+                }
+                if (!GameStateQuery.CheckConditions(gsq))
+                {
+                    break;
+                }
+                ArgUtility.TryGetPoint(critterKindArgs, 2, out pntOffset, out _, name: "Point pntOffset");
             }
             if (
                 !ArgUtility.TryGetOptional(args, i + 1, out string? arg1, out error, name: "string arg1")
@@ -231,17 +254,18 @@ internal static class CritterSpot
                 ModEntry.Log(error, LogLevel.Error);
                 break;
             }
+            Point pnt = position + pntOffset;
             // csharpier-ignore
             var spawnedThisTime = critterKind switch
             {
-                SupportedCritter.Firefly => SpawnCritterFirefly(location, position, arg1, count),
-                SupportedCritter.Seagull => SpawnCritterSeagull(location, position, arg1, count),
-                SupportedCritter.Crab => SpawnCritterCrab(location, position, arg1, count),
-                SupportedCritter.Birdie => SpawnCritterBirdie(location, position, arg1, count),
-                SupportedCritter.Butterfly => SpawnCritterButterfly(location, position, arg1, count),
-                SupportedCritter.Frog => SpawnCritterFrog(location, position, arg1, count),
-                SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, position, arg1, count),
-                SupportedCritter.Rabbit => SpawnCritterRabbit(location, position, arg1, count),
+                SupportedCritter.Firefly => SpawnCritterFirefly(location, pnt, arg1, count),
+                SupportedCritter.Seagull => SpawnCritterSeagull(location, pnt, arg1, count),
+                SupportedCritter.Crab => SpawnCritterCrab(location, pnt, arg1, count),
+                SupportedCritter.Birdie => SpawnCritterBirdie(location, pnt, arg1, count),
+                SupportedCritter.Butterfly => SpawnCritterButterfly(location, pnt, arg1, count),
+                SupportedCritter.Frog => SpawnCritterFrog(location, pnt, arg1, count),
+                SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, pnt, arg1, count),
+                SupportedCritter.Rabbit => SpawnCritterRabbit(location, pnt, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)

@@ -80,7 +80,7 @@ internal static class WoodsDebris
                     }
                 }
             }
-            if (shouldDebris)
+            if (!shouldDebris)
             {
                 e.ignoreDebrisWeather.Value = false;
                 return;

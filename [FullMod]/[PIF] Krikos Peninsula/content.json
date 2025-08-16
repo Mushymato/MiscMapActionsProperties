@@ -84,7 +84,7 @@
           },
           "MapAsset_T0": "{{ModID}}/Greenhouse",
           "CreateOnLoad": {
-            "AlwaysActive": true
+            "AlwaysActive": false
           },
           "DefaultArrivalTile": {
             "X": 22,
