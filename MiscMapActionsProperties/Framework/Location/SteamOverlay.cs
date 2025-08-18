@@ -93,9 +93,9 @@ internal static class SteamOverlay
                 && ArgUtility.TryGetOptionalFloat(args, 5, out float scale, out error, 4f, "string scale")
             )
             {
-                Texture2D texture = Game1.temporaryContent.DoesAssetExist<Texture2D>(steamTexture)
-                    ? Game1.temporaryContent.Load<Texture2D>(steamTexture)
-                    : Game1.temporaryContent.Load<Texture2D>("LooseSprites\\steamAnimation");
+                Texture2D texture = Game1.content.DoesAssetExist<Texture2D>(steamTexture)
+                    ? Game1.content.Load<Texture2D>(steamTexture)
+                    : Game1.content.Load<Texture2D>("LooseSprites\\steamAnimation");
                 Color color = Color.White * 0.8f;
                 if (!string.IsNullOrEmpty(steamColor) && Utility.StringToColor(steamColor) is Color clr)
                     color = clr;

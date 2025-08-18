@@ -109,13 +109,11 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     {
         if (
             !GameStateQuery.CheckConditions(data.Condition, context)
-            && !Game1.temporaryContent.DoesAssetExist<Texture2D>(data.Texture)
+            && !Game1.content.DoesAssetExist<Texture2D>(data.Texture)
         )
             return null;
         Texture2D texture =
-            data.Texture == "LooseSprites/Cursors"
-                ? Game1.mouseCursors
-                : Game1.temporaryContent.Load<Texture2D>(data.Texture);
+            data.Texture == "LooseSprites/Cursors" ? Game1.mouseCursors : Game1.content.Load<Texture2D>(data.Texture);
         return new(data, texture, data.SourceRect.IsEmpty ? texture.Bounds : data.SourceRect);
     }
 
@@ -221,9 +219,9 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
     {
         if (GetFirstMatchingData(dataList, context) is BackingData backing)
         {
-            if (Game1.temporaryContent.DoesAssetExist<Texture2D>(backing.Texture))
+            if (Game1.content.DoesAssetExist<Texture2D>(backing.Texture))
             {
-                Texture2D texture = Game1.temporaryContent.Load<Texture2D>(backing.Texture);
+                Texture2D texture = Game1.content.Load<Texture2D>(backing.Texture);
                 return new(
                     texture,
                     backing.SourceRect.IsEmpty ? texture.Bounds : backing.SourceRect,

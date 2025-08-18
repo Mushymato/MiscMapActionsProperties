@@ -170,7 +170,11 @@
     },
     {
       "Action": "Include",
-      "FromFile": "draw_layer_opening.json"
+      "FromFile": "draw_layers_opening.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "draw_layers_nightly.json"
     }
   ]
 }

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Farmhouse",
+        "DrawLayers"
+      ],
+      "Entries": {
+        "{{ModId}}_Window": {
+          "Id": "{{ModId}}_Window",
+          "Texture": "Animals/Golden Chicken",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 16
+          },
+          "SortTileOffset": 2,
+          "DrawPosition": "54, 87",
+        },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Farmhouse",
+        "Metadata"
+      ],
+      "Entries": {
+        "mushymato.MMAP/DrawLayer.{{ModId}}_Window.condition": "TIME 1700 2200",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Farmhouse",
+        "TileProperties"
+      ],
+      "Entries": {
+        "{{ModId}}_Light": {
+          "Id": "{{ModId}}_Light",
+          "Name": "mushymato.MMAP_Light",
+          "Value": "3 White 1",
+          "Layer": "Front",
+          "TileArea": {
+            "X": 3,
+            "Y": 2,
+            "Width": 1,
+            "Height": 1
+          }
+        },
+        "{{ModId}}_LightCond": {
+          "Id": "{{ModId}}_LightCond",
+          "Name": "mushymato.MMAP_LightCond",
+          "Value": "TIME 1700 2200",
+          "Layer": "Front",
+          "TileArea": {
+            "X": 4,
+            "Y": 2,
+            "Width": 1,
+            "Height": 1
+          }
+        }
+      }
+    }
+  ]
+}

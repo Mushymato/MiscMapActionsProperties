@@ -101,12 +101,12 @@ internal static class LightRays
             int raySeed = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
             if (rayTexture == "T")
             {
-                lightRaysCtx.Value = new(raySeed, Game1.temporaryContent.Load<Texture2D>("LooseSprites\\LightRays"));
+                lightRaysCtx.Value = new(raySeed, Game1.content.Load<Texture2D>("LooseSprites\\LightRays"));
                 return;
             }
-            else if (Game1.temporaryContent.DoesAssetExist<Texture2D>(rayTexture))
+            else if (Game1.content.DoesAssetExist<Texture2D>(rayTexture))
             {
-                lightRaysCtx.Value = new(raySeed, Game1.temporaryContent.Load<Texture2D>(rayTexture));
+                lightRaysCtx.Value = new(raySeed, Game1.content.Load<Texture2D>(rayTexture));
                 return;
             }
         }

@@ -68,7 +68,7 @@ internal static class FridgePosition
                 string[] args = ArgUtility.SplitBySpaceQuoteAware(fridgeDoorProp);
                 if (
                     !ArgUtility.TryGet(args, 0, out string fridgeDoorTx, out string _, name: "fridgeDoorTx")
-                    || !Game1.temporaryContent.DoesAssetExist<Texture2D>(fridgeDoorTx)
+                    || !Game1.content.DoesAssetExist<Texture2D>(fridgeDoorTx)
                 )
                 {
                     return;
@@ -81,7 +81,7 @@ internal static class FridgePosition
                     integerOnly: false,
                     name: "Vector2 offset"
                 );
-                DoorSprite.Value = new(Game1.temporaryContent.Load<Texture2D>(fridgeDoorTx), offset);
+                DoorSprite.Value = new(Game1.content.Load<Texture2D>(fridgeDoorTx), offset);
             }
         }
         else

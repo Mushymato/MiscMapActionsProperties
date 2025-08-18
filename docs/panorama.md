@@ -2,12 +2,14 @@
 
 Panorama defines what goes behind a map in a way independent of map tiles, there are some hardcoded in C# examples of this vanilla (summet, island north, submarine).
 
-MMAP panoramas can be used by map property or custom field `mushymato.MMAP_Panorama <panoramaId>`
+MMAP panoramas can be used by map property or custom field `mushymato.MMAP_Panorama <panoramaId>`.
 
 There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
+
+This document describes how you can add more, by editing `mushymato.MMAP/Panorama` custom asset.
 
 ### Structure
 
