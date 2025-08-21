@@ -3,6 +3,7 @@
 //
 // Based on ConnectedTextures.cs by tlitookilakin https://gist.github.com/tlitookilakin/a1a8d6d8fd9b894578d13f9c56bf9338
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -135,49 +136,40 @@ internal static class ConnectedTextures
     }
 
     /// <summary>
-    // Assert the furniture is both the neigbour and grid aligned for purpose of connection check.
-    // 1x1 is always aligned
-    // For bigger sizes, this is true if the items have the same size, and the difference in X/Y modulos to zero
-    // Practically speaking it checks against these kinds of arrangement:
-    // AA-  ABB
-    // -BB  A--
-    // And allow these kinds
-    // AA   AA--
-    // BB   --BB
-    // </summary>
-    public static bool Furniture_ContainsAndAligned(Furniture furniture, Vector2 neighbourTile, Rectangle bounds)
-    {
-        Rectangle neighbourBounds = FurnitureTileBounds(furniture);
-        if (!neighbourBounds.Contains(neighbourTile))
-            return false;
-        if (neighbourBounds.Width != bounds.Width || neighbourBounds.Height != bounds.Height)
-            return false;
-        if ((neighbourBounds.X - bounds.X) % bounds.Width != 0)
-            return false;
-        if ((neighbourBounds.Y - bounds.Y) % bounds.Height != 0)
-            return false;
-        return true;
-    }
-
-    /// <summary>
     // Update neighbour object/furnitures.
     // Duplicate work potentially happen, but usually furniture changes one at a time.
     // </summary>
     private static void UpdateNeighbours(GameLocation where, Rectangle bounds)
     {
-        foreach (Vector2 neighbourTile in Neighbour_All(bounds))
+        if (bounds.Height is 1)
         {
-            if (where.objects.TryGetValue(neighbourTile, out StardewValley.Object neighbourObj))
+            Object_UpdateParentSheetIndex(where, new(bounds.Left - 1, bounds.Y), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Right, bounds.Y), null, true);
+        }
+
+        if (bounds.Width is 1)
+        {
+            Object_UpdateParentSheetIndex(where, new(bounds.Top - 1, bounds.Y), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Bottom, bounds.Y), null, true);
+        }
+
+        foreach (Furniture furniture in where.furniture)
+        {
+            Rectangle fbounds = FurnitureTileBounds(furniture);
+
+            // if it's touching to the right or left
+            if (fbounds.Right == bounds.Left || fbounds.Left == bounds.Right)
             {
-                Object_UpdateParentSheetIndex(where, neighbourTile, neighbourObj, true);
+                // if it's aligned or at a corner
+                if (fbounds.Y == bounds.Y || fbounds.Top == bounds.Bottom || fbounds.Bottom == bounds.Top)
+                    Furniture_UpdateSourceRect(where, furniture, true);
             }
-            foreach (
-                Furniture neighbourFurniture in where.furniture.Where(f =>
-                    Furniture_ContainsAndAligned(f, neighbourTile, bounds)
-                )
-            )
+            // if it's touching to the top or bottom
+            else if (fbounds.Top == bounds.Bottom || fbounds.Bottom == bounds.Top)
             {
-                Furniture_UpdateSourceRect(where, neighbourFurniture, true);
+                // if it's aligned or at a corner
+                if (fbounds.X == bounds.X || fbounds.Right == bounds.Left || fbounds.Left == bounds.Right)
+                    Furniture_UpdateSourceRect(where, furniture, true);
             }
         }
     }
@@ -222,14 +214,19 @@ internal static class ConnectedTextures
     private static void Object_UpdateParentSheetIndex(
         GameLocation where,
         Vector2 tile,
-        StardewValley.Object obj,
+        StardewValley.Object? obj = null,
         bool forceCheck = false
     )
     {
+        if (obj is null && !where.Objects.TryGetValue(tile, out obj))
+            return;
+
         if (!forceCheck && obj.modData.ContainsKey(ConnectedTextureApplied))
             return;
+
         if (!Data.TryGetValue(obj.QualifiedItemId, out ConnectedTextureData? connectedTextureData))
             return;
+
         int offset = CalculateOffset(where, new Rectangle((int)tile.X, (int)tile.Y, 1, 1), connectedTextureData);
         Object_ResetParentSheetIndex(obj);
         if (offset == 0)
@@ -252,7 +249,7 @@ internal static class ConnectedTextures
         }
 
         UpdateNeighbours(
-            Game1.currentLocation,
+            e.Placement.Location,
             new(e.Placement.TileLocation, new(e.Furniture.getTilesWide(), e.Furniture.getTilesHigh()))
         );
     }
@@ -269,21 +266,6 @@ internal static class ConnectedTextures
 
             FurnitureProperties.FurnitureDLState.SetConnectedTexturesOffset(furniture, Point.Zero);
         }
-    }
-
-    /// <summary>Check if two furniture are perhaps connected, DOES NOT DO NEIGHBOUR CHECK</summary>
-    internal static bool Furniture_IsConnected(Furniture furnitureA, Furniture furnitureB)
-    {
-        return (
-                Data.TryGetValue(furnitureA.QualifiedItemId, out ConnectedTextureData? ctdA)
-                && ctdA.ConnectWith != null
-                && Connects(furnitureB.QualifiedItemId, ctdA.ConnectWith)
-            )
-            || (
-                Data.TryGetValue(furnitureB.QualifiedItemId, out ConnectedTextureData? ctdB)
-                && ctdB.ConnectWith != null
-                && Connects(furnitureB.QualifiedItemId, ctdB.ConnectWith)
-            );
     }
 
     /// <summary>Update furniture source rect</summary>
@@ -382,56 +364,6 @@ internal static class ConnectedTextures
         }
     }
 
-    internal static IEnumerable<Vector2> Neighbour_All(Rectangle bounds)
-    {
-        for (int i = bounds.X - 1; i <= bounds.Right; i++)
-        {
-            for (int j = bounds.Y - 1; j <= bounds.Bottom; j++)
-            {
-                Vector2 neighbourTile = new(i, j);
-                if (!bounds.Contains(neighbourTile))
-                    yield return neighbourTile;
-            }
-        }
-    }
-
-    /// <summary>Get right side neighbours</summary>
-    /// <param name="bounds"></param>
-    /// <returns></returns>
-    internal static IEnumerable<Vector2> Neighbour_Right(Rectangle bounds)
-    {
-        for (int i = bounds.Y; i < bounds.Bottom; i++)
-            yield return new(bounds.X + bounds.Width, i);
-    }
-
-    /// <summary>Get left side neighbours</summary>
-    /// <param name="bounds"></param>
-    /// <returns></returns>
-    internal static IEnumerable<Vector2> Neighbour_Left(Rectangle bounds)
-    {
-        for (int i = bounds.Y; i < bounds.Bottom; i++)
-            yield return new(bounds.X - 1, i);
-    }
-
-    /// <summary>Get up side neighbours</summary>
-    /// <param name="bounds"></param>
-    /// <returns></returns>
-    internal static IEnumerable<Vector2> Neighbour_Up(Rectangle bounds)
-    {
-        for (int i = bounds.X; i < bounds.Right; i++)
-            yield return new(i, bounds.Y - 1);
-    }
-
-    /// <summary>Get up side neighbours</summary>
-    /// <param name="bounds"></param>
-    /// <returns></returns>
-    internal static IEnumerable<Vector2> Neighbour_Down(Rectangle bounds)
-    {
-        // up
-        for (int i = bounds.X; i < bounds.Right; i++)
-            yield return new(i, bounds.Y + bounds.Height);
-    }
-
     /// <summary>Determines the connection style to use.</summary>
     public enum ConnectionStyle
     {
@@ -473,20 +405,65 @@ internal static class ConnectedTextures
         };
     }
 
-    /// <returns>True if this tile has any of the listed connections, otherwise false.</returns>
-    private static bool ConnectsToTile(GameLocation where, Vector2 tile, Rectangle bounds, IList<string> connections)
+    public static bool ConnectsToSide(
+        GameLocation where,
+        Vector2 direction,
+        Rectangle bounds,
+        IList<string> connections,
+        [NotNullWhen(true)] out StardewValley.Object? selected,
+        IEnumerable<Furniture>? furniture = null
+    )
     {
-        // objects, fences, and bigcraftables
-        if (where.Objects.TryGetValue(tile, out var obj) && Connects(obj.QualifiedItemId, connections))
-            return true;
-
-        // furniture
         if (
-            where.furniture.Any(f =>
-                Furniture_ContainsAndAligned(f, tile, bounds) && Connects(f.QualifiedItemId, connections)
-            )
+            // is single tile on checked axis
+            (bounds.Width is 1 && (bounds.Height is 1 || direction.Y is 0))
+            || (bounds.Height is 1 && (bounds.Width is 1 || direction.X is 0))
         )
-            return true;
+        {
+            if (
+                where.Objects.TryGetValue(
+                    new(bounds.X + direction.X * bounds.Width, bounds.Y + direction.Y * bounds.Height),
+                    out selected
+                )
+            )
+                return Connects(selected.QualifiedItemId, connections);
+        }
+
+        furniture ??= where.furniture;
+        selected = furniture.FirstOrDefault(f => Furniture_ConnectedAndAligned(f, bounds, direction, connections));
+        return selected is not null;
+    }
+
+    private static bool Furniture_ConnectedAndAligned(
+        Furniture f,
+        Rectangle bounds,
+        Vector2 direction,
+        IList<string> connections
+    )
+    {
+        var fbound = FurnitureTileBounds(f);
+
+        if (direction.X != 0)
+        {
+            if (fbound.Height != bounds.Height)
+                return false;
+
+            if (direction.X < 0f)
+                return fbound.Right == bounds.Left && Connects(f.QualifiedItemId, connections);
+
+            return fbound.Left == bounds.Right && Connects(f.QualifiedItemId, connections);
+        }
+
+        if (direction.Y != 0)
+        {
+            if (fbound.Width != bounds.Width)
+                return false;
+
+            if (direction.Y < 0f)
+                return fbound.Bottom == bounds.Top && Connects(f.QualifiedItemId, connections);
+
+            return fbound.Top == bounds.Bottom && Connects(f.QualifiedItemId, connections);
+        }
 
         return false;
     }
@@ -541,16 +518,7 @@ internal static class ConnectedTextures
         [0, 1, 2, 3],
     ];
 
-    private static Vector2[] CornerCoords(Rectangle bounds)
-    {
-        return
-        [
-            new(bounds.Right, bounds.Bottom),
-            new(bounds.Left - 1, bounds.Bottom),
-            new(bounds.Left - 1, bounds.Top - 1),
-            new(bounds.Right, bounds.Top - 1),
-        ];
-    }
+    private static readonly Vector2[] CornerCoords = [new(1, 1), new(-1, 1), new(-1, -1), new(1, -1)];
 
     private static int FullOffset(GameLocation where, Rectangle bounds, IList<string> connections)
     {
@@ -562,11 +530,10 @@ internal static class ConnectedTextures
 
         // generate a bitmask based on the relevant corners.
         // this is 1-bit for the corners (first 4), 2-bit for the 3-ways (second 4), and 4-bit for the 4-way (last)
-        Vector2[] cornerCoords = CornerCoords(bounds);
         int corners = 0;
         int[] checks = CornersToCheck[checkCorner];
         for (int i = 0; i < checks.Length; i++)
-            corners |= ConnectsToTile(where, cornerCoords[checks[i]], bounds, connections) ? (1 << i) : 0;
+            corners |= ConnectsToSide(where, CornerCoords[checks[i]], bounds, connections, out _) ? (1 << i) : 0;
 
         // if no corners exist, use the default index
         if (corners is 0)
@@ -602,10 +569,10 @@ internal static class ConnectedTextures
     private static int SimpleOffset(GameLocation where, Rectangle bounds, IList<string> connections)
     {
         int offset = 0;
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Right(bounds), 1 << 0);
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Down(bounds), 1 << 1);
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Left(bounds), 1 << 2);
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Up(bounds), 1 << 3);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(1, 0), 1 << 0);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(0, 1), 1 << 1);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(-1, 0), 1 << 2);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(0, -1), 1 << 3);
         return offset;
     }
 
@@ -613,8 +580,8 @@ internal static class ConnectedTextures
     private static int HorizontalOffset(GameLocation where, Rectangle bounds, IList<string> connections)
     {
         int offset = 0;
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Right(bounds), 1);
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Left(bounds), 2);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(1, 0), 1);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(-1, 0), 2);
         return offset;
     }
 
@@ -622,8 +589,8 @@ internal static class ConnectedTextures
     private static int VerticalOffset(GameLocation where, Rectangle bounds, IList<string> connections)
     {
         int offset = 0;
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Down(bounds), 1);
-        offset |= NeighbourOffsetCheck(where, bounds, connections, Neighbour_Up(bounds), 2);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(0, 1), 1);
+        offset |= NeighbourOffsetCheck(where, bounds, connections, new(0, -1), 2);
         return offset;
     }
 
@@ -634,18 +601,11 @@ internal static class ConnectedTextures
         GameLocation where,
         Rectangle bounds,
         IList<string> connections,
-        IEnumerable<Vector2> neighbours,
+        Vector2 direction,
         int directionalValue
     )
     {
-        foreach (Vector2 neighbour in neighbours)
-        {
-            if (ConnectsToTile(where, neighbour, bounds, connections))
-            {
-                return directionalValue;
-            }
-        }
-        return 0;
+        return ConnectsToSide(where, direction, bounds, connections, out _) ? directionalValue : 0;
     }
 
     public record class ConnectedTextureData

@@ -720,22 +720,29 @@ internal static class FurnitureProperties
     )
     {
         needUpdate.Add(new(tank, tankInfo));
-        Rectangle bounds = ConnectedTextures.FurnitureTileBounds(tank);
-        foreach (Vector2 neighbourTile in ConnectedTextures.Neighbour_Right(bounds))
-        {
-            if (
-                maybeConnectedTanks.FirstOrDefault(kv =>
-                    ConnectedTextures.Furniture_ContainsAndAligned(kv.Key, neighbourTile, bounds)
-                    && ConnectedTextures.Furniture_IsConnected(tank, kv.Key)
-                )
-                    is KeyValuePair<FishTankFurniture, FishTankInfo> neighbourTank
-                && neighbourTank.Key != null
-                && neighbourTank.Value != null
+
+        if (
+            !ConnectedTextures.Data.TryGetValue(tank.QualifiedItemId, out var data)
+            || data.ConnectWith is not IList<string> connections
+        )
+            return;
+
+        if (
+            !ConnectedTextures.ConnectsToSide(
+                tank.Location,
+                new(1, 0),
+                ConnectedTextures.FurnitureTileBounds(tank),
+                connections,
+                out var found,
+                maybeConnectedTanks.Keys
             )
-            {
-                RightOnlyDFS_FishTank(maybeConnectedTanks, neighbourTank.Key, neighbourTank.Value, ref needUpdate);
-            }
-        }
+        )
+            return;
+
+        if (found is not FishTankFurniture tank2)
+            return;
+
+        RightOnlyDFS_FishTank(maybeConnectedTanks, tank2, maybeConnectedTanks[tank2], ref needUpdate);
     }
 
     /// <summary>Patch number of fish allowed</summary>
