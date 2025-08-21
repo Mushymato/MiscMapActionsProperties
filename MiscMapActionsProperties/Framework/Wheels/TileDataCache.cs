@@ -237,7 +237,10 @@ internal sealed class TileDataCache<TProps>
 
     private void OnFurnitureMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
     {
-        PushNextPointsToUpdate(e.Placement.Location, e.Placement.Bounds);
+        PushNextPointsToUpdate(
+            e.Placement.Location,
+            CommonPatch.GetFurnitureTileDataBounds(e.Furniture, e.Placement.TileLocation)
+        );
     }
 
     private void OnBuildingListChanged(object? sender, BuildingListChangedEventArgs e)

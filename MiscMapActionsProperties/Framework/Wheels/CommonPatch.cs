@@ -37,7 +37,7 @@ public static class CommonPatch
 
     public static event EventHandler<OnBuildingMovedArgs>? GameLocation_OnBuildingEndMove;
 
-    public sealed record OnFurnitureMovedArgs(Furniture Furniture, PlacementInfo Placement);
+    public sealed record OnFurnitureMovedArgs(Furniture Furniture, bool IsRemove, PlacementInfo Placement);
 
     public static event EventHandler<OnFurnitureMovedArgs>? Furniture_OnMoved;
 
@@ -239,12 +239,12 @@ public static class CommonPatch
         }
     }
 
-    public sealed record PlacementInfo(GameLocation Location, Rectangle Bounds);
+    public sealed record PlacementInfo(GameLocation Location, Point TileLocation);
 
     private static readonly ConditionalWeakTable<Furniture, PlacementInfo> FurnitureRectCache = [];
 
     private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
-        new(furniture.Location, GetFurnitureTileDataBounds(furniture));
+        new(furniture.Location, furniture.TileLocation.ToPoint());
 
     private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
     {
@@ -252,28 +252,18 @@ public static class CommonPatch
         {
             Furniture_OnMoved?.Invoke(
                 null,
-                new(added, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
+                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
             );
         }
         foreach (Furniture removed in e.Removed)
         {
             Furniture_OnMoved?.Invoke(
                 null,
-                new(removed, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
+                new(removed, true, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
             );
             FurnitureRectCache.Remove(removed);
         }
     }
-
-    // private static void Furniture_OnAdded_Finalizer(Furniture __instance)
-    // {
-    //     Furniture_OnMoved?.Invoke(null, __instance);
-    // }
-
-    // private static void Furniture_OnRemoved_Prefix(Furniture __instance)
-    // {
-    //     Furniture_OnMoved?.Invoke(null, __instance);
-    // }
 
     private static void Building_OnStartMove_Prefix(Building __instance)
     {
@@ -463,14 +453,25 @@ public static class CommonPatch
         );
     }
 
-    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture, int scale = 1)
+    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture)
     {
         int radius = furniture.GetAdditionalTilePropertyRadius();
         return new(
-            ((int)furniture.TileLocation.X - radius) * scale,
-            ((int)furniture.TileLocation.Y - radius) * scale,
-            (furniture.getTilesWide() + 2 * radius) * scale,
-            (furniture.getTilesHigh() + 2 * radius) * scale
+            (int)furniture.TileLocation.X - radius,
+            (int)furniture.TileLocation.Y - radius,
+            furniture.getTilesWide() + 2 * radius,
+            furniture.getTilesHigh() + 2 * radius
+        );
+    }
+
+    internal static Rectangle GetFurnitureTileDataBounds(Furniture furniture, Point TileLocation)
+    {
+        int radius = furniture.GetAdditionalTilePropertyRadius();
+        return new(
+            TileLocation.X - radius,
+            TileLocation.Y - radius,
+            furniture.getTilesWide() + 2 * radius,
+            furniture.getTilesHigh() + 2 * radius
         );
     }
 

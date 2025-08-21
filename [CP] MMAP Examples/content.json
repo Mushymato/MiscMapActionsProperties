@@ -175,6 +175,14 @@
     {
       "Action": "Include",
       "FromFile": "draw_layers_nightly.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "connected-textures/content.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "fish-tank/content.json"
     }
   ]
 }

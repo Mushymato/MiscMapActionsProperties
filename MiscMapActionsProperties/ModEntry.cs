@@ -51,6 +51,7 @@ public sealed class ModEntry : Mod
         }
 
         Framework.Entities.ChestLight.Register();
+        Framework.Entities.ConnectedTextures.Register();
         Framework.Entities.DrawLayerExt.Register();
         Framework.Entities.FloorPathProperties.Register();
         Framework.Entities.FurnitureProperties.Register();
