@@ -333,10 +333,14 @@ internal static class ConnectedTextures
             }
         }
 
-        FurnitureProperties.FurnitureDLState.SetConnectedTexturesOffset(furniture, new(newX, newY));
+        FurnitureProperties.FurnitureDLState.SetConnectedTexturesOffset(
+            furniture,
+            new(newX - defaultSourceRect.X, newY - defaultSourceRect.Y)
+        );
 
         furniture.defaultSourceRect.Value = new(newX, newY, defaultSourceRect.Width, defaultSourceRect.Height);
         furniture.updateRotation();
+
         furniture.modData[ConnectedTextureApplied] = "T";
     }
     #endregion
@@ -445,7 +449,7 @@ internal static class ConnectedTextures
 
         if (direction.X != 0)
         {
-            if (fbound.Height != bounds.Height)
+            if (fbound.Height != bounds.Height || fbound.Y != bounds.Y)
                 return false;
 
             if (direction.X < 0f)
@@ -456,7 +460,7 @@ internal static class ConnectedTextures
 
         if (direction.Y != 0)
         {
-            if (fbound.Width != bounds.Width)
+            if (fbound.Width != bounds.Width || fbound.X != bounds.X)
                 return false;
 
             if (direction.Y < 0f)

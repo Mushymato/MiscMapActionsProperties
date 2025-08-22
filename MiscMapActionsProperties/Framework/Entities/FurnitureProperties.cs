@@ -39,6 +39,7 @@ internal static class FurnitureProperties
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
         ModEntry.help.Events.GameLoop.Saving += OnSaving;
@@ -79,6 +80,8 @@ internal static class FurnitureProperties
             _fpData = null;
             DlExtInfoCache.Clear();
             SeatPositionCache.Clear();
+            TVScreens.Clear();
+            FishTankInfos.Clear();
         }
     }
 
@@ -110,12 +113,18 @@ internal static class FurnitureProperties
         });
     }
 
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
+    {
+        UpdateFishTankNeighbourBounds(Game1.currentLocation);
+    }
+
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
         foreach (DLExtInfo dLExtInfo in CurrentLocationDLStatesIter)
         {
             dLExtInfo.RecheckRands();
         }
+        UpdateFishTankNeighbourBounds(e.NewLocation);
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
@@ -579,14 +588,9 @@ internal static class FurnitureProperties
         internal Rectangle CurrentTankBounds = Rectangle.Empty;
 
         /// <summary>Base tank bounds given a tile location</summary>
-        internal Rectangle GetBaseTankBounds(Vector2 tileLocation)
+        internal Rectangle GetBaseTankBounds(Vector2 pos)
         {
-            return new Rectangle(
-                (int)(tileLocation.X * Game1.tileSize + PosX),
-                (int)(tileLocation.Y * Game1.tileSize + PosY),
-                Width,
-                Height
-            );
+            return new Rectangle((int)(pos.X + PosX), (int)(pos.Y + PosY), Width, Height);
         }
     }
 
@@ -594,7 +598,6 @@ internal static class FurnitureProperties
 
     private static void Patch_FishTank()
     {
-        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
         CommonPatch.Furniture_OnMoved += Furniture_OnMoved;
         try
         {
@@ -615,6 +618,9 @@ internal static class FurnitureProperties
                     nameof(FishTankFurniture.GetTankBounds)
                 ),
                 postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(FishTankFurniture_GetTankBounds_Postfix))
+                {
+                    after = ["Espy.PreciseFurniture"],
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(TankFish), nameof(TankFish.Update)),
@@ -629,7 +635,7 @@ internal static class FurnitureProperties
 
     private static void GameLocation_resetLocalState(object? sender, GameLocation e)
     {
-        UpdateFishTankNeighbourBounds(Game1.currentLocation);
+        UpdateFishTankNeighbourBounds(e);
     }
 
     private static void Furniture_OnMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
@@ -663,6 +669,17 @@ internal static class FurnitureProperties
         return new FishTankInfo(capacity, posX, posY, width, height);
     }
 
+    private static readonly FieldInfo drawPositionField = AccessTools.DeclaredField(typeof(Furniture), "drawPosition");
+
+    private static Vector2 GetDrawPosition(Furniture furniture)
+    {
+        if (drawPositionField.GetValue(furniture) is Netcode.NetVector2 vec)
+        {
+            return vec.Value;
+        }
+        return Vector2.Zero;
+    }
+
     /// <summary>Update fish tank bounds of current location</summary>
     private static void UpdateFishTankNeighbourBounds(GameLocation where)
     {
@@ -677,7 +694,7 @@ internal static class FurnitureProperties
                 && FishTankInfos.GetValue(tank, GetFishTankInfo) is FishTankInfo tankInfo
             )
             {
-                tankInfo.CurrentTankBounds = tankInfo.GetBaseTankBounds(tank.TileLocation);
+                tankInfo.CurrentTankBounds = tankInfo.GetBaseTankBounds(GetDrawPosition(furniture));
                 if (tank.modData.ContainsKey(ConnectedTextures.ConnectedTextureApplied))
                 {
                     tankInfo.IsDirty = true;

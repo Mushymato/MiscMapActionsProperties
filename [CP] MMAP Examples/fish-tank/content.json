@@ -23,13 +23,13 @@
         // calcifer_fishtank_c4x4y-128w128h164
         "{{ModId}}_fishtank_horizontal": {
           "CustomFields": {
-            "FishTank": "4 4 -128 128 164"
+            "FishTank": "4 0 64 128 164"
           }
         },
         // calcifer_fishtank_c4x0y0w128h164
         "{{ModId}}_fishtank_horizontal_wall": {
           "CustomFields": {
-            "FishTank": "4 0 0 128 164"
+            "FishTank": "4 0 64 128 164"
           }
         },
         // calcifer_fishtank_c2x0y40w64h120
