@@ -16,6 +16,7 @@ Some of these features overlap with other framework mods, usually they don't con
 - Add various tile actions and properties (`TileProperties`), which can be used for a variety of purposes like creating catalogues, functional jukeboxes, lights, etc.
 - Add seats (`ActionTiles`).
 - Create custom TV furniture.
+- Create custom fish tank furniture.
 - Make furniture obey seasons via `SeasonOffset`, compared to using the `{{Season}}` token, this feature respects the location's season override.
 - Change furniture collision to make non-rugs passable (but not make rugs impassable).
 - Various advanced drawing controls via `DrawLayers`, see also the [draw layers extension documentation](docs/draw-layers.md).
@@ -33,7 +34,23 @@ Some of these features overlap with other framework mods, usually they don't con
 | `DrawShadow` | bool | false | Because furniture do not have draw shadows in the first place, this field is repurposed to mean "when there are draw layers, do not draw the base furniture sprite". |
 | `ActionTiles` | List\<BuildingActionTiles\> _empty_ | List of special action tiles. | 
 | `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |
-| `CustomFields["TV"]` | string | _empty_ | Sets this furniture as a TV with screen defined as `[posX] [posY] [scale]`. |
+| `CustomFields["TV"]` | string | _empty_ | Sets this furniture as a TV with screen defined as `[posX] [posY] [scale]`, can be used on any non-run furniture. |
+| `CustomFields["FishTank"]` | string | _empty_ | Sets this furniture as a FishTank with capacity & tank bounds defined as `[capacity] [posX] [posY] [Width] [Height]`. |
+
+#### TV and FishTankFurniture Quirks
+
+- Only furniture that resolve to `Furniture` type and are not rugs is allowed to become a `TV` or a `FishTankFurniture` by furniture properties
+- Because the typing is written into the save, the furniture  will remain `TV`/`FishTankFurniture` unless they are destroyed, i.e. data asset changes don't do anything.
+- TV:
+    - Position X/Y is relative to the bounding box of the TV and at 1x scale.
+    - If you are counting pixels on the texture, multiply it by 4 (regardless of the scale argument).
+- FishTank:
+    - It is possible to make a fish tank without additional mod by using `fishtank` as the furniture type, this feature merely offers more customization.
+    - Bounds X/Y/Width/Height is relative to the draw position of the tank.
+    - If you are counting pixels on the texture, multiply it by 4.
+    - Capacity is normally tile width - 1 but can be overriden as well via first arg. Setting it to -2 will default to that, setting it to -1 means unlimited.
+    - The custom capacity value applies to both swiming and grounded entities, decoration is always unlimited (-1) if using MMAP FishTank field
+    - Fish tank bounds will merge horizontally if they are [connected](connected-textures.md), and the fish will visually swim between tanks in that case (but still belong to a particular tank).
 
 ### TileProperties
 

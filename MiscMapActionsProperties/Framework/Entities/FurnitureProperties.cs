@@ -513,27 +513,34 @@ internal static class FurnitureProperties
 
     internal const string CustomFields_TV = "TV";
 
+    internal const string CustomFields_FishTank = "FishTank";
+
     private record TVScreenShape(float PosX, float PosY, float Scale);
 
     private static readonly ConditionalWeakTable<TV, TVScreenShape?> TVScreens = [];
 
-    internal const string CustomFields_FishTank = "FishTank";
-
     private static void Furniture_GetFurnitureInstance_Postfix(string itemId, ref Furniture __result)
     {
-        if (__result is TV || __result is FishTankFurniture)
+        // require exact Furniture type
+        if (__result.GetType() != typeof(Furniture))
             return;
-        if (!FPData.TryGetValue(__result.ItemId, out BuildingData? fpData))
+        // ban rugs (since they are excluded from Furniture.checkForAction)
+        int furniType = __result.furniture_type.Value;
+        if (furniType == Furniture.rug)
             return;
-        if (fpData.CustomFields?.ContainsKey(CustomFields_TV) ?? false)
+
+        if (
+            !FPData.TryGetValue(__result.ItemId, out BuildingData? fpData)
+            || fpData.CustomFields is not Dictionary<string, string> customFields
+        )
+            return;
+
+        if (customFields.ContainsKey(CustomFields_TV))
         {
             __result = new TV(itemId, __result.TileLocation);
             return;
         }
-        if (
-            __result.furniture_type.Value == Furniture.painting
-            && (fpData.CustomFields?.ContainsKey(CustomFields_FishTank) ?? false)
-        )
+        if (customFields.ContainsKey(CustomFields_FishTank))
         {
             __result = new FishTankFurniture(itemId, __result.TileLocation);
             return;
@@ -746,7 +753,7 @@ internal static class FurnitureProperties
                 ConnectedTextures.FurnitureTileBounds(tank),
                 connections,
                 out StardewValley.Object? found,
-                maybeConnectedTanks.Keys.ToHashSet()
+                maybeConnectedTanks.Keys
             )
         )
             return;

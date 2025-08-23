@@ -36,6 +36,7 @@ These pages document custom assets needed by some features.
 - [Panorama](docs/panorama.md)
 - [Question Dialogue](docs/question-dialogue.md)
 - [Temporary Animated Sprites](docs/temporary-animated-sprites.md)
+- [Connected Textures](docs/connected-textures.md)
 
 ## Usage Samples (with Content Patcher)
 

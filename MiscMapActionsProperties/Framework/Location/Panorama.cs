@@ -639,9 +639,27 @@ internal static class Panorama
         return true;
     }
 
+    private sealed class SummitBG : Background
+    {
+        public SummitBG(GameLocation location)
+            : base(location, Color.White, false)
+        {
+            summitBG = true;
+            initialViewportY = Game1.viewport.Y;
+            cloudsTexture = Game1.content.Load<Texture2D>("Minigames\\Clouds");
+        }
+    }
+
+    private static bool IsNullOrCustomBG =>
+        Game1.background is not null || Game1.background is PanoramaBackground || Game1.background is SummitBG;
+
     private static void SetPanorama(GameLocation location, string bgId, bool force = false)
     {
-        if (BgData.TryGetValue(bgId, out PanoramaData? data))
+        if (bgId == "SUMMIT" && (force || IsNullOrCustomBG))
+        {
+            Game1.background = new SummitBG(location);
+        }
+        else if (BgData.TryGetValue(bgId, out PanoramaData? data))
         {
             if (Game1.background is PanoramaBackground Panorama)
             {
@@ -650,7 +668,7 @@ internal static class Panorama
             }
             else
             {
-                if (!force && Game1.background == null)
+                if (!force && !IsNullOrCustomBG)
                 {
                     return;
                 }
@@ -688,6 +706,10 @@ internal static class Panorama
         if (Game1.background is PanoramaBackground bg)
         {
             bg.tempSprites.Clear();
+            Game1.background = null;
+        }
+        else if (Game1.background is SummitBG)
+        {
             Game1.background = null;
         }
     }

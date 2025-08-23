@@ -9,6 +9,9 @@ There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
+Additionally, you can use the vanilla (non-cursed) summit background on any map by setting `mushymato.MMAP_Panorama` to special value `SUMMIT`.
+This is NOT an MMAP panorama and cannot be customized in any way.
+
 This document describes how you can add more, by editing `mushymato.MMAP/Panorama` custom asset.
 
 ### Structure

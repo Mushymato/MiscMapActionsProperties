@@ -3,7 +3,6 @@
 //
 // Based on ConnectedTextures.cs by tlitookilakin https://gist.github.com/tlitookilakin/a1a8d6d8fd9b894578d13f9c56bf9338
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -113,7 +112,6 @@ internal static class ConnectedTextures
     /// <summary>Setup connected textures in new location (as needed) and furniture add/remove handling</summary>
     private static void LocationSetup(GameLocation? where, bool forceCheck = false)
     {
-        Stopwatch stopwatch = Stopwatch.StartNew();
         if (where == null)
             return;
         foreach ((Vector2 tile, StardewValley.Object obj) in where.Objects.Pairs)
@@ -124,7 +122,6 @@ internal static class ConnectedTextures
         {
             Furniture_UpdateSourceRect(where, furniture, forceCheck: forceCheck);
         }
-        ModEntry.Log($"LocationSetup: {stopwatch.Elapsed}");
     }
 
     /// <summary>Furniture tile bounds</summary>
