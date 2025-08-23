@@ -36,7 +36,8 @@ To define connections, edit `mushymato.MMAP/ConnectedTextures` and add data like
             // REQUIRED
             "Style": "Simple", // one of "Horizontal", "Vertical", "Simple", "Full". More on this in following sections
             "ConnectWith": [
-                // Everything connects with itself
+                // List of qualified item ids.
+                // If you don't specify that something connects with itself, then it will not connect with itself
                 "(F){{ModId}}_simple",
                 // List of other items this item can connect into, they don't need to have `mushymato.MMAP/ConnectedTextures` entries (but it usually makes more sense if they did)
                 "(F){{ModId}}_simple2",
@@ -52,6 +53,11 @@ To define connections, edit `mushymato.MMAP/ConnectedTextures` and add data like
     }
 }
 ```
+
+One thing to understand is that connection is one-way until you explicitly define the other way. With the above sample, `(F){{ModId}}_simple` will switch to connected mode when placed next to `(BC)12` (Keg), but `(BC)12` will not switch to a connected texture unless it has it's own `mushymato.MMAP/ConnectedTextures` entry with `(F){{ModId}}_simple` in `ConnectWith`. This is also why the object needs to have it's own qualified in `ConnectWith` in order to work.
+
+Besides being next to each other the 2 objects also need to have the same width to connect vertically, and same height to connect horizontally.
+
 
 The number of sprites required depends on the connection Style, covered in sections below.
 

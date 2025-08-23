@@ -445,6 +445,7 @@ internal static class ConnectedTextures
                 }
             );
 
+        selected = null;
         if (
             where.Objects.TryGetValue(checkPnt.ToVector2(), out selected)
             && (direction.X == 0 || bounds.Height == 1)
@@ -455,6 +456,7 @@ internal static class ConnectedTextures
             return selected != null;
         }
 
+        selected = null;
         if (Optimization.TryGetFurnitureAtTileForLocation(where, checkPnt, out HashSet<Furniture>? furniSet))
         {
             selected = furniSet.FirstOrDefault(f =>
@@ -516,20 +518,7 @@ internal static class ConnectedTextures
         return true;
     }
 
-    private static bool Connects(string id, IList<string> connections)
-    {
-        if (connections.Contains(id))
-            return true;
-
-        if (!Data.TryGetValue(id, out ConnectedTextureData? data) || data.ConnectWith is null)
-            return false;
-
-        foreach (string type in data.ConnectWith)
-            if (connections.Contains(type))
-                return true;
-
-        return false;
-    }
+    private static bool Connects(string id, IList<string> connections) => connections.Contains(id);
 
     private static readonly int[] RequiresCornerCheck =
     [

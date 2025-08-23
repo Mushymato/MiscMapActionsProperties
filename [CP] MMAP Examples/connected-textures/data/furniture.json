@@ -15,7 +15,8 @@
         "{{ModId}}_window": "{{ModId}}_window/window/-1/-1/1/800/-1/{{ModId}}_window/0/{{ModId}}\\window_horizontal",
         "{{ModId}}_lamp_simple": "{{ModId}}_lamp_simple/lamp/1 2/1 1/1/2000/-1/{{ModId}}_lamp_simple/0/{{ModId}}\\lamp_simple",
         "{{ModId}}_2x1_horizontal": "{{ModId}}_2x1_horizontal/decor/2 2/2 1/1/999/-1/{{ModId}}_2x1_horizontal/0/{{ModId}}\\2x1_horizontal",
-        "{{ModId}}_1x2_vertical": "{{ModId}}_1x2_vertical/decor/2 2/2 1/1/999/-1/{{ModId}}_1x2_vertical/0/{{ModId}}\\1x2_vertical",
+        "{{ModId}}_2x1_vertical": "{{ModId}}_2x1_vertical/decor/2 2/2 1/1/999/-1/{{ModId}}_2x1_vertical/0/{{ModId}}\\2x1_vertical",
+        "{{ModId}}_2x1_simple": "{{ModId}}_2x1_simple/decor/2 2/2 1/1/999/-1/{{ModId}}_2x1_simple/0/{{ModId}}\\2x1_simple",
         "{{ModId}}_2x2_full": "{{ModId}}_2x2_full/table/2 3/2 2/1/500/-1/{{ModId}}_2x2_full/0/{{ModId}}\\2x2_full",
         "{{ModId}}_rug_simple": "{{ModId}}_rug_simple/rug/1 1/1 1/1/999/-1/{{ModId}}_rug_simple/0/{{ModId}}\\rug_simple",
         "{{ModId}}_rug_full": "{{ModId}}_rug_full/rug/1 1/1 1/1/999/2/{{ModId}}_rug_full/0/{{ModId}}\\rug_full"
@@ -29,19 +30,21 @@
         "(F){{ModId}}_vertical": {
           "Style": "Vertical",
           "ConnectWith": [
-            // "(F){{ModId}}_vertical",
+            "(F){{ModId}}_vertical",
             "(BC){{ModId}}_vertical"
           ]
         },
         "(F){{ModId}}_horizontal": {
           "Style": "Horizontal",
           "ConnectWith": [
+            "(F){{ModId}}_horizontal",
             "(BC){{ModId}}_horizontal"
           ]
         },
         "(F){{ModId}}_horizontal2": {
           "Style": "Horizontal",
           "ConnectWith": [
+            "(F){{ModId}}_horizontal2",
             "(BC){{ModId}}_horizontal2"
           ]
         },
@@ -66,6 +69,7 @@
           "ConnectWith": [
             "(F){{ModId}}_simple",
             "(F){{ModId}}_simple2",
+            "(F){{ModId}}_lamp_simple",
             "(BC)12"
           ]
         },
@@ -95,10 +99,17 @@
             "(F){{ModId}}_2x1_horizontal"
           ]
         },
-        "(F){{ModId}}_1x2_vertical": {
+        "(F){{ModId}}_2x1_vertical": {
           "Style": "Vertical",
           "ConnectWith": [
-            "(F){{ModId}}_1x2_vertical"
+            "(F){{ModId}}_2x1_vertical"
+          ]
+        },
+        "(F){{ModId}}_2x1_simple": {
+          "Style": "Simple",
+          "ConnectWith": [
+            "(F){{ModId}}_2x1_simple",
+            "(BC)12"
           ]
         },
         "(F){{ModId}}_2x2_full": {
@@ -110,13 +121,13 @@
         "(F){{ModId}}_rug_simple": {
           "Style": "Simple",
           "ConnectWith": [
-            "{{ModId}}_rug_simple"
+            "(F){{ModId}}_rug_simple"
           ]
         },
         "(F){{ModId}}_rug_full": {
           "Style": "Full",
           "ConnectWith": [
-            "{{ModId}}_rug_full"
+            "(F){{ModId}}_rug_full"
           ]
         },
         "(F){{ModId}}_fishtank_horizontal": {
