@@ -11,8 +11,11 @@ You *can* use this with:
 - Most placable objects and big craftables, as long as they obey ParentSheetIndex
 - Most furniture, as long as they obey SourceRect
 
+Some need additional settings:
+- Furniture with rotations need to set appropriate `FurnitureOffset` to account for space taken up by rotations.
+- Certain craftables need to set appropriate `ObjectOffset`, to account for multiple sprites.
+
 You *cannot* use this with:
-- Furniture with rotations
 - Beds
 - Free Cactuses (randomized_plant)
 - Bigger Craftables

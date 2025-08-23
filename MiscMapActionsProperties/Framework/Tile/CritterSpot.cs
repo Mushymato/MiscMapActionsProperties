@@ -117,7 +117,7 @@ internal static class CritterSpot
             }
             if (cacheEntry.TryGetValue(pos, out string[]? props))
             {
-                var spawned = SpawnCritter(e.Location, pos, props, 0, out string _);
+                List<Critter> spawned = SpawnCritter(e.Location, pos, props, 0, out string _);
                 if (spawned.Count > 0)
                 {
                     spawnedCritters[pos] = spawned;
@@ -151,7 +151,7 @@ internal static class CritterSpot
 
         foreach ((Point pos, string[] props) in cacheEntry)
         {
-            var spawned = SpawnCritter(location, pos, props, 0, out string _);
+            List<Critter> spawned = SpawnCritter(location, pos, props, 0, out string _);
             if (spawned.Count > 0)
             {
                 spawnedCritters[pos] = spawned;
@@ -256,7 +256,7 @@ internal static class CritterSpot
             }
             Point pnt = position + pntOffset;
             // csharpier-ignore
-            var spawnedThisTime = critterKind switch
+            IEnumerable<Critter>? spawnedThisTime = critterKind switch
             {
                 SupportedCritter.Firefly => SpawnCritterFirefly(location, pnt, arg1, count),
                 SupportedCritter.Seagull => SpawnCritterSeagull(location, pnt, arg1, count),

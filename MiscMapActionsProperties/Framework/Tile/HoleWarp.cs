@@ -24,16 +24,16 @@ internal static class HoleWrp
             !ArgUtility.TryGet(
                 args,
                 1,
-                out var locationToWarp,
+                out string locationToWarp,
                 out string error,
                 allowBlank: true,
                 "string locationToWarp"
             )
-            || !ArgUtility.TryGetPoint(args, 2, out var tile, out error, "Point tile")
+            || !ArgUtility.TryGetPoint(args, 2, out Point tile, out error, "Point tile")
             || !ArgUtility.TryGetOptional(
                 args,
                 4,
-                out var mailflag,
+                out string mailflag,
                 out error,
                 null,
                 allowBlank: true,

@@ -39,7 +39,7 @@ internal static class ShowGlobalInventory
         if (!Context.IsWorldReady)
             return;
 
-        foreach (var key in Game1.player.team.globalInventories.Keys)
+        foreach (string key in Game1.player.team.globalInventories.Keys)
         {
             Inventory inventory = Game1.player.team.globalInventories[key];
             if (inventory == null)
@@ -59,9 +59,9 @@ internal static class ShowGlobalInventory
     {
         if (
             !ArgUtility.TryGet(query, 1, out string bagInvId, out string error, allowBlank: false, "string bagInvId")
-            || !ArgUtility.TryGet(query, 2, out var itemId, out error, allowBlank: true, "string itemId")
-            || !ArgUtility.TryGetOptionalInt(query, 3, out var minCount, out error, 1, "int minCount")
-            || !ArgUtility.TryGetOptionalInt(query, 4, out var maxCount, out error, int.MaxValue, "int maxCount")
+            || !ArgUtility.TryGet(query, 2, out string itemId, out error, allowBlank: true, "string itemId")
+            || !ArgUtility.TryGetOptionalInt(query, 3, out int minCount, out error, 1, "int minCount")
+            || !ArgUtility.TryGetOptionalInt(query, 4, out int maxCount, out error, int.MaxValue, "int maxCount")
         )
         {
             ModEntry.Log(error, LogLevel.Error);

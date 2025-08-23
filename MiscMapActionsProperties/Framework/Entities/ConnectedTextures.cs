@@ -447,6 +447,8 @@ internal static class ConnectedTextures
 
         if (
             where.Objects.TryGetValue(checkPnt.ToVector2(), out selected)
+            && (direction.X == 0 || bounds.Height == 1)
+            && (direction.Y == 0 || bounds.Width == 1)
             && Connects(selected.QualifiedItemId, connections)
         )
         {
@@ -519,7 +521,7 @@ internal static class ConnectedTextures
         if (connections.Contains(id))
             return true;
 
-        if (!Data.TryGetValue(id, out var data) || data.ConnectWith is null)
+        if (!Data.TryGetValue(id, out ConnectedTextureData? data) || data.ConnectWith is null)
             return false;
 
         foreach (string type in data.ConnectWith)
@@ -608,7 +610,7 @@ internal static class ConnectedTextures
         }
 
         // unit index + block index + variant index
-        return (checkCorner % 4) * unitSize + block + (corners - 1);
+        return checkCorner % 4 * unitSize + block + (corners - 1);
     }
 
     /// <summary>Generates a 4-bit bitmask from the 4 cardinal tiles (sides)</summary>
@@ -654,7 +656,7 @@ internal static class ConnectedTextures
         return ConnectsToSide(where, direction, bounds, connections, out _) ? directionalValue : 0;
     }
 
-    public record class ConnectedTextureData
+    public sealed record class ConnectedTextureData
     {
         /// <summary>Connection style</summary>
         public ConnectionStyle Style { get; set; }

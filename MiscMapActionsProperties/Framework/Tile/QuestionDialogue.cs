@@ -215,7 +215,7 @@ internal static class QuestionDialogue
         if (qdData.Pagination > 0)
         {
             bool addCancel = false;
-            var finalResponse = validEntries.Values.Last();
+            QuestionDialogueEntry finalResponse = validEntries.Values.Last();
             List<KeyValuePair<string, string>> keyValuePairs;
             if (
                 finalResponse.Condition == null

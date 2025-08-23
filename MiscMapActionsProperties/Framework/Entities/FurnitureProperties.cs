@@ -741,7 +741,7 @@ internal static class FurnitureProperties
         needUpdate.Add(new(tank, tankInfo));
 
         if (
-            !ConnectedTextures.Data.TryGetValue(tank.QualifiedItemId, out var data)
+            !ConnectedTextures.Data.TryGetValue(tank.QualifiedItemId, out ConnectedTextures.ConnectedTextureData? data)
             || data.ConnectWith is not IList<string> connections
         )
             return;
@@ -1049,7 +1049,7 @@ internal static class FurnitureProperties
         {
             if (Game1.currentLocation == null)
                 yield break;
-            var cacheImpl = dlExtInfoCacheImpl.Value;
+            ConditionalWeakTable<Furniture, FurnitureDLState?> cacheImpl = dlExtInfoCacheImpl.Value;
             if (cacheImpl == null)
                 yield break;
             foreach (Furniture furniture in Game1.currentLocation.furniture)

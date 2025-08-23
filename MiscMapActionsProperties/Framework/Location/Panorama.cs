@@ -284,7 +284,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         Night = BackingContext.FromDataList(data.BackingNight, context);
 
         parallaxCtx.Clear();
-        foreach (var parallax in ParallaxContext.GetAllMatchingData(data.ParallaxLayers, context))
+        foreach (ParallaxLayerData parallax in ParallaxContext.GetAllMatchingData(data.ParallaxLayers, context))
         {
             if (ParallaxContext.FromData(parallax, context) is ParallaxContext pCtx)
             {
@@ -311,7 +311,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     {
         // Update Parallax
         xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
-        foreach (var pCtx in parallaxCtx)
+        foreach (ParallaxContext pCtx in parallaxCtx)
         {
             pCtx.UpdatePosition(viewport);
         }
@@ -328,7 +328,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         {
             float width = layer.LayerWidth * 64f;
             float height = layer.LayerHeight * 64f;
-            foreach (var mwTAS in respawningTAS)
+            foreach ((MapWideTAS, TASContext) mwTAS in respawningTAS)
                 SpawnTAS(mwTAS.Item1, mwTAS.Item2, width, height, true);
         }
     }
@@ -402,7 +402,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         }
 
         // parallax
-        foreach (var bgDef in parallaxCtx)
+        foreach (ParallaxContext bgDef in parallaxCtx)
         {
             if (!Game1.game1.takingMapScreenshot || bgDef.Data.DrawInMapScreenshot)
             {

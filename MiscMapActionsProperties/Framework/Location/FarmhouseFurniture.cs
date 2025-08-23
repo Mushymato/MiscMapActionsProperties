@@ -129,8 +129,8 @@ internal static class FarmHouseFurniture
                         !ArgUtility.TryGetVector2(
                             mapPropertySplitBySpaces,
                             i,
-                            out var value2,
-                            out var error,
+                            out Vector2 value2,
+                            out string error,
                             integerOnly: false,
                             "Vector2 tile"
                         )
@@ -167,15 +167,15 @@ internal static class FarmHouseFurniture
                     !ArgUtility.TryGet(
                         mapPropertySplitBySpaces,
                         i,
-                        out var value,
-                        out var error,
+                        out string value,
+                        out string error,
                         allowBlank: false,
-                        name: "int index"
+                        name: "string id"
                     )
                     || !ArgUtility.TryGetVector2(
                         mapPropertySplitBySpaces,
                         i + 1,
-                        out var value2,
+                        out Vector2 value2,
                         out error,
                         integerOnly: false,
                         "Vector2 tile"
@@ -183,7 +183,7 @@ internal static class FarmHouseFurniture
                     || !ArgUtility.TryGetInt(
                         mapPropertySplitBySpaces,
                         i + 3,
-                        out var value3,
+                        out int value3,
                         out error,
                         "int rotations"
                     )
@@ -192,7 +192,13 @@ internal static class FarmHouseFurniture
                     __instance.LogMapPropertyError(MapProp_FarmHouseFurnitureAdd, mapPropertySplitBySpaces, error);
                     continue;
                 }
-                if (ItemRegistry.Create<Furniture>(string.Concat("(F)", value), allowNull: true) is Furniture furniture)
+                if (ItemRegistry.IsQualifiedItemId(value) && ItemRegistry.Create(value) is StardewValley.Object obj)
+                {
+                    __instance.Objects.Add(value2, obj);
+                }
+                else if (
+                    ItemRegistry.Create<Furniture>(string.Concat("(F)", value), allowNull: true) is Furniture furniture
+                )
                 {
                     furniture.InitializeAtTile(value2);
                     furniture.IsOn = true;

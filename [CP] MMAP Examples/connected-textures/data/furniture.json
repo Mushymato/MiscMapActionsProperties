@@ -29,6 +29,7 @@
         "(F){{ModId}}_vertical": {
           "Style": "Vertical",
           "ConnectWith": [
+            // "(F){{ModId}}_vertical",
             "(BC){{ModId}}_vertical"
           ]
         },

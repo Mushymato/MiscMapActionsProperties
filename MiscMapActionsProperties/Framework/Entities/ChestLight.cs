@@ -36,14 +36,14 @@ internal static class ChestLight
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
-        foreach (var kv in watchers)
+        foreach (KeyValuePair<Chest, BuildingChestLightWatcher> kv in watchers)
             kv.Value.Unsubscribe();
         AddBuildingChestLightWatcher(e.NewLocation);
     }
 
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
-        foreach (var kv in watchers)
+        foreach (KeyValuePair<Chest, BuildingChestLightWatcher> kv in watchers)
             kv.Value.Dispose();
         watchers.Clear();
     }
@@ -63,7 +63,7 @@ internal static class ChestLight
                 string lightName = $"{Metadata_ChestLight_Prefix}{buildingChest.Name}";
                 if (building.GetMetadata(lightName) is not string lightProps)
                     continue;
-                var watch = watchers.GetValue(
+                BuildingChestLightWatcher watch = watchers.GetValue(
                     buildingChest,
                     (chest) => new BuildingChestLightWatcher(building, chest, lightName, lightProps)
                 );

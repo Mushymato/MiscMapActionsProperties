@@ -103,7 +103,7 @@ internal static class TASSpot
 
             if (tasSpotData.TryGetValue(pos, out string[]? tasKeyList))
             {
-                foreach (var tasKey in tasKeyList)
+                foreach (string tasKey in tasKeyList)
                 {
                     if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
                     {
@@ -335,7 +335,7 @@ internal static class TASSpot
 
         foreach ((Point pos, string[] tasKeyList) in tasSpotData)
         {
-            foreach (var tasKey in tasKeyList)
+            foreach (string tasKey in tasKeyList)
             {
                 if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
                 {
@@ -364,7 +364,7 @@ internal static class TASSpot
         respawning = [];
 
         Vector2 pixelPos = new(pos.X * Game1.tileSize, pos.Y * Game1.tileSize);
-        foreach (var tasKey in args.Skip(startIdx))
+        foreach (string tasKey in args.Skip(startIdx))
         {
             if (ModEntry.TAS.TryGetTASExt(tasKey, out TASExt? def))
             {
