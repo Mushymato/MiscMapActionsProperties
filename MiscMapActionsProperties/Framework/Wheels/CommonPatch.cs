@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
@@ -49,8 +50,6 @@ public static class CommonPatch
 
     internal static void Register()
     {
-        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
-
         try
         {
             ModEntry.harm.Patch(
@@ -125,7 +124,121 @@ public static class CommonPatch
                 LogLevel.Error
             );
         }
+
+        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
+        GameLocation_resetLocalState += On_GameLocation_resetLocalState;
     }
+
+    #region furniture_caching
+    private static readonly PerScreen<Dictionary<Point, HashSet<Furniture>>?> psTileToFurni = new();
+
+    private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
+    {
+        Dictionary<Point, HashSet<Furniture>> tileToFurni = [];
+        foreach (Furniture furni in location.furniture)
+        {
+            Rectangle bounds = GetFurnitureTileDataBounds(furni);
+            foreach (Point pnt in IterateBounds(bounds))
+            {
+                if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                {
+                    furniSet.Add(furni);
+                }
+                else
+                {
+                    tileToFurni[pnt] = [furni];
+                }
+            }
+        }
+        return tileToFurni;
+    }
+
+    internal static bool TryGetFurnitureAtTileForLocation(
+        GameLocation location,
+        Point pnt,
+        [NotNullWhen(true)] out HashSet<Furniture>? furniSet
+    )
+    {
+        if (psTileToFurni.Value is not Dictionary<Point, HashSet<Furniture>> tileToFurni)
+        {
+            tileToFurni = CreateTileToFurniture(location);
+            psTileToFurni.Value = tileToFurni;
+        }
+        return tileToFurni.TryGetValue(pnt, out furniSet);
+    }
+
+    public sealed record PlacementInfo(GameLocation Location, Point TileLocation);
+
+    private static readonly ConditionalWeakTable<Furniture, PlacementInfo> FurnitureRectCache = [];
+
+    private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
+        new(furniture.Location, furniture.TileLocation.ToPoint());
+
+    private static void On_GameLocation_resetLocalState(object? sender, GameLocation e)
+    {
+        if (e == Game1.currentLocation)
+        {
+            psTileToFurni.Value = null;
+            FurnitureRectCache.Clear();
+            foreach (Furniture added in e.furniture)
+            {
+                FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo);
+            }
+        }
+    }
+
+    private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
+    {
+        if (!e.IsCurrentLocation)
+            return;
+        Dictionary<Point, HashSet<Furniture>>? tileToFurni = psTileToFurni.Value;
+        foreach (Furniture added in e.Added)
+        {
+            if (tileToFurni != null)
+            {
+                Rectangle bounds = GetFurnitureTileDataBounds(added);
+                foreach (Point pnt in IterateBounds(bounds))
+                {
+                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                    {
+                        furniSet.Add(added);
+                    }
+                    else
+                    {
+                        tileToFurni[pnt] = [added];
+                    }
+                }
+            }
+            Furniture_OnMoved?.Invoke(
+                null,
+                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
+            );
+        }
+        foreach (Furniture removed in e.Removed)
+        {
+            if (tileToFurni != null)
+            {
+                Rectangle bounds = GetFurnitureTileDataBounds(removed);
+                foreach (Point pnt in IterateBounds(bounds))
+                {
+                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                    {
+                        furniSet.Remove(removed);
+                        if (furniSet.Count == 0)
+                        {
+                            tileToFurni.Remove(pnt);
+                        }
+                    }
+                }
+            }
+            Furniture_OnMoved?.Invoke(
+                null,
+                new(removed, true, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
+            );
+            FurnitureRectCache.Remove(removed);
+        }
+    }
+    #endregion
 
     private static void Flooring_OnRemoved_Prefix(Flooring __instance)
     {
@@ -225,32 +338,6 @@ public static class CommonPatch
         if (__state)
         {
             GameLocation_MapTilePropChanged?.Invoke(null, new(__instance, new(tileX, tileY), layer));
-        }
-    }
-
-    public sealed record PlacementInfo(GameLocation Location, Point TileLocation);
-
-    private static readonly ConditionalWeakTable<Furniture, PlacementInfo> FurnitureRectCache = [];
-
-    private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
-        new(furniture.Location, furniture.TileLocation.ToPoint());
-
-    private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
-    {
-        foreach (Furniture added in e.Added)
-        {
-            Furniture_OnMoved?.Invoke(
-                null,
-                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
-            );
-        }
-        foreach (Furniture removed in e.Removed)
-        {
-            Furniture_OnMoved?.Invoke(
-                null,
-                new(removed, true, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
-            );
-            FurnitureRectCache.Remove(removed);
         }
     }
 
@@ -462,6 +549,17 @@ public static class CommonPatch
             furniture.getTilesWide() + 2 * radius,
             furniture.getTilesHigh() + 2 * radius
         );
+    }
+
+    internal static IEnumerable<Point> IterateBounds(Rectangle bounds)
+    {
+        for (int x = bounds.Left; x < bounds.Right; x++)
+        {
+            for (int y = bounds.Top; y < bounds.Bottom; y++)
+            {
+                yield return new Point(x, y);
+            }
+        }
     }
 
     internal static void RegisterTileAndTouch(

@@ -7,6 +7,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Extensions;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
@@ -133,13 +134,7 @@ internal sealed class TileDataCache<TProps>
             );
 #endif
 
-            for (int x = bounds.Left; x < bounds.Right; x++)
-            {
-                for (int y = bounds.Top; y < bounds.Bottom; y++)
-                {
-                    pointsSet.Add(new(x, y));
-                }
-            }
+            pointsSet.AddRange(CommonPatch.IterateBounds(bounds));
         }
     }
 

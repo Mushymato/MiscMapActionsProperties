@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Objects;
 
@@ -11,73 +11,26 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 
 internal static class Optimization
 {
-    internal static void Register(bool enable_doesTileHaveProperty_Optimization)
+    internal static void Register()
     {
-        if (enable_doesTileHaveProperty_Optimization)
+        try
         {
-            try
-            {
-                ModEntry.harm.Patch(
-                    original: AccessTools.DeclaredMethod(
-                        typeof(GameLocation),
-                        nameof(GameLocation.doesTileHaveProperty)
-                    ),
-                    transpiler: new HarmonyMethod(
-                        typeof(Optimization),
-                        nameof(GameLocation_doesTileHaveProperty_Transpiler)
-                    )
-                );
-            }
-            catch (Exception err)
-            {
-                ModEntry.Log(
-                    $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work just slower in some cases:\n{err}",
-                    LogLevel.Warn
-                );
-                return;
-            }
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty)),
+                transpiler: new HarmonyMethod(
+                    typeof(Optimization),
+                    nameof(GameLocation_doesTileHaveProperty_Transpiler)
+                )
+            );
         }
-
-        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
-        CommonPatch.Furniture_OnMoved += Furniture_OnMoved;
-    }
-
-    private static readonly ConditionalWeakTable<GameLocation, Dictionary<Point, HashSet<Furniture>>> allTileToFurni =
-    [];
-
-    private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
-    {
-        Dictionary<Point, HashSet<Furniture>> tileToFurniture = [];
-        foreach (Furniture furni in location.furniture)
+        catch (Exception err)
         {
-            Rectangle bounds = CommonPatch.GetFurnitureTileDataBounds(furni);
-            for (int x = bounds.Left; x < bounds.Right; x++)
-            {
-                for (int y = bounds.Top; y < bounds.Bottom; y++)
-                {
-                    Point pnt = new(x, y);
-                    if (tileToFurniture.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
-                    {
-                        furniSet.Add(furni);
-                    }
-                    else
-                    {
-                        tileToFurniture[pnt] = [furni];
-                    }
-                }
-            }
+            ModEntry.Log(
+                $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work just slower in some cases:\n{err}",
+                LogLevel.Warn
+            );
+            return;
         }
-        return tileToFurniture;
-    }
-
-    internal static bool TryGetFurnitureAtTileForLocation(
-        GameLocation location,
-        Point pnt,
-        [NotNullWhen(true)] out HashSet<Furniture>? furniSet
-    )
-    {
-        Dictionary<Point, HashSet<Furniture>> tileToFurni = allTileToFurni.GetValue(location, CreateTileToFurniture);
-        return tileToFurni.TryGetValue(pnt, out furniSet);
     }
 
     public static string? CheckFurnitureTileProperties(
@@ -90,7 +43,7 @@ internal static class Optimization
     {
         string? propertyValue = null;
 
-        if (TryGetFurnitureAtTileForLocation(location, new(xTile, yTile), out HashSet<Furniture>? furniSet))
+        if (CommonPatch.TryGetFurnitureAtTileForLocation(location, new(xTile, yTile), out HashSet<Furniture>? furniSet))
         {
             foreach (Furniture furni in furniSet)
             {
@@ -163,15 +116,5 @@ internal static class Optimization
             );
 
         return matcher.Instructions();
-    }
-
-    private static void Furniture_OnMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
-    {
-        allTileToFurni.Remove(e.Placement.Location);
-    }
-
-    private static void GameLocation_resetLocalState(object? sender, GameLocation e)
-    {
-        allTileToFurni.Remove(e);
     }
 }

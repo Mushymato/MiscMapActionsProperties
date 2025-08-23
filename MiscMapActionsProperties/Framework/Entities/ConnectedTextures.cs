@@ -457,7 +457,7 @@ internal static class ConnectedTextures
         }
 
         selected = null;
-        if (Optimization.TryGetFurnitureAtTileForLocation(where, checkPnt, out HashSet<Furniture>? furniSet))
+        if (CommonPatch.TryGetFurnitureAtTileForLocation(where, checkPnt, out HashSet<Furniture>? furniSet))
         {
             selected = furniSet.FirstOrDefault(f =>
                 (furniture == null || furniture.Contains(f))
