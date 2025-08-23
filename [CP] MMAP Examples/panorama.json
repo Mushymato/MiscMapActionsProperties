@@ -97,5 +97,16 @@
         }
       }
     },
+    {
+      "Action": "EditData",
+      "Target": "Data/Locations",
+      "TargetField": [
+        "Summit",
+        "CustomFields"
+      ],
+      "Entries": {
+        "mushymato.MMAP_Panorama": "{{ModId}}_BonchMountain",
+      }
+    }
   ]
 }

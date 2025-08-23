@@ -45,6 +45,16 @@
           "Texture": "{{ModId}}/simple",
           "SpriteIndex": 0
         },
+        "{{ModId}}_full": {
+          "Name": "{{ModId}}_full",
+          "DisplayName": "{{ModId}}_full",
+          "Price": 50,
+          "Fragility": 0,
+          "CanBePlacedOutdoors": true,
+          "CanBePlacedIndoors": true,
+          "Texture": "{{ModId}}\\full",
+          "SpriteIndex": 0
+        },
       }
     },
     // // garden pot
@@ -85,6 +95,12 @@
           "Style": "Simple",
           "ConnectWith": [
             "(BC){{ModId}}_simple"
+          ]
+        },
+        "(BC){{ModId}}_full": {
+          "Style": "Full",
+          "ConnectWith": [
+            "(BC){{ModId}}_full"
           ]
         },
         // "(BC)62": {

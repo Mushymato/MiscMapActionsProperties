@@ -3,6 +3,7 @@
 //
 // Based on ConnectedTextures.cs by tlitookilakin https://gist.github.com/tlitookilakin/a1a8d6d8fd9b894578d13f9c56bf9338
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -112,6 +113,7 @@ internal static class ConnectedTextures
     /// <summary>Setup connected textures in new location (as needed) and furniture add/remove handling</summary>
     private static void LocationSetup(GameLocation? where, bool forceCheck = false)
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         if (where == null)
             return;
         foreach ((Vector2 tile, StardewValley.Object obj) in where.Objects.Pairs)
@@ -122,6 +124,7 @@ internal static class ConnectedTextures
         {
             Furniture_UpdateSourceRect(where, furniture, forceCheck: forceCheck);
         }
+        ModEntry.Log($"LocationSetup: {stopwatch.Elapsed}");
     }
 
     /// <summary>Furniture tile bounds</summary>
@@ -137,20 +140,29 @@ internal static class ConnectedTextures
 
     /// <summary>
     // Update neighbour object/furnitures.
-    // Duplicate work potentially happen, but usually furniture changes one at a time.
+    // Duplicate work potentially happen, but usually object/furniture changes one at a time.
     // </summary>
     private static void UpdateNeighbours(GameLocation where, Rectangle bounds)
     {
-        if (bounds.Height is 1)
+        // corners
+        if (bounds.Height == 1 && bounds.Width == 1)
         {
-            Object_UpdateParentSheetIndex(where, new(bounds.Left - 1, bounds.Y), null, true);
-            Object_UpdateParentSheetIndex(where, new(bounds.Right, bounds.Y), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Left - 1, bounds.Top - 1), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Right, bounds.Top - 1), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Left - 1, bounds.Bottom), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Right, bounds.Bottom), null, true);
         }
-
-        if (bounds.Width is 1)
+        // left/right
+        if (bounds.Height == 1)
         {
-            Object_UpdateParentSheetIndex(where, new(bounds.Top - 1, bounds.Y), null, true);
-            Object_UpdateParentSheetIndex(where, new(bounds.Bottom, bounds.Y), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Left - 1, bounds.Top), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Right, bounds.Top), null, true);
+        }
+        // top/bottom
+        if (bounds.Width == 1)
+        {
+            Object_UpdateParentSheetIndex(where, new(bounds.Left, bounds.Top - 1), null, true);
+            Object_UpdateParentSheetIndex(where, new(bounds.Left, bounds.Bottom), null, true);
         }
 
         foreach (Furniture furniture in where.furniture)
@@ -411,65 +423,98 @@ internal static class ConnectedTextures
 
     public static bool ConnectsToSide(
         GameLocation where,
-        Vector2 direction,
+        Point direction,
         Rectangle bounds,
         IList<string> connections,
         [NotNullWhen(true)] out StardewValley.Object? selected,
         IEnumerable<Furniture>? furniture = null
     )
     {
+        Point checkPnt =
+            new(
+                direction.X switch
+                {
+                    -1 => bounds.Left - 1,
+                    0 => bounds.Left,
+                    1 => bounds.Right,
+                    _ => throw new NotImplementedException(),
+                },
+                direction.Y switch
+                {
+                    -1 => bounds.Top - 1,
+                    0 => bounds.Top,
+                    1 => bounds.Bottom,
+                    _ => throw new NotImplementedException(),
+                }
+            );
+
         if (
-            // is single tile on checked axis
-            (bounds.Width is 1 && (bounds.Height is 1 || direction.Y is 0))
-            || (bounds.Height is 1 && (bounds.Width is 1 || direction.X is 0))
+            where.Objects.TryGetValue(checkPnt.ToVector2(), out selected)
+            && Connects(selected.QualifiedItemId, connections)
         )
         {
-            if (
-                where.Objects.TryGetValue(
-                    new(bounds.X + direction.X * bounds.Width, bounds.Y + direction.Y * bounds.Height),
-                    out selected
-                )
-            )
-                return Connects(selected.QualifiedItemId, connections);
+            return selected != null;
         }
 
-        furniture ??= where.furniture;
-        selected = furniture.FirstOrDefault(f => Furniture_ConnectedAndAligned(f, bounds, direction, connections));
-        return selected is not null;
+        if (Optimization.TryGetFurnitureAtTileForLocation(where, checkPnt, out HashSet<Furniture>? furniSet))
+        {
+            selected = furniSet.FirstOrDefault(f =>
+                (furniture == null || furniture.Contains(f))
+                && BoundsAligned(direction, bounds, FurnitureTileBounds(f))
+                && Connects(f.QualifiedItemId, connections)
+            );
+            if (selected != null)
+                return true;
+        }
+
+        return selected != null;
     }
 
-    private static bool Furniture_ConnectedAndAligned(
-        Furniture f,
-        Rectangle bounds,
-        Vector2 direction,
-        IList<string> connections
-    )
+    private static bool BoundsAligned(Point direction, Rectangle selfBounds, Rectangle elseBounds)
     {
-        var fbound = FurnitureTileBounds(f);
-
-        if (direction.X != 0)
+        if (direction.X == 0)
         {
-            if (fbound.Height != bounds.Height || fbound.Y != bounds.Y)
+            if (selfBounds.X != elseBounds.X)
+            {
                 return false;
-
-            if (direction.X < 0f)
-                return fbound.Right == bounds.Left && Connects(f.QualifiedItemId, connections);
-
-            return fbound.Left == bounds.Right && Connects(f.QualifiedItemId, connections);
+            }
+        }
+        else
+        {
+            // not same height || not same Y axis
+            if (selfBounds.Height != elseBounds.Height)
+            {
+                return false;
+            }
+            // not touching on right or left edges
+            if (direction.X < 0 ? selfBounds.Left != elseBounds.Right : selfBounds.Right != elseBounds.Left)
+            {
+                return false;
+            }
         }
 
-        if (direction.Y != 0)
+        if (direction.Y == 0)
         {
-            if (fbound.Width != bounds.Width || fbound.X != bounds.X)
+            if (selfBounds.Y != elseBounds.Y)
+            {
                 return false;
-
-            if (direction.Y < 0f)
-                return fbound.Bottom == bounds.Top && Connects(f.QualifiedItemId, connections);
-
-            return fbound.Top == bounds.Bottom && Connects(f.QualifiedItemId, connections);
+            }
+        }
+        else
+        {
+            // not same width || direction X is 0 and not same X axis
+            if (selfBounds.Width != elseBounds.Width)
+            {
+                return false;
+            }
+            // not touching on top or bot edges
+            if (direction.Y < 0 ? selfBounds.Top != elseBounds.Bottom : selfBounds.Bottom != elseBounds.Top)
+            {
+                return false;
+            }
         }
 
-        return false;
+        return true;
     }
 
     private static bool Connects(string id, IList<string> connections)
@@ -522,7 +567,7 @@ internal static class ConnectedTextures
         [0, 1, 2, 3],
     ];
 
-    private static readonly Vector2[] CornerCoords = [new(1, 1), new(-1, 1), new(-1, -1), new(1, -1)];
+    private static readonly Point[] CornerCoords = [new(1, 1), new(-1, 1), new(-1, -1), new(1, -1)];
 
     private static int FullOffset(GameLocation where, Rectangle bounds, IList<string> connections)
     {
@@ -605,7 +650,7 @@ internal static class ConnectedTextures
         GameLocation where,
         Rectangle bounds,
         IList<string> connections,
-        Vector2 direction,
+        Point direction,
         int directionalValue
     )
     {

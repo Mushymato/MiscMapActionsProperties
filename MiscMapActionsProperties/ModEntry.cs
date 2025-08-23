@@ -45,10 +45,7 @@ public sealed class ModEntry : Mod
 
         TAS = new(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Register();
-        if (config.Enable_doesTileHaveProperty_Optimization)
-        {
-            Framework.Wheels.Optimization.Register();
-        }
+        Framework.Wheels.Optimization.Register(config.Enable_doesTileHaveProperty_Optimization);
 
         Framework.Entities.ChestLight.Register();
         Framework.Entities.ConnectedTextures.Register();

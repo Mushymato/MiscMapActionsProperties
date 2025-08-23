@@ -633,11 +633,6 @@ internal static class FurnitureProperties
         }
     }
 
-    private static void GameLocation_resetLocalState(object? sender, GameLocation e)
-    {
-        UpdateFishTankNeighbourBounds(e);
-    }
-
     private static void Furniture_OnMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
     {
         if (e.Placement.Location == Game1.currentLocation && e.Furniture is FishTankFurniture)
@@ -750,8 +745,8 @@ internal static class FurnitureProperties
                 new(1, 0),
                 ConnectedTextures.FurnitureTileBounds(tank),
                 connections,
-                out var found,
-                maybeConnectedTanks.Keys
+                out StardewValley.Object? found,
+                maybeConnectedTanks.Keys.ToHashSet()
             )
         )
             return;

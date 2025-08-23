@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
@@ -10,34 +11,41 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 
 internal static class Optimization
 {
-    internal static void Register()
+    internal static void Register(bool enable_doesTileHaveProperty_Optimization)
     {
-        try
+        if (enable_doesTileHaveProperty_Optimization)
         {
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty)),
-                transpiler: new HarmonyMethod(
-                    typeof(Optimization),
-                    nameof(GameLocation_doesTileHaveProperty_Transpiler)
-                )
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log(
-                $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work just slower in some cases:\n{err}",
-                LogLevel.Warn
-            );
-            return;
+            try
+            {
+                ModEntry.harm.Patch(
+                    original: AccessTools.DeclaredMethod(
+                        typeof(GameLocation),
+                        nameof(GameLocation.doesTileHaveProperty)
+                    ),
+                    transpiler: new HarmonyMethod(
+                        typeof(Optimization),
+                        nameof(GameLocation_doesTileHaveProperty_Transpiler)
+                    )
+                );
+            }
+            catch (Exception err)
+            {
+                ModEntry.Log(
+                    $"Failed to apply Optimization on GameLocation.doesTileHaveProperty, MMAP will still work just slower in some cases:\n{err}",
+                    LogLevel.Warn
+                );
+                return;
+            }
         }
 
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
         CommonPatch.Furniture_OnMoved += Furniture_OnMoved;
     }
 
-    internal static ConditionalWeakTable<GameLocation, Dictionary<Point, HashSet<Furniture>>> TileToFurniture = [];
+    private static readonly ConditionalWeakTable<GameLocation, Dictionary<Point, HashSet<Furniture>>> allTileToFurni =
+    [];
 
-    internal static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
+    private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
     {
         Dictionary<Point, HashSet<Furniture>> tileToFurniture = [];
         foreach (Furniture furni in location.furniture)
@@ -62,6 +70,16 @@ internal static class Optimization
         return tileToFurniture;
     }
 
+    internal static bool TryGetFurnitureAtTileForLocation(
+        GameLocation location,
+        Point pnt,
+        [NotNullWhen(true)] out HashSet<Furniture>? furniSet
+    )
+    {
+        Dictionary<Point, HashSet<Furniture>> tileToFurni = allTileToFurni.GetValue(location, CreateTileToFurniture);
+        return tileToFurni.TryGetValue(pnt, out furniSet);
+    }
+
     public static string? CheckFurnitureTileProperties(
         GameLocation location,
         int xTile,
@@ -72,14 +90,9 @@ internal static class Optimization
     {
         string? propertyValue = null;
 
-        Dictionary<Point, HashSet<Furniture>>? tileToFurniture = TileToFurniture.GetValue(
-            location,
-            CreateTileToFurniture
-        );
-
-        if (tileToFurniture.TryGetValue(new(xTile, yTile), out HashSet<Furniture>? furnitureSet))
+        if (TryGetFurnitureAtTileForLocation(location, new(xTile, yTile), out HashSet<Furniture>? furniSet))
         {
-            foreach (Furniture furni in furnitureSet)
+            foreach (Furniture furni in furniSet)
             {
                 if (furni.DoesTileHaveProperty(xTile, yTile, propertyName, layerName, ref propertyValue))
                 {
@@ -154,11 +167,11 @@ internal static class Optimization
 
     private static void Furniture_OnMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)
     {
-        TileToFurniture.Remove(e.Placement.Location);
+        allTileToFurni.Remove(e.Placement.Location);
     }
 
     private static void GameLocation_resetLocalState(object? sender, GameLocation e)
     {
-        TileToFurniture.Remove(e);
+        allTileToFurni.Remove(e);
     }
 }

@@ -10,6 +10,7 @@ using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.Locations;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -250,6 +251,7 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
 
 internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
 {
+    internal string? BgId { get; private set; } = null;
     private readonly List<ParallaxContext> parallaxCtx = [];
     private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
 
@@ -273,8 +275,10 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         Game1.getTrulyDarkTime(location)
     );
 
-    internal void SetData(PanoramaData data, GameStateQueryContext context)
+    internal void SetData(string bgId, PanoramaData data, GameStateQueryContext context)
     {
+        BgId = bgId;
+
         Day = BackingContext.FromDataList(data.BackingDay, context);
         Sunset = BackingContext.FromDataList(data.BackingSunset, context);
         Night = BackingContext.FromDataList(data.BackingNight, context);
@@ -437,7 +441,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 /// </summary>
 internal static class Panorama
 {
-    internal const string MapProp_PanoramaPrefix = $"{ModEntry.ModId}_Panorama";
+    internal const string MapProp_Panorama = $"{ModEntry.ModId}_Panorama";
 
     internal const string Asset_Panorama = $"{ModEntry.ModId}/Panorama";
 
@@ -445,19 +449,37 @@ internal static class Panorama
     {
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
+        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
+        ModEntry.help.Events.Player.Warped += OnWarped;
 
-        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
-
-        ModEntry.harm.Patch(
-            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.updateWeather)),
-            transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
-        );
-
-        ModEntry.harm.Patch(
-            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.isOutdoorMapSmallerThanViewport)),
-            postfix: new HarmonyMethod(typeof(Panorama), nameof(Game1_isOutdoorMapSmallerThanViewport_Postfix))
-        );
         ModEntry.help.ConsoleCommands.Add("mmap.reset_bg", "Reload current area background", ConsoleReloadBg);
+        TriggerActionManager.RegisterAction(MapProp_Panorama, DoSetPanoramaT);
+        CommonPatch.RegisterTileAndTouch(MapProp_Panorama, DoSetPanoramaM);
+
+        try
+        {
+            ModEntry.harm.Patch(
+                AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.updateWeather)),
+                transpiler: new HarmonyMethod(typeof(Panorama), nameof(Game1_updateWeather_Transpiler))
+            );
+            ModEntry.harm.Patch(
+                AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.isOutdoorMapSmallerThanViewport)),
+                postfix: new HarmonyMethod(typeof(Panorama), nameof(Game1_isOutdoorMapSmallerThanViewport_Postfix))
+            );
+            ModEntry.harm.Patch(
+                AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.addClouds)),
+                prefix: new HarmonyMethod(typeof(Panorama), nameof(GameLocation_addClouds_Prefix))
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch Panorama:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static bool GameLocation_addClouds_Prefix()
+    {
+        return Game1.background is not PanoramaBackground;
     }
 
     private static void Game1_isOutdoorMapSmallerThanViewport_Postfix(ref bool __result)
@@ -468,15 +490,64 @@ internal static class Panorama
         }
     }
 
+    private static IEnumerable<CodeInstruction> Game1_updateWeather_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+
+            // IL_0141: call class StardewValley.GameLocation StardewValley.Game1::get_currentLocation()
+            // IL_0146: isinst StardewValley.Locations.IslandNorth
+            // IL_014b: brtrue.s IL_015c
+            matcher.MatchEndForward(
+                [
+                    new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Game1), nameof(Game1.currentLocation))),
+                    new(OpCodes.Isinst, typeof(IslandNorth)),
+                    new(OpCodes.Brtrue_S),
+                ]
+            );
+            Label lbl = (Label)matcher.Operand;
+            matcher
+                .Advance(1)
+                .InsertAndAdvance(
+                    [
+                        new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.background))),
+                        new(OpCodes.Brtrue_S, lbl),
+                    ]
+                );
+
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in Game1_updateWeather_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
+        }
+    }
+
+    private static void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        RecheckPanoramaBackground(e.NewLocation);
+    }
+
+    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
+    {
+        RecheckPanoramaBackground(Game1.currentLocation);
+    }
+
     private static void ConsoleReloadBg(string arg1, string[] arg2)
     {
         // patch reload mushymato.MMAP.Example
         // mmap_reset_bg
         if (!Context.IsWorldReady)
             return;
+        // Game1.player.team.farmPerfect.Value = true;
         if (Game1.currentLocation != null)
         {
-            _bgData = null;
+            ModEntry.help.GameContent.InvalidateCache(Asset_Panorama);
             RecheckPanoramaBackground(Game1.currentLocation);
         }
     }
@@ -527,87 +598,96 @@ internal static class Panorama
     private static void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_Panorama)))
+        {
             _bgData = null;
-    }
-
-    private static IEnumerable<CodeInstruction> Game1_updateWeather_Transpiler(
-        IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator
-    )
-    {
-        try
-        {
-            CodeMatcher matcher = new(instructions, generator);
-
-            // IL_0141: call class StardewValley.GameLocation StardewValley.Game1::get_currentLocation()
-            // IL_0146: isinst StardewValley.Locations.IslandNorth
-            // IL_014b: brtrue.s IL_015c
-            matcher.MatchEndForward(
-                [
-                    new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Game1), nameof(Game1.currentLocation))),
-                    new(OpCodes.Isinst, typeof(IslandNorth)),
-                    new(OpCodes.Brtrue_S),
-                ]
-            );
-            Label lbl = (Label)matcher.Operand;
-            matcher
-                .Advance(1)
-                .InsertAndAdvance(
-                    [
-                        new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.background))),
-                        new(OpCodes.Brtrue_S, lbl),
-                    ]
-                );
-
-            return matcher.Instructions();
+            RecheckPanoramaBackground(Game1.currentLocation);
         }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Error in Game1_updateWeather_Transpiler:\n{err}", LogLevel.Error);
-            return instructions;
-        }
-    }
-
-    private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
-    {
-        RecheckPanoramaBackground(location);
     }
 
     private static void RecheckPanoramaBackground(GameLocation location)
     {
         // GameLocation location, PanoramaBgStaticDef bgStatic, List<TileTAS>? respawningTAS
-        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_PanoramaPrefix, out string? bgId))
+        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_Panorama, out string? bgId))
         {
-            if (BgData.TryGetValue(bgId, out PanoramaData? data))
-            {
-                GameStateQueryContext context = new(location, Game1.player, null, null, null);
-                if (Game1.background is not PanoramaBackground Panorama)
-                    Panorama = new(location);
-                Panorama.SetData(data, context);
-                if (data.OnetimeTAS != null)
-                {
-                    xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
-                    float width = layer.LayerWidth * 64f;
-                    float height = layer.LayerHeight * 64f;
-                    foreach (MapWideTAS mwTAS in data.OnetimeTAS)
-                    {
-                        if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
-                            continue;
-                        foreach (TASExt tasExt in ModEntry.TAS.GetTASExtList(mwTAS.TAS))
-                        {
-                            Panorama.SpawnTAS(mwTAS, new(tasExt) { Pos = Vector2.Zero }, width, height, false);
-                        }
-                    }
-                }
-                Game1.background = Panorama;
-            }
-            else
-            {
-                ModEntry.Log($"No {ModEntry.ModId}/Panorama with Id '{bgId}' found", LogLevel.Warn);
-            }
+            SetPanorama(location, bgId);
         }
         else
         {
+            ClearPanorama();
+        }
+    }
+
+    private static bool DoSetPanoramaT(string[] args, TriggerActionContext context, out string error)
+    {
+        if (
+            !ArgUtility.TryGet(args, 1, out string bgId, out error, allowBlank: false, name: "string bgId")
+            || !ArgUtility.TryGetOptionalBool(args, 2, out bool force, out error, defaultValue: false, "bool force")
+        )
+            return false;
+        SetPanorama(Game1.currentLocation, bgId, force: force);
+        return true;
+    }
+
+    private static bool DoSetPanoramaM(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (
+            !ArgUtility.TryGet(args, 1, out string bgId, out _, allowBlank: false, name: "string bgId")
+            || !ArgUtility.TryGetOptionalBool(args, 2, out bool force, out _, defaultValue: false, "bool force")
+        )
+            return false;
+        SetPanorama(location, bgId, force: force);
+        return true;
+    }
+
+    private static void SetPanorama(GameLocation location, string bgId, bool force = false)
+    {
+        if (BgData.TryGetValue(bgId, out PanoramaData? data))
+        {
+            if (Game1.background is PanoramaBackground Panorama)
+            {
+                if (!force && Panorama.BgId == bgId)
+                    return;
+            }
+            else
+            {
+                if (!force && Game1.background == null)
+                {
+                    return;
+                }
+                Panorama = new(location);
+            }
+
+            GameStateQueryContext context = new(location, Game1.player, null, null, null);
+            Panorama.SetData(bgId, data, context);
+            if (data.OnetimeTAS != null)
+            {
+                xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
+                float width = layer.LayerWidth * 64f;
+                float height = layer.LayerHeight * 64f;
+                foreach (MapWideTAS mwTAS in data.OnetimeTAS)
+                {
+                    if (!GameStateQuery.CheckConditions(mwTAS.Condition, context))
+                        continue;
+                    foreach (TASExt tasExt in ModEntry.TAS.GetTASExtList(mwTAS.TAS))
+                    {
+                        Panorama.SpawnTAS(mwTAS, new(tasExt) { Pos = Vector2.Zero }, width, height, false);
+                    }
+                }
+            }
+            Game1.background = Panorama;
+        }
+        else
+        {
+            ModEntry.Log($"No {ModEntry.ModId}/Panorama with Id '{bgId}' found", LogLevel.Warn);
+            ClearPanorama();
+        }
+    }
+
+    private static void ClearPanorama()
+    {
+        if (Game1.background is PanoramaBackground bg)
+        {
+            bg.tempSprites.Clear();
             Game1.background = null;
         }
     }

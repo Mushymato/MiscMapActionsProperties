@@ -49,6 +49,8 @@ public static class CommonPatch
 
     internal static void Register()
     {
+        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
+
         try
         {
             ModEntry.harm.Patch(
@@ -81,23 +83,10 @@ public static class CommonPatch
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
             );
-
-            // // looks like this gets inlined on mac, pain
-            // ModEntry.harm.Patch(
-            //     original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnRemoved)),
-            //     prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnRemoved_Prefix))
-            // );
-            // ModEntry.harm.Patch(
-            //     original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.OnAdded)),
-            //     finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Furniture_OnAdded_Finalizer))
-            // );
-            ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
-
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
                 finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
             );
-
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Prefix)),
