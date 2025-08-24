@@ -11,6 +11,7 @@ At the moment, these Metadata fields do not work for building skins (mainly beca
 #### string values
 
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.condition`: A [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries) to determine if this layer should draw. Rechecked on time changed (e.g. 10 in game minutes).
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.color`: Draw color for the layer, can use hex or [named color](https://docs.monogame.net/api/Microsoft.Xna.Framework.Color.html), white by default.
 
 #### float values
 
