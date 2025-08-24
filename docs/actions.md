@@ -7,22 +7,22 @@ Each action will note what they can be used as:
 
 ### mushymato.MMAP_ShowConstruct \<builder\> [restrict]
 
-- Can be used as either `Action` or `TouchAction`.
+- Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Opens the construction menu for specified builder (`Robin` or `Wizard` in vanilla)
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
 
 ### mushymato.MMAP_ShowConstructForCurrent \<builder\> [restrict]
 
-- Can be used as either `Action` or `TouchAction`
+- Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Opens the construction menu for the current area.
 - Does nothing if the current area is not buildable.
 - If restrict is given, prevent multiple buildings from being constructed at the same time.
 
-### mushymato.MMAP_HoleWrp \<location\> \<X\> \<Y\> [mailflag]
+### mushymato.MMAP_ShowShipping
 
-- Can be used as either `Action` or `TouchAction`.
-- Arguments are identical to vanilla warp tile actions.
-- When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
+- Can be used as either `Action` or `TouchAction` or `TriggerAction`.
+- Opens the farm shipping bin, as in the one on the actual farm.
+- Will fail if player does not have a shipping bin building on the farm.
 
 ### mushymato.MMAP_ShowBag \<bagInventoryId\> [bagKind]
 
@@ -74,6 +74,12 @@ Each action will note what they can be used as:
 - Requires a float chance for the critter to appear at any random tile in current location.
 - Spawns critter at any tile in the map, randomly.
 - See [tile property mushymato.MMAP_Critter](tile-properties.md#mushymato.MMAP_Critter) for details.
+
+### mushymato.MMAP_HoleWrp \<location\> \<X\> \<Y\> [mailflag]
+
+- Can be used as either `Action` or `TouchAction`.
+- Arguments are identical to vanilla warp tile actions.
+- When used with Action, the warp requires interaction, while TouchAction just sends the player directly down the hole.
 
 ### mushymato.MMAP_WrpBuilding [X Y]
 

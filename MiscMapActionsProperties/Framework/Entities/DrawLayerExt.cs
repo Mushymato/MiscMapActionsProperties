@@ -36,6 +36,7 @@ internal sealed record DLExtInfo(
     Vector2 Origin,
     FloatRange Scale,
     SpriteEffects Effect,
+    Color? Color,
     string? GSQ,
     FloatRange ShakeRotate,
     bool OpenAnim
@@ -101,7 +102,7 @@ internal sealed record DLExtInfo(
             texture,
             position,
             sourceRectangle,
-            color * Alpha.Value,
+            (Color ?? color) * Alpha.Value,
             CurrRotate + rotation,
             Origin,
             scale / 4 * Scale.Value,
@@ -430,6 +431,7 @@ internal static class DrawLayerExt
 
         Vector2 origin = Vector2.Zero;
         SpriteEffects effect = SpriteEffects.None;
+        Color? color = null;
 
         bool hasChange = data.Metadata.TryGetFloatRange(
             string.Concat(drawRotatePrefix, "alpha"),
@@ -464,6 +466,12 @@ internal static class DrawLayerExt
             data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "effect"), out valueStr)
             && Enum.TryParse(valueStr, out effect);
 
+        if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "color"), out string? colorStr))
+        {
+            color = Utility.StringToColor(colorStr);
+            hasChange |= color != null;
+        }
+
         hasChange |= data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "condition"), out string? GSQ);
 
         hasChange |= data.Metadata.TryGetFloatRange(
@@ -479,7 +487,7 @@ internal static class DrawLayerExt
 
         if (hasChange)
         {
-            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, GSQ, shakeRotate, openAnim);
+            dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, color, GSQ, shakeRotate, openAnim);
             if (openAnim)
             {
                 dlExtInfo.ContactState = new();

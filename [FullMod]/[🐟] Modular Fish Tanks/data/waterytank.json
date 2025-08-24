@@ -1,0 +1,45 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_watery_tank_{{L@Seq}}": "{{ModId}}_watery_tank_{{L@Seq}}/fishtank/2 2/2 1/1/100/2/[LocalizedText {{ModId}}.i18n:watery_tank_{{L@Seq}}.name]/0/{{ModId}}_watery/false/{{ModId}}",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_watery_tank_{{L@Seq}}": {
+          "Description": "[LocalizedText {{ModId}}.i18n:watery.desc]",
+          "CollisionMap": "OO",
+          "CustomFields": {
+            "FishTank": "3 0 20 128 108"
+          },
+          "DrawLayers": [
+            {
+              "Id": "Watery",
+              "Texture": "LooseSprites/Cursors",
+              "SourceRect": {
+                "X": 0,
+                "Y": "{{L@WaterY}}",
+                "Width": 128,
+                "Height": 128
+              },
+              "FrameCount": 5,
+              "FrameDuration": 200,
+              "SortTileOffset": -10000
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.5",
+            "mushymato.MMAP/DrawLayer.Watery.color": "{{D@WaterColor}}",
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+          }
+        }
+      }
+    }
+  ]
+}

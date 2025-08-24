@@ -1,7 +1,9 @@
 ﻿using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Delegates;
 using StardewValley.Menus;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
 
@@ -27,6 +29,17 @@ internal static class ShowConstruct
             (location, args, farmer, tile) =>
                 CheckArgsThenShowConstruct(args, (builder) => location.ShowConstructOptions(builder))
         );
+        TriggerActionManager.RegisterAction(
+            TileAction_ShowConstruct,
+            (string[] args, TriggerActionContext ctx, out string err) =>
+            {
+                err = "";
+                return CheckArgsThenShowConstruct(
+                    args,
+                    (builder) => Game1.currentLocation.ShowConstructOptions(builder)
+                );
+            }
+        );
         CommonPatch.RegisterTileAndTouch(
             TileAction_ShowConstructForCurrent,
             (location, args, farmer, tile) =>
@@ -40,6 +53,23 @@ internal static class ShowConstruct
                             Game1.drawObjectDialogue(Game1.content.LoadString("Strings/UI:Carpenter_CantBuild"));
                     }
                 )
+        );
+        TriggerActionManager.RegisterAction(
+            TileAction_ShowConstructForCurrent,
+            (string[] args, TriggerActionContext ctx, out string err) =>
+            {
+                err = "";
+                return CheckArgsThenShowConstruct(
+                    args,
+                    (builder) =>
+                    {
+                        if (Game1.currentLocation.IsBuildableLocation())
+                            Game1.activeClickableMenu = new CarpenterMenu(builder, Game1.currentLocation);
+                        else
+                            Game1.drawObjectDialogue(Game1.content.LoadString("Strings/UI:Carpenter_CantBuild"));
+                    }
+                );
+            }
         );
     }
 

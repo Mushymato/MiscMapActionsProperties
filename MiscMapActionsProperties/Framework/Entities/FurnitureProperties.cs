@@ -593,7 +593,10 @@ internal static class FurnitureProperties
     private record FishTankInfo(int Capacity, int PosX, int PosY, int Width, int Height)
     {
         /// <summary>Mark tank bounds as need combining</summary>
-        internal bool IsDirty = true;
+        internal bool IsBoundsDirty = true;
+
+        /// <summary>Mark decoration as need repositioning</summary>
+        internal bool IsDecoDirty = true;
 
         /// <summary>Cached tank bounds</summary>
         internal Rectangle CurrentTankBounds = Rectangle.Empty;
@@ -702,11 +705,11 @@ internal static class FurnitureProperties
 
     private static void FishTankFurniture_UpdateDecorAndFish_Postfix(FishTankFurniture __instance)
     {
-        if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo || !tankInfo.IsDirty)
+        if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo || !tankInfo.IsDecoDirty)
         {
             return;
         }
-        tankInfo.IsDirty = false;
+        tankInfo.IsDecoDirty = false;
         for (int i = 0; i < __instance.floorDecorations.Count; i++)
         {
             if (__instance.floorDecorations[i] is KeyValuePair<Rectangle, Vector2> kv)
@@ -735,11 +738,9 @@ internal static class FurnitureProperties
                 tankInfo.CurrentTankBounds = tankInfo.GetBaseTankBounds(GetDrawPosition(furniture));
                 if (tank.modData.ContainsKey(ConnectedTextures.ConnectedTextureApplied))
                 {
-                    tankInfo.IsDirty = true;
+                    tankInfo.IsBoundsDirty = true;
                     maybeConnectedTanks[tank] = tankInfo;
                 }
-                // always update fish
-                tank.refreshFishEvent.Fire();
             }
         }
 
@@ -747,22 +748,27 @@ internal static class FurnitureProperties
             (FishTankFurniture tank, FishTankInfo tankInfo) in maybeConnectedTanks.OrderBy(kv => kv.Key.TileLocation.X)
         )
         {
-            if (!tankInfo.IsDirty)
-                continue;
-            List<(FishTankFurniture, FishTankInfo)> needUpdate = [];
-            RightOnlyDFS_FishTank(maybeConnectedTanks, tank, tankInfo, ref needUpdate);
-            Rectangle combinedBounds = tankInfo.CurrentTankBounds;
-            foreach ((_, FishTankInfo subInfo) in needUpdate)
+            if (tankInfo.IsBoundsDirty)
             {
-                combinedBounds = Rectangle.Union(combinedBounds, subInfo.CurrentTankBounds);
-            }
-            foreach ((FishTankFurniture subTank, FishTankInfo subInfo) in needUpdate)
-            {
-                if (combinedBounds != subInfo.CurrentTankBounds)
+                List<(FishTankFurniture, FishTankInfo)> needUpdate = [];
+                RightOnlyDFS_FishTank(maybeConnectedTanks, tank, tankInfo, ref needUpdate);
+                Rectangle combinedBounds = tankInfo.CurrentTankBounds;
+                foreach ((_, FishTankInfo subInfo) in needUpdate)
                 {
-                    subInfo.CurrentTankBounds = combinedBounds;
+                    combinedBounds = Rectangle.Union(combinedBounds, subInfo.CurrentTankBounds);
+                }
+                foreach ((FishTankFurniture subTank, FishTankInfo subInfo) in needUpdate)
+                {
+                    if (combinedBounds != subInfo.CurrentTankBounds)
+                    {
+                        subInfo.CurrentTankBounds = combinedBounds;
+                        subInfo.IsBoundsDirty = false;
+                    }
                 }
             }
+            // always update deco
+            tankInfo.IsDecoDirty = true;
+            tank.refreshFishEvent.Fire();
         }
     }
 

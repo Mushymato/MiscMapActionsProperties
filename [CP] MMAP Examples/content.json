@@ -88,15 +88,14 @@
             "Action": "mushymato.MMAP_ShowConstruct Robin"
           }
         },
-        // This one will not do anything, unless bus stop is made buildable
         {
           "Position": {
-            "X": 27,
+            "X": 26,
             "Y": 21
           },
           "Layer": "Buildings",
           "SetProperties": {
-            "Action": "mushymato.MMAP_ShowConstructForCurrent Robin"
+            "Action": "mushymato.MMAP_ShowShipping Robin"
           }
         }
       ]

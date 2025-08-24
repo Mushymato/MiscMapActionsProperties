@@ -82,6 +82,7 @@ public sealed class ModEntry : Mod
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();
         Framework.Tile.ShowGlobalInventory.Register();
+        Framework.Tile.ShowShipping.Register();
         Framework.Tile.TASSpot.Register();
     }
 

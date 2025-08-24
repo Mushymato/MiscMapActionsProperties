@@ -4,29 +4,29 @@
   "DynamicTokens": [
     {
       "Name": "D@WaterColor",
-      "Value": "3C647F"
+      "Value": "Red"
     },
-    {
-      "Name": "D@WaterColor",
-      "Value": "1E787F",
-      "When": {
-        "Season": "summer"
-      }
-    },
-    {
-      "Name": "D@WaterColor",
-      "Value": "7F4164",
-      "When": {
-        "Season": "fall"
-      }
-    },
-    {
-      "Name": "D@WaterColor",
-      "Value": "41287F",
-      "When": {
-        "Season": "winter"
-      }
-    }
+    // {
+    //   "Name": "D@WaterColor",
+    //   "Value": "#1E787F",
+    //   "When": {
+    //     "Season": "summer"
+    //   }
+    // },
+    // {
+    //   "Name": "D@WaterColor",
+    //   "Value": "#7F4164",
+    //   "When": {
+    //     "Season": "fall"
+    //   }
+    // },
+    // {
+    //   "Name": "D@WaterColor",
+    //   "Value": "#41287F",
+    //   "When": {
+    //     "Season": "winter"
+    //   }
+    // }
   ],
   "Changes": [
     // i18n
@@ -113,8 +113,46 @@
     },
     // watery tank
     {
+      "Action": "Load",
+      "Target": "{{ModId}}_watery",
+      "FromFile": "assets/watery.png"
+    },
+    {
       "Action": "Include",
-      "FromFile": "data/waterytank.json"
+      "FromFile": "data/waterytank.json",
+      "LocalTokens": {
+        "L@Seq": "A",
+        "L@WaterY": "2000"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/waterytank.json",
+      "LocalTokens": {
+        "L@Seq": "B",
+        "L@WaterY": "2128"
+      }
+    },
+    /* althought the TX is invisible, we need this for tank bound connect*/
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/ConnectedTextures",
+      "Entries": {
+        "(F){{ModId}}_watery_tank_A": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_watery_tank_A",
+            "(F){{ModId}}_watery_tank_B"
+          ]
+        },
+        "(F){{ModId}}_watery_tank_B": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_watery_tank_A",
+            "(F){{ModId}}_watery_tank_B"
+          ]
+        }
+      }
     }
   ]
 }
