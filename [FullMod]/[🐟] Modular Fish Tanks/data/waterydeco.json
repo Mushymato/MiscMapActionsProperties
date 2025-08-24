@@ -13,7 +13,7 @@
       "Target": "mushymato.MMAP/FurnitureProperties",
       "Entries": {
         "{{ModId}}_watery_deco_{{L@Len}}": {
-          // "Description": "[LocalizedText {{ModId}}.i18n:watery_deco_{{L@Len}}.desc]",
+          "Description": "[LocalizedText {{ModId}}.i18n:watery_deco_{{L@Len}}.desc]",
           "CollisionMap": "O",
           "DrawShadow": false,
           "DrawLayers": [

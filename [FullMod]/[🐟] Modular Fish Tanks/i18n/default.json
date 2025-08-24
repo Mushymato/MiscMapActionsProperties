@@ -20,7 +20,11 @@
   "watery_tank.name": "Watery Fish Tank",
   "watery_tank.desc": "Looks like water, holds 6 fish",
   "watery_deco_1.name": "Watery Deco 1 Tile",
+  "watery_deco_1.desc": "Looks like water, 1 tile tall",
   "watery_deco_2.name": "Watery Deco 2 Tile",
+  "watery_deco_2.desc": "Looks like water, 2 tile tall",
   "watery_deco_3.name": "Watery Deco 3 Tile",
-  "watery_deco_4.name": "Watery Deco 4 Tile"
+  "watery_deco_3.desc": "Looks like water, 3 tile tall",
+  "watery_deco_4.name": "Watery Deco 4 Tile",
+  "watery_deco_4.desc": "Looks like water, 4 tile tall"
 }
