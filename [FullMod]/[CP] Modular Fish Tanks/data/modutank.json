@@ -10,7 +10,7 @@
       "Action": "EditData",
       "Target": "Data/Furniture",
       "Entries": {
-        "{{ModId}}_modu_{{L@Seq}}": "{{ModId}}_modu_{{L@Seq}}/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:modu_{{L@Seq}}.name]/0/{{ModId}}_modu_{{L@Seq}}_png/false/{{ModId}}",
+        "{{ModId}}_modu_{{L@Seq}}": "{{ModId}}_modu_{{L@Seq}}/{{L@Type}}/{{L@Size}}/1/1000/2/[LocalizedText {{ModId}}.i18n:modu_{{L@Seq}}.name]/0/{{ModId}}_modu_{{L@Seq}}_png/false/{{ModId}}",
       }
     },
     {

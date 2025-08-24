@@ -10,8 +10,8 @@
       "Action": "EditData",
       "Target": "Data/Furniture",
       "Entries": {
-        "{{ModId}}_dual_modu_{{L@Seq}}_A": "{{ModId}}_dual_modu_{{L@Seq}}_A/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_A.name]/0/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
-        "{{ModId}}_dual_modu_{{L@Seq}}_B": "{{ModId}}_dual_modu_{{L@Seq}}_B/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_B.name]/{{L@Pt2Idx}}/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
+        "{{ModId}}_dual_modu_{{L@Seq}}_A": "{{ModId}}_dual_modu_{{L@Seq}}_A/{{L@Type}}/{{L@Size}}/1/5000/2/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_A.name]/0/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
+        "{{ModId}}_dual_modu_{{L@Seq}}_B": "{{ModId}}_dual_modu_{{L@Seq}}_B/{{L@Type}}/{{L@Size}}/1/5000/2/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_B.name]/{{L@Pt2Idx}}/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
       }
     },
     {

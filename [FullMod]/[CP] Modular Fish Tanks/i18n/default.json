@@ -14,5 +14,9 @@
   "dual_modu_wall_01_A.name": "Modular Wall Tank - Antique A",
   "dual_modu_wall_01_A.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with B.",
   "dual_modu_wall_01_B.name": "Modular Wall Tank - Antique B",
-  "dual_modu_wall_01_B.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with A."
+  "dual_modu_wall_01_B.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with A.",
+  "watery_tank.name": "Watery Fish Tank",
+  "watery_tank.desc": "Looks like water, holds 6 fish.",
+  "watery_deco.name": "Watery Deco A",
+  "watery_deco.desc": "Water decoration."
 }

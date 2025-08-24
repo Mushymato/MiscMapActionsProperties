@@ -1,7 +1,35 @@
 {
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Format": "2.7.0",
+  "DynamicTokens": [
+    {
+      "Name": "D@WaterColor",
+      "Value": "3C647F"
+    },
+    {
+      "Name": "D@WaterColor",
+      "Value": "1E787F",
+      "When": {
+        "Season": "summer"
+      }
+    },
+    {
+      "Name": "D@WaterColor",
+      "Value": "7F4164",
+      "When": {
+        "Season": "fall"
+      }
+    },
+    {
+      "Name": "D@WaterColor",
+      "Value": "41287F",
+      "When": {
+        "Season": "winter"
+      }
+    }
+  ],
   "Changes": [
+    // i18n
     {
       "LogName": "LocalizedText i18n",
       "Action": "Load",
@@ -19,6 +47,7 @@
         "HasFile:{{FromFile}}": true
       }
     },
+    // single modular tanks
     {
       "Action": "Include",
       "FromFile": "data/modutank.json",
@@ -59,6 +88,7 @@
         "L@Tank": "4 0 40 128 144"
       }
     },
+    // pair modular tanks
     {
       "Action": "Include",
       "FromFile": "data/dualmodutank.json",
@@ -66,7 +96,7 @@
         "L@Seq": "floor_01",
         "L@Type": "fishtank",
         "L@Size": "2 4/2 1",
-        "L@Tank": "4 0 64 128 192",
+        "L@Tank": "6 0 64 128 192",
         "L@Pt2Idx": "64"
       }
     },
@@ -81,5 +111,10 @@
         "L@Pt2Idx": "48"
       }
     },
+    // watery tank
+    {
+      "Action": "Include",
+      "FromFile": "data/waterytank.json"
+    }
   ]
 }

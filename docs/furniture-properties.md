@@ -49,7 +49,7 @@ Some of these features overlap with other framework mods, usually they don't con
     - Bounds X/Y/Width/Height is relative to the draw position of the tank.
     - If you are counting pixels on the texture, multiply it by 4.
     - Capacity is normally tile width - 1 but can be overriden as well via first arg. Setting it to -2 will default to that, setting it to -1 means unlimited.
-    - The custom capacity value applies to both swiming and grounded entities, decoration is always unlimited (-1) if using MMAP FishTank field
+    - The custom capacity value applies to both swiming and grounded entities. Decoration still depends on the tile width of the tank (unlimited if >2, 1 if <= 2).
     - Fish tank bounds will merge horizontally if they are [connected](connected-textures.md), and the fish will visually swim between tanks in that case (but still belong to a particular tank).
     - **WARNING**: Do not make a 1x1 footprint fish tank! It'll be placable on a table and you will lose all fish if you do that! (Also don't make a 1x1 dresser, same reason).
 

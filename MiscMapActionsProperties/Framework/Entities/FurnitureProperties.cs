@@ -598,10 +598,14 @@ internal static class FurnitureProperties
         /// <summary>Cached tank bounds</summary>
         internal Rectangle CurrentTankBounds = Rectangle.Empty;
 
+        /// <summary>Cached tank bounds</summary>
+        internal Rectangle BaseTankBounds = Rectangle.Empty;
+
         /// <summary>Base tank bounds given a tile location</summary>
         internal Rectangle GetBaseTankBounds(Vector2 pos)
         {
-            return new Rectangle((int)(pos.X + PosX), (int)(pos.Y + PosY), Width, Height);
+            BaseTankBounds = new Rectangle((int)(pos.X + PosX), (int)(pos.Y + PosY), Width, Height);
+            return BaseTankBounds;
         }
     }
 
@@ -636,6 +640,16 @@ internal static class FurnitureProperties
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(TankFish), nameof(TankFish.Update)),
                 postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(TankFish_Update_Postfix))
+            );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(
+                    typeof(FishTankFurniture),
+                    nameof(FishTankFurniture.UpdateDecorAndFish)
+                ),
+                postfix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(FishTankFurniture_UpdateDecorAndFish_Postfix)
+                )
             );
         }
         catch (Exception err)
@@ -686,6 +700,24 @@ internal static class FurnitureProperties
         return Vector2.Zero;
     }
 
+    private static void FishTankFurniture_UpdateDecorAndFish_Postfix(FishTankFurniture __instance)
+    {
+        if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo || !tankInfo.IsDirty)
+        {
+            return;
+        }
+        tankInfo.IsDirty = false;
+        for (int i = 0; i < __instance.floorDecorations.Count; i++)
+        {
+            if (__instance.floorDecorations[i] is KeyValuePair<Rectangle, Vector2> kv)
+            {
+                Vector2 newValue =
+                    new(kv.Value.X + (tankInfo.BaseTankBounds.X - tankInfo.CurrentTankBounds.X) / 4, kv.Value.Y);
+                __instance.floorDecorations[i] = new(kv.Key, newValue);
+            }
+        }
+    }
+
     /// <summary>Update fish tank bounds of current location</summary>
     private static void UpdateFishTankNeighbourBounds(GameLocation where)
     {
@@ -693,7 +725,7 @@ internal static class FurnitureProperties
             return;
 
         Dictionary<FishTankFurniture, FishTankInfo> maybeConnectedTanks = [];
-        foreach (Furniture furniture in where.furniture)
+        foreach (Furniture furniture in where.furniture.OrderBy(f => f.TileLocation.X))
         {
             if (
                 furniture is FishTankFurniture tank
@@ -706,6 +738,8 @@ internal static class FurnitureProperties
                     tankInfo.IsDirty = true;
                     maybeConnectedTanks[tank] = tankInfo;
                 }
+                // always update fish
+                tank.refreshFishEvent.Fire();
             }
         }
 
@@ -724,12 +758,10 @@ internal static class FurnitureProperties
             }
             foreach ((FishTankFurniture subTank, FishTankInfo subInfo) in needUpdate)
             {
-                subInfo.CurrentTankBounds = combinedBounds;
-                foreach (TankFish fish in subTank.tankFish)
+                if (combinedBounds != subInfo.CurrentTankBounds)
                 {
-                    fish.position.X = Random.Shared.Next(combinedBounds.Width);
+                    subInfo.CurrentTankBounds = combinedBounds;
                 }
-                subInfo.IsDirty = false;
             }
         }
     }
@@ -777,9 +809,10 @@ internal static class FurnitureProperties
     {
         if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is FishTankInfo tankInfo && tankInfo.Capacity != -2)
         {
-            if (category == FishTankFurniture.FishTankCategories.Decoration)
-                __result = -1;
-            __result = tankInfo.Capacity;
+            if (category != FishTankFurniture.FishTankCategories.Decoration)
+            {
+                __result = tankInfo.Capacity;
+            }
         }
     }
 

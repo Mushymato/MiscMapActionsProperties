@@ -65,10 +65,10 @@ All map properties are also usable as entry in `Data/Location` `CustomFields`. I
 - Can provide up to 4 colors, for each season.
 - If you don't provide any color or write `T` in any slot, water will fall back to the spring color (first color) if provided.
 - The vanilla seasonal colors are:
-    - #3c6e7f spring
-    - #1e787f summer
-    - #7f4164 fall
-    - #41287F winter
+    - #3C647F7F spring
+    - #1E787F7F summer
+    - #7F41647F fall
+    - #41287F7F winter
 
 #### mushymato.MMAP_Panorama \<panoramaId\>
 
