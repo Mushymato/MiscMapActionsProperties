@@ -1,6 +1,8 @@
 {
   "modu_floor_01.name": "Modular Floor Tank - Standard",
   "modu_floor_01.desc": "Modular free standing fishtank, each part holds 4 fish.",
+  "modu_floor_02.name": "Modular Floor Tank - Sandy",
+  "modu_floor_02.desc": "Modular free standing fishtank, each part holds 4 fish.",
   "modu_wall_01.name": "Modular Wall Tank - Standard",
   "modu_wall_01.desc": "Modular wall mounted fish tank, each part holds 2 fish.",
   "modu_wall_02.name": "Modular Wall Tank - Deep",

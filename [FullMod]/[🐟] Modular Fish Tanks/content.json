@@ -1,33 +1,9 @@
 {
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Format": "2.7.0",
-  "DynamicTokens": [
-    {
-      "Name": "D@WaterColor",
-      "Value": "Red"
-    },
-    // {
-    //   "Name": "D@WaterColor",
-    //   "Value": "#1E787F",
-    //   "When": {
-    //     "Season": "summer"
-    //   }
-    // },
-    // {
-    //   "Name": "D@WaterColor",
-    //   "Value": "#7F4164",
-    //   "When": {
-    //     "Season": "fall"
-    //   }
-    // },
-    // {
-    //   "Name": "D@WaterColor",
-    //   "Value": "#41287F",
-    //   "When": {
-    //     "Season": "winter"
-    //   }
-    // }
-  ],
+  // "ConfigSchema": {
+  //   "Wa"
+  // },
   "Changes": [
     // i18n
     {
@@ -53,6 +29,16 @@
       "FromFile": "data/modutank.json",
       "LocalTokens": {
         "L@Seq": "floor_01",
+        "L@Type": "fishtank",
+        "L@Size": "2 4/2 1",
+        "L@Tank": "4 0 64 128 164"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/modutank.json",
+      "LocalTokens": {
+        "L@Seq": "floor_02",
         "L@Type": "fishtank",
         "L@Size": "2 4/2 1",
         "L@Tank": "4 0 64 128 164"
@@ -133,25 +119,55 @@
         "L@WaterY": "2128"
       }
     },
-    /* althought the TX is invisible, we need this for tank bound connect*/
+    // add watery effect to tank_wall_02 and tank_wall_03
     {
       "Action": "EditData",
-      "Target": "mushymato.MMAP/ConnectedTextures",
-      "Entries": {
-        "(F){{ModId}}_watery_tank_A": {
-          "Style": "Horizontal",
-          "ConnectWith": [
-            "(F){{ModId}}_watery_tank_A",
-            "(F){{ModId}}_watery_tank_B"
-          ]
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Fields": {
+        "{{ModId}}_modu_wall_02": {
+          "DrawLayers": [
+            {
+              "Id": "Watery",
+              "Texture": "LooseSprites/Cursors",
+              "SourceRect": {
+                "X": 0,
+                "Y": 2128,
+                "Width": 64,
+                "Height": 192
+              },
+              "FrameCount": 10,
+              "FrameDuration": 200,
+              "DrawPosition": "0,0",
+              "SortTileOffset": -0.0001
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.2",
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+          }
         },
-        "(F){{ModId}}_watery_tank_B": {
-          "Style": "Horizontal",
-          "ConnectWith": [
-            "(F){{ModId}}_watery_tank_A",
-            "(F){{ModId}}_watery_tank_B"
-          ]
-        }
+        "{{ModId}}_modu_wall_03": {
+          "DrawLayers": [
+            {
+              "Id": "Watery",
+              "Texture": "LooseSprites/Cursors",
+              "SourceRect": {
+                "X": 0,
+                "Y": 2000,
+                "Width": 128,
+                "Height": 152
+              },
+              "FrameCount": 5,
+              "FrameDuration": 200,
+              "DrawInBackground": true,
+              "DrawPosition": "0,2"
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.5",
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+          }
+        },
       }
     }
   ]

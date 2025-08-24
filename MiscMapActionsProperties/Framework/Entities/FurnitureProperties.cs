@@ -596,7 +596,7 @@ internal static class FurnitureProperties
         internal bool IsBoundsDirty = true;
 
         /// <summary>Mark decoration as need repositioning</summary>
-        internal bool IsDecoDirty = true;
+        internal int LastDecoCount = 0;
 
         /// <summary>Cached tank bounds</summary>
         internal Rectangle CurrentTankBounds = Rectangle.Empty;
@@ -705,11 +705,13 @@ internal static class FurnitureProperties
 
     private static void FishTankFurniture_UpdateDecorAndFish_Postfix(FishTankFurniture __instance)
     {
-        if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo || !tankInfo.IsDecoDirty)
-        {
+        if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo)
             return;
-        }
-        tankInfo.IsDecoDirty = false;
+        int decoCount = __instance.floorDecorations.Count(deco => deco is not null);
+        if (tankInfo.LastDecoCount == decoCount)
+            return;
+
+        tankInfo.LastDecoCount = decoCount;
         for (int i = 0; i < __instance.floorDecorations.Count; i++)
         {
             if (__instance.floorDecorations[i] is KeyValuePair<Rectangle, Vector2> kv)
@@ -741,6 +743,11 @@ internal static class FurnitureProperties
                     tankInfo.IsBoundsDirty = true;
                     maybeConnectedTanks[tank] = tankInfo;
                 }
+                else
+                {
+                    tankInfo.LastDecoCount = -1;
+                    tank.refreshFishEvent.Fire();
+                }
             }
         }
 
@@ -766,8 +773,7 @@ internal static class FurnitureProperties
                     }
                 }
             }
-            // always update deco
-            tankInfo.IsDecoDirty = true;
+            tankInfo.LastDecoCount = -1;
             tank.refreshFishEvent.Fire();
         }
     }

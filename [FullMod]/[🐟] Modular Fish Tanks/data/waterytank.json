@@ -35,10 +35,22 @@
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.Watery.alpha": "0.5",
-            "mushymato.MMAP/DrawLayer.Watery.color": "{{D@WaterColor}}",
             "mushymato.MMAP/DrawLayer.Watery.scale": "1"
           }
         }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/ConnectedTextures",
+      "Entries": {
+        "(F){{ModId}}_watery_tank_{{L@Seq}}": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_watery_tank_A",
+            "(F){{ModId}}_watery_tank_B"
+          ]
+        },
       }
     }
   ]
