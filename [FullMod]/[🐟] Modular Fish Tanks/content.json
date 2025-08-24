@@ -78,7 +78,7 @@
         "L@Seq": "wall_03",
         "L@Type": "painting",
         "L@Size": "2 3/2 3",
-        "L@Tank": "4 0 40 128 144"
+        "L@Tank": "4 0 40 128 128"
       }
     },
     // pair modular tanks
@@ -89,7 +89,7 @@
         "L@Seq": "floor_01",
         "L@Type": "fishtank",
         "L@Size": "2 4/2 1",
-        "L@Tank": "6 0 64 128 192",
+        "L@Tank": "6 0 64 128 160",
         "L@Pt2Idx": "64"
       }
     },
@@ -100,7 +100,7 @@
         "L@Seq": "wall_01",
         "L@Type": "painting",
         "L@Size": "2 3/2 3",
-        "L@Tank": "4 0 40 128 164",
+        "L@Tank": "4 0 40 128 144",
         "L@Pt2Idx": "48"
       }
     },
@@ -157,12 +157,12 @@
               "FrameCount": 10,
               "FrameDuration": 180,
               "DrawPosition": "0,0",
-              "SortTileOffset": -0.0001
+              "SortTileOffset": -0.01
             }
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.Watery.scale": "1",
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 2}}",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 3}}",
             "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
           }
         },
@@ -185,7 +185,7 @@
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.Watery.scale": "1",
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 2}}",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 3}}",
             "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
           }
         },

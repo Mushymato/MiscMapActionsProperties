@@ -35,7 +35,7 @@
               },
               "FrameCount": 5,
               "FrameDuration": 180,
-              "SortTileOffset": -10000
+              "SortTileOffset": -1
             }
           ],
           "Metadata": {
