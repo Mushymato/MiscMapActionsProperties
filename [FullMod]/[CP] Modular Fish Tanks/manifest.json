@@ -1,0 +1,21 @@
+{
+  "Name": "[🐟] Modular Fish Tanks",
+  "Author": "mushymato",
+  "Version": "1.1.0",
+  "Description": "Modular fish tanks, some go on the wall.",
+  "UniqueID": "mushymato.ModularFishTanks",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [
+    "Nexus:36938"
+  ],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "mushymato.MMAP",
+      "MinimumVersion": "1.10.0-Debug",
+      "IsRequired": true
+    }
+  ]
+}

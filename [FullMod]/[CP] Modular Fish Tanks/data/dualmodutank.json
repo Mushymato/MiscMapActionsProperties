@@ -1,0 +1,56 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}_dual_modu_{{L@Seq}}_png",
+      "FromFile": "assets/dual_modu_{{L@Seq}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_dual_modu_{{L@Seq}}_A": "{{ModId}}_dual_modu_{{L@Seq}}_A/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_A.name]/0/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
+        "{{ModId}}_dual_modu_{{L@Seq}}_B": "{{ModId}}_dual_modu_{{L@Seq}}_B/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_B.name]/{{L@Pt2Idx}}/{{ModId}}_dual_modu_{{L@Seq}}_png/false/{{ModId}}",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_dual_modu_{{L@Seq}}_A": {
+          "Description": "[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_A.desc]",
+          "CustomFields": {
+            "FishTank": "{{L@Tank}}"
+          }
+        },
+        "{{ModId}}_dual_modu_{{L@Seq}}_B": {
+          "Description": "[LocalizedText {{ModId}}.i18n:dual_modu_{{L@Seq}}_B.desc]",
+          "CustomFields": {
+            "FishTank": "{{L@Tank}}"
+          }
+        },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/ConnectedTextures",
+      "Entries": {
+        "(F){{ModId}}_dual_modu_{{L@Seq}}_A": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_dual_modu_{{L@Seq}}_A",
+            "(F){{ModId}}_dual_modu_{{L@Seq}}_B"
+          ]
+        },
+        "(F){{ModId}}_dual_modu_{{L@Seq}}_B": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_dual_modu_{{L@Seq}}_A",
+            "(F){{ModId}}_dual_modu_{{L@Seq}}_B"
+          ]
+        }
+      }
+    }
+  ]
+}

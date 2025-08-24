@@ -56,9 +56,6 @@ To define connections, edit `mushymato.MMAP/ConnectedTextures` and add data like
 
 One thing to understand is that connection is one-way until you explicitly define the other way. With the above sample, `(F){{ModId}}_simple` will switch to connected mode when placed next to `(BC)12` (Keg), but `(BC)12` will not switch to a connected texture unless it has it's own `mushymato.MMAP/ConnectedTextures` entry with `(F){{ModId}}_simple` in `ConnectWith`. This is also why the object needs to have it's own qualified in `ConnectWith` in order to work.
 
-Besides being next to each other the 2 objects also need to have the same width to connect vertically, and same height to connect horizontally.
-
-
 The number of sprites required depends on the connection Style, covered in sections below.
 
 Besides having enough sprites, there is no fixed format. As long as the general rules about sprite index (left to right, then move to next row) is followed, you may put multiple sets of sprites on the same texture if desired. For your own convenience it's recommended to avoid having sets of sprites with different sizes on the same sheet.
@@ -116,22 +113,45 @@ SOOOS
 CSSSC
 ```
 
-A neighbour furniture is only considered connected if:
-1. It has the same width and height as this furniture
-2. It is aligned gridwise with this furniture
+A neighbour furniture is considered from the sides if:
+1. It is touching this furniture along an edge, horizontal or vertical
+2. The length of the touching edge is equal.
 
-The furniture marked by A and B are considered connected here:
+The furniture marked by A and B are considered connected by side here:
 ```
-AAABBB
-AAABBB
+AABBB
+AABBB
 ```
 
 The furniture marked by A and B are **NOT** connected here:
 ```
-AAA---
-AAABBB
----BBB
+AA-
+AA-
+BBB
+BBB
 ```
+
+A neighbour furniture is considered connected at the corner if:
+1. It is touching this furniture at a corner without overhanging on X or Y direction.
+2. They have same width and height.
+
+The furniture marked by A and B are considered connected by corner here:
+```
+AA---
+AA---
+--BBB
+--BBB
+```
+
+The furniture marked by A and B are **NOT** connected here:
+```
+AA---
+AABBB
+--BBB
+```
+
+
+Of course, the objects will need to exist in `ConnectWith` to actually be considered connected, even if the geometry is correct.
 
 ### Lamp and Windows
 
@@ -144,6 +164,7 @@ Like in vanilla, you need to have a second texture offset to the right for the r
 ### Draw Layers
 
 When used with [furniture draw layers](./draw-layers.md), the connected source rect offset is applied only if `Texture` is `null` or non-existent.
+You will likely want to set `FurnitureOffset` to larger dimensions.
 
 ### Overriding the Default Offset
 

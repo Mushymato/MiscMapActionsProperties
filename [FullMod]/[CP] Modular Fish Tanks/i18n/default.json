@@ -1,0 +1,18 @@
+{
+  "modu_floor_01.name": "Modular Floor Tank - Standard",
+  "modu_floor_01.desc": "Modular free standing fishtank, each part holds 4 fish.",
+  "modu_wall_01.name": "Modular Wall Tank - Standard",
+  "modu_wall_01.desc": "Modular wall mounted fish tank, each part holds 2 fish.",
+  "modu_wall_02.name": "Modular Wall Tank - Deep",
+  "modu_wall_02.desc": "Modular wall mounted fish tank, each part holds 2 fish.",
+  "modu_wall_03.name": "Modular Wall Tank - Pane",
+  "modu_wall_03.desc": "Modular wall mounted fish tank, each part holds 4 fish.",
+  "dual_modu_floor_01_A.name": "Modular Floor Tank - Antique A",
+  "dual_modu_floor_01_A.desc": "Modular free standing fishtank, each part holds 4 fish, connects with B.",
+  "dual_modu_floor_01_B.name": "Modular Floor Tank - Antique B",
+  "dual_modu_floor_01_B.desc": "Modular free standing fishtank, each part holds 4 fish, connects with A.",
+  "dual_modu_wall_01_A.name": "Modular Wall Tank - Antique A",
+  "dual_modu_wall_01_A.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with B.",
+  "dual_modu_wall_01_B.name": "Modular Wall Tank - Antique B",
+  "dual_modu_wall_01_B.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with A."
+}

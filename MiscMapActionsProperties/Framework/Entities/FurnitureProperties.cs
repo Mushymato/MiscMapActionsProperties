@@ -82,6 +82,10 @@ internal static class FurnitureProperties
             SeatPositionCache.Clear();
             TVScreens.Clear();
             FishTankInfos.Clear();
+            if (Context.IsWorldReady && Game1.currentLocation is not null)
+            {
+                UpdateFishTankNeighbourBounds(Game1.currentLocation);
+            }
         }
     }
 

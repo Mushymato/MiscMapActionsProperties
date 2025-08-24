@@ -1,0 +1,41 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}_modu_{{L@Seq}}_png",
+      "FromFile": "assets/modu_{{L@Seq}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_modu_{{L@Seq}}": "{{ModId}}_modu_{{L@Seq}}/{{L@Type}}/{{L@Size}}/1/100/-1/[LocalizedText {{ModId}}.i18n:modu_{{L@Seq}}.name]/0/{{ModId}}_modu_{{L@Seq}}_png/false/{{ModId}}",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_modu_{{L@Seq}}": {
+          "Description": "[LocalizedText {{ModId}}.i18n:modu_{{L@Seq}}.desc]",
+          "CustomFields": {
+            "FishTank": "{{L@Tank}}"
+          }
+        },
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/ConnectedTextures",
+      "Entries": {
+        "(F){{ModId}}_modu_{{L@Seq}}": {
+          "Style": "Horizontal",
+          "ConnectWith": [
+            "(F){{ModId}}_modu_{{L@Seq}}"
+          ]
+        }
+      }
+    }
+  ]
+}
