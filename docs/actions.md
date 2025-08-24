@@ -42,6 +42,7 @@ Each action will note what they can be used as:
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Spawns [TAS](temporary-animated-sprites.md) on the specified tile.
 - Works nearly identical to the tile data version but does not respond to tile data changes.
+- If you use -1000 -1000 as X and Y and this is a map or touch action, the TAS will spawn at the tile of the action.
 
 ### mushymato.MMAP_ToggleTAS \<spawnKey\> \<X\> \<Y\> \<tasId\>+
 

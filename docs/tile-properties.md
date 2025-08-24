@@ -73,6 +73,11 @@ Map properties can be set on the map or through building/furniture/floor path.
         - When giving a texture, the first frame is the rabbit's standing frame, while the following 6 frames are the running frames
         - T makes rabbit face right, F makes rabbit face left, e.g. `loadedRabbitTexture:F` gives a rabbit using the specific texture and facing left. When not specified, the direction is random.
 - You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
+- The critter type arg can have extra setting arguments like `\"Crab:RANDOM .5:16:16\"`, these separated by `:` and the args mean the following:
+    - CritterType
+    - [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries)
+    - X offset in pixels
+    - Y offset in pixels
 - T as first argument is a placeholder and lets you use defaults.
 - For critters that support a custom texture, they need to have same dimensions as the original, see `[CP] MMAP Examples/assets/critters` for example textures you can use as a base.
 - There are several actions related to this tile property, see [actions mushymato.MMAP_Critter](actions.md#mushymato.MMAP_Critter) for details.

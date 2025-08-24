@@ -4,13 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 
+## [1.10.0]
+
+### Added
+- New feature connected textures, which allows for creation of modular objects.
+- Furniture CustomFields FishTank to define custom sizes and bounds.
+- mushymato.MMAP_Panorama now accept special value SUMMIT which will directly use the summit panorama, instead of custom.
+- New action mushymato.MMAP_ShowShipping, shows the shipping bin
+- mushymato.MMAP_ShowConstruct is now available for traction
+
+### Fixed
+- small caching improvements
 
 ## [1.9.7]
 
 ### Added
-- Micro-syntax for GSQ critters `Crab:FALSE:1:3`. [NEEDS DOCS]
-- Special -1000 -1000 coord for "at this tile" TAS [NEEDS DOCS]
+- Micro-syntax for GSQ critters `Crab:FALSE:1:3`.
+- Special -1000 -1000 coord for "at this tile" TAS
 
 ### Fixed
 - Fixed woods debris not actually working oops.
@@ -29,7 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added a more significant `GameLocation.doesTileHaveProperty` optimization, this can be disabled via config.json in case of compatibility problems
 - New action `mushymato.MMAP_AddItemToBag` adds an item to MMAP global inventory
 - New gsq `mushymato.MMAP_RAINING_HERE` checks current location for raining-ness
-
+q
 ### Fixed
 - more small perf improvements (it never ends)
 

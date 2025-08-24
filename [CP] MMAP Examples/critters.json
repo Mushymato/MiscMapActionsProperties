@@ -37,7 +37,7 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "Crab:FALSE:1:3 {{ModId}}/critters/crab 4 Seagull {{ModId}}/critters/seagull 4"
+            "mushymato.MMAP_Critter": "\"Crab:RANDOM .5:16:16\" {{ModId}}/critters/crab 4 Seagull {{ModId}}/critters/seagull 4"
           }
         },
         {

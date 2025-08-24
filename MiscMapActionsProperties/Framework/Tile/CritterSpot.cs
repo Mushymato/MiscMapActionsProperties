@@ -254,18 +254,18 @@ internal static class CritterSpot
                 ModEntry.Log(error, LogLevel.Error);
                 break;
             }
-            Point pnt = position + pntOffset;
+            Point pnt = position;
             // csharpier-ignore
             IEnumerable<Critter>? spawnedThisTime = critterKind switch
             {
-                SupportedCritter.Firefly => SpawnCritterFirefly(location, pnt, arg1, count),
-                SupportedCritter.Seagull => SpawnCritterSeagull(location, pnt, arg1, count),
-                SupportedCritter.Crab => SpawnCritterCrab(location, pnt, arg1, count),
-                SupportedCritter.Birdie => SpawnCritterBirdie(location, pnt, arg1, count),
-                SupportedCritter.Butterfly => SpawnCritterButterfly(location, pnt, arg1, count),
-                SupportedCritter.Frog => SpawnCritterFrog(location, pnt, arg1, count),
-                SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, pnt, arg1, count),
-                SupportedCritter.Rabbit => SpawnCritterRabbit(location, pnt, arg1, count),
+                SupportedCritter.Firefly => SpawnCritterFirefly(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Seagull => SpawnCritterSeagull(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Crab => SpawnCritterCrab(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Birdie => SpawnCritterBirdie(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Butterfly => SpawnCritterButterfly(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Frog => SpawnCritterFrog(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Rabbit => SpawnCritterRabbit(location, pnt, pntOffset, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)
@@ -275,9 +275,19 @@ internal static class CritterSpot
         return spawned;
     }
 
+    private static Vector2 GetPosOffset(Point posOffset)
+    {
+        if (posOffset == Point.Zero)
+        {
+            return new(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize));
+        }
+        return posOffset.ToVector2();
+    }
+
     private static IEnumerable<Critter> SpawnCritterFirefly(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? color,
         int count
     )
@@ -290,8 +300,7 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Firefly firefly = new(position.ToVector2());
-            firefly.position.X += Random.Shared.Next(Game1.tileSize);
-            firefly.position.Y += Random.Shared.Next(Game1.tileSize);
+            firefly.position += GetPosOffset(posOffset);
             firefly.startingPosition = firefly.position;
             if (c != null && fireflyLight.GetValue(firefly) is LightSource light)
                 light.color.Value = (Color)c;
@@ -302,6 +311,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterSeagull(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? texture,
         int count
     )
@@ -316,12 +326,7 @@ internal static class CritterSpot
             startingState = 2;
         for (int i = 0; i < count; i++)
         {
-            Seagull seagull =
-                new(
-                    position.ToVector2() * Game1.tileSize
-                        + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize)),
-                    startingState
-                );
+            Seagull seagull = new(position.ToVector2() * Game1.tileSize + GetPosOffset(posOffset), startingState);
             if (texture != null)
                 seagull.sprite.textureName.Value = texture;
             yield return seagull;
@@ -331,6 +336,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterCrab(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? texture,
         int count
     )
@@ -339,11 +345,7 @@ internal static class CritterSpot
             texture = null;
         for (int i = 0; i < count; i++)
         {
-            CrabCritter crab =
-                new(
-                    position.ToVector2() * Game1.tileSize
-                        + new Vector2(Random.Shared.Next(Game1.tileSize), Random.Shared.Next(Game1.tileSize))
-                );
+            CrabCritter crab = new(position.ToVector2() * Game1.tileSize + GetPosOffset(posOffset));
             if (texture != null)
             {
                 crab.sprite.textureName.Value = texture;
@@ -356,6 +358,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterBirdie(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? texture,
         int count
     )
@@ -414,11 +417,8 @@ internal static class CritterSpot
                     }
                 }
             }
-            Birdie birdie = new((int)position.X, (int)position.Y, startIdx);
-            birdie.position += new Vector2(
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
-            );
+            Birdie birdie = new(position.X, position.Y, startIdx);
+            birdie.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
             birdie.yOffset = yOffset;
             if (texture != null)
             {
@@ -431,6 +431,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterButterfly(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? texture,
         int count
     )
@@ -461,10 +462,7 @@ internal static class CritterSpot
                     forceSummerButterfly: startingIndex != -1,
                     baseFrameOverride: startingIndex
                 );
-            butterfly.position += new Vector2(
-                Random.Shared.Next(0, Game1.tileSize),
-                Random.Shared.Next(0, Game1.tileSize)
-            );
+            butterfly.position += GetPosOffset(posOffset);
             if (texture != null)
             {
                 butterfly.sprite.textureName.Value = texture;
@@ -473,15 +471,18 @@ internal static class CritterSpot
         }
     }
 
-    private static IEnumerable<Critter> SpawnCritterFrog(GameLocation location, Point position, string? arg1, int count)
+    private static IEnumerable<Critter> SpawnCritterFrog(
+        GameLocation location,
+        Point position,
+        Point posOffset,
+        string? arg1,
+        int count
+    )
     {
         for (int i = 0; i < count; i++)
         {
             Frog frog = new(position.ToVector2(), waterLeaper: false);
-            frog.position += new Vector2(
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
-            );
+            frog.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
             frog.flip = arg1 == "F";
             yield return frog;
         }
@@ -490,6 +491,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterLeaperFrog(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? arg1,
         int count
     )
@@ -497,10 +499,7 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Frog frog = new(position.ToVector2(), waterLeaper: true);
-            frog.position += new Vector2(
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
-            );
+            frog.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
             frog.flip = arg1 == "F";
             yield return frog;
         }
@@ -509,6 +508,7 @@ internal static class CritterSpot
     private static IEnumerable<Critter> SpawnCritterRabbit(
         GameLocation location,
         Point position,
+        Point posOffset,
         string? texture,
         int count
     )
@@ -530,10 +530,7 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Rabbit rabbit = new(location, position.ToVector2(), flipped);
-            rabbit.position += new Vector2(
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2),
-                Random.Shared.Next(-Game1.tileSize / 2, Game1.tileSize / 2)
-            );
+            rabbit.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
             if (texture != null)
             {
                 rabbit.sprite.textureName.Value = texture;
