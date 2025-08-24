@@ -838,6 +838,11 @@ internal static class FurnitureProperties
                 __result = tankInfo.CurrentTankBounds;
             }
         }
+        else if (__result.Width < 0 || __result.Height < 0)
+        {
+            // fixes the vanilla draw loop crash for error tank
+            __result = __instance.boundingBox.Value;
+        }
     }
 
     /// <summary>Make fishes in 1 tile (64px) wide tanks not move around in the X direction</summary>

@@ -1,9 +1,16 @@
 {
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Format": "2.7.0",
-  // "ConfigSchema": {
-  //   "Wa"
-  // },
+  "ConfigSchema": {
+    "WaterColor": {
+      "Default": "",
+      "AllowBlank": true
+    },
+    "WaterAlpha": {
+      "Default": "0.5",
+      "AllowBlank": true
+    }
+  },
   "Changes": [
     // i18n
     {
@@ -99,24 +106,36 @@
     },
     // watery tank
     {
-      "Action": "Load",
-      "Target": "{{ModId}}_watery",
-      "FromFile": "assets/watery.png"
-    },
-    {
       "Action": "Include",
       "FromFile": "data/waterytank.json",
+    },
+    // watery deco
+    {
+      "Action": "Include",
+      "FromFile": "data/waterydeco.json",
       "LocalTokens": {
-        "L@Seq": "A",
-        "L@WaterY": "2000"
+        "L@Len": "1"
       }
     },
     {
       "Action": "Include",
-      "FromFile": "data/waterytank.json",
+      "FromFile": "data/waterydeco.json",
       "LocalTokens": {
-        "L@Seq": "B",
-        "L@WaterY": "2128"
+        "L@Len": "2"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/waterydeco.json",
+      "LocalTokens": {
+        "L@Len": "3"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/waterydeco.json",
+      "LocalTokens": {
+        "L@Len": "4"
       }
     },
     // add watery effect to tank_wall_02 and tank_wall_03
@@ -136,14 +155,15 @@
                 "Height": 192
               },
               "FrameCount": 10,
-              "FrameDuration": 200,
+              "FrameDuration": 180,
               "DrawPosition": "0,0",
               "SortTileOffset": -0.0001
             }
           ],
           "Metadata": {
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.2",
-            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 2}}",
+            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
           }
         },
         "{{ModId}}_modu_wall_03": {
@@ -158,14 +178,15 @@
                 "Height": 152
               },
               "FrameCount": 5,
-              "FrameDuration": 200,
+              "FrameDuration": 180,
               "DrawInBackground": true,
               "DrawPosition": "0,2"
             }
           ],
           "Metadata": {
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.5",
-            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 2}}",
+            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
           }
         },
       }

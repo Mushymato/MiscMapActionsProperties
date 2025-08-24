@@ -2,21 +2,26 @@
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Changes": [
     {
+      "Action": "Load",
+      "Target": "{{ModId}}_watery",
+      "FromFile": "assets/watery.png"
+    },
+    {
       "Action": "EditData",
       "Target": "Data/Furniture",
       "Entries": {
-        "{{ModId}}_watery_tank_{{L@Seq}}": "{{ModId}}_watery_tank_{{L@Seq}}/fishtank/2 2/2 1/1/100/2/[LocalizedText {{ModId}}.i18n:watery_tank_{{L@Seq}}.name]/0/{{ModId}}_watery/false/{{ModId}}",
+        "{{ModId}}_watery_tank": "{{ModId}}_watery_tank/fishtank/2 4/2 1/1/100/2/[LocalizedText {{ModId}}.i18n:watery_tank.name]/0/{{ModId}}_watery/false/{{ModId}}",
       }
     },
     {
       "Action": "EditData",
       "Target": "mushymato.MMAP/FurnitureProperties",
       "Entries": {
-        "{{ModId}}_watery_tank_{{L@Seq}}": {
-          "Description": "[LocalizedText {{ModId}}.i18n:watery.desc]",
+        "{{ModId}}_watery_tank": {
+          "Description": "[LocalizedText {{ModId}}.i18n:watery_tank.desc]",
           "CollisionMap": "OO",
           "CustomFields": {
-            "FishTank": "3 0 20 128 108"
+            "FishTank": "6 0 64 128 192"
           },
           "DrawLayers": [
             {
@@ -24,31 +29,32 @@
               "Texture": "LooseSprites/Cursors",
               "SourceRect": {
                 "X": 0,
-                "Y": "{{L@WaterY}}",
+                "Y": 2000,
                 "Width": 128,
-                "Height": 128
+                "Height": 256
               },
               "FrameCount": 5,
-              "FrameDuration": 200,
+              "FrameDuration": 180,
               "SortTileOffset": -10000
             }
           ],
           "Metadata": {
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.5",
-            "mushymato.MMAP/DrawLayer.Watery.scale": "1"
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{WaterAlpha}}",
+            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
           }
         }
       }
     },
+    // this is exclusively for bounds connect
     {
       "Action": "EditData",
       "Target": "mushymato.MMAP/ConnectedTextures",
       "Entries": {
-        "(F){{ModId}}_watery_tank_{{L@Seq}}": {
+        "(F){{ModId}}_watery_tank": {
           "Style": "Horizontal",
           "ConnectWith": [
-            "(F){{ModId}}_watery_tank_A",
-            "(F){{ModId}}_watery_tank_B"
+            "(F){{ModId}}_watery_tank"
           ]
         },
       }

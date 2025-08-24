@@ -1,0 +1,42 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_watery_deco_{{L@Len}}": "{{ModId}}_watery_deco_{{L@Len}}/decor/1 {{L@Len}}/1 1/1/100/2/[LocalizedText {{ModId}}.i18n:watery_deco_{{L@Len}}.name]/0/LooseSprites\\Cursors/false/{{ModId}}",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_watery_deco_{{L@Len}}": {
+          // "Description": "[LocalizedText {{ModId}}.i18n:watery_deco_{{L@Len}}.desc]",
+          "CollisionMap": "O",
+          "DrawShadow": false,
+          "DrawLayers": [
+            {
+              "Id": "Watery",
+              "SourceRect": {
+                "X": 0,
+                "Y": 2000,
+                "Width": 64,
+                "Height": "{{query: 64 * {{L@Len}} }}"
+              },
+              "FrameCount": 10,
+              "FrameDuration": 180,
+              "SortTileOffset": -10000
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.Watery.scale": "1",
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{WaterAlpha}}",
+            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
+          }
+        }
+      }
+    },
+  ]
+}

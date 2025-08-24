@@ -10,14 +10,17 @@
   "modu_wall_03.name": "Modular Wall Tank - Pane",
   "modu_wall_03.desc": "Modular wall mounted fish tank, each part holds 4 fish.",
   "dual_modu_floor_01_A.name": "Modular Floor Tank - Antique A",
-  "dual_modu_floor_01_A.desc": "Modular free standing fishtank, each part holds 4 fish, connects with B.",
+  "dual_modu_floor_01_A.desc": "Modular free standing fishtank, each part holds 6 fish, connects with B.",
   "dual_modu_floor_01_B.name": "Modular Floor Tank - Antique B",
-  "dual_modu_floor_01_B.desc": "Modular free standing fishtank, each part holds 4 fish, connects with A.",
+  "dual_modu_floor_01_B.desc": "Modular free standing fishtank, each part holds 6 fish, connects with A.",
   "dual_modu_wall_01_A.name": "Modular Wall Tank - Antique A",
   "dual_modu_wall_01_A.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with B.",
   "dual_modu_wall_01_B.name": "Modular Wall Tank - Antique B",
   "dual_modu_wall_01_B.desc": "Modular wall mounted fish tank, each part holds 4 fish, connects with A.",
   "watery_tank.name": "Watery Fish Tank",
-  "watery_tank_A.name": "Watery Fish Tank A.",
-  "watery_tank.desc": "Looks like water, holds 3 fish."
+  "watery_tank.desc": "Looks like water, holds 6 fish",
+  "watery_deco_1.name": "Watery Deco 1 Tile",
+  "watery_deco_2.name": "Watery Deco 2 Tile",
+  "watery_deco_3.name": "Watery Deco 3 Tile",
+  "watery_deco_4.name": "Watery Deco 4 Tile"
 }
