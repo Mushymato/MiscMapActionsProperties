@@ -14,7 +14,7 @@
   "Dependencies": [
     {
       "UniqueID": "mushymato.MMAP",
-      "MinimumVersion": "1.10.0-Debug",
+      "MinimumVersion": "1.10.0",
       "IsRequired": true
     }
   ]

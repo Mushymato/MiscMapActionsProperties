@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - mushymato.MMAP_Panorama now accept special value SUMMIT which will directly use the summit panorama, instead of custom.
 - New action mushymato.MMAP_ShowShipping, shows the shipping bin
 - mushymato.MMAP_ShowConstruct is now available for traction
-- 
+- Draw layers can now be colored.
 
 ### Fixed
 - small caching improvements

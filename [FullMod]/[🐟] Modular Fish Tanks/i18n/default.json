@@ -1,4 +1,8 @@
 {
+  "config.WaterColor.name": "Watery Color",
+  "config.WaterColor.description": "Change the color of the watery tank/deco.",
+  "config.WaterAlpha.name": "Watery Opacity",
+  "config.WaterAlpha.description": "Change opacity of the watery tank/deco.",
   "modu_floor_01.name": "Modular Floor Tank - Standard",
   "modu_floor_01.desc": "Modular free standing fishtank, each part holds 4 fish.",
   "modu_floor_02.name": "Modular Floor Tank - Sandy",

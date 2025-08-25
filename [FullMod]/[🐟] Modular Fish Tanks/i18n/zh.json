@@ -1,4 +1,8 @@
 {
+  "config.WaterColor.name": "水块色",
+  "config.WaterColor.description": "更改水块鱼缸/装饰的颜色",
+  "config.WaterAlpha.name": "水块不透明度",
+  "config.WaterAlpha.description": "更改水块鱼缸/装饰的不透明度",
   "modu_floor_01.name": "可拼接立式鱼缸 - 普通",
   "modu_floor_01.desc": "模块化的立式鱼缸，每一部分可容纳4条鱼",
   "modu_floor_02.name": "可拼接立式鱼缸 - 沙底",
@@ -17,14 +21,14 @@
   "dual_modu_wall_01_A.desc": "模块化挂墙鱼缸，每一部分可容纳4条鱼，可以和B部分拼接。",
   "dual_modu_wall_01_B.name": "可拼接嵌入式鱼缸 - 古董B",
   "dual_modu_wall_01_B.desc": "模块化挂墙鱼缸，每一部分可容纳4条鱼，可以和A部分拼接。",
-  "watery_tank.name": "水型鱼缸",
+  "watery_tank.name": "水块鱼缸",
   "watery_tank.desc": "看起来像水，每一部分可容纳6条鱼",
-  "watery_deco_1.name": "水型装饰（1格）",
+  "watery_deco_1.name": "水块装饰（1格）",
   "watery_deco_1.desc": "看起来像水，1格高",
-  "watery_deco_2.name": "水型装饰（2格）",
+  "watery_deco_2.name": "水块装饰（2格）",
   "watery_deco_2.desc": "看起来像水，2格高",
-  "watery_deco_3.name": "水型装饰（3格）",
+  "watery_deco_3.name": "水块装饰（3格）",
   "watery_deco_3.desc": "看起来像水，3格高",
-  "watery_deco_4.name": "水型装饰（4格）",
+  "watery_deco_4.name": "水块装饰（4格）",
   "watery_deco_4.desc": "看起来像水，4格高"
 }

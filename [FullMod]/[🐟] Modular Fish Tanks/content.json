@@ -162,8 +162,7 @@
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.Watery.scale": "1",
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 3}}",
-            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.2"
           }
         },
         "{{ModId}}_modu_wall_03": {
@@ -185,8 +184,7 @@
           ],
           "Metadata": {
             "mushymato.MMAP/DrawLayer.Watery.scale": "1",
-            "mushymato.MMAP/DrawLayer.Watery.alpha": "{{query: {{WaterAlpha}} / 3}}",
-            "mushymato.MMAP/DrawLayer.Watery.color": "{{WaterColor}}"
+            "mushymato.MMAP/DrawLayer.Watery.alpha": "0.2"
           }
         },
       }
