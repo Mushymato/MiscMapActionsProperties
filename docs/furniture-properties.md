@@ -95,10 +95,10 @@ You can use these values in `Action`:
 | `SourceRect` | Rectangle | _null_ | Source rectangle of draw layer, when this layer is animated, only provide first frame. |
 | `DrawPosition` | Vector2 | _null_ | An offset to apply to the draw position (relative to top left corner of furniture sprite). |
 | `DrawInBackground` | bool | false | If this is true, draw with base layer depth = 0. |
-| `SortTileOffset` | float | 0f | How much to adjust layer depth by, according to Y tile based rules. Positive value is draw under, negative draw over. |
+| `SortTileOffset` | float | 0f | How much to adjust layer depth by, according to Y tile position based rules similar to buildings. A positive 1 will make this layer draw as if the furniture was placed 1 tile above its actual position, and a negative 1 does the opposite and makes this layer draw as if the furniture was placed 1 tile below its actual position. A very large negative value can achieve a "draw above (almost) everything" effect, and you can use floating point to achieve partial layer depth offsets. |
 | `FrameDuration`| int | 90 | Number of miliseconds between animation frames. |
 | `FrameCount`| int | 1 | Number of animation frames. |
-| `FramesPerRow`| int | -1 | Number frames per row, -1 for unlimited. |
+| `FramesPerRow`| int | -1 | Number frames per row before wrapping arund, -1 for unlimited. |
 | `OnlyDrawIfChestHasContents`| string | _empty_ | Unused. |
 | `AnimalDoorOffset`| Point | 0,0 | Unused. |
 

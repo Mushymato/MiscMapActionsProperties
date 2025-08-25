@@ -544,7 +544,6 @@ internal static class Panorama
         // mmap_reset_bg
         if (!Context.IsWorldReady)
             return;
-        // Game1.player.team.farmPerfect.Value = true;
         if (Game1.currentLocation != null)
         {
             ModEntry.help.GameContent.InvalidateCache(Asset_Panorama);
@@ -651,7 +650,7 @@ internal static class Panorama
     }
 
     private static bool IsNullOrCustomBG =>
-        Game1.background is not null || Game1.background is PanoramaBackground || Game1.background is SummitBG;
+        Game1.background is null || Game1.background is PanoramaBackground || Game1.background is SummitBG;
 
     private static void SetPanorama(GameLocation location, string bgId, bool force = false)
     {
@@ -661,12 +660,7 @@ internal static class Panorama
         }
         else if (BgData.TryGetValue(bgId, out PanoramaData? data))
         {
-            if (Game1.background is PanoramaBackground Panorama)
-            {
-                if (!force && Panorama.BgId == bgId)
-                    return;
-            }
-            else
+            if (Game1.background is not PanoramaBackground Panorama)
             {
                 if (!force && !IsNullOrCustomBG)
                 {

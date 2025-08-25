@@ -28,7 +28,7 @@
           },
           "CustomFields": {
             // this is a built-in panorama, see MiscMapActionsProperties/assets/panorama.json
-            "mushymato.MMAP_Panorama": "SUMMIT",
+            "mushymato.MMAP_Panorama": "MMAP_MountainView",
             // "mushymato.MMAP_Panorama": "{{ModId}}_Bonch"
             // MMAP_MountainView has time of day backing, control time of day for this location like so
             "mushymato.MMAP_NightTimeStarting": "1100", // default 1800 spring summer island, 1700 fall, 1500 winter
