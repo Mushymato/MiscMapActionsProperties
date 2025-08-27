@@ -34,6 +34,10 @@ internal static class CribPosition
                 original: AccessTools.Method(typeof(Child), nameof(Child.resetForPlayerEntry)),
                 postfix: new HarmonyMethod(typeof(CribPosition), nameof(Child_resetForPlayerEntry_Postfix))
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(Child), nameof(Child.isInCrib)),
+                postfix: new HarmonyMethod(typeof(CribPosition), nameof(Child_isInCrib_Postfix))
+            );
         }
         catch (Exception err)
         {
@@ -44,6 +48,18 @@ internal static class CribPosition
     private static bool TryGetCribPosition(GameLocation location, out Vector2 cribPos)
     {
         return CommonPatch.TryGetCustomFieldsOrMapPropertyAsVector2(location, MapProp_CribPosition, out cribPos);
+    }
+
+    private static void Child_isInCrib_Postfix(Child __instance, ref bool __result)
+    {
+        if (TryGetCribPosition(__instance.currentLocation, out Vector2 cribPos))
+        {
+            Point tilePoint = __instance.TilePoint;
+            if (tilePoint.X >= cribPos.X && tilePoint.X <= cribPos.X + 2 && tilePoint.Y >= cribPos.Y)
+            {
+                __result = tilePoint.Y <= cribPos.Y + 1;
+            }
+        }
     }
 
     private static void Child_dayUpdate_Postfix(Child __instance)
@@ -59,6 +75,8 @@ internal static class CribPosition
 
     private static void Child_resetForPlayerEntry_Postfix(Child __instance, GameLocation l)
     {
+        if (__instance.Age > 2)
+            return;
         if (TryGetCribPosition(l, out Vector2 cribPos))
         {
             switch (__instance.Age)

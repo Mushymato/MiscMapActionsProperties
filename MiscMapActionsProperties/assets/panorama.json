@@ -322,13 +322,24 @@
     ]
   },
   "MMAP_IslandHorizon": {
+    "BackingDay": [
+      {
+        "Id": "MMAP_BlueDay",
+        "Color": "#017ad9"
+      }
+    ],
+    "BackingNight": [
+      {
+        "Id": "MMAP_BlueNight",
+        "Color": "#00003f"
+      }
+    ],
     "ParallaxLayers": [
       {
         "Id": "MMAP_Cloudy_Ocean_BG",
         "Texture": "LooseSprites/Cloudy_Ocean_BG",
         "Scale": 3.0,
         "RepeatX": true,
-        "DrawViewportOffset": "-0.5,-0.01",
         "AlignY": "Start",
         "ShowDuring": "Day"
       },
@@ -337,7 +348,6 @@
         "Texture": "LooseSprites/Cloudy_Ocean_BG_Night",
         "Scale": 3.0,
         "RepeatX": true,
-        "DrawViewportOffset": "-0.5,-0.01",
         "AlignY": "Start",
         "ShowDuring": "Night"
       }

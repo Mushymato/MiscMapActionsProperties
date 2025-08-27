@@ -74,12 +74,13 @@ public sealed class ParallaxLayerData : PanoramaSharedData
     public Vector2 DrawViewportOffset = Vector2.Zero;
     public Vector2 Velocity = Vector2.Zero;
     public ShowDuringMode ShowDuring = ShowDuringMode.Any;
-    public bool DrawInMapScreenshot = false;
+    public bool DrawInMapScreenshot = true;
 }
 
 public sealed class PanoramaData
 {
     public string? BasedOn = null;
+    public bool? FullView = true;
     public List<BackingData>? BackingDay = null;
     public List<BackingData>? BackingSunset = null;
     public List<BackingData>? BackingNight = null;
@@ -95,6 +96,7 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     private readonly Color TxColor = Utility.StringToColor(Data.Color) ?? Color.White;
     private readonly float ScaledWidth = SourceRect.Width * Data.Scale;
     private readonly float ScaledHeight = SourceRect.Height * Data.Scale;
+    private xTile.Dimensions.Rectangle LastViewport = Game1.viewport;
 
     internal static IEnumerable<ParallaxLayerData> GetAllMatchingData(
         List<ParallaxLayerData>? dataList,
@@ -126,19 +128,34 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
         GameTime time = Game1.currentGameTime;
         ScrollOffset.X = (ScrollOffset.X + time.ElapsedGameTime.Milliseconds * Data.Velocity.X) % ScaledWidth;
         ScrollOffset.Y = (ScrollOffset.Y + time.ElapsedGameTime.Milliseconds * Data.Velocity.Y) % ScaledHeight;
+
+        LastViewport = viewport;
     }
 
     private IEnumerable<Vector2> DrawPositions()
     {
-        int refWidth = Game1.viewport.Width;
-        int refHeight = Game1.viewport.Height;
-        Vector2 drawOffset =
-            new(
-                Data.DrawOffset.X + refWidth * Data.DrawPercentOffset.X + Game1.viewport.X * Data.DrawViewportOffset.X,
-                Data.DrawOffset.Y + refHeight * Data.DrawPercentOffset.Y + Game1.viewport.Y * Data.DrawViewportOffset.Y
-            );
+        int refWidth;
+        int refHeight;
+        Vector2 drawOffset = Data.DrawOffset;
+        if (Game1.game1.takingMapScreenshot)
+        {
+            refWidth = Game1.currentLocation.Map.DisplayWidth;
+            refHeight = Game1.currentLocation.Map.DisplayHeight;
+            drawOffset.X += LastViewport.X;
+            drawOffset.Y += LastViewport.Y;
+        }
+        else
+        {
+            refWidth = Game1.viewport.Width;
+            refHeight = Game1.viewport.Height;
+            drawOffset.X += Game1.viewport.X * Data.DrawViewportOffset.X;
+            drawOffset.Y += Game1.viewport.Y * Data.DrawViewportOffset.Y;
+        }
+        drawOffset += new Vector2(refWidth * Data.DrawPercentOffset.X, refHeight * Data.DrawPercentOffset.Y);
+
         float posX = Position.X + drawOffset.X + ScrollOffset.X;
         float posY = Position.Y + drawOffset.Y + ScrollOffset.Y;
+
         float i;
         float j;
         // repeat both, i.e. tile to fill screen
@@ -190,7 +207,22 @@ internal sealed record ParallaxContext(ParallaxLayerData Data, Texture2D Texture
     {
         if (colorMult == 0f)
             return;
-        foreach (Vector2 pos in DrawPositions())
+
+        IEnumerable<Vector2> drawPosition;
+        if (Game1.game1.takingMapScreenshot)
+        {
+            if (!Data.DrawInMapScreenshot)
+            {
+                return;
+            }
+            drawPosition = DrawPositions().Select(Game1.GlobalToLocal);
+        }
+        else
+        {
+            drawPosition = DrawPositions();
+        }
+
+        foreach (Vector2 pos in drawPosition)
         {
             b.Draw(
                 Texture,
@@ -252,12 +284,15 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
 internal sealed class PanoramaBackground(GameLocation location) : Background(location, Color.Black, false)
 {
     internal string? BgId { get; private set; } = null;
+    internal bool FullView { get; private set; } = true;
+
     private readonly List<ParallaxContext> parallaxCtx = [];
     private readonly List<ValueTuple<MapWideTAS, TASContext>> respawningTAS = [];
 
     private BackingContext? Day = null;
     private BackingContext? Sunset = null;
     private BackingContext? Night = null;
+
     private readonly int startingMinutes = Utility.ConvertTimeToMinutes(Game1.getStartingToGetDarkTime(location));
     private readonly int moderatelyMinutes = Utility.ConvertTimeToMinutes(Game1.getModeratelyDarkTime(location));
     private readonly int trulyMinutes = Utility.ConvertTimeToMinutes(Game1.getTrulyDarkTime(location));
@@ -278,6 +313,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
     internal void SetData(string bgId, PanoramaData data, GameStateQueryContext context)
     {
         BgId = bgId;
+        FullView = data.FullView ?? true;
 
         Day = BackingContext.FromDataList(data.BackingDay, context);
         Sunset = BackingContext.FromDataList(data.BackingSunset, context);
@@ -292,6 +328,7 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
             }
         }
 
+        tempSprites.Clear();
         respawningTAS.Clear();
         if (data.RespawnTAS != null)
         {
@@ -404,23 +441,20 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         // parallax
         foreach (ParallaxContext bgDef in parallaxCtx)
         {
-            if (!Game1.game1.takingMapScreenshot || bgDef.Data.DrawInMapScreenshot)
+            switch (bgDef.Data.ShowDuring)
             {
-                switch (bgDef.Data.ShowDuring)
-                {
-                    case ShowDuringMode.Day:
-                        bgDef.Draw(b, multDay);
-                        break;
-                    case ShowDuringMode.Night:
-                        bgDef.Draw(b, multNight);
-                        break;
-                    case ShowDuringMode.Sunset:
-                        bgDef.Draw(b, multSunset);
-                        break;
-                    default:
-                        bgDef.Draw(b);
-                        break;
-                }
+                case ShowDuringMode.Day:
+                    bgDef.Draw(b, multDay);
+                    break;
+                case ShowDuringMode.Night:
+                    bgDef.Draw(b, multNight);
+                    break;
+                case ShowDuringMode.Sunset:
+                    bgDef.Draw(b, multSunset);
+                    break;
+                default:
+                    bgDef.Draw(b);
+                    break;
             }
         }
 
@@ -442,19 +476,18 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 internal static class Panorama
 {
     internal const string MapProp_Panorama = $"{ModEntry.ModId}_Panorama";
-
     internal const string Asset_Panorama = $"{ModEntry.ModId}/Panorama";
+    internal const string Action_Panorama = $"{ModEntry.ModId}_SetPanorama";
 
     internal static void Register()
     {
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
-        ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
-        ModEntry.help.Events.Player.Warped += OnWarped;
+        CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
 
         ModEntry.help.ConsoleCommands.Add("mmap.reset_bg", "Reload current area background", ConsoleReloadBg);
-        TriggerActionManager.RegisterAction(MapProp_Panorama, DoSetPanoramaT);
-        CommonPatch.RegisterTileAndTouch(MapProp_Panorama, DoSetPanoramaM);
+        TriggerActionManager.RegisterAction(Action_Panorama, DoSetPanoramaT);
+        CommonPatch.RegisterTileAndTouch(Action_Panorama, DoSetPanoramaM);
 
         try
         {
@@ -484,9 +517,9 @@ internal static class Panorama
 
     private static void Game1_isOutdoorMapSmallerThanViewport_Postfix(ref bool __result)
     {
-        if (__result && Game1.background is PanoramaBackground)
+        if (!Game1.uiMode && Game1.currentLocation is not null && Game1.background is PanoramaBackground panorama)
         {
-            __result = false;
+            __result = !panorama.FullView;
         }
     }
 
@@ -528,20 +561,13 @@ internal static class Panorama
         }
     }
 
-    private static void OnWarped(object? sender, WarpedEventArgs e)
-    {
-        RecheckPanoramaBackground(e.NewLocation);
-    }
-
-    private static void OnDayStarted(object? sender, DayStartedEventArgs e)
-    {
-        RecheckPanoramaBackground(Game1.currentLocation);
-    }
+    /// <summary>Must use resetLocalState for SVE reasons >:(</summary>
+    private static void GameLocation_resetLocalState(object? sender, GameLocation e) => RecheckPanoramaBackground(e);
 
     private static void ConsoleReloadBg(string arg1, string[] arg2)
     {
         // patch reload mushymato.MMAP.Example
-        // mmap_reset_bg
+        // mmap.reset_bg
         if (!Context.IsWorldReady)
             return;
         if (Game1.currentLocation != null)
@@ -574,6 +600,7 @@ internal static class Panorama
                     }
                     else
                     {
+                        panorama.FullView ??= basedOn.FullView;
                         panorama.BackingDay ??= basedOn.BackingDay;
                         panorama.BackingSunset ??= basedOn.BackingSunset;
                         panorama.BackingNight ??= basedOn.BackingNight;
@@ -618,23 +645,17 @@ internal static class Panorama
 
     private static bool DoSetPanoramaT(string[] args, TriggerActionContext context, out string error)
     {
-        if (
-            !ArgUtility.TryGet(args, 1, out string bgId, out error, allowBlank: false, name: "string bgId")
-            || !ArgUtility.TryGetOptionalBool(args, 2, out bool force, out error, defaultValue: false, "bool force")
-        )
+        if (!ArgUtility.TryGet(args, 1, out string bgId, out error, allowBlank: false, name: "string bgId"))
             return false;
-        SetPanorama(Game1.currentLocation, bgId, force: force);
+        SetPanorama(Game1.currentLocation, bgId, force: true);
         return true;
     }
 
     private static bool DoSetPanoramaM(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (
-            !ArgUtility.TryGet(args, 1, out string bgId, out _, allowBlank: false, name: "string bgId")
-            || !ArgUtility.TryGetOptionalBool(args, 2, out bool force, out _, defaultValue: false, "bool force")
-        )
+        if (!ArgUtility.TryGet(args, 1, out string bgId, out _, allowBlank: false, name: "string bgId"))
             return false;
-        SetPanorama(location, bgId, force: force);
+        SetPanorama(location, bgId, force: true);
         return true;
     }
 
@@ -654,6 +675,11 @@ internal static class Panorama
 
     private static void SetPanorama(GameLocation location, string bgId, bool force = false)
     {
+        if (location == null)
+        {
+            ClearPanorama();
+            return;
+        }
         if (bgId == "SUMMIT" && (force || IsNullOrCustomBG))
         {
             Game1.background = new SummitBG(location);

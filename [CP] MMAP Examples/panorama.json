@@ -3,19 +3,14 @@
   "Changes": [
     {
       "Action": "Load",
-      "Target": "Maps/{{ModId}}/panorama_test",
-      "FromFile": "assets/{{TargetWithoutPath}}.tmx"
-    },
-    {
-      "Action": "Load",
-      "Target": "Maps/{{ModId}}/panorama_tall",
+      "Target": "Maps/{{ModId}}/panorama_test, Maps/{{ModId}}/panorama_tall, Maps/{{ModId}}/panorama_small",
       "FromFile": "assets/{{TargetWithoutPath}}.tmx"
     },
     {
       "Action": "EditData",
       "Target": "Data/Locations",
       "Entries": {
-        "panorama_test": {
+        "{{ModId}}_PanoramaTest": {
           "DisplayName": "panorama_test",
           "DefaultArrivalTile": {
             "X": 10,
@@ -36,7 +31,7 @@
             "mushymato.MMAP_NightTimeTruly": "1500" // default starting + 200
           }
         },
-        "panorama_tall": {
+        "{{ModId}}_PanoramaTall": {
           "DisplayName": "panorama_tall",
           "DefaultArrivalTile": {
             "X": 10,
@@ -48,9 +43,24 @@
             "AlwaysActive": false
           },
           "CustomFields": {
-            "mushymato.MMAP_Panorama": "{{ModId}}_BonchMountain",
+            "mushymato.MMAP_Panorama": "MMAP_IslandHorizon",
           }
         },
+        "{{ModId}}_PanoramaSmall": {
+          "DisplayName": "panorama_small",
+          "DefaultArrivalTile": {
+            "X": 2,
+            "Y": 10
+          },
+          "CreateOnLoad": {
+            "MapPath": "Maps/{{ModId}}/panorama_small",
+            "Type": null,
+            "AlwaysActive": false
+          },
+          "CustomFields": {
+            "mushymato.MMAP_Panorama": "{{ModId}}_BoxedIslandHorizon",
+          }
+        }
       }
     },
     // a panorama that bonches you
@@ -94,6 +104,10 @@
               "Velocity": "-0.1,0.2"
             }
           ],
+        },
+        "{{ModId}}_BoxedIslandHorizon": {
+          "BasedOn": "MMAP_IslandHorizon",
+          "FullView": false
         }
       }
     },

@@ -1,8 +1,10 @@
 # Panorama
 
-Panorama defines what goes behind a map in a way independent of map tiles, there are some hardcoded in C# examples of this vanilla (summet, island north, submarine).
+Panorama defines what goes behind a map in a way independent of map tiles, there are some hardcoded in C# examples of this vanilla (summit, island north, submarine).
 
-MMAP panoramas can be used by map property or custom field `mushymato.MMAP_Panorama <panoramaId>`.
+MMAP panoramas can be used by map property or custom field `mushymato.MMAP_Panorama <panoramaId>`. There is also action `mushymato.MMAP_SetPanorama <panoramaId>` for changing the panorama without re-entering the map.
+
+In order for the panorama to be visible, your map must have transparent tiles.
 
 There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
@@ -10,9 +12,9 @@ There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
 Additionally, you can use the vanilla (non-cursed) summit background on any map by setting `mushymato.MMAP_Panorama` to special value `SUMMIT`.
-This is NOT an MMAP panorama and cannot be customized in any way.
+This is *NOT* an MMAP panorama and thus cannot be customized in any way, and has some quirks if used on maps shaped differently than the summit.
 
-This document describes how you can add more, by editing `mushymato.MMAP/Panorama` custom asset.
+This document describes how you can add more, by editing the `mushymato.MMAP/Panorama` custom asset.
 
 ### Structure
 
@@ -25,9 +27,10 @@ This document describes how you can add more, by editing `mushymato.MMAP/Panoram
 | `BackingNight` | List<BackingData> | _null_ | List of [parallax](panorama.md#parallax) data. |
 | `OnetimeTAS` | List<MapWideTAS> | _null_ | List of [parallax](panorama.md#tas) data. |
 | `BackingNight` | List<BackingData> | _null_ | List of [parallax](panorama.md#tas) data. |
-| `BasedOn` | string | _null_ | If this is set, replace any null values in this panorama with the values from another panorama. Can only do 1 layer, i.e. the BasedOn may not have BasedOn. To clear a specific value, set them to empty list (`[]`). |
+| `FullView` | bool | `true` | Controls whether there should be black boxes drawn around the map bounds. When this is true, panorama will span the whole viewport, otherwise, panorama is only visible within the bounding box of the map. |
+| `BasedOn` | string | _null_ | If this is set, replace any null values in this panorama with the values from another panorama. Can only do 1 layer, i.e. the BasedOn may not have BasedOn. To fully clear an element they must still be set to a non-null value (`[]` rather than `null` for lists, `false` for bool). |
 
-MMAP's panorama system is separated into 3 main layers, which will be explained in each section.
+MMAP's panorama system is separated into 3 main layers, explained in each section below:
 
 ## Backing
 
@@ -81,6 +84,7 @@ This is the middle layers, parallax refers to how the background moves as player
 | `RepeatY` | bool | false |  If true, repeat the texture vertically. |
 | `Velocity` | Vector2 | 0,0 | Moves the layer by this many pixels every tick to create a scrolling effect, best used with `RepeatX` or `RepeatY`. |
 | `ShowDuring` | ShowDuringMode | `"Any"` | Makes this parallax layer only show during some time of day, and fade out according to same rules as the backing layers. Valid values are `"Day"`, `"Sunset"`, `"Night"`, and `"Any"` (show all day). |
+| `DrawInMapScreenshot` | bool | true | Decide whether this layer should appear during full map screenshots. |
 
 Note: When using `ShowDuring`, it's recommended to arrange your layers in the order of `"Any"`, `"Day"`, `"Night"`, `"Sunset"`, this will ensure the sunset layer is drawn over both day and night, otherwise it might be hidden.
 

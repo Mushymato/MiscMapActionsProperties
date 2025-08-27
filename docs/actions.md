@@ -152,12 +152,19 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - Optionally allows a `else-case` Action.
 - The action provided must match the usescase, e.g. if this If is on a TileAction, both the if-case and else-case actions should also be tile actions.
 
-## Question Dialogue
-
 ### mushymato.MMAP_QuestionDialogue \<question_dialog_id\>
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - See [question dialogue](question-dialogue.md) for more info.
+
+#### mushymato.MMAP_Panorama \<panoramaId\>
+
+- Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
+- The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](docs/panorama.md) for details.
+- There are some some panoramas provided by MMAP that can be used out of the box.
+    - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
+    - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
+    - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
 
 ## Farmhouse Upgrade Relocation Solution
 

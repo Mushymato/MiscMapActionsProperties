@@ -48,10 +48,6 @@ internal static class ConnectedTextures
         try
         {
             ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(IndoorPot), nameof(IndoorPot.draw)),
-                transpiler: new HarmonyMethod(typeof(ConnectedTextures), nameof(IndoorPot_draw_Transpiler))
-            );
-            ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(FishTankFurniture), nameof(FishTankFurniture.draw)),
                 transpiler: new HarmonyMethod(typeof(ConnectedTextures), nameof(FishTankFurniture_draw_Transpiler))
             );
@@ -662,68 +658,6 @@ internal static class ConnectedTextures
     #endregion
 
     #region drawfix
-    private static int? GetParentSheetIndex(int? previous, IndoorPot pot)
-    {
-        return previous ?? pot.ParentSheetIndex;
-    }
-
-    /// <summary>
-    /// Harmony patch to make IndoorPot.draw respect parent sheet index so that connected texture can work.
-    /// Could perhaps use similar transpilers on other misbehaving draws
-    /// </summary>
-    /// <param name="instructions"></param>
-    /// <param name="generator"></param>
-    /// <returns></returns>
-    public static IEnumerable<CodeInstruction> IndoorPot_draw_Transpiler(
-        IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator
-    )
-    {
-        try
-        {
-            // IL_00d1: ldc.i4.0
-            // IL_00d2: cgt.un
-            // IL_00d4: ldloca.s 4
-            // IL_00d6: initobj valuetype [System.Runtime]System.Nullable`1<int32>
-            // IL_00dc: ldloc.s 4
-            // IL_00de: callvirt instance valuetype [MonoGame.Framework]Microsoft.Xna.Framework.Rectangle StardewValley.ItemTypeDefinitions.ParsedItemData::GetSourceRect(int32, valuetype [System.Runtime]System.Nullable`1<int32>)
-
-            // dataOrErrorItem.GetSourceRect(showNextIndex.Value ? 1 : 0, null)
-            CodeMatcher matcher = new(instructions, generator);
-
-            matcher
-                .MatchEndForward(
-                    [
-                        new(OpCodes.Cgt_Un),
-                        new(inst => inst.IsLdloc()),
-                        new(OpCodes.Initobj, typeof(int?)),
-                        new(inst => inst.IsLdloc()),
-                        new(
-                            OpCodes.Callvirt,
-                            AccessTools.DeclaredMethod(typeof(ParsedItemData), nameof(ParsedItemData.GetSourceRect))
-                        ),
-                    ]
-                )
-                .ThrowIfNotMatch("Failed to find '-.GetSourceRect(- ? - : 0, null)'")
-                .InsertAndAdvance(
-                    [
-                        new(OpCodes.Ldarg_0),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.DeclaredMethod(typeof(ConnectedTextures), nameof(GetParentSheetIndex))
-                        ),
-                    ]
-                );
-
-            return matcher.Instructions();
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Error in ConnectedTextures::IndoorPot_draw_Transpiler:\n{err}", LogLevel.Error);
-            return instructions;
-        }
-    }
-
     private static Rectangle GetDefaultSourceRect(Rectangle rectangle, FishTankFurniture furniture)
     {
         return furniture.defaultSourceRect.Value;

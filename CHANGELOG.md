@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2]
+
+### Added
+- New action mushymato.MMAP_SetPanorama for actively setting the panorama of current location.
+- New panorama field FullView which controls whether panorama is visible past the bounds of the map, default true.
+
+### Fixed
+- Panorama conflicting with SVE Summit sigh, revert to resetLocalState timing
+- Make Panorama look decent enough in map screenshots to enable DrawInMapScreenshot=true all the time
+
+### Changed
+- Removed IndoorPot draw fix for connected textures since Raised Garden Beds is back(!) and MMAP doesn't have means of making custom IndoorPot anyways
+
 ## [1.10.1]
 
 ### Fixed
