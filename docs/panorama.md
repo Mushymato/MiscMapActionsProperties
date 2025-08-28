@@ -90,7 +90,7 @@ Note: When using `ShowDuring`, it's recommended to arrange your layers in the or
 
 ## Temporary Animated Sprite <a name="tas"></a>
 
-Temporary animated sprites (TAS) are used for active elements of the background, such as clouds. See [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details on defining a temporary animated sprite.
+Temporary animated sprites (TAS) are used for active elements of the background, such as clouds. See [temporary animated sprites docs](temporary-animated-sprites.md) for details on defining a temporary animated sprite.
 
 For panorama, there are 2 lists of TAS, onetime and respawning. You can put temporary animated sprite with interval in onetime without having them respawn since the list kind takes priority.
 

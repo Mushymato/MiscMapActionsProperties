@@ -55,7 +55,7 @@ internal static class ConnectedTextures
         catch (Exception err)
         {
             ModEntry.Log(
-                $"Failed to apply CommonPatch, this is a critical error that should be reported to the mod page:\n{err}",
+                $"Failed to apply ConnectedTextures (FishTank.draw fix):\n{err}",
                 LogLevel.Error
             );
         }

@@ -19,7 +19,7 @@ Some of these features overlap with other framework mods, usually they don't con
 - Create custom fish tank furniture.
 - Make furniture obey seasons via `SeasonOffset`, compared to using the `{{Season}}` token, this feature respects the location's season override.
 - Change furniture collision to make non-rugs passable (but not make rugs impassable).
-- Various advanced drawing controls via `DrawLayers`, see also the [draw layers extension documentation](docs/draw-layers.md).
+- Various advanced drawing controls via `DrawLayers`, see also the [draw layers extension documentation](draw-layers.md).
 
 ## Fields Actually in Use
 
@@ -30,7 +30,7 @@ Some of these features overlap with other framework mods, usually they don't con
 | `AdditionalTilePropertyRadius` | int | 0 | Extra tile property radius, needed if any tile property should apply in a bound larger than the furniture's own bounding box. For example, having 1 in this field on a 1x1 furniture means the actual bounds checked is 3x3 starting with tile that's 1 left and 1 up from the furniture's placement tile. This radius also affects checks for shaking/open close anim. |
 | `CollisionMap` | string | _empty_ | Collision map string, e.g. `"XOX"` where `X` is impassable and `O` is passable. Rugs ignore this property. You can put other furniture on tiles marked O, but not objects/big craftables. |
 | `SeasonOffset` | Point | 0,0 | Adjusts the source rectangle of the furniture plus any draw layers depending on the season. |
-| `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to building draw layers, but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used, and furniture draw in menu do not show draw layers. |
+| `DrawLayers` | List\<BuildingDrawLayers\> | _empty_ | List of draw layers to show for this furniture, works very similar to [building draw layers](https://stardewvalleywiki.com/Modding:Buildings#Exterior_appearance), but the fields `OnlyDrawIfChestHasContents` and `AnimalDoorOffset` are not used. |
 | `DrawShadow` | bool | false | Because furniture do not have draw shadows in the first place, this field is repurposed to mean "when there are draw layers, do not draw the base furniture sprite". |
 | `ActionTiles` | List\<BuildingActionTiles\> _empty_ | List of special action tiles. | 
 | `Metadata` | Dictionary\<string, string\> | _empty_ | MMAP's [building draw layer extension feature](../README.md#drawlayerext) can be used here too. |

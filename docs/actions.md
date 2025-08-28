@@ -160,7 +160,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 #### mushymato.MMAP_Panorama \<panoramaId\>
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
-- The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](docs/panorama.md) for details.
+- The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](panorama.md) for details.
 - There are some some panoramas provided by MMAP that can be used out of the box.
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.

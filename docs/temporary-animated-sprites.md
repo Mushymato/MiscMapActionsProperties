@@ -1,6 +1,6 @@
 # Temporary Animated Sprites
 
-Temporary sprites defined here can be used with tile property [mushymato.MMAP_TAS](tile-properties.md#mushymato.MMAP_TAS) and [panorama](docs/panorama.md). (This is the same model used in TrinketTinker).
+Temporary sprites defined here can be used with tile property [mushymato.MMAP_TAS](tile-properties.md#mushymato.MMAP_TAS) and [panorama](panorama.md). (This is the same model used in TrinketTinker).
 
 To add your own temporary animated sprite, edit `mushymato.MMAP/TAS`. See examples in [tas_spot.json](../[CP]%20MMAP%20Examples/tas_spot.json)
 

@@ -1,11 +1,12 @@
 ### Draw Layers
 
 You can extend `DrawLayers` found on `Data/Buildings` and in `mushymato.MMAP/FurnitureProperties` with some special `Metadata` fields.
+For info on building draw layers in vanilla see [wiki documentation](https://stardewvalleywiki.com/Modding:Buildings#Exterior_appearance).
 
 ### mushymato.MMAP/DrawLayer.{DrawLayerId}.{override} <a name="drawlayerext"></a>
 
 Various draw layer overriding fields, can be used with regular draw layer things.
-These also work with draw layers added via [furniture properties](./docs/furniture-properties.md).
+These also work with draw layers added via [furniture properties](furniture-properties.md).
 At the moment, these Metadata fields do not work for building skins (mainly because draw layers are also not settable per building skins).
 
 #### string values

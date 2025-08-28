@@ -40,7 +40,7 @@ Map properties can be set on the map or through building/furniture/floor path.
 
 - Add a temporary animated sprite at this tile.
 - The layer depth is based on the tile position.
-- The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](docs/temporary-animated-sprites.md) for details.
+- The `tasId` arguments refer to an entry in the `mushymato.MMAP/TAS` custom asset, see [temporary animated sprites docs](temporary-animated-sprites.md) for details.
 - There are several actions related to this tile property, see [actions mushymato.MMAP_TAS](actions.md#mushymato.MMAP_TAS) for details.
 
 #### Back Layer: mushymato.MMAP_Critter [\<critterType\> [type dependent args]]+ <a name="mushymato.MMAP_Critter"></a>
