@@ -54,10 +54,7 @@ internal static class ConnectedTextures
         }
         catch (Exception err)
         {
-            ModEntry.Log(
-                $"Failed to apply ConnectedTextures (FishTank.draw fix):\n{err}",
-                LogLevel.Error
-            );
+            ModEntry.Log($"Failed to apply ConnectedTextures (FishTank.draw fix):\n{err}", LogLevel.Error);
         }
     }
 

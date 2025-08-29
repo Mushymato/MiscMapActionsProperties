@@ -861,7 +861,7 @@ internal static class FurnitureProperties
     internal const float LAYER_OFFSET = 1E-06f;
     private static FurnitureDrawMode FurnitureDraw = FurnitureDrawMode.None;
     private static float FurnitureLayerDepthOffset = 0f;
-    private static float DrawFurnitureLayerDepthMax = 0f;
+    private static float DrawFurnitureLayerDepthMax = -1f;
     private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
     private static readonly MethodInfo? Furniture_getScaleSize = AccessTools.DeclaredMethod(
         typeof(Furniture),
@@ -1006,94 +1006,149 @@ internal static class FurnitureProperties
         {
             foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
             {
-                if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value))
-                {
-                    continue;
-                }
-
-                ParsedItemData? dataOrErrorItem = null;
-
-                float layerDepth;
-                Vector2 drawPos;
-                if (drawSource == DrawSource.Menu)
-                {
-                    layerDepth = 0f;
-                    dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
-                    Rectangle baseSrcRect = dataOrErrorItem.GetSourceRect();
-                    drawPos =
-                        drawPosition
-                        + new Vector2(32, 32)
-                        - new Vector2(baseSrcRect.Width / 2 * scaleSize, baseSrcRect.Height / 2 * scaleSize)
-                        + drawLayer.DrawPosition * scaleSize;
-                }
-                else
-                {
-                    layerDepth = drawLayer.DrawInBackground ? 0f : furnitureLayerDepth;
-                    if (drawSource == DrawSource.NonTile)
-                    {
-                        layerDepth = furnitureLayerDepth;
-                        drawPos = drawPosition + drawLayer.DrawPosition * scaleSize;
-                    }
-                    else
-                    {
-                        layerDepth -= drawLayer.SortTileOffset * 64f / 10000f + furniture.TileLocation.X * LAYER_OFFSET;
-                        drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
-                    }
-                }
-
-                Rectangle sourceRect = drawLayer.GetSourceRect(
-                    (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds
+                DrawLayer(
+                    furniture,
+                    drawPosition,
+                    spriteBatch,
+                    alpha,
+                    furnitureLayerDepth,
+                    scaleSize,
+                    drawSource,
+                    drawLayer,
+                    drawLayerExt
                 );
-                sourceRect = AdjustSourceRectToSeason(FpData, furniture.Location, sourceRect);
-                Texture2D texture;
-                if (Game1.content.DoesAssetExist<Texture2D>(drawLayer.Texture))
-                {
-                    texture = Game1.content.Load<Texture2D>(drawLayer.Texture);
-                }
-                else
-                {
-                    dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
-                    texture = dataOrErrorItem.GetTexture();
-                    sourceRect.Offset(connectedTexturesOffset);
-                }
+            }
+        }
 
-                if (drawLayerExt != null)
+        internal void Draw(
+            Furniture furniture,
+            Vector2 drawPosition,
+            SpriteBatch spriteBatch,
+            float alpha,
+            float furnitureLayerDepth,
+            float scaleSize,
+            bool drawOnlyBackground,
+            DrawSource drawSource = DrawSource.Normal
+        )
+        {
+            foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in LayerInfo)
+            {
+                if (drawLayer.DrawInBackground == drawOnlyBackground)
                 {
-                    float rotation = 0f;
-                    if (drawLayerExt.ContactState is DLContactState contactState)
-                    {
-                        rotation += contactState.Rotate;
-                        if (contactState.OpenPhase != DLContactState.Phase.None)
-                            sourceRect = drawLayer.GetSourceRect(contactState.AnimTime);
-                    }
-                    drawLayerExt.Draw(
+                    DrawLayer(
+                        furniture,
+                        drawPosition,
                         spriteBatch,
-                        texture,
-                        drawPos,
-                        sourceRect,
-                        Color.White * alpha,
-                        rotation,
-                        Vector2.Zero,
+                        alpha,
+                        furnitureLayerDepth,
                         scaleSize,
-                        SpriteEffects.None,
-                        layerDepth
-                    );
-                }
-                else
-                {
-                    spriteBatch.Draw(
-                        texture,
-                        drawPos,
-                        sourceRect,
-                        Color.White * alpha,
-                        0f,
-                        Vector2.Zero,
-                        scaleSize,
-                        SpriteEffects.None,
-                        layerDepth
+                        drawSource,
+                        drawLayer,
+                        drawLayerExt
                     );
                 }
             }
+        }
+
+        private bool DrawLayer(
+            Furniture furniture,
+            Vector2 drawPosition,
+            SpriteBatch spriteBatch,
+            float alpha,
+            float furnitureLayerDepth,
+            float scaleSize,
+            DrawSource drawSource,
+            BuildingDrawLayer drawLayer,
+            DLExtInfo? drawLayerExt
+        )
+        {
+            if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value))
+            {
+                return false;
+            }
+
+            ParsedItemData? dataOrErrorItem = null;
+
+            float layerDepth;
+            Vector2 drawPos;
+            if (drawSource == DrawSource.Menu)
+            {
+                layerDepth = 0f;
+                dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
+                Rectangle baseSrcRect = dataOrErrorItem.GetSourceRect();
+                drawPos =
+                    drawPosition
+                    + new Vector2(32, 32)
+                    - new Vector2(baseSrcRect.Width / 2 * scaleSize, baseSrcRect.Height / 2 * scaleSize)
+                    + drawLayer.DrawPosition * scaleSize;
+            }
+            else
+            {
+                layerDepth = drawLayer.DrawInBackground ? 0f : furnitureLayerDepth;
+                if (drawSource == DrawSource.NonTile)
+                {
+                    layerDepth = furnitureLayerDepth;
+                    drawPos = drawPosition + drawLayer.DrawPosition * scaleSize;
+                }
+                else
+                {
+                    layerDepth -= drawLayer.SortTileOffset * 64f / 10000f + furniture.TileLocation.X * LAYER_OFFSET;
+                    drawPos = Game1.GlobalToLocal(drawPosition + drawLayer.DrawPosition * scaleSize);
+                }
+            }
+
+            Rectangle sourceRect = drawLayer.GetSourceRect((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds);
+            sourceRect = AdjustSourceRectToSeason(FpData, furniture.Location, sourceRect);
+            Texture2D texture;
+            if (Game1.content.DoesAssetExist<Texture2D>(drawLayer.Texture))
+            {
+                texture = Game1.content.Load<Texture2D>(drawLayer.Texture);
+            }
+            else
+            {
+                dataOrErrorItem ??= ItemRegistry.GetDataOrErrorItem(furniture.QualifiedItemId);
+                texture = dataOrErrorItem.GetTexture();
+                sourceRect.Offset(connectedTexturesOffset);
+            }
+
+            if (drawLayerExt != null)
+            {
+                float rotation = 0f;
+                if (drawLayerExt.ContactState is DLContactState contactState)
+                {
+                    rotation += contactState.Rotate;
+                    if (contactState.OpenPhase != DLContactState.Phase.None)
+                        sourceRect = drawLayer.GetSourceRect(contactState.AnimTime);
+                }
+                drawLayerExt.Draw(
+                    spriteBatch,
+                    texture,
+                    drawPos,
+                    sourceRect,
+                    Color.White * alpha,
+                    rotation,
+                    Vector2.Zero,
+                    scaleSize,
+                    SpriteEffects.None,
+                    layerDepth
+                );
+            }
+            else
+            {
+                spriteBatch.Draw(
+                    texture,
+                    drawPos,
+                    sourceRect,
+                    Color.White * alpha,
+                    0f,
+                    Vector2.Zero,
+                    scaleSize,
+                    SpriteEffects.None,
+                    layerDepth
+                );
+            }
+
+            return true;
         }
     }
 
@@ -1184,6 +1239,10 @@ internal static class FurnitureProperties
         if (__state.Value.Item1 is FurnitureDLState state)
         {
             float layerDepth = DrawFurnitureLayerDepthMax;
+            if (layerDepth == -1)
+            {
+                layerDepth = (__instance.boundingBox.Value.Bottom - 8) / 10000f;
+            }
             FurnitureDraw &= ~FurnitureDrawMode.None;
             state.Draw(
                 __instance,
@@ -1202,7 +1261,7 @@ internal static class FurnitureProperties
 
         FurnitureDraw = __state.Value.Item2;
 
-        DrawFurnitureLayerDepthMax = 0;
+        DrawFurnitureLayerDepthMax = -1;
         FurnitureLayerDepthOffset = 0;
 
         if (__state.Value.Item3 is Rectangle sourceRect)
@@ -1335,6 +1394,11 @@ internal static class FurnitureProperties
     // draw in menu patch
     private static void Furniture_drawInMenu_Prefix(
         Furniture __instance,
+        SpriteBatch spriteBatch,
+        Vector2 location,
+        float scaleSize,
+        float transparency,
+        float layerDepth,
         ref (FurnitureDLState?, FurnitureDrawMode)? __state
     )
     {
@@ -1354,6 +1418,17 @@ internal static class FurnitureProperties
             if (!fpData.DrawShadow)
                 FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
+
+        dlState?.Draw(
+            __instance,
+            location,
+            spriteBatch,
+            transparency,
+            layerDepth,
+            TryGetScaleSize(__instance) * scaleSize,
+            true,
+            drawSource: FurnitureDLState.DrawSource.Menu
+        );
 
         __state = new(dlState, prevDraw);
     }
@@ -1386,8 +1461,10 @@ internal static class FurnitureProperties
             transparency,
             layerDepth,
             TryGetScaleSize(__instance) * scaleSize,
+            false,
             drawSource: FurnitureDLState.DrawSource.Menu
         );
+
         FurnitureDraw &= __state.Value.Item2;
     }
 
