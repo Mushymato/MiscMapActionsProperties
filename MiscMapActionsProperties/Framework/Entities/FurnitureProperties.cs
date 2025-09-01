@@ -649,6 +649,10 @@ internal static class FurnitureProperties
                     typeof(FishTankFurniture),
                     nameof(FishTankFurniture.UpdateDecorAndFish)
                 ),
+                prefix: new HarmonyMethod(
+                    typeof(FurnitureProperties),
+                    nameof(FishTankFurniture_UpdateDecorAndFish_Prefix)
+                ),
                 postfix: new HarmonyMethod(
                     typeof(FurnitureProperties),
                     nameof(FishTankFurniture_UpdateDecorAndFish_Postfix)
@@ -703,8 +707,22 @@ internal static class FurnitureProperties
         return Vector2.Zero;
     }
 
-    private static void FishTankFurniture_UpdateDecorAndFish_Postfix(FishTankFurniture __instance)
+    private static void FishTankFurniture_UpdateDecorAndFish_Prefix(FishTankFurniture __instance, ref int __state)
     {
+        __state = 0;
+        if (__instance.boundingBox.Width < 64 * 2)
+        {
+            __state = __instance.boundingBox.Width;
+            __instance.boundingBox.Width = 64 * 2;
+        }
+    }
+
+    private static void FishTankFurniture_UpdateDecorAndFish_Postfix(FishTankFurniture __instance, ref int __state)
+    {
+        if (__state > 0)
+        {
+            __instance.boundingBox.Width = __state;
+        }
         if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is not FishTankInfo tankInfo)
             return;
         int itemCount = __instance.heldItems.Count(itm => itm is not null);
