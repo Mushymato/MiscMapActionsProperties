@@ -66,7 +66,7 @@ internal static class WoodsLighting
         woodsLightingCtx.Value = null;
         if (CommonPatch.TryGetLocationalProperty(location, MapProp_WoodsLighting, out string? argString))
         {
-            string[] args = ArgUtility.SplitBySpace(argString);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(argString);
             if (
                 !ArgUtility.TryGet(
                     args,

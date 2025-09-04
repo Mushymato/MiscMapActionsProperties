@@ -1,15 +1,17 @@
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
-using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 
 namespace MiscMapActionsProperties.Framework.Location;
+
+public sealed record WaterDrawCtx(Texture2D Tx, Point Pnt, float Scale);
 
 /// <summary>
 /// Add new map property mushymato.MMAP_WaterColor T|color [T|color T|color T|color]
@@ -20,11 +22,12 @@ internal static class WaterColor
 {
     internal const string Asset_Water = $"{ModEntry.ModId}/Water";
     internal const string MapProp_WaterColor = $"{ModEntry.ModId}_WaterColor";
-    internal const string MapProp_WaterTexture = $"{ModEntry.ModId}_WaterTexture";
+    internal const string MapProp_WaterDraw = $"{ModEntry.ModId}_WaterDraw";
 
     // abusing the fact that content patcher always does a copy to not actually invalidate these :)
-    private static Texture2D? T_WaterTx = null;
-    private static readonly PerScreen<Texture2D?> WaterTx = new();
+    private static WaterDrawCtx? T_WaterCtx = null;
+    private static Rectangle T_Rect = new(0, 0, 640, 256);
+    private static readonly PerScreen<WaterDrawCtx?> WaterCtx = new();
 
     internal static void Register()
     {
@@ -47,14 +50,34 @@ internal static class WaterColor
         }
     }
 
-    private static Texture2D ModifyWaterTexture(Texture2D currentWaterTx)
+    private static void DrawReplace(
+        SpriteBatch b,
+        Texture2D texture,
+        Vector2 position,
+        Rectangle? sourceRectangle,
+        Color color,
+        float rotation,
+        Vector2 origin,
+        float scale,
+        SpriteEffects effects,
+        float layerDepth
+    )
     {
-        return WaterTx.Value ?? currentWaterTx;
-    }
-
-    private static int ModifyWaterYOffset(int yOffset)
-    {
-        return WaterTx.Value != null ? 0 : yOffset;
+        if (WaterCtx.Value is WaterDrawCtx ctx && sourceRectangle is Rectangle rect)
+        {
+            Rectangle overrideRect;
+            float overrideScale = ctx.Scale;
+            float scaleMod = scale / ctx.Scale;
+            overrideRect = new Rectangle(
+                (int)(ctx.Pnt.X + rect.X * scaleMod),
+                ctx.Pnt.Y + (int)((rect.Y - 2064) * scaleMod),
+                (int)(rect.Width * scaleMod),
+                (int)(rect.Height * scaleMod)
+            );
+            b.Draw(ctx.Tx, position, overrideRect, color, rotation, origin, overrideScale, effects, layerDepth);
+            return;
+        }
+        b.Draw(texture, position, sourceRectangle, color, rotation, origin, scale, effects, layerDepth);
     }
 
     private static IEnumerable<CodeInstruction> GameLocation_drawWaterTile_Transpiler(
@@ -65,27 +88,33 @@ internal static class WaterColor
         try
         {
             CodeMatcher matcher = new(instructions, generator);
-
-            for (int i = 0; i < 2; i++)
-            {
-                matcher
-                    .MatchEndForward(
+            MethodInfo replacedDraw = AccessTools.DeclaredMethod(typeof(WaterColor), nameof(DrawReplace));
+            CodeMatch[] callvirtDraw =
+            [
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.DeclaredMethod(
+                        typeof(SpriteBatch),
+                        nameof(SpriteBatch.Draw),
                         [
-                            new(OpCodes.Ldarg_1),
-                            new(OpCodes.Ldsfld, AccessTools.DeclaredField(typeof(Game1), nameof(Game1.mouseCursors))),
+                            typeof(Texture2D),
+                            typeof(Vector2),
+                            typeof(Rectangle?),
+                            typeof(Color),
+                            typeof(float),
+                            typeof(Vector2),
+                            typeof(float),
+                            typeof(SpriteEffects),
+                            typeof(float),
                         ]
                     )
-                    .ThrowIfNotMatch("Failed to find 'Game1.mouseCursors'")
-                    .Advance(1)
-                    .InsertAndAdvance(
-                        [new(OpCodes.Call, AccessTools.DeclaredMethod(typeof(WaterColor), nameof(ModifyWaterTexture)))]
-                    )
-                    .MatchEndForward([new(OpCodes.Mul), new(OpCodes.Ldc_I4, 2064)])
-                    .ThrowIfNotMatch("Failed to find '* 2064")
-                    .Advance(1)
-                    .InsertAndAdvance(
-                        [new(OpCodes.Call, AccessTools.DeclaredMethod(typeof(WaterColor), nameof(ModifyWaterYOffset)))]
-                    );
+                ),
+            ];
+            for (int i = 0; i < 2; i++)
+            {
+                matcher.MatchEndForward(callvirtDraw).ThrowIfNotMatch("Failed to find 'b.Draw'");
+                matcher.Opcode = OpCodes.Call;
+                matcher.Operand = replacedDraw;
             }
             return matcher.Instructions();
         }
@@ -109,57 +138,89 @@ internal static class WaterColor
         // water color
         if (CommonPatch.TryGetLocationalProperty(location, MapProp_WaterColor, out string? waterColors))
         {
-            string[] args = ArgUtility.SplitBySpace(waterColors);
-            Season season = location.GetSeason();
-            Color? waterColorOverride = null;
-
-            if (
-                ArgUtility.TryGet(
-                    args,
-                    (int)season,
-                    out string seasonColor,
-                    out _,
-                    allowBlank: false,
-                    name: "string seasonWaterColor"
-                )
-            )
-            {
-                if (seasonColor != "T")
-                    waterColorOverride = Utility.StringToColor(seasonColor);
-            }
-            else if (
-                ArgUtility.TryGet(
-                    args,
-                    0,
-                    out string springColor,
-                    out _,
-                    allowBlank: false,
-                    name: "string seasonWaterColor"
-                )
-            )
-            {
-                if (springColor != "T")
-                    waterColorOverride = Utility.StringToColor(springColor);
-            }
-
-            if (waterColorOverride.HasValue)
-            {
-                location.waterColor.Value = waterColorOverride.Value;
-            }
+            SetupWaterColor(location, waterColors);
         }
 
-        WaterTx.Value = null;
-        if (CommonPatch.TryGetLocationalProperty(location, MapProp_WaterTexture, out string? waterTexture))
+        if (CommonPatch.TryGetLocationalProperty(location, MapProp_WaterDraw, out string? waterDraw))
         {
-            if (waterTexture == "T")
-            {
-                T_WaterTx ??= Game1.content.Load<Texture2D>(Asset_Water);
-                WaterTx.Value = T_WaterTx;
-            }
-            else if (Game1.content.DoesAssetExist<Texture2D>(waterTexture))
-            {
-                WaterTx.Value = Game1.content.Load<Texture2D>(waterTexture);
-            }
+            SetupWaterDraw(waterDraw);
+        }
+    }
+
+    private static void SetupWaterDraw(string waterDraw)
+    {
+        WaterCtx.Value = null;
+
+        if (waterDraw == "T")
+        {
+            T_WaterCtx ??= new(Game1.content.Load<Texture2D>(Asset_Water), Point.Zero, 1f);
+            WaterCtx.Value = T_WaterCtx;
+            return;
+        }
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(waterDraw);
+
+        if (
+            !ArgUtility.TryGet(args, 0, out string waterDrawTx, out string _, allowBlank: false, "string waterDrawTx")
+            || !Game1.content.DoesAssetExist<Texture2D>(waterDrawTx)
+        )
+        {
+            ModEntry.Log($"Failed to get water texture '{waterDrawTx}'", LogLevel.Error);
+            return;
+        }
+        if (
+            !ArgUtility.TryGetOptionalFloat(args, 1, out float scale, out _, defaultValue: 1, name: "float scale")
+            || scale <= 0
+        )
+        {
+            ModEntry.Log($"Failed to get water draw scale", LogLevel.Error);
+            return;
+        }
+        ArgUtility.TryGetPoint(args, 2, out Point sourcePnt, out _, name: "point source");
+
+        Texture2D waterTx = Game1.content.Load<Texture2D>(waterDrawTx);
+        WaterCtx.Value = new(waterTx, sourcePnt, scale);
+    }
+
+    private static void SetupWaterColor(GameLocation location, string waterColors)
+    {
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(waterColors);
+        Season season = location.GetSeason();
+        Color? waterColorOverride = null;
+
+        if (
+            ArgUtility.TryGet(
+                args,
+                (int)season,
+                out string seasonColor,
+                out _,
+                allowBlank: false,
+                name: "string seasonWaterColor"
+            )
+        )
+        {
+            if (seasonColor != "T")
+                waterColorOverride = Utility.StringToColor(seasonColor);
+        }
+
+        if (
+            !waterColorOverride.HasValue
+            && ArgUtility.TryGet(
+                args,
+                0,
+                out string springColor,
+                out _,
+                allowBlank: false,
+                name: "string seasonWaterColor"
+            )
+        )
+        {
+            if (springColor != "T")
+                waterColorOverride = Utility.StringToColor(springColor);
+        }
+
+        if (waterColorOverride.HasValue)
+        {
+            location.waterColor.Value = waterColorOverride.Value;
         }
     }
 }

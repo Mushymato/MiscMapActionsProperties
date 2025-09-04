@@ -241,7 +241,7 @@ internal static class FurnitureProperties
         string error;
         foreach (BuildingActionTile actionTile in fpData.ActionTiles)
         {
-            string[] args = ArgUtility.SplitBySpace(actionTile.Action);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(actionTile.Action);
             if (!ArgUtility.TryGet(args, 0, out string value, out error, allowBlank: false, name: "string Action"))
             {
                 ModEntry.Log(error, LogLevel.Error);
@@ -558,7 +558,7 @@ internal static class FurnitureProperties
             && (fpData.CustomFields?.TryGetValue(CustomFields_TV, out string? tvRect) ?? false)
         )
         {
-            string[] args = ArgUtility.SplitBySpace(tvRect);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(tvRect);
             if (
                 !ArgUtility.TryGetVector2(args, 0, out Vector2 pos, out string error, name: "Vector2 pos")
                 || !ArgUtility.TryGetFloat(args, 2, out float scale, out error, name: "float scale")
@@ -681,7 +681,7 @@ internal static class FurnitureProperties
         {
             return null;
         }
-        string[] args = ArgUtility.SplitBySpace(fishTankDef);
+        string[] args = ArgUtility.SplitBySpaceQuoteAware(fishTankDef);
         if (
             !ArgUtility.TryGetOptionalInt(args, 0, out int capacity, out string error, defaultValue: -2, "int capacity")
             || !ArgUtility.TryGetOptionalInt(args, 1, out int posX, out error, defaultValue: 0, "int posX")

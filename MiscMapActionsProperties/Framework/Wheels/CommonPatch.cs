@@ -353,7 +353,7 @@ public static class CommonPatch
         {
             if (
                 ArgUtility.TryGetRectangle(
-                    ArgUtility.SplitBySpace(prevBoundsStr),
+                    ArgUtility.SplitBySpaceQuoteAware(prevBoundsStr),
                     0,
                     out Rectangle prevBounds,
                     out _,
@@ -508,7 +508,7 @@ public static class CommonPatch
         prop = Vector2.Zero;
         if (TryGetLocationalProperty(location, propKey, out string? propValue))
         {
-            string[] args = ArgUtility.SplitBySpace(propValue);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(propValue);
             if (
                 ArgUtility.TryGetFloat(args, 0, out float xVal, out string error, "float X")
                 && ArgUtility.TryGetFloat(args, 1, out float yVal, out error, "float Y")

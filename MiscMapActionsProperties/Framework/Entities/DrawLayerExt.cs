@@ -386,7 +386,7 @@ internal static class DrawLayerExt
     {
         if (dict.TryGetValue(key, out string? valueStr))
         {
-            string[] args = ArgUtility.SplitBySpace(valueStr);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(valueStr);
             if (
                 !ArgUtility.TryGetOptionalFloat(
                     args,
@@ -451,7 +451,7 @@ internal static class DrawLayerExt
 
         if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "origin"), out string? valueStr))
         {
-            string[] args = ArgUtility.SplitBySpace(valueStr);
+            string[] args = ArgUtility.SplitBySpaceQuoteAware(valueStr);
             hasChange |= ArgUtility.TryGetVector2(
                 args,
                 0,
