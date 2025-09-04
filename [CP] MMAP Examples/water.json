@@ -1,0 +1,13 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Farm",
+      "MapProperties": {
+        "mushymato.MMAP_WaterColor": "White",
+        "mushymato.MMAP_WaterDraw": "Maps/Mines/volcano_dungeon 4 0 320",
+      }
+    }
+  ]
+}

@@ -155,6 +155,7 @@ internal static class WaterColor
         {
             T_WaterCtx ??= new(Game1.content.Load<Texture2D>(Asset_Water), Point.Zero, 1f);
             WaterCtx.Value = T_WaterCtx;
+            ModEntry.Log($"WaterCtx: {WaterCtx.Value}");
             return;
         }
         string[] args = ArgUtility.SplitBySpaceQuoteAware(waterDraw);
@@ -179,6 +180,7 @@ internal static class WaterColor
 
         Texture2D waterTx = Game1.content.Load<Texture2D>(waterDrawTx);
         WaterCtx.Value = new(waterTx, sourcePnt, scale);
+        ModEntry.Log($"WaterCtx: {WaterCtx.Value}");
     }
 
     private static void SetupWaterColor(GameLocation location, string waterColors)
@@ -221,6 +223,7 @@ internal static class WaterColor
         if (waterColorOverride.HasValue)
         {
             location.waterColor.Value = waterColorOverride.Value;
+            ModEntry.Log($"WaterColor: {waterColorOverride}");
         }
     }
 }

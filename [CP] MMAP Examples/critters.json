@@ -37,7 +37,8 @@
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "\"Crab:RANDOM .5:16:16\" {{ModId}}/critters/crab 4 Seagull {{ModId}}/critters/seagull 4"
+            // "mushymato.MMAP_Critter": "\"Crab:RANDOM .5:16:16\" {{ModId}}/critters/crab 4 Seagull {{ModId}}/critters/seagull 4"
+            "mushymato.MMAP_Critter": "\"Rabbit:mushymato.MMAP_TIME_IS_DAY\" T:F 1 \"Firefly:!mushymato.MMAP_TIME_IS_DAY\" T 5"
           }
         },
         {

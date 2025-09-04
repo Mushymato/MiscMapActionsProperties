@@ -240,7 +240,7 @@ internal static class CritterSpot
                 }
                 if (!GameStateQuery.CheckConditions(gsq))
                 {
-                    break;
+                    continue;
                 }
                 ArgUtility.TryGetPoint(critterKindArgs, 2, out pntOffset, out _, name: "Point pntOffset");
             }
