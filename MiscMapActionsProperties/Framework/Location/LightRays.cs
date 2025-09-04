@@ -93,10 +93,7 @@ internal static class LightRays
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_LightRays, out string? rayTexture)
-            && !string.IsNullOrWhiteSpace(rayTexture)
-        )
+        if (CommonPatch.TryGetLocationalProperty(location, MapProp_LightRays, out string? rayTexture))
         {
             int raySeed = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
             if (rayTexture == "T")

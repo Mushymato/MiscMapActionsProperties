@@ -102,13 +102,7 @@ internal static class FarmHouseFurniture
     private static void FarmHouse_AddStarterFurniture_Postfix(FarmHouse __instance)
     {
         bool bedCheck = false;
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(
-                __instance,
-                MapProp_FarmHouseFurnitureRemove,
-                out string? propStr1
-            )
-        )
+        if (CommonPatch.TryGetLocationalProperty(__instance, MapProp_FarmHouseFurnitureRemove, out string? propStr1))
         {
             ModEntry.Log($"{MapProp_FarmHouseFurnitureRemove}: {propStr1}");
             if (propStr1 == "ALL")
@@ -151,9 +145,7 @@ internal static class FarmHouseFurniture
                 }
             }
         }
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(__instance, MapProp_FarmHouseFurnitureAdd, out string? propStr2)
-        )
+        if (CommonPatch.TryGetLocationalProperty(__instance, MapProp_FarmHouseFurnitureAdd, out string? propStr2))
         {
             ModEntry.Log($"{MapProp_FarmHouseFurnitureAdd}: {propStr2}");
             string[] mapPropertySplitBySpaces = ArgUtility.SplitBySpaceQuoteAware(propStr2);

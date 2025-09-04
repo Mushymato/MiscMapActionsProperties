@@ -47,7 +47,7 @@ internal static class CribPosition
 
     private static bool TryGetCribPosition(GameLocation location, out Vector2 cribPos)
     {
-        return CommonPatch.TryGetCustomFieldsOrMapPropertyAsVector2(location, MapProp_CribPosition, out cribPos);
+        return CommonPatch.TryGetLocationalPropertyVector2(location, MapProp_CribPosition, out cribPos);
     }
 
     private static void Child_isInCrib_Postfix(Child __instance, ref bool __result)

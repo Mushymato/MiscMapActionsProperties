@@ -71,10 +71,7 @@ internal static class SteamOverlay
 
     private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_SteamOverlay, out string? steamOverlayProps)
-            && !string.IsNullOrWhiteSpace(steamOverlayProps)
-        )
+        if (CommonPatch.TryGetLocationalProperty(location, MapProp_SteamOverlay, out string? steamOverlayProps))
         {
             string[] args = ArgUtility.SplitBySpaceQuoteAware(steamOverlayProps);
             if (

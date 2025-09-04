@@ -27,7 +27,7 @@ internal static class WoodsDebris
     private static void GameLocation_resetLocalState(object? sender, GameLocation e)
     {
         WeatherDebris.Clear();
-        if (CommonPatch.TryGetCustomFieldsOrMapProperty(e, MapProp_WoodsDebris, out string? prop))
+        if (CommonPatch.TryGetLocationalProperty(e, MapProp_WoodsDebris, out string? prop))
         {
             Season season = e.GetSeason();
             bool shouldDebris;

@@ -64,10 +64,7 @@ internal static class WoodsLighting
     private static void GameLocation_resetLocalState_Postfix(object? sender, GameLocation location)
     {
         woodsLightingCtx.Value = null;
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_WoodsLighting, out string? argString)
-            && !string.IsNullOrWhiteSpace(argString)
-        )
+        if (CommonPatch.TryGetLocationalProperty(location, MapProp_WoodsLighting, out string? argString))
         {
             string[] args = ArgUtility.SplitBySpace(argString);
             if (

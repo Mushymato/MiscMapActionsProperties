@@ -73,7 +73,7 @@ internal static class ProtectTree
     {
         if (
             (t is not Axe && explosion == 0)
-            || !CommonPatch.TryGetCustomFieldsOrMapProperty(
+            || !CommonPatch.TryGetLocationalProperty(
                 __instance.Location,
                 MapProp_ProtectTree,
                 out string? protectMessageKey
@@ -98,7 +98,7 @@ internal static class ProtectTree
     {
         if (
             (t is not Axe && explosion == 0)
-            || !CommonPatch.TryGetCustomFieldsOrMapProperty(
+            || !CommonPatch.TryGetLocationalProperty(
                 __instance.Location,
                 MapProp_ProtectFruitTree,
                 out string? protectMessageKey

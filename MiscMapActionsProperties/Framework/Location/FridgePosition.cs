@@ -55,9 +55,7 @@ internal static class FridgePosition
     {
         if (location is not FarmHouse farmHouse)
             return;
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapProperty(farmHouse, MapProp_FridgeDoorSprite, out string? fridgeDoorProp)
-        )
+        if (CommonPatch.TryGetLocationalProperty(farmHouse, MapProp_FridgeDoorSprite, out string? fridgeDoorProp))
         {
             if (fridgeDoorProp == "F")
             {
@@ -174,13 +172,7 @@ internal static class FridgePosition
 
     private static Point? GetOverrideFridgePosition(FarmHouse __instance)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapPropertyAsVector2(
-                __instance,
-                MapProp_FridgePosition,
-                out Vector2 position
-            )
-        )
+        if (CommonPatch.TryGetLocationalPropertyVector2(__instance, MapProp_FridgePosition, out Vector2 position))
         {
             return position.ToPoint();
         }
@@ -206,13 +198,7 @@ internal static class FridgePosition
 
     private static bool FarmHouse_GetFridgePositionFromMap_Prefix(FarmHouse __instance, ref Point? __result)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapPropertyAsVector2(
-                __instance,
-                MapProp_FridgePosition,
-                out Vector2 position
-            )
-        )
+        if (CommonPatch.TryGetLocationalPropertyVector2(__instance, MapProp_FridgePosition, out Vector2 position))
         {
             __result = position.ToPoint();
             return false;

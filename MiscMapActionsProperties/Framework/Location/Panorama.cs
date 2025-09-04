@@ -633,7 +633,7 @@ internal static class Panorama
     private static void RecheckPanoramaBackground(GameLocation location)
     {
         // GameLocation location, PanoramaBgStaticDef bgStatic, List<TileTAS>? respawningTAS
-        if (CommonPatch.TryGetCustomFieldsOrMapProperty(location, MapProp_Panorama, out string? bgId))
+        if (CommonPatch.TryGetLocationalProperty(location, MapProp_Panorama, out string? bgId))
         {
             SetPanorama(location, bgId);
         }

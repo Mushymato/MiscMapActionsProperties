@@ -94,13 +94,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapPropertyAsInt(
-                location,
-                MapProp_NightTimeStarting,
-                out int nightTimeStarting
-            )
-        )
+        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeStarting, out int nightTimeStarting))
         {
             __result = nightTimeStarting;
         }
@@ -108,13 +102,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getModeratelyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (
-            CommonPatch.TryGetCustomFieldsOrMapPropertyAsInt(
-                location,
-                MapProp_NightTimeModerate,
-                out int nightTimeModerate
-            )
-        )
+        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeModerate, out int nightTimeModerate))
         {
             if (nightTimeModerate > Game1.getStartingToGetDarkTime(location))
                 __result = nightTimeModerate;
@@ -125,7 +113,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getTrulyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (CommonPatch.TryGetCustomFieldsOrMapPropertyAsInt(location, MapProp_NightTimeTruly, out int nightTimeTruly))
+        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeTruly, out int nightTimeTruly))
         {
             if (nightTimeTruly > Game1.getModeratelyDarkTime(location))
                 __result = nightTimeTruly;

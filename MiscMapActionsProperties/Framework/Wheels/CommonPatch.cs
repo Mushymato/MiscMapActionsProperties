@@ -455,10 +455,10 @@ public static class CommonPatch
 
     internal static bool HasCustomFieldsOrMapProperty(GameLocation location, string propKey)
     {
-        return TryGetCustomFieldsOrMapProperty(location, propKey, out _);
+        return TryGetLocationalProperty(location, propKey, out _);
     }
 
-    internal static bool TryGetCustomFieldsOrMapProperty(
+    internal static bool TryGetLocationalProperty(
         GameLocation location,
         string propKey,
         [NotNullWhen(true)] out string? prop
@@ -467,25 +467,29 @@ public static class CommonPatch
         prop = null;
         if (location == null)
             return false;
-        if (
-            (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
-            || (
-                location.Map != null && location.Map.Properties != null && location.TryGetMapProperty(propKey, out prop)
-            )
-            || false
-        )
-            return !string.IsNullOrEmpty(prop);
+        if (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
+        {
+            return !string.IsNullOrWhiteSpace(prop);
+        }
+        if (location.Map != null && location.Map.Properties != null && location.TryGetMapProperty(propKey, out prop))
+        {
+            return !string.IsNullOrWhiteSpace(prop);
+        }
+        if (location.GetLocationContext()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
+        {
+            return !string.IsNullOrWhiteSpace(prop);
+        }
         return false;
     }
 
-    internal static bool TryGetCustomFieldsOrMapPropertyAsInt(
+    internal static bool TryGetLocationalPropertyInt(
         GameLocation location,
         string propKey,
         [NotNullWhen(true)] out int prop
     )
     {
         prop = 0;
-        if (TryGetCustomFieldsOrMapProperty(location, propKey, out string? propValue))
+        if (TryGetLocationalProperty(location, propKey, out string? propValue))
         {
             if (int.TryParse(propValue, out prop))
             {
@@ -495,14 +499,14 @@ public static class CommonPatch
         return false;
     }
 
-    internal static bool TryGetCustomFieldsOrMapPropertyAsVector2(
+    internal static bool TryGetLocationalPropertyVector2(
         GameLocation location,
         string propKey,
         [NotNullWhen(true)] out Vector2 prop
     )
     {
         prop = Vector2.Zero;
-        if (TryGetCustomFieldsOrMapProperty(location, propKey, out string? propValue))
+        if (TryGetLocationalProperty(location, propKey, out string? propValue))
         {
             string[] args = ArgUtility.SplitBySpace(propValue);
             if (
