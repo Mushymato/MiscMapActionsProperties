@@ -16,8 +16,8 @@
       "Target": "Maps/Farm",
       "MapProperties": {
         // "mushymato.MMAP_WaterColor": "Red Green Blue Yellow",
-        "mushymato.MMAP_WaterColor": "#FFFFFFFF",
-        "mushymato.MMAP_WaterTexture": "T",
+        // "mushymato.MMAP_WaterColor": "#FFFFFFFF",
+        // "mushymato.MMAP_WaterTexture": "T",
         "mushymato.MMAP_FarmHouseStarterBedPosition": "4 4"
       }
     }

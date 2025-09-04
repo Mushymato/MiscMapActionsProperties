@@ -3,6 +3,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
+using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -23,8 +24,7 @@ internal static class WaterColor
 
     // abusing the fact that content patcher always does a copy to not actually invalidate these :)
     private static Texture2D? T_WaterTx = null;
-    private static readonly PerScreen<Texture2D?> PerScreenWaterTx = new();
-    private static Texture2D? WaterTx = null;
+    private static readonly PerScreen<Texture2D?> WaterTx = new();
 
     internal static void Register()
     {
@@ -40,11 +40,6 @@ internal static class WaterColor
                 ),
                 transpiler: new HarmonyMethod(typeof(WaterColor), nameof(GameLocation_drawWaterTile_Transpiler))
             );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.drawWater)),
-                prefix: new HarmonyMethod(typeof(WaterColor), nameof(GameLocation_drawWater_Prefix)),
-                postfix: new HarmonyMethod(typeof(WaterColor), nameof(GameLocation_drawWater_Postfix))
-            );
         }
         catch (Exception err)
         {
@@ -52,19 +47,14 @@ internal static class WaterColor
         }
     }
 
-    private static void GameLocation_drawWater_Prefix()
-    {
-        WaterTx = PerScreenWaterTx.Value;
-    }
-
     private static Texture2D ModifyWaterTexture(Texture2D currentWaterTx)
     {
-        return WaterTx ?? currentWaterTx;
+        return WaterTx.Value ?? currentWaterTx;
     }
 
     private static int ModifyWaterYOffset(int yOffset)
     {
-        return WaterTx != null ? 0 : yOffset;
+        return WaterTx.Value != null ? 0 : yOffset;
     }
 
     private static IEnumerable<CodeInstruction> GameLocation_drawWaterTile_Transpiler(
@@ -97,10 +87,6 @@ internal static class WaterColor
                         [new(OpCodes.Call, AccessTools.DeclaredMethod(typeof(WaterColor), nameof(ModifyWaterYOffset)))]
                     );
             }
-            foreach (CodeInstruction inst in matcher.Instructions())
-            {
-                Console.WriteLine(inst);
-            }
             return matcher.Instructions();
         }
         catch (Exception err)
@@ -108,11 +94,6 @@ internal static class WaterColor
             ModEntry.Log($"Failed to patch WaterDraw:\n{err}", LogLevel.Error);
             return instructions;
         }
-    }
-
-    private static void GameLocation_drawWater_Postfix()
-    {
-        WaterTx = null;
     }
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
@@ -167,17 +148,17 @@ internal static class WaterColor
             }
         }
 
-        PerScreenWaterTx.Value = null;
+        WaterTx.Value = null;
         if (CommonPatch.TryGetLocationalProperty(location, MapProp_WaterTexture, out string? waterTexture))
         {
             if (waterTexture == "T")
             {
                 T_WaterTx ??= Game1.content.Load<Texture2D>(Asset_Water);
-                PerScreenWaterTx.Value = T_WaterTx;
+                WaterTx.Value = T_WaterTx;
             }
             else if (Game1.content.DoesAssetExist<Texture2D>(waterTexture))
             {
-                PerScreenWaterTx.Value = Game1.content.Load<Texture2D>(waterTexture);
+                WaterTx.Value = Game1.content.Load<Texture2D>(waterTexture);
             }
         }
     }
