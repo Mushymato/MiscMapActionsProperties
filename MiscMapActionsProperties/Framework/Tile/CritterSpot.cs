@@ -24,6 +24,8 @@ internal enum SupportedCritter
     Frog,
     LeaperFrog,
     Rabbit,
+    Squirrel,
+    Opossum,
 }
 
 /// <summary>
@@ -129,7 +131,10 @@ internal static class CritterSpot
     private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
         SpawnLocationCritters(Game1.currentLocation);
 
-    private static void OnWarped(object? sender, WarpedEventArgs e) => SpawnLocationCritters(e.NewLocation);
+    private static void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        SpawnLocationCritters(e.NewLocation);
+    }
 
     private static void SpawnLocationCritters(GameLocation location)
     {
@@ -266,6 +271,8 @@ internal static class CritterSpot
                 SupportedCritter.Frog => SpawnCritterFrog(location, pnt, pntOffset, arg1, count),
                 SupportedCritter.LeaperFrog => SpawnCritterLeaperFrog(location, pnt, pntOffset, arg1, count),
                 SupportedCritter.Rabbit => SpawnCritterRabbit(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Squirrel => SpawnCritterSquirrel(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Opossum => SpawnCritterOpossum(location, pnt, pntOffset, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)
@@ -482,7 +489,7 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Frog frog = new(position.ToVector2(), waterLeaper: false);
-            frog.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
+            frog.position += GetPosOffset(posOffset);
             frog.flip = arg1 == "F";
             yield return frog;
         }
@@ -499,7 +506,7 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Frog frog = new(position.ToVector2(), waterLeaper: true);
-            frog.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
+            frog.position += GetPosOffset(posOffset);
             frog.flip = arg1 == "F";
             yield return frog;
         }
@@ -514,15 +521,23 @@ internal static class CritterSpot
     )
     {
         bool flipped = Random.Shared.NextBool();
+        int baseFrame = -1;
         if (texture != null)
         {
             string[] parts = texture.Split(":");
             if (parts.Length >= 2)
             {
-                texture = parts[0];
                 flipped = parts[1] == "F";
+                texture = parts[0];
             }
-            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+
+            if (
+                texture == "T"
+                || !(
+                    (int.TryParse(texture, out baseFrame) && (baseFrame == 74 || baseFrame == 54))
+                    || Game1.content.DoesAssetExist<Texture2D>(texture)
+                )
+            )
             {
                 texture = null;
             }
@@ -530,14 +545,95 @@ internal static class CritterSpot
         for (int i = 0; i < count; i++)
         {
             Rabbit rabbit = new(location, position.ToVector2(), flipped);
-            rabbit.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
-            if (texture != null)
+            rabbit.position += GetPosOffset(posOffset);
+            if (baseFrame >= 0)
+            {
+                rabbit.baseFrame = baseFrame;
+                // 74 = winter
+                // 54 = not winter
+                rabbit.sprite.CurrentFrame = baseFrame == 74 ? 69 : 68;
+            }
+            else if (texture != null)
             {
                 rabbit.sprite.textureName.Value = texture;
-                rabbit.sprite.CurrentFrame = 0;
                 rabbit.baseFrame = 1;
+                rabbit.sprite.CurrentFrame = 0;
             }
             yield return rabbit;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterSquirrel(
+        GameLocation location,
+        Point position,
+        Point posOffset,
+        string? texture,
+        int count
+    )
+    {
+        bool flipped = Random.Shared.NextBool();
+        if (texture != null)
+        {
+            string[] parts = texture.Split(":");
+            if (parts.Length >= 2)
+            {
+                flipped = parts[1] == "F";
+                texture = parts[0];
+            }
+
+            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+            {
+                texture = null;
+            }
+        }
+        for (int i = 0; i < count; i++)
+        {
+            Squirrel squirrel = new(position.ToVector2(), flipped);
+            squirrel.position += GetPosOffset(posOffset);
+            if (texture != null)
+            {
+                squirrel.sprite.textureName.Value = texture;
+                squirrel.baseFrame = 0;
+                squirrel.sprite.CurrentFrame = 0;
+            }
+            yield return squirrel;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterOpossum(
+        GameLocation location,
+        Point position,
+        Point posOffset,
+        string? texture,
+        int count
+    )
+    {
+        bool flipped = Random.Shared.NextBool();
+        if (texture != null)
+        {
+            string[] parts = texture.Split(":");
+            if (parts.Length >= 2)
+            {
+                flipped = parts[1] == "F";
+                texture = parts[0];
+            }
+
+            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+            {
+                texture = null;
+            }
+        }
+        for (int i = 0; i < count; i++)
+        {
+            Opossum opossum = new(location, position.ToVector2(), flipped);
+            opossum.position += GetPosOffset(posOffset);
+            if (texture != null)
+            {
+                opossum.sprite.textureName.Value = texture;
+                opossum.baseFrame = 0;
+                opossum.sprite.CurrentFrame = 0;
+            }
+            yield return opossum;
         }
     }
 }
