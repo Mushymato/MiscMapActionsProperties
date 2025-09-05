@@ -568,7 +568,7 @@ internal static class CritterSpot
     )
     {
         ParseRabbitStyleArgs(ref texture, out string flippy, out int baseFrame);
-        if (baseFrame != 74 && baseFrame != 54)
+        if (baseFrame != -1 && baseFrame != 74 && baseFrame != 54)
         {
             ModEntry.LogOnce($"{TileProp_Critter} Rabbit does not support base frame '{baseFrame}'", LogLevel.Warn);
             baseFrame = -1;
