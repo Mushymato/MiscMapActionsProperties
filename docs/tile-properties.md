@@ -47,14 +47,14 @@ Map properties can be set on the map or through building/furniture/floor path.
 
 - Spawn a certain kind of simple critter on this tile. The positions are slightly randomized within the tile's bounds.
 - Currently supports the following critter types:
-    - Firefly: [color|T] [count]
-    - Seagull: [texture|T] [count]
-    - Crab: [texture|T] [count]
-    - Birdie: [texture|<number>|T][:YOffset] [count]
+    - **Firefly** [color|T] [count]
+    - **Seagull** [texture|T] [count]
+    - **Crab** [texture|T] [count]
+    - **Birdie** [texture|<number>|T][:YOffset] [count]
         - The number option allows you to give a start index for `TileSheet/critters` which has birdies starting at 25, 45, 125, 135, 165, and 175.
         - When using T, the birdie start index will be picked with logic similar to base game.
         - YOffset is a change on Y axis to the birdy's position, e.g. `T:-128` to make birdie appear 2 tiles above it's tile position.
-    - Butterfly: [texture|<number>|T] [count]
+    - **Butterfly** [texture|<number>|T] [count]
         - The number option allows you to give a start index for `TileSheet/critters`
             - winter butterflies: 397
             - spring butterflies: 160, 163, 166, 180, 183, 186
@@ -64,15 +64,50 @@ Map properties can be set on the map or through building/furniture/floor path.
             - unused: 428, 432, 480, 484
         - When using texture, the bufferfly will follow summer butterfly rules (4 frames)
         - When using T, the butterfly start index will be picked by base game logic, this covers the winter/spring/summer/island butterfly sets.
-    - Frog: [T|F] [count]
-        - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
-    - LeaperFrog: [T|F] [count]
-        - T makes frog face right, F makes frog face left. There's no option to change for a different texture.
+    - **Frog** [T|F|P|R] [count]
+        - There's no option to change for a different texture, and the second argument only decides orientation.
+            - T: face right
+            - F: face left
+            - R: face left or right randomly
+            - P: face away from the player, based on X position (default)
+    - **LeaperFrog** [T|F|P|R] [count]
+        - There's no option to change for a different texture, and the second argument only decides orientation.
+            - T: face right
+            - F: face left
+            - R: face left or right randomly
+            - P: face away from the player, based on X position (default)
         - This frog jumps farther into water.
-    - Rabbit: [texture|T][:T|F]
-        - When giving a texture, the first frame is the rabbit's standing frame, while the following 6 frames are the running frames
-        - T makes rabbit face right, F makes rabbit face left, e.g. `loadedRabbitTexture:F` gives a rabbit using the specific texture and facing left. When not specified, the direction is random.
-- You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile.
+    - **Rabbit** [[texture|number|T][:T|F|P|R]]
+        - The second argument is a composite value, where the texture and the flipped status is separated by a `:` (e.g. `Rabbit {{ModId}}_MyRabbit:F 1`).
+        - The flipped status is optional (e.g. `Rabbit {{ModId}}_MyRabbit 1` is fine).
+        - Texture argument (value before `:`)
+            - You may use a loaded texture, and in that case the first frame is the standing frame while the remaining 6 are running frames, this is different than how rabbits are arranged on `TileSheet/critters`
+            - You may use these start index on `TileSheet/critters`: `54` (gray rabbit) or `74` (white rabbit). No other start indicies are accepted.
+            - Using `T` option results in gray rabbit in spring summer fall, and white rabbit in the winter.
+        - Orientation argument (value after `:`)
+            - T: face right
+            - F: face left
+            - R: face left or right randomly
+            - P: face away from the player, based on X position (default)
+    - **Squirrel** [[texture|T][:T|F|P|R]]
+        - The second argument is a composite value, where the texture and the flipped status is separated by a `:` (e.g. `Squirrel {{ModId}}_Squirrel:F 1`).
+        - The flipped status is optional (e.g. `Squirrel {{ModId}}_Squirrel 1`).
+        - Texture argument (value before `:`) is either a loaded texture or `T` for the default squirrel.
+        - Orientation argument (value after `:`)
+            - T: face right
+            - F: face left
+            - R: face left or right randomly
+            - P: face away from the player, based on X position (default)
+    - **Opossum** [[texture|T][:T|F|P|R]]
+        - The second argument is a composite value, where the texture and the flipped status is separated by a `:` (e.g. `Opossum {{ModId}}_Opossum:F 1`).
+        - The flipped status is optional (e.g. `Opossum {{ModId}}_Opossum 1`).
+        - Texture argument (value before `:`) is either a loaded texture or `T` for the default squirrel.
+        - Orientation argument (value after `:`)
+            - T: face right
+            - F: face left
+            - R: face left or right randomly
+            - P: face away from the player, based on X position (default)
+- You can use multiple sets of these args to spawn more critters on the same tile, e.g. `Crab T 3 Firefly T 8` for 3 crabs 8 fireflies on the tile. Each individual set is 3 space separated items.
 - The critter type arg can have extra setting arguments like `\"Crab:RANDOM .5:16:16\"`, these separated by `:` and the args mean the following:
     - CritterType
     - [Game State Query](https://stardewvalleywiki.com/Modding:Game_state_queries)

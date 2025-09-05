@@ -39,6 +39,8 @@ internal enum SupportedCritter
 /// - Frog: [T|F] [count]
 /// - LeaperFrog: [T|F] [count]
 /// - Rabbit: [texture|<number>](:T|F)? [count]
+/// - Squirrel: [texture](:T|F)? [count]
+/// - Opossum: [texture](:T|F)? [count]
 /// </summary>
 internal static class CritterSpot
 {
@@ -478,6 +480,17 @@ internal static class CritterSpot
         }
     }
 
+    private static bool SetFlipped(string? flippy, float x)
+    {
+        return flippy switch
+        {
+            "F" => true,
+            "T" => false,
+            "R" => Random.Shared.NextBool(),
+            _ => x + 4 < Game1.player.Position.X,
+        };
+    }
+
     private static IEnumerable<Critter> SpawnCritterFrog(
         GameLocation location,
         Point position,
@@ -490,7 +503,7 @@ internal static class CritterSpot
         {
             Frog frog = new(position.ToVector2(), waterLeaper: false);
             frog.position += GetPosOffset(posOffset);
-            frog.flip = arg1 == "F";
+            frog.flip = SetFlipped(arg1, frog.position.X);
             yield return frog;
         }
     }
@@ -507,8 +520,42 @@ internal static class CritterSpot
         {
             Frog frog = new(position.ToVector2(), waterLeaper: true);
             frog.position += GetPosOffset(posOffset);
-            frog.flip = arg1 == "F";
+            frog.flip = SetFlipped(arg1, frog.position.X);
             yield return frog;
+        }
+    }
+
+    private static void ParseRabbitStyleArgs(ref string? texture, out string flippy, out int baseFrame)
+    {
+        flippy = "P";
+        baseFrame = -1;
+        if (texture == null)
+        {
+            return;
+        }
+
+        string[] parts = texture.Split(":");
+        if (parts.Length >= 2)
+        {
+            texture = parts[0];
+            flippy = parts[1];
+        }
+
+        if (texture == "T")
+        {
+            texture = null;
+        }
+        else if (int.TryParse(texture, out baseFrame))
+        {
+            texture = null;
+        }
+        else if (Game1.content.DoesAssetExist<Texture2D>(texture))
+        {
+            baseFrame = -1;
+        }
+        else
+        {
+            texture = null;
         }
     }
 
@@ -520,33 +567,18 @@ internal static class CritterSpot
         int count
     )
     {
-        bool flipped = Random.Shared.NextBool();
-        int baseFrame = -1;
-        if (texture != null)
+        ParseRabbitStyleArgs(ref texture, out string flippy, out int baseFrame);
+        if (baseFrame != 74 && baseFrame != 54)
         {
-            string[] parts = texture.Split(":");
-            if (parts.Length >= 2)
-            {
-                flipped = parts[1] == "F";
-                texture = parts[0];
-            }
-
-            if (
-                texture == "T"
-                || !(
-                    (int.TryParse(texture, out baseFrame) && (baseFrame == 74 || baseFrame == 54))
-                    || Game1.content.DoesAssetExist<Texture2D>(texture)
-                )
-            )
-            {
-                texture = null;
-            }
+            ModEntry.LogOnce($"{TileProp_Critter} Rabbit does not support base frame '{baseFrame}'", LogLevel.Warn);
+            baseFrame = -1;
         }
         for (int i = 0; i < count; i++)
         {
-            Rabbit rabbit = new(location, position.ToVector2(), flipped);
+            Rabbit rabbit = new(location, position.ToVector2(), false);
             rabbit.position += GetPosOffset(posOffset);
-            if (baseFrame >= 0)
+            rabbit.flip = SetFlipped(flippy, rabbit.position.X);
+            if (baseFrame > 0)
             {
                 rabbit.baseFrame = baseFrame;
                 // 74 = winter
@@ -555,6 +587,7 @@ internal static class CritterSpot
             }
             else if (texture != null)
             {
+                ModEntry.Log(texture);
                 rabbit.sprite.textureName.Value = texture;
                 rabbit.baseFrame = 1;
                 rabbit.sprite.CurrentFrame = 0;
@@ -571,25 +604,12 @@ internal static class CritterSpot
         int count
     )
     {
-        bool flipped = Random.Shared.NextBool();
-        if (texture != null)
-        {
-            string[] parts = texture.Split(":");
-            if (parts.Length >= 2)
-            {
-                flipped = parts[1] == "F";
-                texture = parts[0];
-            }
-
-            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
-            {
-                texture = null;
-            }
-        }
+        ParseRabbitStyleArgs(ref texture, out string flippy, out _);
         for (int i = 0; i < count; i++)
         {
-            Squirrel squirrel = new(position.ToVector2(), flipped);
+            Squirrel squirrel = new(position.ToVector2(), false);
             squirrel.position += GetPosOffset(posOffset);
+            squirrel.flip = SetFlipped(flippy, squirrel.position.X);
             if (texture != null)
             {
                 squirrel.sprite.textureName.Value = texture;
@@ -608,25 +628,12 @@ internal static class CritterSpot
         int count
     )
     {
-        bool flipped = Random.Shared.NextBool();
-        if (texture != null)
-        {
-            string[] parts = texture.Split(":");
-            if (parts.Length >= 2)
-            {
-                flipped = parts[1] == "F";
-                texture = parts[0];
-            }
-
-            if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
-            {
-                texture = null;
-            }
-        }
+        ParseRabbitStyleArgs(ref texture, out string flippy, out _);
         for (int i = 0; i < count; i++)
         {
-            Opossum opossum = new(location, position.ToVector2(), flipped);
+            Opossum opossum = new(location, position.ToVector2(), false);
             opossum.position += GetPosOffset(posOffset);
+            opossum.flip = SetFlipped(flippy, opossum.position.X);
             if (texture != null)
             {
                 opossum.sprite.textureName.Value = texture;

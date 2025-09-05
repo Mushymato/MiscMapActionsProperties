@@ -27,7 +27,29 @@ internal static class WaterColor
     // abusing the fact that content patcher always does a copy to not actually invalidate these :)
     private static WaterDrawCtx? T_WaterCtx = null;
     private static Rectangle T_Rect = new(0, 0, 640, 256);
-    private static readonly PerScreen<WaterDrawCtx?> WaterCtx = new();
+
+    // is this more perf? i have no clue lol
+    private static readonly PerScreen<WaterDrawCtx?> psWaterCtx = new();
+    private static int lastScreenId = -1;
+    private static WaterDrawCtx? lastWaterCtx = null;
+    private static WaterDrawCtx? WaterCtx
+    {
+        get
+        {
+            if (lastScreenId != Context.ScreenId)
+            {
+                lastScreenId = Context.ScreenId;
+                lastWaterCtx = psWaterCtx.Value;
+            }
+            return lastWaterCtx;
+        }
+        set
+        {
+            psWaterCtx.Value = value;
+            lastScreenId = Context.ScreenId;
+            lastWaterCtx = value;
+        }
+    }
 
     internal static void Register()
     {
@@ -63,7 +85,7 @@ internal static class WaterColor
         float layerDepth
     )
     {
-        if (WaterCtx.Value is WaterDrawCtx ctx && sourceRectangle is Rectangle rect)
+        if (WaterCtx is WaterDrawCtx ctx && sourceRectangle is Rectangle rect)
         {
             Rectangle overrideRect;
             float overrideScale = ctx.Scale;
@@ -141,6 +163,7 @@ internal static class WaterColor
             SetupWaterColor(location, waterColors);
         }
 
+        WaterCtx = null;
         if (CommonPatch.TryGetLocationalProperty(location, MapProp_WaterDraw, out string? waterDraw))
         {
             SetupWaterDraw(waterDraw);
@@ -149,13 +172,10 @@ internal static class WaterColor
 
     private static void SetupWaterDraw(string waterDraw)
     {
-        WaterCtx.Value = null;
-
         if (waterDraw == "T")
         {
             T_WaterCtx ??= new(Game1.content.Load<Texture2D>(Asset_Water), Point.Zero, 1f);
-            WaterCtx.Value = T_WaterCtx;
-            ModEntry.Log($"WaterCtx: {WaterCtx.Value}");
+            WaterCtx = T_WaterCtx;
             return;
         }
         string[] args = ArgUtility.SplitBySpaceQuoteAware(waterDraw);
@@ -179,8 +199,7 @@ internal static class WaterColor
         ArgUtility.TryGetPoint(args, 2, out Point sourcePnt, out _, name: "point source");
 
         Texture2D waterTx = Game1.content.Load<Texture2D>(waterDrawTx);
-        WaterCtx.Value = new(waterTx, sourcePnt, scale);
-        ModEntry.Log($"WaterCtx: {WaterCtx.Value}");
+        WaterCtx = new(waterTx, sourcePnt, scale);
     }
 
     private static void SetupWaterColor(GameLocation location, string waterColors)
