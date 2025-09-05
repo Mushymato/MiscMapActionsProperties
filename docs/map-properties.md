@@ -1,6 +1,12 @@
 # Map Properties
 
-All map properties are also usable as entry in `Data/Location` `CustomFields`. In the case where both map property and `Data/Location` `CustomFields` exist, `CustomFields` are used.
+All map properties are also usable as entry in `Data/Location` `CustomFields` as well as `Data/LocationContext` `CustomFields`.
+
+For a given location the properties are checked in this order:
+1. `Data/Location` `CustomFields`
+2. `MapProperties`
+3. `Data/LocationContext` `CustomFields`
+Thus you can use `Data/LocationContext` to set a shared value across your entire area, then use `Data/Location` to override the value for a single location.
 
 #### mushymato.MMAP_ProtectTree [T|message]
 
@@ -69,6 +75,17 @@ All map properties are also usable as entry in `Data/Location` `CustomFields`. I
     - #1E787F7F summer
     - #7F41647F fall
     - #41287F7F winter
+
+#### mushymato.MMAP_WaterDraw: \<texture\> [scale] [sourceX] [sourceY]
+
+- Changes the current location's water overlay draw texture.
+- This option allows you to completely replace the water draw with something else.
+- Using `T` applies the grayscale [base_water.png](MiscMapActionsProperties/assets/base_water.png) texture loaded to asset name `mushymato.MMAP/Water`.
+- The format of the water texture is fixed, so you may only change the scale, not the aspect ratio.
+    - Vanilla water is 640x256, rendered at 1x scale
+    - Vanilla lava (found on `Maps/Mines/volcano_dungeon`) is 160x64, rendered at 4x scale.
+- SourceX and SourceY determines the top left corner of the water texture area, in a larger texture.
+- Thus can apply the lava texture from `Maps/Mines/volcano_dungeon` in a location by setting this prop to `Maps/Mines/volcano_dungeon 4 0 320` and WaterColor to `White`.
 
 #### mushymato.MMAP_Panorama \<panoramaId\>
 
