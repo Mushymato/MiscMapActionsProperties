@@ -225,7 +225,6 @@ internal static class WaterColor
         if (waterColorOverride.HasValue)
         {
             location.waterColor.Value = waterColorOverride.Value;
-            ModEntry.Log($"WaterColor: {waterColorOverride}");
         }
     }
 }

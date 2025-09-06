@@ -187,10 +187,10 @@ public static class CommonPatch
 
     private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
     {
-        Dictionary<Point, HashSet<Furniture>>? tileToFurni = psTileToFurni.Value;
-        foreach (Furniture added in e.Added)
+        // update tile to furniture
+        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
         {
-            if (tileToFurni != null)
+            foreach (Furniture added in e.Added)
             {
                 Rectangle bounds = GetFurnitureTileDataBounds(added);
                 foreach (Point pnt in IterateBounds(bounds))
@@ -205,14 +205,7 @@ public static class CommonPatch
                     }
                 }
             }
-            Furniture_OnMoved?.Invoke(
-                null,
-                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
-            );
-        }
-        foreach (Furniture removed in e.Removed)
-        {
-            if (tileToFurni != null)
+            foreach (Furniture removed in e.Removed)
             {
                 Rectangle bounds = GetFurnitureTileDataBounds(removed);
                 foreach (Point pnt in IterateBounds(bounds))
@@ -227,6 +220,18 @@ public static class CommonPatch
                     }
                 }
             }
+        }
+
+        // fire moved events
+        foreach (Furniture added in e.Added)
+        {
+            Furniture_OnMoved?.Invoke(
+                null,
+                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
+            );
+        }
+        foreach (Furniture removed in e.Removed)
+        {
             Furniture_OnMoved?.Invoke(
                 null,
                 new(removed, true, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
@@ -601,7 +606,7 @@ public static class CommonPatch
 
     private static bool SimpleTilePropComparer(string[]? props1, string[]? props2)
     {
-        return props1 == props2;
+        return (props1 != null) != (props2 != null);
     }
 
     internal static TileDataCache<string[]> GetSimpleTileDataCache(string[] propKeys, string layer)

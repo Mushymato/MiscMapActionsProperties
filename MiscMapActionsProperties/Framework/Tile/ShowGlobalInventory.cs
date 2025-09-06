@@ -18,6 +18,7 @@ internal static class ShowGlobalInventory
 {
     internal const string TileAction_ShowBag = $"{ModEntry.ModId}_ShowBag";
     internal const string TileAction_AddItemToBag = $"{ModEntry.ModId}_AddItemToBag";
+    internal const string TileAction_RemoveItemFromBag = $"{ModEntry.ModId}_RemoveItemFromBag";
     internal const string GSQ_BAG_HAS_ITEM = $"{ModEntry.ModId}_BAG_HAS_ITEM";
 
     internal static void Register()
@@ -26,6 +27,8 @@ internal static class ShowGlobalInventory
         TriggerActionManager.RegisterAction(TileAction_ShowBag, TriggerShowBag);
         CommonPatch.RegisterTileAndTouch(TileAction_AddItemToBag, TileAddItemToBag);
         TriggerActionManager.RegisterAction(TileAction_AddItemToBag, TriggerAddItemToBag);
+        CommonPatch.RegisterTileAndTouch(TileAction_RemoveItemFromBag, TileRemoveItemFromBag);
+        TriggerActionManager.RegisterAction(TileAction_RemoveItemFromBag, TriggerRemoveItemFromBag);
         GameStateQuery.Register(GSQ_BAG_HAS_ITEM, BAG_HAS_ITEM);
         ModEntry.help.ConsoleCommands.Add(
             "mmap.list_bags",
@@ -84,17 +87,33 @@ internal static class ShowGlobalInventory
         ShowBag(args, out error);
 
     private static bool TileAddItemToBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
-        AddItemToBag(args, out _);
+        ModifyItemsInBag(args, AddItems, out _);
 
     private static bool TriggerAddItemToBag(string[] args, TriggerActionContext context, out string error) =>
-        AddItemToBag(args, out error);
+        ModifyItemsInBag(args, AddItems, out error);
+
+    private static bool TileRemoveItemFromBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
+        ModifyItemsInBag(args, RemoveItems, out _);
+
+    private static bool TriggerRemoveItemFromBag(string[] args, TriggerActionContext context, out string error) =>
+        ModifyItemsInBag(args, RemoveItems, out error);
 
     internal static string GetBagInventoryId(string bagInvId)
     {
         return string.Join('#', ModEntry.ModId, bagInvId);
     }
 
-    private static bool AddItemToBag(string[] args, out string error)
+    private static void AddItems(Inventory items, string qId, int amount, int quality)
+    {
+        items.Add(ItemRegistry.Create(qId, amount, quality));
+    }
+
+    private static void RemoveItems(Inventory items, string qId, int amount, int quality)
+    {
+        items.ReduceId(qId, amount);
+    }
+
+    private static bool ModifyItemsInBag(string[] args, Action<Inventory, string, int, int> modifyBy, out string error)
     {
         if (
             !ArgUtility.TryGet(args, 1, out string bagInvId, out error, allowBlank: false, "string bagInvId")
@@ -112,7 +131,7 @@ internal static class ShowGlobalInventory
             .RequestLock(() =>
             {
                 Inventory items = Game1.player.team.GetOrCreateGlobalInventory(globalInvId);
-                items.Add(ItemRegistry.Create(qId, amount, quality));
+                modifyBy(items, qId, amount, quality);
             });
         return true;
     }
