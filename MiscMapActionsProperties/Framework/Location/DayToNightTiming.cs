@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
@@ -7,6 +8,8 @@ using StardewValley.Delegates;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Location;
+
+public sealed record DayToNightCtx(int Starting, int Moderate, int Truly);
 
 /// <summary>
 /// Add 3 new map properties for changing when the map/location becomes dark.
@@ -27,6 +30,36 @@ internal static class DayToNightTiming
     internal const string GSQ_TIME_IS_NIGHT = $"{ModEntry.ModId}_TIME_IS_NIGHT";
     internal const string GSQ_WINDOW_LIGHTS = $"{ModEntry.ModId}_WINDOW_LIGHTS";
     internal const string GSQ_RAINING_HERE = $"{ModEntry.ModId}_RAINING_HERE";
+
+    private static readonly ConditionalWeakTable<GameLocation, DayToNightCtx?> dayToNightCache = [];
+
+    private static DayToNightCtx? GetDayToNightCtx(GameLocation location)
+    {
+        if (!CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeStarting, out int nightTimeStarting))
+        {
+            nightTimeStarting = -1;
+        }
+        if (
+            !CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeModerate, out int nightTimeModerate)
+            || nightTimeModerate < nightTimeStarting
+        )
+        {
+            nightTimeModerate = -1;
+        }
+        if (
+            CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeTruly, out int nightTimeTruly)
+            || nightTimeTruly < nightTimeModerate
+        )
+        {
+            nightTimeTruly = -1;
+        }
+
+        if (nightTimeStarting == 1 && nightTimeModerate == -1 && nightTimeTruly == -1)
+        {
+            return null;
+        }
+        return new DayToNightCtx(nightTimeStarting, nightTimeModerate, nightTimeTruly);
+    }
 
     internal static void Register()
     {
@@ -94,31 +127,25 @@ internal static class DayToNightTiming
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeStarting, out int nightTimeStarting))
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Starting > -1)
         {
-            __result = nightTimeStarting;
+            __result = ctx.Starting;
         }
     }
 
     private static void Game1_getModeratelyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeModerate, out int nightTimeModerate))
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Moderate > -1)
         {
-            if (nightTimeModerate > Game1.getStartingToGetDarkTime(location))
-                __result = nightTimeModerate;
-            else
-                ModEntry.Log($"Invalid {MapProp_NightTimeModerate} value {nightTimeModerate:04}", LogLevel.Warn);
+            __result = ctx.Moderate;
         }
     }
 
     private static void Game1_getTrulyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeTruly, out int nightTimeTruly))
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Truly > -1)
         {
-            if (nightTimeTruly > Game1.getModeratelyDarkTime(location))
-                __result = nightTimeTruly;
-            else
-                ModEntry.Log($"Invalid {MapProp_NightTimeTruly} value {nightTimeTruly:04}", LogLevel.Warn);
+            __result = ctx.Truly;
         }
     }
 }
