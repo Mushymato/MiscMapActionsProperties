@@ -1,9 +1,7 @@
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
-using StardewValley.Locations;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -14,7 +12,9 @@ namespace MiscMapActionsProperties.Framework.Location;
 internal static class WoodsDebris
 {
     internal const string MapProp_WoodsDebris = $"{ModEntry.ModId}_WoodsDebris";
-    private static readonly PerScreen<List<WeatherDebris>> _weatherDebris = new(() => []);
+    internal static PerScreenCache<List<WeatherDebris>> _weatherDebris = PerScreenCache.Make<List<WeatherDebris>>(
+        () => []
+    );
     private static List<WeatherDebris> WeatherDebris => _weatherDebris.Value;
 
     internal static void Register()

@@ -45,7 +45,8 @@ internal static class LightSpot
     private static string FormLightId(GameLocation loc, Point pos) =>
         string.Concat(loc.NameOrUniqueName, MapLightInfix, pos.X.ToString(), ",", pos.Y.ToString());
 
-    private static readonly PerScreen<Dictionary<string, List<LightSource>>?> conditionalLightSources = new();
+    internal static PerScreenCache<Dictionary<string, List<LightSource>>?> conditionalLightSources =
+        PerScreenCache.Make<Dictionary<string, List<LightSource>>?>();
 
     internal static void Register()
     {
@@ -112,10 +113,8 @@ internal static class LightSpot
         if (cache.GetTileData(location) is not Dictionary<Point, LightCondAndProps> cachedProps)
             return;
 
-        ModEntry.Log($"Lights: {string.Join(',', cachedProps.Keys.Select(pnt => pnt.ToString()))}");
         foreach ((Point pos, LightCondAndProps condprop) in cachedProps)
         {
-            ModEntry.Log($"{pos}");
             CreateNewLight(location, pos, condprop);
         }
     }

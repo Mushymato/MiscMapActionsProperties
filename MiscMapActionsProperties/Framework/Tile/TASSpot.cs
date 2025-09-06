@@ -33,10 +33,12 @@ internal static class TASSpot
 
     private record ContactTASDefs(Point Pos, List<TASContext> Onetime, List<TASContext> Respawning);
 
-    private static readonly PerScreen<LocationTASDefs?> locationTASDefs = new();
-    private static readonly PerScreen<List<TASContext>?> respawningTASCache = new();
-    private static readonly PerScreen<Dictionary<string, (List<TASContext>, List<TASContext>)>?> toggleTASDefs = new();
-    private static readonly PerScreen<ContactTASDefs?> contactTASDefs = new();
+    private static readonly PerScreenCache<LocationTASDefs?> locationTASDefs = PerScreenCache.Make<LocationTASDefs?>();
+    private static readonly PerScreenCache<List<TASContext>?> respawningTASCache =
+        PerScreenCache.Make<List<TASContext>?>();
+    private static readonly PerScreenCache<Dictionary<string, (List<TASContext>, List<TASContext>)>?> toggleTASDefs =
+        PerScreenCache.Make<Dictionary<string, (List<TASContext>, List<TASContext>)>?>();
+    private static readonly PerScreenCache<ContactTASDefs?> contactTASDefs = PerScreenCache.Make<ContactTASDefs?>();
 
     internal static void Register()
     {

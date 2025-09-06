@@ -20,8 +20,8 @@ internal static class QuestionDialogue
 {
     internal const string TileAction_QuestionDialogue = $"{ModEntry.ModId}_QuestionDialogue";
     internal const string Asset_QuestionDialogue = $"{ModEntry.ModId}/QuestionDialogue";
-
-    internal static readonly PerScreen<GameLocation.afterQuestionBehavior?> heldAfterQuestionBehavior = new();
+    internal static PerScreenCache<GameLocation.afterQuestionBehavior?> heldAfterQuestionBehavior =
+        PerScreenCache.Make<GameLocation.afterQuestionBehavior?>();
 
     internal static void Register()
     {

@@ -57,7 +57,9 @@ internal static class CritterSpot
     );
     private static readonly FieldInfo butterflyLightId = AccessTools.DeclaredField(typeof(Butterfly), "lightId");
 
-    internal static PerScreen<Dictionary<Point, List<Critter>>> tileDataSpawnedCritters = new();
+    internal static PerScreenCache<Dictionary<Point, List<Critter>>> tileDataSpawnedCritters = PerScreenCache.Make<
+        Dictionary<Point, List<Critter>>
+    >();
     internal static Dictionary<Point, List<Critter>> TileDataSpawnedCritters => tileDataSpawnedCritters.Value ??= [];
 
     internal static void Register()

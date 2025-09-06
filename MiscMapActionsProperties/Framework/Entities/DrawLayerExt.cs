@@ -234,9 +234,11 @@ internal sealed class DLContactState
 internal static class DrawLayerExt
 {
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
-    private static readonly PerScreen<Dictionary<(Guid, string), DLExtInfo>> dlExtInfoCacheImpl = new();
+    private static readonly PerScreenCache<Dictionary<(Guid, string), DLExtInfo>> dlExtInfoCacheImpl =
+        PerScreenCache.Make<Dictionary<(Guid, string), DLExtInfo>>();
     private static Dictionary<(Guid, string), DLExtInfo> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
-    private static readonly PerScreen<Dictionary<(string, string), DLExtInfo>> dlExtInfoInMenuImpl = new();
+    private static readonly PerScreenCache<Dictionary<(string, string), DLExtInfo>> dlExtInfoInMenuImpl =
+        PerScreenCache.Make<Dictionary<(string, string), DLExtInfo>>();
     private static Dictionary<(string, string), DLExtInfo> DlExtInfoInMenu => dlExtInfoInMenuImpl.Value ??= [];
 
     internal static void Register()

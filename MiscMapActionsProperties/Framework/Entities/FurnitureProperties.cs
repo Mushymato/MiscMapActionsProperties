@@ -60,7 +60,8 @@ internal static class FurnitureProperties
     #region properties
     internal const string Asset_FurnitureProperties = $"{ModEntry.ModId}/FurnitureProperties";
     private static Dictionary<string, BuildingData>? _fpData = null;
-    private static readonly PerScreen<ConditionalWeakTable<Furniture, FurnitureDLState?>> dlExtInfoCacheImpl = new();
+    private static readonly PerScreenCache<ConditionalWeakTable<Furniture, FurnitureDLState?>> dlExtInfoCacheImpl =
+        PerScreenCache.Make<ConditionalWeakTable<Furniture, FurnitureDLState?>>();
     private static ConditionalWeakTable<Furniture, FurnitureDLState?> DlExtInfoCache => dlExtInfoCacheImpl.Value ??= [];
 
     /// <summary>Furniture property data (secretly building data)</summary>

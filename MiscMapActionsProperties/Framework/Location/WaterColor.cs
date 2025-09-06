@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 
 namespace MiscMapActionsProperties.Framework.Location;
@@ -28,27 +27,11 @@ internal static class WaterColor
     private static WaterDrawCtx? T_WaterCtx = null;
     private static Rectangle T_Rect = new(0, 0, 640, 256);
 
-    // is this more perf? i have no clue lol
-    private static readonly PerScreen<WaterDrawCtx?> psWaterCtx = new();
-    private static int lastScreenId = -1;
-    private static WaterDrawCtx? lastWaterCtx = null;
+    private static readonly PerScreenCache<WaterDrawCtx?> psWaterCtx = PerScreenCache.Make<WaterDrawCtx?>();
     private static WaterDrawCtx? WaterCtx
     {
-        get
-        {
-            if (lastScreenId != Context.ScreenId)
-            {
-                lastScreenId = Context.ScreenId;
-                lastWaterCtx = psWaterCtx.Value;
-            }
-            return lastWaterCtx;
-        }
-        set
-        {
-            psWaterCtx.Value = value;
-            lastScreenId = Context.ScreenId;
-            lastWaterCtx = value;
-        }
+        get => psWaterCtx.Value;
+        set => psWaterCtx.Value = value;
     }
 
     internal static void Register()

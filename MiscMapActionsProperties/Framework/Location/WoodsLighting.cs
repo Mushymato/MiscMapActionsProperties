@@ -16,7 +16,7 @@ internal static class WoodsLighting
     internal sealed record WoodsLightingCtx(Color DayColor, Color NightColor, bool AffectMapLights);
 
     internal const string MapProp_WoodsLighting = $"{ModEntry.ModId}_WoodsLighting";
-    private static readonly PerScreen<WoodsLightingCtx?> woodsLightingCtx = new();
+    internal static PerScreenCache<WoodsLightingCtx?> woodsLightingCtx = PerScreenCache.Make<WoodsLightingCtx?>();
 
     internal static void Register()
     {

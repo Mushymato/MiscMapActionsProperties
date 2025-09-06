@@ -130,7 +130,8 @@ public static class CommonPatch
     }
 
     #region furniture_caching
-    private static readonly PerScreen<Dictionary<Point, HashSet<Furniture>>?> psTileToFurni = new();
+    private static readonly PerScreenCache<Dictionary<Point, HashSet<Furniture>>?> psTileToFurni =
+        PerScreenCache.Make<Dictionary<Point, HashSet<Furniture>>?>();
 
     private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
     {
