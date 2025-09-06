@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Entities;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Extensions;
@@ -17,6 +16,7 @@ public sealed record TileDataCacheChangedArgs(GameLocation Location, HashSet<Poi
 
 /// <summary>
 /// CWT cache for tile data props
+/// Should be used PerScreen
 /// </summary>
 internal sealed class TileDataCache<TProps>
 {
@@ -28,13 +28,12 @@ internal sealed class TileDataCache<TProps>
 
     internal event EventHandler<TileDataCacheChangedArgs>? TileDataCacheChanged;
 
-    private readonly PerScreen<Dictionary<string, Dictionary<Point, TProps>>> _cachePerScreen = new();
-    private Dictionary<string, Dictionary<Point, TProps>> Cache => _cachePerScreen.Value ??= [];
-    internal PerScreen<ConditionalWeakTable<GameLocation, HashSet<Point>>> pointsToUpdate = new(() => []);
+    private readonly Dictionary<string, Dictionary<Point, TProps>> Cache = [];
+    internal ConditionalWeakTable<GameLocation, HashSet<Point>> pointsToUpdate = [];
 
-    private readonly PerScreen<HashSet<string>> buildingPropertyJustInvalidated = new(() => []);
-    private readonly PerScreen<HashSet<string>> furniturePropertyJustInvalidated = new(() => []);
-    private readonly PerScreen<HashSet<string>> floorPathPropertyJustInvalidated = new(() => []);
+    private readonly HashSet<string> buildingPropertyJustInvalidated = [];
+    private readonly HashSet<string> furniturePropertyJustInvalidated = [];
+    private readonly HashSet<string> floorPathPropertyJustInvalidated = [];
 
     internal TileDataCache(
         string[] propKeys,
@@ -66,9 +65,11 @@ internal sealed class TileDataCache<TProps>
         if (!Context.IsWorldReady)
             return;
 
+        HashSet<string> cachedLocations = Cache.Keys.ToHashSet();
+
         if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
         {
-            buildingPropertyJustInvalidated.Value = Cache.Keys.ToHashSet();
+            buildingPropertyJustInvalidated.AddRange(cachedLocations);
         }
 
         if (
@@ -76,12 +77,12 @@ internal sealed class TileDataCache<TProps>
             || e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/FurnitureExtensionData")
         )
         {
-            furniturePropertyJustInvalidated.Value = Cache.Keys.ToHashSet();
+            furniturePropertyJustInvalidated.AddRange(cachedLocations);
         }
 
         if (e.NameWithoutLocale.IsEquivalentTo(FloorPathProperties.Asset_FloorPathProperties))
         {
-            floorPathPropertyJustInvalidated.Value = Cache.Keys.ToHashSet();
+            floorPathPropertyJustInvalidated.AddRange(cachedLocations);
         }
     }
 
@@ -91,7 +92,7 @@ internal sealed class TileDataCache<TProps>
 
     private void ClearNextPointsToUpdate(GameLocation location)
     {
-        if (pointsToUpdate.Value.TryGetValue(location, out HashSet<Point>? pointsSet))
+        if (pointsToUpdate.TryGetValue(location, out HashSet<Point>? pointsSet))
         {
             pointsSet.Clear();
         }
@@ -106,11 +107,11 @@ internal sealed class TileDataCache<TProps>
 #endif
     )
     {
-        if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
+        if (pointsToUpdate.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
 #if DEBUG_VERBOSE
             ModEntry.Log(
-                $"{callerMemberName} add point {point} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
+                $"{Context.ScreenId}: {callerMemberName} add point {point} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
             );
 #endif
             pointsSet.Add(point);
@@ -126,11 +127,11 @@ internal sealed class TileDataCache<TProps>
 #endif
     )
     {
-        if (pointsToUpdate.Value.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
+        if (pointsToUpdate.GetValue(location, MakePointSet) is HashSet<Point> pointsSet)
         {
 #if DEBUG_VERBOSE
             ModEntry.Log(
-                $"{callerMemberName} add rect {bounds} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
+                $"{Context.ScreenId}: {callerMemberName} add rect {bounds} ({string.Join('+', propKeys)}, {string.Join('+', layers)})"
             );
 #endif
 
@@ -157,7 +158,7 @@ internal sealed class TileDataCache<TProps>
         List<string> hasDoneUpdate = [];
 #endif
 
-        foreach ((GameLocation loc, HashSet<Point> points) in pointsToUpdate.Value)
+        foreach ((GameLocation loc, HashSet<Point> points) in pointsToUpdate)
         {
             if (
                 !points.Any()
@@ -212,7 +213,7 @@ internal sealed class TileDataCache<TProps>
 #if DEBUG_VERBOSE
         if (hasDoneUpdate.Any())
             ModEntry.Log(
-                $"{stopwatch.Elapsed}: UpdateQueuedPoints (locations {string.Join(',', hasDoneUpdate)}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
+                $"{Context.ScreenId}: {stopwatch.Elapsed}: UpdateQueuedPoints (locations {string.Join(',', hasDoneUpdate)}, {string.Join('+', propKeys)}, {string.Join('+', layers)})"
             );
 #endif
     }
@@ -259,9 +260,9 @@ internal sealed class TileDataCache<TProps>
 
     private void OnReloadMap(object? sender, GameLocation location)
     {
-        if (HasTileData(location))
+        if (location?.NameOrUniqueName is string uniqueName)
         {
-            Cache.Remove(location.NameOrUniqueName);
+            Cache.Remove(uniqueName);
             ClearNextPointsToUpdate(location);
         }
     }
@@ -288,11 +289,6 @@ internal sealed class TileDataCache<TProps>
         return cacheEntry;
     }
 
-    internal bool HasTileData(GameLocation location)
-    {
-        return location != null && location.NameOrUniqueName != null && Cache.ContainsKey(location.NameOrUniqueName);
-    }
-
     internal Dictionary<Point, TProps>? GetTileData(
         GameLocation location,
         bool onWarp = true
@@ -309,30 +305,28 @@ internal sealed class TileDataCache<TProps>
         Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 
-        Dictionary<Point, TProps> cacheEntry;
-        if (Cache.ContainsKey(uniqueName))
+        if (Cache.TryGetValue(uniqueName, out Dictionary<Point, TProps>? cacheEntry))
         {
-            cacheEntry = Cache[uniqueName];
             if (onWarp)
             {
                 // handle invalidated situations
-                if (buildingPropertyJustInvalidated.Value.Contains(uniqueName))
+                if (buildingPropertyJustInvalidated.Contains(uniqueName))
                 {
                     foreach (Building building in location.buildings)
                     {
                         PushNextPointsToUpdate(location, CommonPatch.GetBuildingTileDataBounds(building));
                     }
-                    buildingPropertyJustInvalidated.Value.Remove(uniqueName);
+                    buildingPropertyJustInvalidated.Remove(uniqueName);
                 }
-                if (furniturePropertyJustInvalidated.Value.Contains(uniqueName))
+                if (furniturePropertyJustInvalidated.Contains(uniqueName))
                 {
                     foreach (Furniture furniture in location.furniture)
                     {
                         PushNextPointsToUpdate(location, CommonPatch.GetFurnitureTileDataBounds(furniture));
                     }
-                    furniturePropertyJustInvalidated.Value.Remove(uniqueName);
+                    furniturePropertyJustInvalidated.Remove(uniqueName);
                 }
-                if (floorPathPropertyJustInvalidated.Value.Contains(uniqueName))
+                if (floorPathPropertyJustInvalidated.Contains(uniqueName))
                 {
                     foreach (TerrainFeature feature in location.terrainFeatures.Values)
                     {
@@ -341,7 +335,7 @@ internal sealed class TileDataCache<TProps>
                             PushNextPointsToUpdate(location, flooring.Tile.ToPoint());
                         }
                     }
-                    floorPathPropertyJustInvalidated.Value.Remove(uniqueName);
+                    floorPathPropertyJustInvalidated.Remove(uniqueName);
                 }
 
                 UpdateQueuedPoints(signalChanged: false);

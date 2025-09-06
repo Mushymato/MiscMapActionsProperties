@@ -20,7 +20,7 @@ internal static class LightSpot
 {
     internal const string TileProp_Light = $"{ModEntry.ModId}_Light";
     internal const string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
-    internal const string MapLightPrefix = $"{ModEntry.ModId}_MapLight_";
+    internal const string MapLightInfix = $"_MapLight_{ModEntry.ModId}";
 
     private static readonly TileDataCache<LightCondAndProps> lightSpotsCache =
         new([TileProp_LightCond, TileProp_Light], ["Front", "Back"], LightSpotValueGetter, LightSpotValueComparer);
@@ -42,8 +42,8 @@ internal static class LightSpot
         return new(propValues[0], lightProps);
     }
 
-    private static string FormLightId(Point pos) =>
-        string.Concat(MapLightPrefix, pos.X.ToString(), ",", pos.Y.ToString());
+    private static string FormLightId(GameLocation loc, Point pos) =>
+        string.Concat(loc.NameOrUniqueName, MapLightInfix, pos.X.ToString(), ",", pos.Y.ToString());
 
     private static readonly PerScreen<Dictionary<string, List<LightSource>>?> conditionalLightSources = new();
 
@@ -63,7 +63,6 @@ internal static class LightSpot
 
         if (e.Points == null)
         {
-            Game1.currentLightSources.RemoveWhere(kv => kv.Key.StartsWith(MapLightPrefix));
             SpawnLocationLights(e.Location);
             return;
         }
@@ -71,7 +70,7 @@ internal static class LightSpot
         string lightId;
         foreach (Point pos in e.Points)
         {
-            lightId = FormLightId(pos);
+            lightId = FormLightId(e.Location, pos);
             Game1.currentLightSources.Remove(lightId);
             if (conditionalLightSources.Value == null)
                 continue;
@@ -103,8 +102,8 @@ internal static class LightSpot
         if (location == null || location.ignoreLights.Value)
             return;
 
+        Game1.currentLightSources.RemoveWhere(kv => kv.Key.Contains(MapLightInfix));
         SpawnLocationLightsForCache(location, lightSpotsCache);
-
         UpdateConditionalLights(location);
     }
 
@@ -113,8 +112,10 @@ internal static class LightSpot
         if (cache.GetTileData(location) is not Dictionary<Point, LightCondAndProps> cachedProps)
             return;
 
+        ModEntry.Log($"Lights: {string.Join(',', cachedProps.Keys.Select(pnt => pnt.ToString()))}");
         foreach ((Point pos, LightCondAndProps condprop) in cachedProps)
         {
+            ModEntry.Log($"{pos}");
             CreateNewLight(location, pos, condprop);
         }
     }
@@ -142,7 +143,7 @@ internal static class LightSpot
         if (
             Light.MakeMapLightFromProps(
                 condprop.Props,
-                FormLightId(pos),
+                FormLightId(location, pos),
                 new Vector2(pos.X + 0.5f, pos.Y + 0.5f) * Game1.tileSize,
                 location.NameOrUniqueName
             )

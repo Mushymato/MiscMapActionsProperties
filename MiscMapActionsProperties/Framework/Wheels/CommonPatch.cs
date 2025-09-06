@@ -179,7 +179,6 @@ public static class CommonPatch
         if (e == Game1.currentLocation)
         {
             psTileToFurni.Value = null;
-            FurnitureRectCache.Clear();
             foreach (Furniture added in e.furniture)
             {
                 FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo);
@@ -189,8 +188,6 @@ public static class CommonPatch
 
     private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
     {
-        if (!e.IsCurrentLocation)
-            return;
         Dictionary<Point, HashSet<Furniture>>? tileToFurni = psTileToFurni.Value;
         foreach (Furniture added in e.Added)
         {
