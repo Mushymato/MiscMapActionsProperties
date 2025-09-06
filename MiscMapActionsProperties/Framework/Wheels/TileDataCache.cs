@@ -8,6 +8,9 @@ using StardewValley.Buildings;
 using StardewValley.Extensions;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
+#if DEBUG_VERBOSE
+using System.Diagnostics;
+#endif
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -21,12 +24,13 @@ internal sealed class TileDataCache<TProps>
 {
     private readonly string[] propKeys;
     private readonly Func<string?[], TProps?> propsValueTransformer;
-    private readonly Func<TProps?, TProps?, bool> propsValueComparer;
 
     private readonly string[] layers;
 
     internal event EventHandler<TileDataCacheChangedArgs>? TileDataCacheChanged;
 
+    // has to be a dict of NameOrUniqueName -> Dictionary because of split screen
+    // DO NOT TRY ConditionalWeakTable AGAIN YOU DUMMY
     private readonly Dictionary<string, Dictionary<Point, TProps>> Cache = [];
     internal ConditionalWeakTable<GameLocation, HashSet<Point>> pointsToUpdate = [];
 
@@ -34,17 +38,11 @@ internal sealed class TileDataCache<TProps>
     private readonly HashSet<string> furniturePropertyJustInvalidated = [];
     private readonly HashSet<string> floorPathPropertyJustInvalidated = [];
 
-    internal TileDataCache(
-        string[] propKeys,
-        string[] layers,
-        Func<string?[], TProps?> propsValueTransformer,
-        Func<TProps?, TProps?, bool> propsValueComparer
-    )
+    internal TileDataCache(string[] propKeys, string[] layers, Func<string?[], TProps?> propsValueTransformer)
     {
         this.propKeys = propKeys;
         this.layers = layers;
         this.propsValueTransformer = propsValueTransformer;
-        this.propsValueComparer = propsValueComparer;
         ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearCache;
         ModEntry.help.Events.GameLoop.UpdateTicked += OnUpdateTicked;
 
@@ -187,10 +185,7 @@ internal sealed class TileDataCache<TProps>
                         is TProps result
                     )
                     {
-                        if (!propsValueComparer(result, previous))
-                        {
-                            changedPoints.Add(pnt);
-                        }
+                        changedPoints.Add(pnt);
                         cacheEntry[pnt] = result;
                         found = true;
                         break;

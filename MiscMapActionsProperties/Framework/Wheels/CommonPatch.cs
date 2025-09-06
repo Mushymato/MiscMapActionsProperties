@@ -123,8 +123,9 @@ public static class CommonPatch
             );
         }
 
-        ModEntry.help.Events.World.FurnitureListChanged += OnFurnitureListChanged;
-        GameLocation_resetLocalState += On_GameLocation_resetLocalState;
+        // furniture change watcher
+        ModEntry.help.Events.GameLoop.DayStarted += AddFurnitureMovedWatcher;
+        ModEntry.help.Events.Player.Warped += AddFurnitureMovedWatcher;
     }
 
     #region furniture_caching
@@ -158,86 +159,105 @@ public static class CommonPatch
         [NotNullWhen(true)] out HashSet<Furniture>? furniSet
     )
     {
-        if (psTileToFurni.Value is not Dictionary<Point, HashSet<Furniture>> tileToFurni)
-        {
-            tileToFurni = CreateTileToFurniture(location);
-            psTileToFurni.Value = tileToFurni;
-        }
-        return tileToFurni.TryGetValue(pnt, out furniSet);
+        return (psTileToFurni.Value ??= CreateTileToFurniture(location)).TryGetValue(pnt, out furniSet);
     }
 
     public sealed record PlacementInfo(GameLocation Location, Point TileLocation);
 
-    private static readonly ConditionalWeakTable<Furniture, PlacementInfo> FurnitureRectCache = [];
-
     private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
         new(furniture.Location, furniture.TileLocation.ToPoint());
 
-    private static void On_GameLocation_resetLocalState(object? sender, GameLocation e)
+    private static readonly ConditionalWeakTable<GameLocation, FurnitureMovedWatcher> furniMovedWatchers = [];
+
+    private static void AddFurnitureMovedWatcher(object? sender, EventArgs e)
     {
-        if (e == Game1.currentLocation)
+        if (Game1.currentLocation is GameLocation location)
         {
             psTileToFurni.Value = null;
-            foreach (Furniture added in e.furniture)
-            {
-                FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo);
-            }
+            furniMovedWatchers.GetValue(location, FurnitureMovedWatcher.CreateFurnitureMovedWatcher);
         }
     }
 
-    private static void OnFurnitureListChanged(object? sender, FurnitureListChangedEventArgs e)
+    private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
-        // update tile to furniture
-        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
+        foreach (KeyValuePair<GameLocation, FurnitureMovedWatcher> kv in furniMovedWatchers)
+            kv.Value.Dispose();
+        furniMovedWatchers.Clear();
+    }
+
+    internal sealed class FurnitureMovedWatcher : IDisposable
+    {
+        internal static FurnitureMovedWatcher CreateFurnitureMovedWatcher(GameLocation location)
         {
-            foreach (Furniture added in e.Added)
-            {
-                Rectangle bounds = GetFurnitureTileDataBounds(added);
-                foreach (Point pnt in IterateBounds(bounds))
-                {
-                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
-                    {
-                        furniSet.Add(added);
-                    }
-                    else
-                    {
-                        tileToFurni[pnt] = [added];
-                    }
-                }
-            }
-            foreach (Furniture removed in e.Removed)
-            {
-                Rectangle bounds = GetFurnitureTileDataBounds(removed);
-                foreach (Point pnt in IterateBounds(bounds))
-                {
-                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
-                    {
-                        furniSet.Remove(removed);
-                        if (furniSet.Count == 0)
-                        {
-                            tileToFurni.Remove(pnt);
-                        }
-                    }
-                }
-            }
+            return new(location);
         }
 
-        // fire moved events
-        foreach (Furniture added in e.Added)
+        private GameLocation Loc;
+
+        internal FurnitureMovedWatcher(GameLocation location)
         {
-            Furniture_OnMoved?.Invoke(
-                null,
-                new(added, false, FurnitureRectCache.GetValue(added, CreateFurniturePlacementInfo))
-            );
+            Loc = location;
+            Loc.furniture.OnValueAdded += OnFurnitureAdded;
+            Loc.furniture.OnValueRemoved += OnFurnitureRemoved;
         }
-        foreach (Furniture removed in e.Removed)
+
+        ~FurnitureMovedWatcher() => DisposeValues();
+
+        private void DisposeValues()
         {
-            Furniture_OnMoved?.Invoke(
-                null,
-                new(removed, true, FurnitureRectCache.GetValue(removed, CreateFurniturePlacementInfo))
-            );
-            FurnitureRectCache.Remove(removed);
+            ModEntry.Log($"DisposeValues: {Loc.NameOrUniqueName}");
+            if (Loc == null)
+                return;
+            Loc.furniture.OnValueAdded -= OnFurnitureAdded;
+            Loc.furniture.OnValueRemoved -= OnFurnitureRemoved;
+            Loc = null!;
         }
+
+        public void Dispose()
+        {
+            DisposeValues();
+            GC.SuppressFinalize(this);
+        }
+    }
+
+    private static void OnFurnitureAdded(Furniture added)
+    {
+        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
+        {
+            Rectangle bounds = GetFurnitureTileDataBounds(added);
+            foreach (Point pnt in IterateBounds(bounds))
+            {
+                if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                {
+                    furniSet.Add(added);
+                }
+                else
+                {
+                    tileToFurni[pnt] = [added];
+                }
+            }
+        }
+        Furniture_OnMoved?.Invoke(null, new(added, false, CreateFurniturePlacementInfo(added)));
+    }
+
+    private static void OnFurnitureRemoved(Furniture removed)
+    {
+        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
+        {
+            Rectangle bounds = GetFurnitureTileDataBounds(removed);
+            foreach (Point pnt in IterateBounds(bounds))
+            {
+                if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                {
+                    furniSet.Remove(removed);
+                    if (furniSet.Count == 0)
+                    {
+                        tileToFurni.Remove(pnt);
+                    }
+                }
+            }
+        }
+        Furniture_OnMoved?.Invoke(null, new(removed, true, CreateFurniturePlacementInfo(removed)));
     }
     #endregion
 
@@ -604,13 +624,8 @@ public static class CommonPatch
         return ArgUtility.SplitBySpaceQuoteAware(propV);
     }
 
-    private static bool SimpleTilePropComparer(string[]? props1, string[]? props2)
-    {
-        return (props1 != null) != (props2 != null);
-    }
-
     internal static TileDataCache<string[]> GetSimpleTileDataCache(string[] propKeys, string layer)
     {
-        return new(propKeys, [layer], SimpleTilePropTransformer, SimpleTilePropComparer);
+        return new(propKeys, [layer], SimpleTilePropTransformer);
     }
 }

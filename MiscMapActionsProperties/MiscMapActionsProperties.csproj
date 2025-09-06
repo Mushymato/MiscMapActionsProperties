@@ -8,6 +8,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
     <EnableHarmony>true</EnableHarmony>
+
+    <!-- <DefineConstants>DEBUG_VERBOSE</DefineConstants> -->
   </PropertyGroup>
 
   <PropertyGroup>
