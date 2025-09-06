@@ -35,26 +35,11 @@ internal static class DayToNightTiming
 
     private static DayToNightCtx? GetDayToNightCtx(GameLocation location)
     {
-        if (!CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeStarting, out int nightTimeStarting))
-        {
-            nightTimeStarting = -1;
-        }
-        if (
-            !CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeModerate, out int nightTimeModerate)
-            || nightTimeModerate < nightTimeStarting
-        )
-        {
-            nightTimeModerate = -1;
-        }
-        if (
-            CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeTruly, out int nightTimeTruly)
-            || nightTimeTruly < nightTimeModerate
-        )
-        {
-            nightTimeTruly = -1;
-        }
+        CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeStarting, out int nightTimeStarting);
+        CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeModerate, out int nightTimeModerate);
+        CommonPatch.TryGetLocationalPropertyInt(location, MapProp_NightTimeTruly, out int nightTimeTruly);
 
-        if (nightTimeStarting == 1 && nightTimeModerate == -1 && nightTimeTruly == -1)
+        if (nightTimeStarting == 0 && nightTimeModerate == 0 && nightTimeTruly == 0)
         {
             return null;
         }
@@ -127,7 +112,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Starting > -1)
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Starting > 0)
         {
             __result = ctx.Starting;
         }
@@ -135,7 +120,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getModeratelyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Moderate > -1)
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Moderate > 0)
         {
             __result = ctx.Moderate;
         }
@@ -143,7 +128,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getTrulyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Truly > -1)
+        if (dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx && ctx.Truly > 0)
         {
             __result = ctx.Truly;
         }
