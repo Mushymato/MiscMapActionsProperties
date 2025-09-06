@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;

@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Locations;
-using StardewValley.Objects;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Location;
