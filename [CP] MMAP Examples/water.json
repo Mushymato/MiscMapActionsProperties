@@ -2,9 +2,9 @@
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Changes": [
     {
-      // volcano beach :)
+      // volcano mountain :)
       "Action": "EditMap",
-      "Target": "Maps/Beach",
+      "Target": "Maps/Mountain",
       "MapProperties": {
         "mushymato.MMAP_WaterColor": "White",
         "mushymato.MMAP_WaterDraw": "Maps/Mines/volcano_dungeon 4 0 320",

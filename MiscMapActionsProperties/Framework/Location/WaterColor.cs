@@ -38,6 +38,7 @@ internal static class WaterColor
     {
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
+        ModEntry.help.Events.GameLoop.GameLaunched += OnGameLaunched;
         try
         {
             ModEntry.harm.Patch(
@@ -52,6 +53,35 @@ internal static class WaterColor
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch WaterDraw:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    {
+        if (
+            ModEntry.help.ModRegistry.Get("blueberry.WaterFlow") is not IModInfo modInfo
+            || modInfo?.GetType().GetProperty("Mod")?.GetValue(modInfo) is not IMod mod
+        )
+        {
+            return;
+        }
+        Assembly assembly = mod.GetType().Assembly;
+        foreach (Type type in assembly.GetTypes())
+        {
+            if (!type.Name.Contains("DisplayClass"))
+                continue;
+            foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+            {
+                if (!methodInfo.Name.StartsWith("<GameLocation_DrawWaterTile_Prefix>g__draw"))
+                {
+                    continue;
+                }
+                ModEntry.Log($"Patching blueberry.WaterFlow: {methodInfo}", LogLevel.Warn);
+                ModEntry.harm.Patch(
+                    methodInfo,
+                    transpiler: new HarmonyMethod(typeof(WaterColor), nameof(GameLocation_drawWaterTile_Transpiler))
+                );
+            }
         }
     }
 
@@ -117,7 +147,9 @@ internal static class WaterColor
             ];
             for (int i = 0; i < 2; i++)
             {
-                matcher.MatchEndForward(callvirtDraw).ThrowIfNotMatch("Failed to find 'b.Draw'");
+                matcher.MatchEndForward(callvirtDraw);
+                if (matcher.IsInvalid)
+                    break;
                 matcher.Opcode = OpCodes.Call;
                 matcher.Operand = replacedDraw;
             }
