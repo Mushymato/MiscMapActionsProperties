@@ -8,7 +8,7 @@ namespace MiscMapActionsProperties.Framework.Wheels;
 
 internal static class Optimization
 {
-    internal static void Register()
+    internal static void Setup()
     {
         try
         {

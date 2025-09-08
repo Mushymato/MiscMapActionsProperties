@@ -44,10 +44,10 @@ public sealed class ModEntry : Mod
         );
 
         TAS = new(helper, $"{ModId}/TAS");
-        Framework.Wheels.CommonPatch.Register();
+        Framework.Wheels.CommonPatch.Setup();
         if (config.Enable_doesTileHaveProperty_Optimization)
         {
-            Framework.Wheels.Optimization.Register();
+            Framework.Wheels.Optimization.Setup();
         }
 
         Framework.Entities.ChestLight.Register();

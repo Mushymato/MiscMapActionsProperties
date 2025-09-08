@@ -38,7 +38,6 @@ internal static class WaterColor
     {
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
-        ModEntry.help.Events.GameLoop.GameLaunched += OnGameLaunched;
         try
         {
             ModEntry.harm.Patch(
@@ -54,33 +53,39 @@ internal static class WaterColor
         {
             ModEntry.Log($"Failed to patch WaterDraw:\n{err}", LogLevel.Error);
         }
-    }
 
-    private static void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
-    {
         if (
-            ModEntry.help.ModRegistry.Get("blueberry.WaterFlow") is not IModInfo modInfo
-            || modInfo?.GetType().GetProperty("Mod")?.GetValue(modInfo) is not IMod mod
+            ModEntry.help.ModRegistry.Get("blueberry.WaterFlow") is IModInfo modInfo
+            && modInfo?.GetType().GetProperty("Mod")?.GetValue(modInfo) is IMod mod
         )
         {
-            return;
-        }
-        Assembly assembly = mod.GetType().Assembly;
-        foreach (Type type in assembly.GetTypes())
-        {
-            if (!type.Name.Contains("DisplayClass"))
-                continue;
-            foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+            try
             {
-                if (!methodInfo.Name.StartsWith("<GameLocation_DrawWaterTile_Prefix>g__draw"))
+                Assembly assembly = mod.GetType().Assembly;
+                foreach (Type type in assembly.GetTypes())
                 {
-                    continue;
+                    if (!type.Name.Contains("DisplayClass"))
+                        continue;
+                    foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+                    {
+                        if (!methodInfo.Name.StartsWith("<GameLocation_DrawWaterTile_Prefix>g__draw"))
+                        {
+                            continue;
+                        }
+                        ModEntry.Log($"Patching blueberry.WaterFlow: {methodInfo}");
+                        ModEntry.harm.Patch(
+                            methodInfo,
+                            transpiler: new HarmonyMethod(
+                                typeof(WaterColor),
+                                nameof(GameLocation_drawWaterTile_Transpiler)
+                            )
+                        );
+                    }
                 }
-                ModEntry.Log($"Patching blueberry.WaterFlow: {methodInfo}", LogLevel.Warn);
-                ModEntry.harm.Patch(
-                    methodInfo,
-                    transpiler: new HarmonyMethod(typeof(WaterColor), nameof(GameLocation_drawWaterTile_Transpiler))
-                );
+            }
+            catch (Exception err)
+            {
+                ModEntry.Log($"Failed to patch blueberry.WaterFlow:\n{err}", LogLevel.Error);
             }
         }
     }

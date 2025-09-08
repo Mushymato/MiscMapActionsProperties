@@ -46,7 +46,7 @@ public static class CommonPatch
 
     public static event EventHandler<MapTilePropChangedArgs>? GameLocation_MapTilePropChanged;
 
-    internal static void Register()
+    internal static void Setup()
     {
         try
         {
