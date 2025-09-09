@@ -124,8 +124,7 @@ public static class CommonPatch
         }
 
         // furniture change watcher
-        ModEntry.help.Events.GameLoop.DayStarted += AddFurnitureMovedWatcher;
-        ModEntry.help.Events.Player.Warped += AddFurnitureMovedWatcher;
+        GameLocation_resetLocalState += AddFurnitureMovedWatcher;
     }
 
     #region furniture_caching
@@ -169,9 +168,9 @@ public static class CommonPatch
 
     private static readonly ConditionalWeakTable<GameLocation, FurnitureMovedWatcher> furniMovedWatchers = [];
 
-    private static void AddFurnitureMovedWatcher(object? sender, EventArgs e)
+    private static void AddFurnitureMovedWatcher(object? sender, GameLocation location)
     {
-        if (Game1.currentLocation is GameLocation location)
+        if (location != null)
         {
             psTileToFurni.Value = null;
             furniMovedWatchers.GetValue(location, FurnitureMovedWatcher.CreateFurnitureMovedWatcher);
