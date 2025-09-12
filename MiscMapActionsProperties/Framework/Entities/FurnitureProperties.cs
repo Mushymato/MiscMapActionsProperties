@@ -32,6 +32,8 @@ public enum FurnitureDrawMode
 /// </summary>
 internal static class FurnitureProperties
 {
+    internal const string Action_FurnitureDrawLayerToggle = $"{ModEntry.ModId}_FurnitureDrawLayerToggle";
+
     internal static void Register()
     {
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
@@ -54,6 +56,8 @@ internal static class FurnitureProperties
 
         // drawing patches
         Patch_Drawing();
+
+        CommonPatch.RegisterTileAndTouch(Action_FurnitureDrawLayerToggle, DoDrawLayerToggle);
     }
 
     #region properties
@@ -238,11 +242,19 @@ internal static class FurnitureProperties
         if (!FPData.TryGetValue(furniture.ItemId, out BuildingData? fpData) || !(fpData.ActionTiles?.Any() ?? false))
             return null;
         List<FurnitureSeat> seatPositions = [];
-        string error;
         foreach (BuildingActionTile actionTile in fpData.ActionTiles)
         {
             string[] args = ArgUtility.SplitBySpaceQuoteAware(actionTile.Action);
-            if (!ArgUtility.TryGet(args, 0, out string value, out error, allowBlank: false, name: "string Action"))
+            if (
+                !ArgUtility.TryGet(
+                    args,
+                    0,
+                    out string value,
+                    out string error,
+                    allowBlank: false,
+                    name: "string Action"
+                )
+            )
             {
                 ModEntry.Log(error, LogLevel.Error);
                 continue;
@@ -387,6 +399,41 @@ internal static class FurnitureProperties
             layer_name,
             ref property_value
         );
+    }
+
+    private static bool DoDrawLayerToggle(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (
+            !CommonPatch.TryGetFurnitureAtTileForLocation(location, point, out HashSet<Furniture>? furniSet)
+            || !furniSet.Any()
+        )
+        {
+            return false;
+        }
+        if (
+            !ArgUtility.TryGet(args, 1, out string furniId, out string error, allowBlank: false, "string furniId")
+            || !ArgUtility.TryGet(args, 2, out string drawLayerId, out error, allowBlank: false, "string drawLayerId")
+        )
+        {
+            return false;
+        }
+
+        bool hasToggled = false;
+        foreach (Furniture furni in furniSet)
+        {
+            if (furni.ItemId != furniId)
+                continue;
+            if (DlExtInfoCache.GetValue(furni, FurnitureDLState.GetFurnitureDLState) is not FurnitureDLState state)
+                continue;
+            foreach ((BuildingDrawLayer drawLayer, DLExtInfo? drawLayerExt) in state.LayerInfo)
+            {
+                if (drawLayerExt == null || !(drawLayer.Id?.StartsWith(drawLayerId) ?? false))
+                    continue;
+                drawLayerExt.ToggleOpen();
+                hasToggled = true;
+            }
+        }
+        return hasToggled;
     }
 
     public const int MMAP_SpecialVariableOffset = 28423000;

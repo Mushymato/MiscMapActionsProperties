@@ -10,7 +10,8 @@
       "Action": "EditData",
       "Target": "Data/Furniture",
       "Entries": {
-        "{{ModId}}_DOOR": "DOOR/decor/1 3/1 1/2/250/2/DOOR/0/{{ModID}}\\DOOR/true",
+        "{{ModId}}_DOOR": "DOOR-Auto/decor/1 3/1 1/2/250/2/DOOR-Auto/0/{{ModID}}\\DOOR/true",
+        "{{ModId}}_DOOR_TOGGLE": "DOOR-Manual/decor/1 3/1 1/2/250/2/DOOR-Manual/0/{{ModID}}\\DOOR/true",
       }
     },
     {
@@ -23,7 +24,7 @@
           "AdditionalTilePropertyRadius": 1,
           "DrawLayers": [
             {
-              "Id": "{{ModId}}_Open_Rotation.0",
+              "Id": "{{ModId}}_DOOR_Open_Rotation.0",
               "SourceRect": {
                 "X": 0,
                 "Y": 0,
@@ -34,7 +35,7 @@
               "FrameDuration": 90,
             },
             {
-              "Id": "{{ModId}}_Open_Rotation.2",
+              "Id": "{{ModId}}_DOOR_Open_Rotation.2",
               "SourceRect": {
                 "X": 0,
                 "Y": 0,
@@ -46,9 +47,56 @@
             },
           ],
           "Metadata": {
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Open_Rotation.0.openAnim": "true",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Open_Rotation.2.effect": "FlipHorizontally",
-            "mushymato.MMAP/DrawLayer.{{ModId}}_Open_Rotation.2.openAnim": "true",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_Open_Rotation.0.openAnim": "Auto",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_Open_Rotation.2.openAnim": "Auto",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_Open_Rotation.2.effect": "FlipHorizontally",
+          }
+        },
+        "{{ModId}}_DOOR_TOGGLE": {
+          "CollisionMap": "O",
+          "DrawShadow": false,
+          "DrawLayers": [
+            {
+              "Id": "{{ModId}}_DOOR_TOGGLE_Open_Rotation.0",
+              "SourceRect": {
+                "X": 0,
+                "Y": 0,
+                "Width": 16,
+                "Height": 48
+              },
+              "FrameCount": 4,
+              "FrameDuration": 90,
+            },
+            {
+              "Id": "{{ModId}}_DOOR_TOGGLE_Open_Rotation.2",
+              "SourceRect": {
+                "X": 0,
+                "Y": 0,
+                "Width": 16,
+                "Height": 48
+              },
+              "FrameCount": 4,
+              "FrameDuration": 90,
+            },
+          ],
+          "TileProperties": [
+            {
+              "Id": "{{ModId}}_1-toggleDoor",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_FurnitureDrawLayerToggle {{ModId}}_DOOR_TOGGLE {{ModId}}_DOOR_TOGGLE_Open_",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_TOGGLE_Open_Rotation.0.openAnim": "Manual",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_TOGGLE_Open_Rotation.2.openAnim": "Manual",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_TOGGLE_Open_Rotation.2.effect": "FlipHorizontally",
           }
         },
       }

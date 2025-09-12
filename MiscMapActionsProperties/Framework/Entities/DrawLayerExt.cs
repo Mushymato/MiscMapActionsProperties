@@ -9,6 +9,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Extensions;
 using StardewValley.GameData.Buildings;
 using StardewValley.Menus;
 
@@ -22,6 +23,13 @@ internal sealed record FloatRange(float Min, float? Max)
     {
         Value = Max == null ? Min : Random.Shared.NextSingle(Min, Max.Value);
     }
+}
+
+internal enum OpenAnimKind
+{
+    None,
+    Auto,
+    Manual,
 }
 
 /// <summary>Holds info about draw layer</summary>
@@ -38,7 +46,7 @@ internal sealed record DLExtInfo(
     Color? Color,
     string? GSQ,
     FloatRange ShakeRotate,
-    bool OpenAnim
+    OpenAnimKind OpenAnim
 )
 {
     internal bool ShouldDraw { get; private set; } = GSQ == null || GameStateQuery.CheckConditions(GSQ);
@@ -63,13 +71,29 @@ internal sealed record DLExtInfo(
     {
         if (ShakeRotate.Value != 0)
         {
-            ContactState ??= new();
+            ContactState ??= new(OpenAnim);
             ContactState.StartShaking(speed, left, ShakeRotate.Value);
         }
-        if (OpenAnim)
+        if (OpenAnim == OpenAnimKind.Auto)
         {
-            ContactState ??= new();
+            ContactState ??= new(OpenAnim);
             ContactState.StartOpen(contactBounds);
+        }
+    }
+
+    internal void ToggleOpen()
+    {
+        if (OpenAnim == OpenAnimKind.Manual)
+        {
+            ContactState ??= new(OpenAnim);
+            if (ContactState.OpenPhase == DLContactState.Phase.Closed)
+            {
+                ContactState.StartOpen();
+            }
+            else
+            {
+                ContactState.StartClose();
+            }
         }
     }
 
@@ -112,7 +136,7 @@ internal sealed record DLExtInfo(
     }
 }
 
-internal sealed class DLContactState
+internal sealed class DLContactState(OpenAnimKind openKind)
 {
     // shake
     internal bool Left { get; private set; } = false;
@@ -167,31 +191,36 @@ internal sealed class DLContactState
 
         if (OpenPhase != Phase.None)
         {
-            switch (OpenPhase)
-            {
-                case Phase.Opened:
-                    if (!Game1.player.GetBoundingBox().Intersects(OpenBounds))
-                    {
-                        OpenPhase = Phase.Closing;
-                    }
-                    break;
-                case Phase.Opening:
-                    AnimTime += Game1.currentGameTime.ElapsedGameTime.Milliseconds;
-                    if (AnimTime >= OpenAnimTimeMax)
-                    {
-                        AnimTime = OpenAnimTimeMax;
-                        OpenPhase = Phase.Opened;
-                    }
-                    break;
-                case Phase.Closing:
-                    AnimTime -= Game1.currentGameTime.ElapsedGameTime.Milliseconds;
-                    if (AnimTime <= 0)
-                    {
-                        AnimTime = 0;
-                        OpenPhase = Phase.Closed;
-                    }
-                    break;
-            }
+            PhaseUpdate();
+        }
+    }
+
+    private void PhaseUpdate()
+    {
+        switch (OpenPhase)
+        {
+            case Phase.Opened:
+                if (openKind == OpenAnimKind.Auto && !Game1.player.GetBoundingBox().Intersects(OpenBounds))
+                {
+                    OpenPhase = Phase.Closing;
+                }
+                break;
+            case Phase.Opening:
+                AnimTime += Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                if (AnimTime >= OpenAnimTimeMax)
+                {
+                    AnimTime = OpenAnimTimeMax;
+                    OpenPhase = Phase.Opened;
+                }
+                break;
+            case Phase.Closing:
+                AnimTime -= Game1.currentGameTime.ElapsedGameTime.Milliseconds;
+                if (AnimTime <= 0)
+                {
+                    AnimTime = 0;
+                    OpenPhase = Phase.Closed;
+                }
+                break;
         }
     }
 
@@ -212,16 +241,28 @@ internal sealed class DLContactState
         Left = left;
     }
 
-    internal void SetOpenAnim(int openAnimTimeMax)
+    internal void SetOpenAnimFields(int openAnimTimeMax)
     {
         OpenAnimTimeMax = openAnimTimeMax - 1;
         OpenPhase = Phase.Closed;
     }
 
-    internal void StartOpen(Rectangle contactBounds)
+    internal void StartOpen(Rectangle? contactBounds = null)
     {
-        OpenPhase = Phase.Opening;
-        OpenBounds = contactBounds;
+        if (OpenPhase == Phase.Closed)
+        {
+            OpenPhase = Phase.Opening;
+            if (contactBounds.HasValue)
+                OpenBounds = contactBounds.Value;
+        }
+    }
+
+    internal void StartClose()
+    {
+        if (OpenPhase != Phase.Closed)
+        {
+            OpenPhase = Phase.Closing;
+        }
     }
 }
 
@@ -232,6 +273,7 @@ internal sealed class DLContactState
 /// </summary>
 internal static class DrawLayerExt
 {
+    internal const string Action_DrawLayerToggle = $"{ModEntry.ModId}_BuildingDrawLayerToggle";
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
     private static readonly PerScreenCache<Dictionary<(Guid, string), DLExtInfo>> dlExtInfoCacheImpl =
         PerScreenCache.Make<Dictionary<(Guid, string), DLExtInfo>>();
@@ -480,19 +522,27 @@ internal static class DrawLayerExt
             out FloatRange shakeRotate,
             0f
         );
-        bool openAnim = false;
+        OpenAnimKind openAnim = OpenAnimKind.None;
         if (data.Metadata.TryGetValue(string.Concat(drawRotatePrefix, "openAnim"), out string? openAnimStr))
         {
-            hasChange |= bool.TryParse(openAnimStr, out openAnim);
+            if (openAnimStr.EqualsIgnoreCase("true"))
+            {
+                hasChange = true;
+                openAnim = OpenAnimKind.Auto;
+            }
+            else if (Enum.TryParse(openAnimStr, out openAnim))
+            {
+                hasChange = true;
+            }
         }
 
         if (hasChange)
         {
             dlExtInfo = new(alpha, rotate, rotateRate, origin, scale, effect, color, GSQ, shakeRotate, openAnim);
-            if (openAnim)
+            if (openAnim != OpenAnimKind.None)
             {
-                dlExtInfo.ContactState = new();
-                dlExtInfo.ContactState.SetOpenAnim(drawLayer.FrameDuration * drawLayer.FrameCount);
+                dlExtInfo.ContactState = new(openAnim);
+                dlExtInfo.ContactState.SetOpenAnimFields(drawLayer.FrameDuration * drawLayer.FrameCount);
             }
         }
 

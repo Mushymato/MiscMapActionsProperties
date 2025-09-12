@@ -210,7 +210,7 @@ internal static class TASSpot
         if (
             args.Length < 5
             || !ArgUtility.TryGet(args, 1, out string spawnKey, out error, allowBlank: false, name: "string spawnKey")
-            || !ArgUtility.TryGetPoint(args, 2, out Point pos, out error, "Point spawnPos")
+            || !TryGetPos(args, 2, out error, point, out Point pos)
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -267,11 +267,31 @@ internal static class TASSpot
     private static bool SpawnTAS(GameLocation location, string[] args, out string error, Point? defaultPos = null)
     {
         error = "Not enough arguments.";
-        if (args.Length < 4 || !ArgUtility.TryGetPoint(args, 1, out Point pos, out error, "Point spawnPos"))
+        if (args.Length < 4 || !TryGetPos(args, 1, out error, defaultPos, out Point pos))
         {
             return false;
         }
 
+        if (!CreateTASDefsFromArgs(args, 3, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
+        {
+            return false;
+        }
+
+        GameStateQueryContext context = new(location, null, null, null, null);
+        AddLocationTAS(location, context, onetime);
+        AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
+        respawningTASCache.Value ??= [];
+        respawningTASCache.Value.AddRange(respawning);
+
+        return true;
+    }
+
+    private static bool TryGetPos(string[] args, int idx, out string error, Point? defaultPos, out Point pos)
+    {
+        if (!ArgUtility.TryGetPoint(args, idx, out pos, out error, "Point spawnPos"))
+        {
+            return false;
+        }
         if (pos.X == -1000 && pos.Y == -1000)
         {
             if (defaultPos.HasValue)
@@ -284,17 +304,6 @@ internal static class TASSpot
                 return false;
             }
         }
-        if (!CreateTASDefsFromArgs(args, 3, pos, out List<TASContext>? onetime, out List<TASContext>? respawning))
-        {
-            return false;
-        }
-
-        GameStateQueryContext context = new(location, null, null, null, null);
-        AddLocationTAS(location, context, onetime);
-        AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
-        respawningTASCache.Value ??= [];
-        respawningTASCache.Value.AddRange(respawning);
-
         return true;
     }
 
