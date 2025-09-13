@@ -85,22 +85,47 @@
                 "Width": 1,
                 "Height": 1
               }
+            },
+            {
+              "Id": "{{ModId}}_1-toggleDoor",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_BuildingDrawLayerToggle {{ModId}}.WarpyBuildy {{ModId}}_DOOR_TOGGLE_Open_",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
             }
           ],
           "DrawLayers": [
+            // {
+            //   "Id": "{{ModId}}_ShakeWheat",
+            //   "SourceRect": {
+            //     "X": 0,
+            //     "Y": 0,
+            //     "Width": 16,
+            //     "Height": 32
+            //   },
+            //   "DrawPosition": "8,24"
+            // },
             {
-              "Id": "{{ModId}}_ShakeWheat",
+              "Id": "{{ModId}}_DOOR_TOGGLE_Open_Rotation.0",
               "SourceRect": {
                 "X": 0,
                 "Y": 0,
                 "Width": 16,
-                "Height": 32
+                "Height": 48
               },
-              "DrawPosition": "8,24"
+              "FrameCount": 3,
+              "FrameDuration": 90,
+              "DrawPosition": "96,0"
             },
           ],
           "Metadata": {
-            "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "1",
+            // "mushymato.MMAP/DrawLayer.{{ModId}}_ShakeWheat.shakeRotate": "1",
+            "mushymato.MMAP/DrawLayer.{{ModId}}_DOOR_TOGGLE_Open_Rotation.0.openAnim": "Manual",
           }
         }
       }

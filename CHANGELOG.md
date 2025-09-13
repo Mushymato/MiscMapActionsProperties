@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.11.0] - wip
+## [1.11.0]
 
 ### Added
 - 2 new critters Squirrel and Opossum
 - More options for flipping on Frog and Rabbit critters
 - Water draw texture override for more control over how water looks
+- Manual mode for draw layer open anim
 
 ### Fixed
 - Critter microsyntax GSQ causing early return

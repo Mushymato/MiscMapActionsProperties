@@ -273,7 +273,7 @@ internal sealed class DLContactState(OpenAnimKind openKind)
 /// </summary>
 internal static class DrawLayerExt
 {
-    internal const string Action_DrawLayerToggle = $"{ModEntry.ModId}_BuildingDrawLayerToggle";
+    internal const string Action_BuildingDrawLayerToggle = $"{ModEntry.ModId}_BuildingDrawLayerToggle";
     internal const string Metadata_DrawLayer_Prefix = $"{ModEntry.ModId}/DrawLayer.";
     private static readonly PerScreenCache<Dictionary<(Guid, string), DLExtInfo>> dlExtInfoCacheImpl =
         PerScreenCache.Make<Dictionary<(Guid, string), DLExtInfo>>();
@@ -345,6 +345,52 @@ internal static class DrawLayerExt
         {
             ModEntry.Log($"Failed to patch DrawLayerExt(nice to have draws):\n{err}", LogLevel.Warn);
         }
+
+        CommonPatch.RegisterTileAndTouch(Action_BuildingDrawLayerToggle, DoDrawLayerToggle);
+    }
+
+    private static bool DoDrawLayerToggle(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (
+            !ArgUtility.TryGet(args, 1, out string buildingId, out string error, allowBlank: false, "string buildingId")
+            || !ArgUtility.TryGet(args, 2, out string drawLayerId, out error, allowBlank: false, "string drawLayerId")
+        )
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+
+        Vector2 tile = point.ToVector2();
+
+        bool hasToggled = false;
+        foreach (Building building in location.buildings)
+        {
+            if (building.buildingType.Value != buildingId || building.GetData() is not BuildingData data)
+            {
+                continue;
+            }
+            if (!building.occupiesTile(tile))
+            {
+                continue;
+            }
+            foreach (BuildingDrawLayer drawLayer in data.DrawLayers)
+            {
+                if (!(drawLayer.Id?.StartsWith(drawLayerId) ?? false))
+                {
+                    continue;
+                }
+                if (!DlExtInfoCache.TryGetValue(new(building.id.Value, drawLayer.Id), out DLExtInfo? value))
+                {
+                    continue;
+                }
+                value.ToggleOpen();
+                hasToggled = true;
+            }
+            if (hasToggled)
+                return true;
+        }
+
+        return hasToggled;
     }
 
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
