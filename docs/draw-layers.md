@@ -30,17 +30,35 @@ These are Vector2 coordinates, takes 2 integers like `"0 0"`.
 
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.origin`: defines the origin of the sprite. Mainly relevant if you also use rotate, but can act as a secondary offset for the draw layer.
 
-#### SpriteEffects values
+#### enum values
 
-SpriteEffects, one of "None", "FlipHorizontally", "FlipVertically"
+These take specific strings, listed for each option.
+
+<a name="openAnim"></a>
 
 - `mushymato.MMAP/DrawLayer.{DrawLayerId}.effect`: sprite effects for flipping the sprite
+    - `"None"`: no effect
+    - `"FlipHorizontally"`: flip sprite horizontally
+    - `"FlipVertically"`: flip sprite vertically
+- `mushymato.MMAP/DrawLayer.{DrawLayerId}.openAnim`: control draw layer animation cycle,
+    - `"None"`: no effect (draw layer animation plays automatically on loop)
+    - `"Auto"`: draw layer anim proceeds or reverses depending on player proximity. For backwards compatibility, `"true"` is also accepted and will resolve to `"Auto"`.
+    - `"Manual"`: draw layer anim proceeds depending on player interaction with tile/touch actions
 
-#### Bool values
+##### Details about openAnim
 
-These are simply `true` or `false`.
+When using openAnim, the animation will progress across 4 states, closed -> opening -> opened -> closing (and then return to closed).
 
-- `mushymato.MMAP/DrawLayer.{DrawLayerId}.openAnim`: When true, instead of always playing this layer's animation, control it  with collision with the building/furniture bounding box to achieve automatically opening doors. Does not sync across multiplayer.
+If the draw layer has `FrameCount=4` (and thus has frames 0 1 2 3):
+- Closed: frame 0, held steady
+- Opening: frames 0 1 2 3
+- Opened: frame 3, held steady
+- Closing: frames 3 2 1 0
+
+`"Auto"`: The radius of player proximity is controlled by `AdditionalTilePropertyRadius` (on building data and [furniture properties](furniture-properties.md))
+`"Manual"`: The opening and closing states are toggled by tile/touch action.
+- Buildings: `mushymato.MMAP_BuildingDrawLayerToggle <furnitureId> <drawLayerIdPrefix>`
+- Furniture: `mushymato.MMAP_FurnitureDrawLayerToggle <furnitureId> <drawLayerIdPrefix>`
 
 ### mushymato.MMAP/ChestLight.{ChestName}: [radius] [color] [type|texture] [offsetX] [offsetY]
 

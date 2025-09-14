@@ -79,13 +79,13 @@ Thus you can use `Data/LocationContext` to set a shared value across your entire
 #### mushymato.MMAP_WaterDraw: \<texture\> [scale] [sourceX] [sourceY]
 
 - Changes the current location's water overlay draw texture.
-- This option allows you to completely replace the water draw with something else.
+- This option allows you to completely replace the water draw texture with something else, to replace expensive edits to LooseTextues/Cursors.
 - Using `T` applies the grayscale [base_water.png](MiscMapActionsProperties/assets/base_water.png) texture loaded to asset name `mushymato.MMAP/Water`.
 - The format of the water texture is fixed, so you may only change the scale, not the aspect ratio.
     - Vanilla water is 640x256, rendered at 1x scale
     - Vanilla lava (found on `Maps/Mines/volcano_dungeon`) is 160x64, rendered at 4x scale.
 - SourceX and SourceY determines the top left corner of the water texture area, in a larger texture.
-- Thus can apply the lava texture from `Maps/Mines/volcano_dungeon` in a location by setting this prop to `Maps/Mines/volcano_dungeon 4 0 320` and WaterColor to `White`.
+- For example, you can apply lava texture from `Maps/Mines/volcano_dungeon` in a location by setting this prop to `Maps/Mines/volcano_dungeon 4 0 320` and `mushymato.MMAP_WaterColor` to `White` (needed to render the texture color without change).
 
 #### mushymato.MMAP_Panorama \<panoramaId\>
 

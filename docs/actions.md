@@ -157,7 +157,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - See [question dialogue](question-dialogue.md) for more info.
 
-#### mushymato.MMAP_Panorama \<panoramaId\>
+### mushymato.MMAP_Panorama \<panoramaId\>
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - The `panoramaId` arguments refer to an entry in the `mushymato.MMAP/Panorama` custom asset, see [panorama docs](panorama.md) for details.
@@ -165,6 +165,17 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
+
+### mushymato.MMAP_*DrawLayerToggle
+
+Has 2 variants:
+- `mushymato.MMAP_BuildingDrawLayerToggle <buildingId> <drawLayerIdPrefix>`
+- `mushymato.MMAP_FurnitureDrawLayerToggle <furnitureId> <drawLayerIdPrefix>`
+
+- Can be used as `Action` or `TouchAction`.
+- These are used in conjunction with [draw layer openAnim](draw-layers.md#openAnim) in `"Manual"`, see that page for more details
+- For buildings, you must supply the exact building ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
+- For furniture, you must supply the exact unqualified furniture ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
 
 ## Farmhouse Upgrade Relocation Solution
 
