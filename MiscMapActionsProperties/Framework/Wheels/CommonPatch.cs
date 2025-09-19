@@ -204,7 +204,6 @@ public static class CommonPatch
 
         private void DisposeValues()
         {
-            ModEntry.Log($"DisposeValues: {Loc.NameOrUniqueName}");
             if (Loc == null)
                 return;
             Loc.furniture.OnValueAdded -= OnFurnitureAdded;
