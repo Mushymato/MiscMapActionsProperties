@@ -108,7 +108,6 @@ internal static class QuestionDialogue
             return false;
         }
 
-
         string? speakerId = qdData.Speaker;
         string? speakerName = TokenParser.ParseText(qdData.SpeakerDisplayName ?? qdData.Speaker);
         Texture2D? speakerPortrait = null;
@@ -119,12 +118,15 @@ internal static class QuestionDialogue
         {
             speakerPortrait = Game1.content.Load<Texture2D>(qdData.SpeakerPortrait);
         }
-        if (speakerName == null || speakerPortrait == null)
+        if (qdData.SpeakerDisplayName == null || speakerPortrait == null)
         {
             NPC? speakerRef = speakerId != null ? Game1.getCharacterFromName(speakerId) : null;
             if (speakerRef != null)
             {
-                speakerName ??= speakerRef.displayName;
+                if (qdData.SpeakerDisplayName == null)
+                {
+                    speakerName = speakerRef.displayName;
+                }
                 speakerPortrait ??= speakerRef.Portrait;
             }
         }
@@ -142,7 +144,7 @@ internal static class QuestionDialogue
                 eventActor: false
             )
             {
-                Name = speakerId,
+                Name = speakerId ?? "???",
                 displayName = speakerName,
             };
         }
@@ -153,9 +155,16 @@ internal static class QuestionDialogue
         }
         else
         {
-            Dialogue dialogueBefore =
-                new(speaker, qdData.DialogueBefore, TokenParser.ParseText(qdData.DialogueBefore) ?? "");
-            Game1.DrawDialogue(dialogueBefore);
+            if (speaker == null)
+            {
+                Game1.drawObjectDialogue(TokenParser.ParseText(qdData.DialogueBefore) ?? "");
+            }
+            else
+            {
+                Dialogue dialogueBefore =
+                    new(speaker, qdData.DialogueBefore, TokenParser.ParseText(qdData.DialogueBefore) ?? "");
+                Game1.DrawDialogue(dialogueBefore);
+            }
             Game1.afterDialogues = (Game1.afterFadeFunction)
                 Delegate.Combine(
                     Game1.afterDialogues,
