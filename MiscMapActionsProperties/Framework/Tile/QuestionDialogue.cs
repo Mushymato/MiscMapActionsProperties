@@ -108,48 +108,43 @@ internal static class QuestionDialogue
             return false;
         }
 
-        NPC? speaker = Game1.getCharacterFromName(qdData.Speaker);
-        Texture2D? portrait = null;
-        string? speakerName = null;
+
+        string? speakerId = qdData.Speaker;
+        string? speakerName = TokenParser.ParseText(qdData.SpeakerDisplayName ?? qdData.Speaker);
+        Texture2D? speakerPortrait = null;
         if (
             !string.IsNullOrEmpty(qdData.SpeakerPortrait)
             && Game1.content.DoesAssetExist<Texture2D>(qdData.SpeakerPortrait)
         )
         {
-            portrait = Game1.content.Load<Texture2D>(qdData.SpeakerPortrait);
-            if (speaker != null)
-            {
-                speakerName = speaker.displayName;
-            }
-            else
-            {
-                speakerName = TokenParser.ParseText(qdData.Speaker) ?? "???";
-            }
+            speakerPortrait = Game1.content.Load<Texture2D>(qdData.SpeakerPortrait);
         }
-        else if (speaker != null)
+        if (speakerName == null || speakerPortrait == null)
         {
-            portrait = speaker.Portrait;
-            speakerName = speaker.displayName;
+            NPC? speakerRef = speakerId != null ? Game1.getCharacterFromName(speakerId) : null;
+            if (speakerRef != null)
+            {
+                speakerName ??= speakerRef.displayName;
+                speakerPortrait ??= speakerRef.Portrait;
+            }
         }
 
-        if (portrait != null)
+        NPC? speaker = null;
+        if (speakerPortrait != null)
         {
-            speaker = new NPC(
+            speaker = new(
                 new AnimatedSprite("Characters\\Abigail", 0, 16, 16),
                 Vector2.Zero,
                 "",
                 0,
                 "",
-                portrait,
+                speakerPortrait,
                 eventActor: false
             )
             {
+                Name = speakerId,
                 displayName = speakerName,
             };
-        }
-        else
-        {
-            speaker = null;
         }
 
         if (string.IsNullOrEmpty(qdData.DialogueBefore))
@@ -337,6 +332,9 @@ public sealed class QuestionDialogueData
 
     /// <summary>Speaking NPC</summary>
     public string? Speaker = null;
+
+    /// <summary>Speaking Display Name</summary>
+    public string? SpeakerDisplayName = null;
 
     /// <summary>Speaking NPC Portrait</summary>
     public string? SpeakerPortrait = null;
