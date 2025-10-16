@@ -951,7 +951,10 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(BedFurniture.draw)),
@@ -960,7 +963,10 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawInMenu)),
@@ -969,7 +975,10 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.drawAtNonTileSpot)),
@@ -981,7 +990,10 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                finalizer: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
         }
         catch (Exception err)

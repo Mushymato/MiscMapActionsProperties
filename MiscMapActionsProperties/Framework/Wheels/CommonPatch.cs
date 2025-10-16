@@ -57,10 +57,13 @@ public static class CommonPatch
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix)),
-                finalizer: new HarmonyMethod(
+                postfix: new HarmonyMethod(
                     typeof(CommonPatch),
                     nameof(GameLocation_UpdateWhenCurrentLocation_Finalizer)
                 )
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 // Map override_map, string override_key, Microsoft.Xna.Framework.Rectangle? source_rect = null, Microsoft.Xna.Framework.Rectangle? dest_rect = null, Action<Point> perTileCustomAction = null
@@ -70,7 +73,10 @@ public static class CommonPatch
                     [typeof(xTile.Map), typeof(string), typeof(Rectangle?), typeof(Rectangle?), typeof(Action<Point>)]
                 ),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Prefix)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Building), nameof(Building.OnStartMove)),
@@ -78,37 +84,61 @@ public static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Prefix)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setAnimatedMapTile)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Prefix)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setTileProperty)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeTileProperty)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnAdded)),
-                finalizer: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Finalizer))
+                {
+                    priority = Priority.Last
+                }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnRemoved)),
