@@ -63,11 +63,13 @@ public sealed class ModEntry : Mod
         Framework.Location.FruitTreeCosmeticSeason.Register();
         Framework.Location.LightRays.Register();
         Framework.Location.MapChangeRelocate.Register();
+        Framework.Location.MapOverride.Register();
         Framework.Location.Panorama.Register();
         Framework.Location.ProtectTree.Register();
         Framework.Location.FarmHouseFurniture.Register();
         Framework.Location.SteamOverlay.Register();
         Framework.Location.WaterColor.Register();
+        Framework.Location.WoodsBaubles.Register();
         Framework.Location.WoodsDebris.Register();
         Framework.Location.WoodsLighting.Register();
 

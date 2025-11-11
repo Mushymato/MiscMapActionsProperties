@@ -951,9 +951,9 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_draw_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -963,9 +963,9 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(BedFurniture_draw_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -975,9 +975,9 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawInMenu_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -990,9 +990,9 @@ internal static class FurnitureProperties
                 {
                     priority = Priority.Last,
                 },
-                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Finalizer))
+                postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_drawAtNonTileSpot_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
         }
@@ -1300,7 +1300,7 @@ internal static class FurnitureProperties
         __state = new(dlState, prevDraw, oldSourceRect);
     }
 
-    private static void Furniture_draw_Finalizer(
+    private static void Furniture_draw_Postfix(
         Furniture __instance,
         Netcode.NetVector2 ___drawPosition,
         SpriteBatch spriteBatch,
@@ -1446,7 +1446,7 @@ internal static class FurnitureProperties
             Furniture_draw_Prefix(__instance, ref __state);
     }
 
-    private static void BedFurniture_draw_Finalizer(
+    private static void BedFurniture_draw_Postfix(
         Furniture __instance,
         Netcode.NetVector2 ___drawPosition,
         SpriteBatch spriteBatch,
@@ -1457,7 +1457,7 @@ internal static class FurnitureProperties
     )
     {
         if (Furniture.isDrawingLocationFurniture)
-            Furniture_draw_Finalizer(__instance, ___drawPosition, spriteBatch, x, y, alpha, ref __state);
+            Furniture_draw_Postfix(__instance, ___drawPosition, spriteBatch, x, y, alpha, ref __state);
     }
 
     private static IEnumerable<CodeInstruction> BedFurniture_draw_Transpiler(
@@ -1518,7 +1518,7 @@ internal static class FurnitureProperties
         return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.drawInMenu");
     }
 
-    private static void Furniture_drawInMenu_Finalizer(
+    private static void Furniture_drawInMenu_Postfix(
         Furniture __instance,
         SpriteBatch spriteBatch,
         Vector2 location,
@@ -1579,7 +1579,7 @@ internal static class FurnitureProperties
         return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.drawAtNonTileSpot");
     }
 
-    private static void Furniture_drawAtNonTileSpot_Finalizer(
+    private static void Furniture_drawAtNonTileSpot_Postfix(
         Furniture __instance,
         SpriteBatch spriteBatch,
         Vector2 location,

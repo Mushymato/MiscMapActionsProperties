@@ -12,15 +12,15 @@ namespace MiscMapActionsProperties.Framework.Location;
 internal static class WoodsDebris
 {
     internal const string MapProp_WoodsDebris = $"{ModEntry.ModId}_WoodsDebris";
-    internal static PerScreenCache<List<WeatherDebris>> _weatherDebris = PerScreenCache.Make<List<WeatherDebris>>(
-        () => []
-    );
+    internal static readonly PerScreenCache<List<WeatherDebris>> _weatherDebris = PerScreenCache.Make<
+        List<WeatherDebris>
+    >(() => []);
     private static List<WeatherDebris> WeatherDebris => _weatherDebris.Value;
 
     internal static void Register()
     {
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
-        CommonPatch.GameLocation_UpdateWhenCurrentLocationFinalizer += GameLocation_UpdateWhenCurrentLocationFinalizer;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocationPostfix += GameLocation_UpdateWhenCurrentLocationFinalizer;
         ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
     }
 

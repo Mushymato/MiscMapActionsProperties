@@ -182,6 +182,10 @@
     {
       "Action": "Include",
       "FromFile": "water.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "map_override.json"
     }
   ]
 }

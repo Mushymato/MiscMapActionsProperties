@@ -7,9 +7,11 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -22,7 +24,7 @@ public static class CommonPatch
     public sealed record UpdateWhenCurrentLocationArgs(GameLocation Location, GameTime Time);
 
     public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPrefix;
-    public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationFinalizer;
+    public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPostfix;
 
     public sealed record DrawAboveAlwaysFrontLayerArgs(GameLocation Location, SpriteBatch B);
 
@@ -57,12 +59,9 @@ public static class CommonPatch
             ModEntry.harm.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.UpdateWhenCurrentLocation)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Prefix)),
-                postfix: new HarmonyMethod(
-                    typeof(CommonPatch),
-                    nameof(GameLocation_UpdateWhenCurrentLocation_Finalizer)
-                )
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_UpdateWhenCurrentLocation_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -73,9 +72,9 @@ public static class CommonPatch
                     [typeof(xTile.Map), typeof(string), typeof(Rectangle?), typeof(Rectangle?), typeof(Action<Point>)]
                 ),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Prefix)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_ApplyMapOverride_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -84,60 +83,60 @@ public static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.OnBuildingMoved)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_OnBuildingMoved_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Prefix)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setMapTile_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setAnimatedMapTile)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setAnimatedMapTile_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeMapTile)),
                 prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Prefix)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_removeMapTile_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.setTileProperty)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.removeTileProperty)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_setTileProperty_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnAdded)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Finalizer))
+                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Postfix))
                 {
-                    priority = Priority.Last
+                    priority = Priority.Last,
                 }
             );
             ModEntry.harm.Patch(
@@ -294,7 +293,7 @@ public static class CommonPatch
         Flooring_OnMoved?.Invoke(null, __instance);
     }
 
-    private static void Flooring_OnAdded_Finalizer(Flooring __instance)
+    private static void Flooring_OnAdded_Postfix(Flooring __instance)
     {
         Flooring_OnMoved?.Invoke(null, __instance);
     }
@@ -304,7 +303,7 @@ public static class CommonPatch
         GameLocation_MapTilePropChanged?.Invoke(null, new(location, pos, layer));
     }
 
-    private static void GameLocation_setTileProperty_Finalizer(
+    private static void GameLocation_setTileProperty_Postfix(
         GameLocation __instance,
         int tileX,
         int tileY,
@@ -330,7 +329,7 @@ public static class CommonPatch
         __state = layer2.Tiles[tileX, tileY] != null;
     }
 
-    private static void GameLocation_removeMapTile_Finalizer(
+    private static void GameLocation_removeMapTile_Postfix(
         GameLocation __instance,
         int tileX,
         int tileY,
@@ -344,7 +343,7 @@ public static class CommonPatch
         }
     }
 
-    private static void GameLocation_setAnimatedMapTile_Finalizer(
+    private static void GameLocation_setAnimatedMapTile_Postfix(
         GameLocation __instance,
         int tileX,
         int tileY,
@@ -376,7 +375,7 @@ public static class CommonPatch
         }
     }
 
-    private static void GameLocation_setMapTile_Finalizer(
+    private static void GameLocation_setMapTile_Postfix(
         GameLocation __instance,
         int tileX,
         int tileY,
@@ -424,7 +423,7 @@ public static class CommonPatch
         return Rectangle.Empty;
     }
 
-    private static void GameLocation_OnBuildingMoved_Finalizer(GameLocation __instance, Building building)
+    private static void GameLocation_OnBuildingMoved_Postfix(GameLocation __instance, Building building)
     {
         GameLocation_OnBuildingEndMove?.Invoke(
             null,
@@ -432,7 +431,7 @@ public static class CommonPatch
         );
     }
 
-    private static void GameLocation_reloadMap_Finalizer(GameLocation __instance)
+    private static void GameLocation_reloadMap_Postfix(GameLocation __instance)
     {
         GameLocation_ReloadMap?.Invoke(null, __instance);
     }
@@ -447,9 +446,9 @@ public static class CommonPatch
         GameLocation_UpdateWhenCurrentLocationPrefix?.Invoke(null, new(__instance, time));
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Finalizer(GameLocation __instance, GameTime time)
+    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(GameLocation __instance, GameTime time)
     {
-        GameLocation_UpdateWhenCurrentLocationFinalizer?.Invoke(null, new(__instance, time));
+        GameLocation_UpdateWhenCurrentLocationPostfix?.Invoke(null, new(__instance, time));
     }
 
     private static readonly ConditionalWeakTable<
@@ -468,7 +467,7 @@ public static class CommonPatch
         __state = ____appliedMapOverrides.Contains(override_key);
     }
 
-    private static void GameLocation_ApplyMapOverride_Finalizer(
+    private static void GameLocation_ApplyMapOverride_Postfix(
         GameLocation __instance,
         HashSet<string> ____appliedMapOverrides,
         xTile.Map override_map,

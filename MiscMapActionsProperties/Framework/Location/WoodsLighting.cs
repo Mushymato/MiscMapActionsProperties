@@ -19,7 +19,7 @@ internal static class WoodsLighting
 
     internal static void Register()
     {
-        CommonPatch.GameLocation_UpdateWhenCurrentLocationFinalizer += GameLocation_UpdateWhenCurrentLocation_Finalizer;
+        CommonPatch.GameLocation_UpdateWhenCurrentLocationPostfix += GameLocation_UpdateWhenCurrentLocation_Postfix;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState_Postfix;
     }
 
@@ -113,7 +113,7 @@ internal static class WoodsLighting
         }
     }
 
-    private static void GameLocation_UpdateWhenCurrentLocation_Finalizer(
+    private static void GameLocation_UpdateWhenCurrentLocation_Postfix(
         object? sender,
         CommonPatch.UpdateWhenCurrentLocationArgs e
     )

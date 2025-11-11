@@ -6,7 +6,7 @@ using StardewValley;
 using StardewValley.TerrainFeatures;
 using FloorPathPropDict = System.Collections.Generic.Dictionary<
     string,
-    System.Collections.Generic.Dictionary<string, string>
+    System.Collections.Generic.Dictionary<string, string?>
 >;
 
 namespace MiscMapActionsProperties.Framework.Entities;
@@ -78,10 +78,10 @@ internal static class FloorPathProperties
         if (!FPPData.TryGetValue(flooring.whichFloor.Value, out FloorPathPropDict? properties))
             return;
         if (
-            !properties.TryGetValue(layerName, out Dictionary<string, string>? layerProps)
+            !properties.TryGetValue(layerName, out Dictionary<string, string?>? layerProps)
             || !layerProps.TryGetValue(propertyName, out string? propertyValue)
         )
             return;
-        __result = propertyValue;
+        __result = propertyValue!;
     }
 }
