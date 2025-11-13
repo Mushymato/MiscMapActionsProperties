@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - Map property mushymato.MMAP_WoodsBaubles, adds sparkly woods particles.
+- New feature map overrides, apply a small map override dynamically.
 
 ## [1.11.1]
 
