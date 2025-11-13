@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -18,25 +19,42 @@ public sealed class MapOverrideModel
     public string MapOverrideAsset { get; set; } = "SkullCaveAltar";
     public Rectangle? SourceRect { get; set; } = null;
     public Rectangle? TargetRect { get; set; } = null;
+    public int Precedence { get; set; } = 0;
 
     private string? mapOverrideKey = null;
-    internal string MapOverrideKey => mapOverrideKey ??= $"{MapOverride.ModMapOverridePrefix}{Id}";
+    internal string MapOverrideKey => mapOverrideKey ??= $"{ModEntry.ModId}+MapOverride/{Id}";
 }
 
 internal static class MapOverride
 {
-    internal const string Asset_MapOverride = $"{ModEntry.ModId}/MapOverrides";
-    internal const string ModMapOverridePrefix = $"{ModEntry.ModId}+MapOverride/";
-    internal const string ModData_MapOverrides = $"{ModEntry.ModId}/MapOverrides";
-    internal const char ModData_MapOverrides_SEP = ',';
-    internal static readonly int ModMapOverridePrefixLength = ModMapOverridePrefix.AsSpan().Length;
-    internal const string Action_ApplyMapOverride = $"{ModEntry.ModId}_ApplyMapOverride";
-    internal const string Action_RemoveMapOverride = $"{ModEntry.ModId}_RemoveMapOverride";
+    private const string Asset_MapOverride = $"{ModEntry.ModId}/MapOverrides";
+    private const string ModData_MapOverrides = $"{ModEntry.ModId}/MapOverrides";
+    private const char Ctrl_SEP = ',';
+    private const char Ctrl_ADD = '+';
+    private const char Ctrl_RMV = '-';
+    internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_ADD, Ctrl_RMV];
+    private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
+    private const string MP_UpdateMapOverride = "UpdateMapOverride";
+    private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
+
+    private static readonly FieldInfo? _appliedMapOverridesField = AccessTools.DeclaredField(
+        typeof(GameLocation),
+        "_appliedMapOverrides"
+    );
 
     internal static void Register()
     {
+        if (_appliedMapOverridesField == null)
+        {
+            ModEntry.Log($"Failed to reflect '_appliedMapOverrides', '{Asset_MapOverride}' feature disabled.");
+            return;
+        }
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.MakeMapModifications)),
+            prefix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Prefix))
+            {
+                priority = Priority.First,
+            },
             postfix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Postfix))
             {
                 priority = Priority.Last,
@@ -47,10 +65,8 @@ internal static class MapOverride
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         ModEntry.help.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
 
-        TriggerActionManager.RegisterAction(Action_ApplyMapOverride, TriggerApplyMapOverride);
-        TriggerActionManager.RegisterAction(Action_RemoveMapOverride, TriggerRemoveMapOverride);
-        CommonPatch.RegisterTileAndTouch(Action_ApplyMapOverride, TileApplyMapOverride);
-        CommonPatch.RegisterTileAndTouch(Action_RemoveMapOverride, TileRemoveMapOverride);
+        TriggerActionManager.RegisterAction(Action_UpdateMapOverride, TriggerUpdateMapOverride);
+        CommonPatch.RegisterTileAndTouch(Action_UpdateMapOverride, TileUpdateMapOverride);
     }
 
     private static bool TryGetModMapOverrides(GameLocation location, [NotNullWhen(true)] out string[]? mapOverrides)
@@ -60,15 +76,15 @@ internal static class MapOverride
         {
             return false;
         }
-        mapOverrides = mapOverridesStr.Split(ModData_MapOverrides_SEP);
-        return true;
+        mapOverrides = mapOverridesStr.Split(Ctrl_SEP);
+        return mapOverrides.Any();
     }
 
     private static string UpdateModMapOverrides(GameLocation location, HashSet<string> mapOverrides)
     {
         if (mapOverrides.Count > 0)
         {
-            string joined = string.Join(ModData_MapOverrides_SEP, mapOverrides);
+            string joined = string.Join(Ctrl_SEP, mapOverrides);
             location.modData[ModData_MapOverrides] = joined;
             return joined;
         }
@@ -79,12 +95,19 @@ internal static class MapOverride
         }
     }
 
-    private static void GameLocation_MakeMapModifications_Postfix(GameLocation __instance)
+    private static void GameLocation_MakeMapModifications_Prefix(
+        GameLocation __instance,
+        bool force,
+        ref HashSet<string> ____appliedMapOverrides,
+        ref List<MapOverrideModel>? __state
+    )
     {
+        __state = null;
         if (!TryGetModMapOverrides(__instance, out string[]? mapOverrides))
         {
             return;
         }
+        List<MapOverrideModel>? validOverrideModels = [];
         HashSet<string> validOverrideIds = [];
         foreach (string mapOverrideId in mapOverrides)
         {
@@ -96,15 +119,69 @@ internal static class MapOverride
             {
                 continue;
             }
-            validOverrideIds.Add(model.Id);
-            __instance.ApplyMapOverride(
-                model.MapOverrideAsset,
-                model.MapOverrideKey,
-                model.SourceRect,
-                model.TargetRect
+            if (validOverrideIds.Add(model.Id))
+            {
+                validOverrideModels.Add(model);
+            }
+        }
+        if (validOverrideModels.Count > 0)
+        {
+            validOverrideModels.Sort(
+                (modelA, modelB) =>
+                {
+                    if (modelA.Precedence != modelB.Precedence)
+                        return modelA.Precedence.CompareTo(modelB.Precedence);
+                    return modelA.Id.CompareTo(modelB.Id);
+                }
             );
+            if (force)
+            {
+                ____appliedMapOverrides.Clear();
+            }
+            foreach (MapOverrideModel model in validOverrideModels)
+            {
+                if (model.Precedence < 0)
+                {
+                    __instance.ApplyMapOverride(
+                        model.MapOverrideAsset,
+                        model.MapOverrideKey,
+                        model.SourceRect,
+                        model.TargetRect
+                    );
+                }
+            }
+            __state = validOverrideModels;
         }
         UpdateModMapOverrides(__instance, validOverrideIds);
+    }
+
+    private static void GameLocation_MakeMapModifications_Postfix(
+        GameLocation __instance,
+        bool force,
+        ref HashSet<string> ____appliedMapOverrides,
+        ref List<MapOverrideModel>? __state
+    )
+    {
+        if (__state?.Count > 0)
+        {
+            foreach (MapOverrideModel model in __state)
+            {
+                if (model.Precedence < 0)
+                {
+                    if (force)
+                        ____appliedMapOverrides.Add(model.MapOverrideKey);
+                }
+                else
+                {
+                    __instance.ApplyMapOverride(
+                        model.MapOverrideAsset,
+                        model.MapOverrideKey,
+                        model.SourceRect,
+                        model.TargetRect
+                    );
+                }
+            }
+        }
     }
 
     private static Dictionary<string, MapOverrideModel>? _mapOverrideData = null;
@@ -117,14 +194,14 @@ internal static class MapOverride
             HashSet<string> invalid = [];
             foreach ((string id, MapOverrideModel model) in _mapOverrideData)
             {
-                if (id.Contains(ModData_MapOverrides_SEP))
+                foreach (char illegal in ILLEGAL_CHARS)
                 {
-                    ModEntry.Log(
-                        $"Cannot use '{ModData_MapOverrides_SEP}' in '{Asset_MapOverride}' key",
-                        LogLevel.Error
-                    );
-                    invalid.Add(id);
-                    continue;
+                    if (id.Contains(illegal))
+                    {
+                        ModEntry.Log($"Cannot use '{illegal}' in '{Asset_MapOverride}' key", LogLevel.Error);
+                        invalid.Add(id);
+                        continue;
+                    }
                 }
                 model.Id = id;
             }
@@ -160,11 +237,11 @@ internal static class MapOverride
         {
             return;
         }
-        if (e.Type == Action_RemoveMapOverride)
+        if (e.Type == MP_UpdateMapOverride_ReloadMap)
         {
             Game1.currentLocation.loadMap(Game1.currentLocation.mapPath.Value, true);
         }
-        else if (e.Type != Action_ApplyMapOverride)
+        else if (e.Type != MP_UpdateMapOverride)
         {
             return;
         }
@@ -173,161 +250,132 @@ internal static class MapOverride
         Game1.currentLocation.MakeMapModifications();
     }
 
-    private static bool TriggerApplyMapOverride(string[] args, TriggerActionContext context, out string error)
+    private static bool TileUpdateMapOverride(GameLocation location, string[] args, Farmer who, Point point)
     {
-        error = WrapMpHandling(Game1.currentLocation, args, Game1.player, DoApplyMapOverride)!;
-        return error == null;
+        if (DoUpdateMapOverride(Game1.currentLocation, args, who, out string error))
+            return true;
+        ModEntry.Log(error, LogLevel.Error);
+        return false;
     }
 
-    private static bool TriggerRemoveMapOverride(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerUpdateMapOverride(string[] args, TriggerActionContext context, out string error)
     {
-        error = WrapMpHandling(Game1.currentLocation, args, Game1.player, DoRemoveMapOverride)!;
-        return error == null;
+        return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player, out error);
     }
 
-    private static bool TileApplyMapOverride(GameLocation location, string[] args, Farmer farmer, Point point)
+    private static bool DoUpdateMapOverride(GameLocation location, string[] args, Farmer who, out string error)
     {
-        string? error = WrapMpHandling(location, args, Game1.player, DoApplyMapOverride)!;
-        if (error != null)
-            ModEntry.Log(error, LogLevel.Error);
-        return error != null;
-    }
+        if (location == null || location.Map == null)
+        {
+            error = "Location map is null";
+            return false;
+        }
 
-    private static bool TileRemoveMapOverride(GameLocation location, string[] args, Farmer farmer, Point point)
-    {
-        string? error = WrapMpHandling(location, args, Game1.player, DoRemoveMapOverride)!;
-        if (error != null)
-            ModEntry.Log(error, LogLevel.Error);
-        return error != null;
-    }
-
-    private static string? WrapMpHandling(
-        GameLocation location,
-        string[] args,
-        Farmer who,
-        Func<GameLocation, IEnumerable<string>, (string?, string?)?> mapOverrideCb
-    )
-    {
-        int skip = 2;
-        if (ArgUtility.TryGet(args, 1, out string locationName, out string? error, name: "string locationName"))
+        if (ArgUtility.TryGet(args, 1, out string locationName, out error, name: "string locationName"))
         {
             location = GameStateQuery.Helpers.GetLocation(locationName, location);
         }
 
-        (string?, string?)? result = mapOverrideCb(location, args.Skip(skip))!;
-        string? updatedMapOverride = result?.Item1;
-        error = result?.Item2;
-
-        if (error != null)
-            return error;
-        if (updatedMapOverride != null)
-        {
-            long[] playersInSameLocation = location
-                .farmers.Where(farmer => farmer.UniqueMultiplayerID != who.UniqueMultiplayerID)
-                .Select(farmer => farmer.UniqueMultiplayerID)
-                .ToArray();
-            if (playersInSameLocation.Length > 0)
-            {
-                ModEntry.help.Multiplayer.SendMessage(
-                    updatedMapOverride,
-                    args[0],
-                    [ModEntry.ModId],
-                    playersInSameLocation
-                );
-            }
-        }
-        return null;
-    }
-
-    private static (string?, string?)? DoApplyMapOverride(GameLocation location, IEnumerable<string> args)
-    {
-        if (location == null || location.Map == null)
-        {
-            return (null, "Location map is null");
-        }
         HashSet<string> mapOverrides;
+        int maxPrecedence = 0;
+        string maxId = string.Empty;
         if (TryGetModMapOverrides(location, out string[]? mapOverridesArray))
         {
             mapOverrides = mapOverridesArray.ToHashSet();
+            maxPrecedence = mapOverrides
+                .Select(mapOverrideId =>
+                {
+                    if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
+                    {
+                        return 0;
+                    }
+                    return model.Precedence;
+                })
+                .Max();
+            maxId =
+                mapOverrides
+                    .Select(mapOverrideId =>
+                    {
+                        if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
+                        {
+                            return null;
+                        }
+                        return model.Id;
+                    })
+                    .Max() ?? "";
         }
         else
         {
             mapOverrides = [];
         }
-        bool hasAdded = false;
-        foreach (string mapOverrideId in args)
+
+        bool needForcedReload = false;
+        bool hasChanged = false;
+        HashSet<string> _appliedMapOverrides = (HashSet<string>)_appliedMapOverridesField!.GetValue(location)!;
+        for (int i = 2; i < args.Length - 1; i += 2)
         {
+            char mode = args[i][0];
+            string mapOverrideId = args[i + 1];
+
             if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
             {
-                return (null, $"Map override id '{mapOverrideId}' not found");
+                error = $"Map override id '{mapOverrideId}' not found";
+                return false;
             }
             if (!Game1.game1.xTileContent.DoesAssetExist<Map>("Maps\\" + model.MapOverrideAsset))
             {
-                return (null, $"Map override asset 'Maps/{model.MapOverrideAsset}' from '{model.Id}' not found");
+                error = $"Map override asset 'Maps/{model.MapOverrideAsset}' from '{model.Id}' not found";
+                return false;
             }
-            try
-            {
-                if (location == Game1.currentLocation)
-                {
-                    location.ApplyMapOverride(
-                        model.MapOverrideAsset,
-                        model.MapOverrideKey,
-                        model.SourceRect,
-                        model.TargetRect
-                    );
-                }
-                mapOverrides.Add(model.Id);
-                hasAdded = true;
-            }
-            catch (Exception err)
-            {
-                return (null, err.ToString());
-            }
-        }
-        if (hasAdded)
-        {
-            return new(UpdateModMapOverrides(location, mapOverrides), null);
-        }
-        return null;
-    }
 
-    private static (string?, string?)? DoRemoveMapOverride(GameLocation location, IEnumerable<string> args)
-    {
-        if (location == null || location.Map == null)
-        {
-            return (null, "Location map is null");
-        }
-        if (!TryGetModMapOverrides(location, out string[]? mapOverridesArray))
-        {
-            return null;
-        }
-        bool hasRemoved = false;
-        HashSet<string> mapOverrides = mapOverridesArray.ToHashSet();
-        foreach (string mapOverrideId in args)
-        {
-            try
+            switch (mode)
             {
-                hasRemoved = mapOverrides.Remove(mapOverrideId) || hasRemoved;
-            }
-            catch (Exception err)
-            {
-                return (null, err.ToString());
-            }
-        }
-        if (hasRemoved)
-        {
-            string updated = UpdateModMapOverrides(location, mapOverrides);
-            if (location == Game1.currentLocation)
-            {
-                location.loadMap(location.mapPath.Value, true);
-                location.MakeMapModifications();
-                return (updated, null);
-            }
-            else
-            {
-                location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
+                case Ctrl_ADD:
+                    if (mapOverrides.Add(model.Id))
+                    {
+                        hasChanged = true;
+                        needForcedReload =
+                            needForcedReload
+                            || maxPrecedence > model.Precedence
+                            || maxPrecedence == model.Precedence && maxId.CompareTo(model.Id) > 0;
+                    }
+                    break;
+                case Ctrl_RMV:
+                    if (mapOverrides.Remove(model.Id))
+                    {
+                        hasChanged = true;
+                        needForcedReload = true;
+                        _appliedMapOverrides.Remove(model.MapOverrideKey);
+                    }
+                    break;
             }
         }
-        return null;
+
+        if (!hasChanged)
+            return true;
+
+        string updated = UpdateModMapOverrides(location, mapOverrides);
+
+        if (location != Game1.currentLocation)
+            return true;
+
+        if (needForcedReload)
+            location.loadMap(location.mapPath.Value, true);
+        location.MakeMapModifications(needForcedReload);
+
+        long[] playersInSameLocation = location
+            .farmers.Where(farmer => farmer.UniqueMultiplayerID != who.UniqueMultiplayerID)
+            .Select(farmer => farmer.UniqueMultiplayerID)
+            .ToArray();
+        if (playersInSameLocation.Length > 0)
+        {
+            ModEntry.help.Multiplayer.SendMessage(
+                needForcedReload ? MP_UpdateMapOverride_ReloadMap : MP_UpdateMapOverride,
+                args[0],
+                [ModEntry.ModId],
+                playersInSameLocation
+            );
+        }
+        return true;
     }
 }

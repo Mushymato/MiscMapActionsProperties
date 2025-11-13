@@ -1,0 +1,46 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}_MO_Crib",
+      "FromFile": "assets/MO_Crib.tmx"
+    },
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}_MO_Chimkins",
+      "FromFile": "assets/MO_Chimkins.tmx"
+    },
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}/SewerChickens",
+      "FromFile": "assets/SewerChickens.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/MapOverrides",
+      "Entries": {
+        "{{ModId}}_Crib": {
+          "Id": "{{ModId}}_Crib",
+          "MapOverrideAsset": "{{ModId}}_MO_Crib",
+          "TargetRect": {
+            "X": 10,
+            "Y": 10,
+            "Width": 3,
+            "Height": 4
+          }
+        },
+        "{{ModId}}_Chimkins": {
+          "Id": "{{ModId}}_Chimkins",
+          "MapOverrideAsset": "{{ModId}}_MO_Chimkins",
+          "TargetRect": {
+            "X": 10,
+            "Y": 15,
+            "Width": 1,
+            "Height": 2
+          }
+        }
+      }
+    }
+  ]
+}
