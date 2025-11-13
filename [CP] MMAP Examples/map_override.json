@@ -22,7 +22,13 @@
       "Entries": {
         "{{ModId}}_Crib": {
           "Id": "{{ModId}}_Crib",
-          "MapOverrideAsset": "{{ModId}}_MO_Crib",
+          "SourceMap": "Maps/{{ModId}}_MO_Crib",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 2,
+            "Height": 4
+          },
           "TargetRect": {
             "X": 10,
             "Y": 10,
@@ -32,13 +38,14 @@
         },
         "{{ModId}}_Chimkins": {
           "Id": "{{ModId}}_Chimkins",
-          "MapOverrideAsset": "{{ModId}}_MO_Chimkins",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
           "TargetRect": {
             "X": 10,
-            "Y": 15,
+            "Y": 9,
             "Width": 1,
             "Height": 2
-          }
+          },
+          "Precedence": 1
         }
       }
     }

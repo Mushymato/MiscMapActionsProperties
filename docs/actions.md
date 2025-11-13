@@ -173,9 +173,18 @@ Has 2 variants:
 - `mushymato.MMAP_FurnitureDrawLayerToggle <furnitureId> <drawLayerIdPrefix>`
 
 - Can be used as `Action` or `TouchAction`.
-- These are used in conjunction with [draw layer openAnim](draw-layers.md#openAnim) in `"Manual"`, see that page for more details
+- `buildingId` is the building id as defined in asset, and `drawLayerIdPrefix` defines the group of draw layers to toggle.
+- These are used in conjunction with [draw layer openAnim](draw-layers.md#openAnim) in `"Manual"`, see that page for more details.
 - For buildings, you must supply the exact building ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
 - For furniture, you must supply the exact unqualified furniture ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
+
+## mushymato.MMAP_UpdateMapOverride <location> [[mode] [mapOverrideId]]
+
+- Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
+= Applies the given map overrides, see [map overrides docs](map-overrides.md) for details.
+- `location`: Either `Here` or a location name.
+- `mode`: Either `+` for adding an override, or `-` for removing an override.
+- `mapOverrideId`: The map override id set in the data asset.
 
 ## Farmhouse Upgrade Relocation Solution
 
