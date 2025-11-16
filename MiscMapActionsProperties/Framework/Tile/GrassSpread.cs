@@ -41,7 +41,8 @@ internal static class GrassSpread
         // IL_011f: ldstr "Diggable"
         // IL_0124: ldstr "Back"
         // IL_0129: ldc.i4.0
-        // IL_012a: callvirt instance string StardewValley.GameLocation::doesTileHaveProperty(int32, int32, string, string, bool)
+        // IL_0129: ldc.i4.0
+        // IL_012a: callvirt instance string StardewValley.GameLocation::doesTileHaveProperty(int32, int32, string, string, bool, bool)
         // IL_012f: brfalse.s IL_0180
         try
         {
@@ -52,6 +53,9 @@ internal static class GrassSpread
                     new(OpCodes.Ldstr, "Diggable"),
                     new(OpCodes.Ldstr, "Back"),
                     new(OpCodes.Ldc_I4_0),
+#if SDV17
+                    new(OpCodes.Ldc_I4_0),
+#endif
                     new(
                         OpCodes.Callvirt,
                         AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty))
@@ -77,6 +81,10 @@ internal static class GrassSpread
         string propertyName,
         string layerName,
         bool ignoreTileSheetProperties = false
+#if SDV17
+        ,
+        bool ignoredPlacedEntities = false
+#endif
     )
     {
         return location.doesTileHaveProperty(
@@ -85,6 +93,10 @@ internal static class GrassSpread
                 TileProp_GrassSpread,
                 layerName,
                 ignoreTileSheetProperties: ignoreTileSheetProperties
+#if SDV17
+                ,
+                ignoredPlacedEntities: ignoredPlacedEntities
+#endif
             )
             ?? location.doesTileHaveProperty(
                 xTile,
@@ -92,6 +104,10 @@ internal static class GrassSpread
                 propertyName,
                 layerName,
                 ignoreTileSheetProperties: ignoreTileSheetProperties
+#if SDV17
+                ,
+                ignoredPlacedEntities: ignoredPlacedEntities
+#endif
             );
     }
 }

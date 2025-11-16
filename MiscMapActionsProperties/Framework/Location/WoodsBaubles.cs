@@ -92,18 +92,18 @@ internal static class WoodsBaubles
             {
                 string[] args = ArgUtility.SplitBySpaceQuoteAware(prop);
                 if (
-                !ArgUtility.TryGetInt(args, 0, out mincount, out string err, name: "int mincount")
-                || !ArgUtility.TryGetOptionalInt(args, 1, out maxcount, out err, name: "int maxcount")
-                || !ArgUtility.TryGetOptional(
-                    args,
-                    2,
-                    out string gsq,
-                    out err,
-                    defaultValue: "TRUE",
-                    allowBlank: false,
-                    name: "string gsq"
+                    !ArgUtility.TryGetInt(args, 0, out mincount, out string err, name: "int mincount")
+                    || !ArgUtility.TryGetOptionalInt(args, 1, out maxcount, out err, name: "int maxcount")
+                    || !ArgUtility.TryGetOptional(
+                        args,
+                        2,
+                        out string gsq,
+                        out err,
+                        defaultValue: "TRUE",
+                        allowBlank: false,
+                        name: "string gsq"
+                    )
                 )
-            )
                 {
                     ModEntry.Log(err, StardewModdingAPI.LogLevel.Error);
                     return;

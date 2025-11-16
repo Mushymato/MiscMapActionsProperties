@@ -63,8 +63,14 @@ internal static class Optimization
 
         LocalBuilder propValueLoc = generator.DeclareLocal(typeof(string));
 
+        matcher.Start()
+#if SDV17
+        .MatchEndForward([new(OpCodes.Ldarg_S, (byte)6), new(OpCodes.Brtrue)]);
+
+        Label lbl = (Label)matcher.Operand;
         matcher
-            .Start()
+            .MatchStartForward(
+#else
             // IL_013e: ldloc.1
             // IL_013f: brtrue.s IL_019b
             // IL_0141: ldarg.0
@@ -85,6 +91,7 @@ internal static class Optimization
             // IL_0079: ldfld class Netcode.NetCollection`1<class StardewValley.Objects.Furniture> StardewValley.GameLocation::furniture
             // IL_007e: callvirt instance valuetype [System.Collections]System.Collections.Generic.List`1/Enumerator<!0> class Netcode.NetCollection`1<class StardewValley.Objects.Furniture>::GetEnumerator()
             .MatchStartBackwards(
+#endif
                 [
                     new(OpCodes.Ldarg_0),
                     new(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(GameLocation), nameof(GameLocation.furniture))),
