@@ -58,8 +58,13 @@ Thus you can use `Data/LocationContext` to set a shared value across your entire
         - 2: fall leaves
         - 3: winter snow particles
 
-#### mushymato.MMAP_WoodsBaubles 
+#### mushymato.MMAP_WoodsBaubles T | [minCount] [maxCount] [gsq]
 
+- Spawn baubles (sparkly things) on this map. These look the same as the ones in vanilla secret woods.
+- When the value given is simply `T`, follow vanilla secret woods logic:
+    - Random count between 25 and 75
+    - No baubles when raining
+- When arguments are given, the game state query (gsq) is used to control whether baubles spawn, and a random amount is picked between min and max counts.
 
 #### mushymato.MMAP_SteamOverlay: \<T|texture\> [velocityX] [velocityY] [color] [alpha] [scale]
 
