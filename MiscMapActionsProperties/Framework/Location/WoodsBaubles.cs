@@ -77,10 +77,23 @@ internal static class WoodsBaubles
         _baubles.Value = null;
         if (CommonPatch.TryGetLocationalProperty(e, MapProp_WoodsBaubles, out string? prop))
         {
-            string[] args = ArgUtility.SplitBySpaceQuoteAware(prop);
-            if (
-                !ArgUtility.TryGetInt(args, 0, out int mincount, out string err, name: "int mincount")
-                || !ArgUtility.TryGetOptionalInt(args, 1, out int maxcount, out err, name: "int maxcount")
+            int mincount;
+            int maxcount;
+            if (prop == "T")
+            {
+                mincount = 25;
+                maxcount = 75;
+                if (e.IsRainingHere())
+                {
+                    return;
+                }
+            }
+            else
+            {
+                string[] args = ArgUtility.SplitBySpaceQuoteAware(prop);
+                if (
+                !ArgUtility.TryGetInt(args, 0, out mincount, out string err, name: "int mincount")
+                || !ArgUtility.TryGetOptionalInt(args, 1, out maxcount, out err, name: "int maxcount")
                 || !ArgUtility.TryGetOptional(
                     args,
                     2,
@@ -91,14 +104,16 @@ internal static class WoodsBaubles
                     name: "string gsq"
                 )
             )
-            {
-                ModEntry.Log(err, StardewModdingAPI.LogLevel.Error);
-                return;
+                {
+                    ModEntry.Log(err, StardewModdingAPI.LogLevel.Error);
+                    return;
+                }
+                if (!GameStateQuery.CheckConditions(gsq, e))
+                {
+                    return;
+                }
             }
-            if (!GameStateQuery.CheckConditions(gsq, e))
-            {
-                return;
-            }
+
             if (maxcount < mincount)
             {
                 maxcount = mincount;
@@ -108,7 +123,7 @@ internal static class WoodsBaubles
                 return;
             }
             Random random = Utility.CreateDaySaveRandom();
-            int num = 25 + random.Next(0, maxcount);
+            int num = mincount + random.Next(0, maxcount - mincount);
             List<Vector2> baubles = [];
             for (int i = 0; i < num; i++)
             {
