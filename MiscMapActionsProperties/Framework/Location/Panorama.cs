@@ -535,22 +535,18 @@ internal static class Panorama
             // IL_0141: call class StardewValley.GameLocation StardewValley.Game1::get_currentLocation()
             // IL_0146: isinst StardewValley.Locations.IslandNorth
             // IL_014b: brtrue.s IL_015c
-            matcher.MatchEndForward(
-                [
-                    new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Game1), nameof(Game1.currentLocation))),
-                    new(OpCodes.Isinst, typeof(IslandNorth)),
-                    new(OpCodes.Brtrue_S),
-                ]
-            );
+            matcher.MatchEndForward([
+                new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Game1), nameof(Game1.currentLocation))),
+                new(OpCodes.Isinst, typeof(IslandNorth)),
+                new(OpCodes.Brtrue_S),
+            ]);
             Label lbl = (Label)matcher.Operand;
             matcher
                 .Advance(1)
-                .InsertAndAdvance(
-                    [
-                        new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.background))),
-                        new(OpCodes.Brtrue_S, lbl),
-                    ]
-                );
+                .InsertAndAdvance([
+                    new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.background))),
+                    new(OpCodes.Brtrue_S, lbl),
+                ]);
 
             return matcher.Instructions();
         }

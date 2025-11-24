@@ -78,16 +78,15 @@ internal static class Light
         color = new Color(color.PackedValue ^ 0x00FFFFFF);
         if (lightContext == LightSource.LightContext.MapLight && mapName == null)
             lightContext = LightSource.LightContext.None;
-        LightSource newLight =
-            new(
-                lightName,
-                textureIndex,
-                position + new Vector2(offsetX, offsetY),
-                radius,
-                color,
-                lightContext,
-                onlyLocation: mapName
-            );
+        LightSource newLight = new(
+            lightName,
+            textureIndex,
+            position + new Vector2(offsetX, offsetY),
+            radius,
+            color,
+            lightContext,
+            onlyLocation: mapName
+        );
         if (customTexture != null)
             newLight.lightTexture = customTexture;
         return newLight;

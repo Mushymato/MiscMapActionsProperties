@@ -48,20 +48,18 @@ internal static class GrassSpread
         {
             CodeMatcher matcher = new(instructions, generator);
 
-            matcher.MatchEndForward(
-                [
-                    new(OpCodes.Ldstr, "Diggable"),
-                    new(OpCodes.Ldstr, "Back"),
-                    new(OpCodes.Ldc_I4_0),
+            matcher.MatchEndForward([
+                new(OpCodes.Ldstr, "Diggable"),
+                new(OpCodes.Ldstr, "Back"),
+                new(OpCodes.Ldc_I4_0),
 #if SDV17
-                    new(OpCodes.Ldc_I4_0),
+                new(OpCodes.Ldc_I4_0),
 #endif
-                    new(
-                        OpCodes.Callvirt,
-                        AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty))
-                    ),
-                ]
-            );
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.doesTileHaveProperty))
+                ),
+            ]);
             matcher.Opcode = OpCodes.Call;
             matcher.Operand = AccessTools.DeclaredMethod(typeof(GrassSpread), nameof(GrassSpreadTilePropCheck));
 

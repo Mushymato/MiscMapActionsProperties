@@ -681,13 +681,11 @@ internal static class DrawLayerExt
         // IL_07a4: ldfld string [StardewValley.GameData]StardewValley.GameData.Buildings.BuildingDrawLayer::Texture
         matcher.Start();
         matcher
-            .MatchStartForward(
-                [
-                    new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.content))),
-                    new((inst) => inst.IsLdloc()),
-                    new(OpCodes.Ldfld, AccessTools.Field(typeof(BuildingDrawLayer), nameof(BuildingDrawLayer.Texture))),
-                ]
-            )
+            .MatchStartForward([
+                new(OpCodes.Ldsfld, AccessTools.Field(typeof(Game1), nameof(Game1.content))),
+                new((inst) => inst.IsLdloc()),
+                new(OpCodes.Ldfld, AccessTools.Field(typeof(BuildingDrawLayer), nameof(BuildingDrawLayer.Texture))),
+            ])
             .ThrowIfNotMatch("Did not find BuildingDrawLayer local");
         CodeInstruction drawLayerLoc = matcher.InstructionAt(1);
 
@@ -697,29 +695,27 @@ internal static class DrawLayerExt
         // IL_0804: ldc.r4 0.0
         // IL_0809: newobj instance void [MonoGame.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
         matcher
-            .MatchEndForward(
-                [
-                    new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
-                    new(
-                        OpCodes.Callvirt,
-                        AccessTools.Method(
-                            typeof(SpriteBatch),
-                            nameof(SpriteBatch.Draw),
-                            [
-                                typeof(Texture2D),
-                                typeof(Vector2),
-                                typeof(Rectangle?),
-                                typeof(Color),
-                                typeof(float),
-                                typeof(Vector2),
-                                typeof(float),
-                                typeof(SpriteEffects),
-                                typeof(float),
-                            ]
-                        )
-                    ),
-                ]
-            )
+            .MatchEndForward([
+                new((inst) => inst.IsLdloc() || (inst.opcode == OpCodes.Ldc_R4 && (float)inst.operand == 0f)),
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.Method(
+                        typeof(SpriteBatch),
+                        nameof(SpriteBatch.Draw),
+                        [
+                            typeof(Texture2D),
+                            typeof(Vector2),
+                            typeof(Rectangle?),
+                            typeof(Color),
+                            typeof(float),
+                            typeof(Vector2),
+                            typeof(float),
+                            typeof(SpriteEffects),
+                            typeof(float),
+                        ]
+                    )
+                ),
+            ])
             .InsertAndAdvance([new(OpCodes.Ldarg_0), new(drawLayerLoc.opcode, drawLayerLoc.operand)]);
         matcher.Opcode = OpCodes.Call;
     }

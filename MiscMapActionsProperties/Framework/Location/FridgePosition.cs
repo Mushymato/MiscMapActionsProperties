@@ -122,41 +122,37 @@ internal static class FridgePosition
         {
             CodeMatcher matcher = new(instructions, generator);
 
-            matcher.MatchStartForward(
-                [
-                    new(
-                        OpCodes.Callvirt,
-                        AccessTools.DeclaredMethod(
-                            typeof(StardewValley.Network.NetMutex),
-                            nameof(StardewValley.Network.NetMutex.IsLocked)
-                        )
-                    ),
-                ]
-            );
+            matcher.MatchStartForward([
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.DeclaredMethod(
+                        typeof(StardewValley.Network.NetMutex),
+                        nameof(StardewValley.Network.NetMutex.IsLocked)
+                    )
+                ),
+            ]);
             if (!matcher.IsValid)
                 return instructions;
-            matcher.MatchStartForward(
-                [
-                    new(
-                        OpCodes.Callvirt,
-                        AccessTools.Method(
-                            typeof(SpriteBatch),
-                            nameof(SpriteBatch.Draw),
-                            [
-                                typeof(Texture2D),
-                                typeof(Vector2),
-                                typeof(Rectangle?),
-                                typeof(Color),
-                                typeof(float),
-                                typeof(Vector2),
-                                typeof(float),
-                                typeof(SpriteEffects),
-                                typeof(float),
-                            ]
-                        )
-                    ),
-                ]
-            );
+            matcher.MatchStartForward([
+                new(
+                    OpCodes.Callvirt,
+                    AccessTools.Method(
+                        typeof(SpriteBatch),
+                        nameof(SpriteBatch.Draw),
+                        [
+                            typeof(Texture2D),
+                            typeof(Vector2),
+                            typeof(Rectangle?),
+                            typeof(Color),
+                            typeof(float),
+                            typeof(Vector2),
+                            typeof(float),
+                            typeof(SpriteEffects),
+                            typeof(float),
+                        ]
+                    )
+                ),
+            ]);
             matcher.Opcode = OpCodes.Call;
             matcher.Operand = AccessTools.DeclaredMethod(typeof(FridgePosition), nameof(FridgePosition_Draw));
 

@@ -473,13 +473,12 @@ internal static class FurnitureProperties
         {
             int radius = __instance.GetAdditionalTilePropertyRadius() * Game1.tileSize;
 
-            Rectangle furniBounds =
-                new(
-                    boundingBox.X - radius,
-                    boundingBox.Y - radius,
-                    boundingBox.Width + 2 * radius,
-                    boundingBox.Height + 2 * radius
-                );
+            Rectangle furniBounds = new(
+                boundingBox.X - radius,
+                boundingBox.Y - radius,
+                boundingBox.Width + 2 * radius,
+                boundingBox.Height + 2 * radius
+            );
             if (!furniBounds.Intersects(rect))
                 return;
 
@@ -781,8 +780,10 @@ internal static class FurnitureProperties
         {
             if (__instance.floorDecorations[i] is KeyValuePair<Rectangle, Vector2> kv)
             {
-                Vector2 newValue =
-                    new(kv.Value.X + (tankInfo.BaseTankBounds.X - tankInfo.CurrentTankBounds.X) / 4, kv.Value.Y);
+                Vector2 newValue = new(
+                    kv.Value.X + (tankInfo.BaseTankBounds.X - tankInfo.CurrentTankBounds.X) / 4,
+                    kv.Value.Y
+                );
                 __instance.floorDecorations[i] = new(kv.Key, newValue);
             }
         }

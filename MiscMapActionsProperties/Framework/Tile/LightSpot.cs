@@ -21,8 +21,11 @@ internal static class LightSpot
     internal const string TileProp_LightCond = $"{ModEntry.ModId}_LightCond";
     internal const string MapLightInfix = $"_MapLight_{ModEntry.ModId}";
 
-    private static readonly TileDataCache<LightCondAndProps> lightSpotsCache =
-        new([TileProp_LightCond, TileProp_Light], ["Front", "Back"], LightSpotValueGetter);
+    private static readonly TileDataCache<LightCondAndProps> lightSpotsCache = new(
+        [TileProp_LightCond, TileProp_Light],
+        ["Front", "Back"],
+        LightSpotValueGetter
+    );
 
     private static LightCondAndProps? LightSpotValueGetter(string?[] propValues)
     {

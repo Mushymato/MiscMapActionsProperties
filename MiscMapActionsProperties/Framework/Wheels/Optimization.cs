@@ -76,15 +76,13 @@ internal static class Optimization
             // IL_0141: ldarg.0
             // IL_0142: ldfld class [xTile]xTile.Map StardewValley.GameLocation::map
             // IL_0147: brfalse.s IL_019b
-            .MatchStartForward(
-                [
-                    new(inst => inst.IsLdloc()),
-                    new(OpCodes.Brtrue_S),
-                    new(OpCodes.Ldarg_0),
-                    new(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(GameLocation), nameof(GameLocation.map))),
-                    new(OpCodes.Brfalse_S),
-                ]
-            )
+            .MatchStartForward([
+                new(inst => inst.IsLdloc()),
+                new(OpCodes.Brtrue_S),
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(GameLocation), nameof(GameLocation.map))),
+                new(OpCodes.Brfalse_S),
+            ])
             .ThrowIfNotMatch("Failed to match 'if (!flag && map != null)'")
             .CreateLabel(out Label lbl)
             // IL_0078: ldarg.0
@@ -92,32 +90,29 @@ internal static class Optimization
             // IL_007e: callvirt instance valuetype [System.Collections]System.Collections.Generic.List`1/Enumerator<!0> class Netcode.NetCollection`1<class StardewValley.Objects.Furniture>::GetEnumerator()
             .MatchStartBackwards(
 #endif
-                [
-                    new(OpCodes.Ldarg_0),
-                    new(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(GameLocation), nameof(GameLocation.furniture))),
-                    new(OpCodes.Callvirt),
-                ]
-            )
+            [
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldfld, AccessTools.DeclaredField(typeof(GameLocation), nameof(GameLocation.furniture))),
+                new(OpCodes.Callvirt),
+            ])
             .ThrowIfNotMatch("Failed to match 'foreach (Furniture item in furniture)'")
             .Advance(1)
-            .InsertAndAdvance(
-                [
-                    new(OpCodes.Ldarg_1),
-                    new(OpCodes.Ldarg_2),
-                    new(OpCodes.Ldarg_3),
-                    new(OpCodes.Ldarg_S, (sbyte)4),
-                    new(
-                        OpCodes.Call,
-                        AccessTools.DeclaredMethod(typeof(Optimization), nameof(CheckFurnitureTileProperties))
-                    ),
-                    new(OpCodes.Stloc, propValueLoc.LocalIndex),
-                    new(OpCodes.Ldloc, propValueLoc.LocalIndex),
-                    new(OpCodes.Brfalse_S, lbl),
-                    new(OpCodes.Ldloc, propValueLoc.LocalIndex),
-                    new(OpCodes.Ret),
-                    new(OpCodes.Ldarg_0),
-                ]
-            );
+            .InsertAndAdvance([
+                new(OpCodes.Ldarg_1),
+                new(OpCodes.Ldarg_2),
+                new(OpCodes.Ldarg_3),
+                new(OpCodes.Ldarg_S, (sbyte)4),
+                new(
+                    OpCodes.Call,
+                    AccessTools.DeclaredMethod(typeof(Optimization), nameof(CheckFurnitureTileProperties))
+                ),
+                new(OpCodes.Stloc, propValueLoc.LocalIndex),
+                new(OpCodes.Ldloc, propValueLoc.LocalIndex),
+                new(OpCodes.Brfalse_S, lbl),
+                new(OpCodes.Ldloc, propValueLoc.LocalIndex),
+                new(OpCodes.Ret),
+                new(OpCodes.Ldarg_0),
+            ]);
 
         return matcher.Instructions();
     }

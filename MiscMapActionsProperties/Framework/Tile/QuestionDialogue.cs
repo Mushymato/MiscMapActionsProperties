@@ -161,8 +161,11 @@ internal static class QuestionDialogue
             }
             else
             {
-                Dialogue dialogueBefore =
-                    new(speaker, qdData.DialogueBefore, TokenParser.ParseText(qdData.DialogueBefore) ?? "");
+                Dialogue dialogueBefore = new(
+                    speaker,
+                    qdData.DialogueBefore,
+                    TokenParser.ParseText(qdData.DialogueBefore) ?? ""
+                );
                 Game1.DrawDialogue(dialogueBefore);
             }
             Game1.afterDialogues = (Game1.afterFadeFunction)

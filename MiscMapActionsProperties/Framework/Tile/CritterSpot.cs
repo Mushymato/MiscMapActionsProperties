@@ -467,13 +467,12 @@ internal static class CritterSpot
         }
         for (int i = 0; i < count; i++)
         {
-            Butterfly butterfly =
-                new(
-                    location,
-                    position.ToVector2(),
-                    forceSummerButterfly: startingIndex != -1,
-                    baseFrameOverride: startingIndex
-                );
+            Butterfly butterfly = new(
+                location,
+                position.ToVector2(),
+                forceSummerButterfly: startingIndex != -1,
+                baseFrameOverride: startingIndex
+            );
             butterfly.position += GetPosOffset(posOffset);
             if (texture != null)
             {

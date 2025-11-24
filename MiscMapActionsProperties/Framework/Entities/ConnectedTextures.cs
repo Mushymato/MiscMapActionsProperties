@@ -420,23 +420,22 @@ internal static class ConnectedTextures
         IEnumerable<Furniture>? furniture = null
     )
     {
-        Point checkPnt =
-            new(
-                direction.X switch
-                {
-                    -1 => bounds.Left - 1,
-                    0 => bounds.Left,
-                    1 => bounds.Right,
-                    _ => throw new NotImplementedException(),
-                },
-                direction.Y switch
-                {
-                    -1 => bounds.Top - 1,
-                    0 => bounds.Top,
-                    1 => bounds.Bottom,
-                    _ => throw new NotImplementedException(),
-                }
-            );
+        Point checkPnt = new(
+            direction.X switch
+            {
+                -1 => bounds.Left - 1,
+                0 => bounds.Left,
+                1 => bounds.Right,
+                _ => throw new NotImplementedException(),
+            },
+            direction.Y switch
+            {
+                -1 => bounds.Top - 1,
+                0 => bounds.Top,
+                1 => bounds.Bottom,
+                _ => throw new NotImplementedException(),
+            }
+        );
 
         selected = null;
         if (
@@ -681,18 +680,16 @@ internal static class ConnectedTextures
             CodeMatcher matcher = new(instructions, generator);
 
             matcher
-                .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_I4_0),
-                        new(inst => inst.IsLdloc()),
-                        new(OpCodes.Initobj, typeof(int?)),
-                        new(inst => inst.IsLdloc()),
-                        new(
-                            OpCodes.Callvirt,
-                            AccessTools.DeclaredMethod(typeof(ParsedItemData), nameof(ParsedItemData.GetSourceRect))
-                        ),
-                    ]
-                )
+                .MatchEndForward([
+                    new(OpCodes.Ldc_I4_0),
+                    new(inst => inst.IsLdloc()),
+                    new(OpCodes.Initobj, typeof(int?)),
+                    new(inst => inst.IsLdloc()),
+                    new(
+                        OpCodes.Callvirt,
+                        AccessTools.DeclaredMethod(typeof(ParsedItemData), nameof(ParsedItemData.GetSourceRect))
+                    ),
+                ])
                 .ThrowIfNotMatch("Failed to find '-.GetSourceRect(0, null)'")
                 .Advance(1)
                 .InsertAndAdvance(

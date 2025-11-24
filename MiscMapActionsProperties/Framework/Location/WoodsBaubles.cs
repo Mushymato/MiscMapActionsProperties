@@ -12,17 +12,14 @@ internal record BaublesCtx(List<Vector2> Baubles, int DisplayHeight, int Display
     {
         for (int i = 0; i < Baubles.Count; i++)
         {
-            Vector2 value =
-                new()
-                {
-                    X =
-                        Baubles[i].X
-                        - Math.Max(0.4f, Math.Min(1f, i * 0.01f))
-                        - (float)(
-                            (double)(i * 0.01f) * Math.Sin(Math.PI * 2.0 * time.TotalGameTime.Milliseconds / 8000.0)
-                        ),
-                    Y = Baubles[i].Y + Math.Max(0.5f, Math.Min(1.2f, i * 0.02f)),
-                };
+            Vector2 value = new()
+            {
+                X =
+                    Baubles[i].X
+                    - Math.Max(0.4f, Math.Min(1f, i * 0.01f))
+                    - (float)((double)(i * 0.01f) * Math.Sin(Math.PI * 2.0 * time.TotalGameTime.Milliseconds / 8000.0)),
+                Y = Baubles[i].Y + Math.Max(0.5f, Math.Min(1.2f, i * 0.02f)),
+            };
             if (value.Y > DisplayHeight || value.X < 0f)
             {
                 value.X = Game1.random.Next(0, DisplayWidth);
