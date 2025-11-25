@@ -9,6 +9,7 @@ using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
+using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using StardewValley.Triggers;
@@ -513,7 +514,7 @@ public static class CommonPatch
     )
     {
         prop = null;
-        if (location == null)
+        if (location == null || (location.Name == null && location is not MineShaft))
             return false;
         if (location.GetData()?.CustomFields?.TryGetValue(propKey, out prop) ?? false)
         {
