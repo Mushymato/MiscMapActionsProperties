@@ -77,7 +77,7 @@ internal sealed class TileDataCache<TProps>
             furniturePropertyJustInvalidated.AddRange(cachedLocations);
         }
 
-        if (e.NameWithoutLocale.IsEquivalentTo(FloorPathProperties.Asset_FloorPathProperties))
+        if (e.NameWithoutLocale.IsEquivalentTo(TerrainFeatureProperties.Asset_FloorPathProperties))
         {
             floorPathPropertyJustInvalidated.AddRange(cachedLocations);
         }

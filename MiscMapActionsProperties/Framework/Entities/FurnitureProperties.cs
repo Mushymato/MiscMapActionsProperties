@@ -928,7 +928,7 @@ internal static class FurnitureProperties
     private static FurnitureDrawMode FurnitureDraw = FurnitureDrawMode.None;
     private static float FurnitureLayerDepthOffset = 0f;
     private static float DrawFurnitureLayerDepthMax = -1f;
-    private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)$", RegexOptions.IgnoreCase);
+    private static readonly Regex IdIsRotation = new(@"^.+_Rotation.(\d+)(.F)?$", RegexOptions.IgnoreCase);
     private static readonly MethodInfo? Furniture_getScaleSize = AccessTools.DeclaredMethod(
         typeof(Furniture),
         "getScaleSize"
@@ -1049,11 +1049,13 @@ internal static class FurnitureProperties
             }
         }
 
-        private readonly Dictionary<string, int?> parsedRotations = [];
+        private sealed record RotationAndFlip(int Rotation, bool Flipped);
 
-        internal bool CheckRotation(string drawLayerId, int currentRotation)
+        private readonly Dictionary<string, RotationAndFlip?> parsedRotations = [];
+
+        internal bool CheckRotation(string drawLayerId, int currentRotation, bool currentFlipped)
         {
-            if (!parsedRotations.TryGetValue(drawLayerId, out int? rotation))
+            if (!parsedRotations.TryGetValue(drawLayerId, out RotationAndFlip? rotAndFlip))
             {
                 if (
                     !string.IsNullOrEmpty(drawLayerId)
@@ -1061,15 +1063,16 @@ internal static class FurnitureProperties
                     && match.Success
                 )
                 {
-                    rotation = int.Parse(match.Groups[1].Value);
+                    rotAndFlip = new(int.Parse(match.Groups[1].Value), match.Groups[2].ValueSpan.Length > 0);
                 }
                 else
                 {
-                    rotation = null;
+                    rotAndFlip = null;
                 }
-                parsedRotations[drawLayerId] = rotation;
+                parsedRotations[drawLayerId] = rotAndFlip;
             }
-            return rotation == null || rotation == currentRotation;
+            return rotAndFlip == null
+                || (rotAndFlip.Rotation == currentRotation && rotAndFlip.Flipped == currentFlipped);
         }
 
         internal void Draw(
@@ -1140,7 +1143,7 @@ internal static class FurnitureProperties
             DLExtInfo? drawLayerExt
         )
         {
-            if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value))
+            if (!CheckRotation(drawLayer.Id, furniture.currentRotation.Value, furniture.Flipped))
             {
                 return false;
             }
