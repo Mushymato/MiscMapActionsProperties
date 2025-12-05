@@ -1,0 +1,65 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    // Basic add new custom floor
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/treelight,{{ModId}}/treelight_f",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    // wild tree properties
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/WildTreeProperties",
+      "Entries": {
+        // format is space separated: <treeid> <growthstage> <T|F where F means flipped and T means not flipped>
+        // can use quotes for treeid if it already contains space
+        // can omit growthstage and flipped/not flipped if not important
+        // for vanilla trees, initialize it like this first, in case of multiple mods editing
+        "1 5 T": {},
+        "1 5 F": {}
+      },
+      "Priority": "Early"
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/WildTreeProperties",
+      "Fields": {
+        // for vanilla trees, initialize it like this first, in case of multiple mods editing
+        "1 5 T": {
+          "Back": {}
+        },
+        "1 5 F": {
+          "Back": {}
+        }
+      },
+      "Priority": "Early"
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/WildTreeProperties",
+      "TargetField": [
+        "1 5 T",
+        "Back"
+      ],
+      "Entries": {
+        // property: value
+        "mushymato.MMAP_Light": "1 White {{ModId}}/treelight 0 -160",
+        "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/WildTreeProperties",
+      "TargetField": [
+        "1 5 F",
+        "Back"
+      ],
+      "Entries": {
+        // property: value
+        "mushymato.MMAP_Light": "1 White {{ModId}}/treelight_f 0 -160",
+        "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+      }
+    },
+  ]
+}
