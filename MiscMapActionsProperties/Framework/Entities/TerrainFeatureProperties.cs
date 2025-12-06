@@ -55,12 +55,36 @@ internal static class TerrainFeatureProperties
                 string normalizedKey = string.Join(TreePropSep, parts);
                 if (parts.Length == 3)
                 {
+                    if (parts[2] != "T" && parts[2] != "F")
+                    {
+                        ModEntry.Log(
+                            $"Invalid value for flip at position 2 '{string.Join(' ', parts)}'",
+                            LogLevel.Warn
+                        );
+                        continue;
+                    }
+                    if (!char.IsDigit(parts[1][0]) || !char.IsAscii(parts[1][0]))
+                    {
+                        ModEntry.Log(
+                            $"Invalid value for growth stage at position 1 '{string.Join(' ', parts)}'",
+                            LogLevel.Warn
+                        );
+                        continue;
+                    }
                     _wtpData[normalizedKey] = value;
                     continue;
                 }
                 List<string> allKeys = [];
                 if (parts.Length == 2)
                 {
+                    if (!char.IsDigit(parts[1][0]) || !char.IsAscii(parts[1][0]))
+                    {
+                        ModEntry.Log(
+                            $"Invalid value for growth stage at position 1 '{string.Join(' ', parts)}'",
+                            LogLevel.Warn
+                        );
+                        continue;
+                    }
                     allKeys.Add(string.Concat(normalizedKey, TreePropSep, 'T'));
                     allKeys.Add(string.Concat(normalizedKey, TreePropSep, 'F'));
                 }

@@ -1476,7 +1476,7 @@ internal static class FurnitureProperties
     private static void Furniture_drawInMenu_Prefix(
         Furniture __instance,
         SpriteBatch spriteBatch,
-        Vector2 location,
+        ref Vector2 location,
         float scaleSize,
         float transparency,
         float layerDepth,
@@ -1500,13 +1500,16 @@ internal static class FurnitureProperties
                 FurnitureDraw &= ~FurnitureDrawMode.Base;
         }
 
+        float scale = TryGetScaleSize(__instance) * scaleSize;
+        location += fpData.BuildMenuDrawOffset.ToVector2() * scale;
+
         dlState?.Draw(
             __instance,
             location,
             spriteBatch,
             transparency,
             layerDepth,
-            TryGetScaleSize(__instance) * scaleSize,
+            scale,
             true,
             drawSource: FurnitureDLState.DrawSource.Menu
         );
