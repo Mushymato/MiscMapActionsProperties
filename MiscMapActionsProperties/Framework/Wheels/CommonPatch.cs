@@ -3,16 +3,15 @@ using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
-using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
-using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -43,7 +42,9 @@ public static class CommonPatch
 
     public static event EventHandler<OnFurnitureMovedArgs>? Furniture_OnMoved;
 
-    public static event EventHandler<Flooring>? Flooring_OnMoved;
+    public sealed record OnTerrainFeatureMovedArgs(GameLocation Location, TerrainFeature Feature);
+
+    public static event EventHandler<OnTerrainFeatureMovedArgs>? TerrainFeature_OnMoved;
 
     public sealed record MapTilePropChangedArgs(GameLocation Location, Point DestPoint, string Layer);
 
@@ -133,17 +134,6 @@ public static class CommonPatch
                     priority = Priority.Last,
                 }
             );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnAdded)),
-                postfix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnAdded_Postfix))
-                {
-                    priority = Priority.Last,
-                }
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Flooring), nameof(Flooring.OnRemoved)),
-                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(Flooring_OnRemoved_Prefix))
-            );
         }
         catch (Exception err)
         {
@@ -196,41 +186,53 @@ public static class CommonPatch
     private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
         new(furniture.Location, furniture.TileLocation.ToPoint());
 
-    private static readonly ConditionalWeakTable<GameLocation, FurnitureMovedWatcher> furniMovedWatchers = [];
+    private static readonly ConditionalWeakTable<GameLocation, LocationMovedWatcher> furniMovedWatchers = [];
 
     private static void AddFurnitureMovedWatcher(object? sender, GameLocation location)
     {
         if (location != null)
         {
             psTileToFurni.Value = null;
-            furniMovedWatchers.GetValue(location, FurnitureMovedWatcher.CreateFurnitureMovedWatcher);
+            furniMovedWatchers.GetValue(location, LocationMovedWatcher.CreateLocationWatcher);
         }
     }
 
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
-        foreach (KeyValuePair<GameLocation, FurnitureMovedWatcher> kv in furniMovedWatchers)
+        foreach (KeyValuePair<GameLocation, LocationMovedWatcher> kv in furniMovedWatchers)
             kv.Value.Dispose();
         furniMovedWatchers.Clear();
     }
 
-    internal sealed class FurnitureMovedWatcher : IDisposable
+    internal sealed class LocationMovedWatcher : IDisposable
     {
-        internal static FurnitureMovedWatcher CreateFurnitureMovedWatcher(GameLocation location)
+        internal static LocationMovedWatcher CreateLocationWatcher(GameLocation location)
         {
             return new(location);
         }
 
         private GameLocation Loc;
 
-        internal FurnitureMovedWatcher(GameLocation location)
+        private readonly Dictionary<Tree, (FieldChange<NetInt, int>, FieldChange<NetBool, bool>)> TreeStateWatchers =
+        [];
+
+        internal LocationMovedWatcher(GameLocation location)
         {
             Loc = location;
             Loc.furniture.OnValueAdded += OnFurnitureAdded;
             Loc.furniture.OnValueRemoved += OnFurnitureRemoved;
+            Loc.terrainFeatures.OnValueAdded += OnTerrainFeatureAdded;
+            Loc.terrainFeatures.OnValueRemoved += OnTerrainFeatureRemoved;
+            foreach (TerrainFeature feature in Loc.terrainFeatures.Values)
+            {
+                if (feature is Tree tree)
+                {
+                    AddWildTreeStateWatch(tree);
+                }
+            }
         }
 
-        ~FurnitureMovedWatcher() => DisposeValues();
+        ~LocationMovedWatcher() => DisposeValues();
 
         private void DisposeValues()
         {
@@ -238,7 +240,67 @@ public static class CommonPatch
                 return;
             Loc.furniture.OnValueAdded -= OnFurnitureAdded;
             Loc.furniture.OnValueRemoved -= OnFurnitureRemoved;
+            Loc.terrainFeatures.OnValueAdded -= OnTerrainFeatureAdded;
+            Loc.terrainFeatures.OnValueRemoved -= OnTerrainFeatureRemoved;
+            foreach (TerrainFeature feature in Loc.terrainFeatures.Values)
+            {
+                if (feature is Tree tree)
+                {
+                    RemoveWildTreeStateWatch(tree);
+                }
+            }
+            TreeStateWatchers.Clear();
             Loc = null!;
+        }
+
+        private void OnTerrainFeatureAdded(Vector2 key, TerrainFeature value)
+        {
+            if (value is Tree tree)
+            {
+                AddWildTreeStateWatch(tree);
+            }
+            TerrainFeature_OnMoved?.Invoke(null, new(Loc, value));
+        }
+
+        private void OnTerrainFeatureRemoved(Vector2 key, TerrainFeature value)
+        {
+            if (value is Tree tree)
+            {
+                RemoveWildTreeStateWatch(tree);
+                TreeStateWatchers.Remove(tree);
+            }
+            TerrainFeature_OnMoved?.Invoke(null, new(Loc, value));
+        }
+
+        private void AddWildTreeStateWatch(Tree tree)
+        {
+#pragma warning disable IDE0039 // Use local function
+            FieldChange<NetInt, int> growthStageChanged = (field, oldValue, newValue) =>
+            {
+                TerrainFeature_OnMoved?.Invoke(null, new(Loc, tree));
+            };
+            FieldChange<NetBool, bool> stumpChanged = (field, oldValue, newValue) =>
+            {
+                TerrainFeature_OnMoved?.Invoke(null, new(Loc, tree));
+            };
+#pragma warning restore IDE0039 // Use local function
+            TreeStateWatchers[tree] = new(growthStageChanged, stumpChanged);
+            tree.growthStage.fieldChangeVisibleEvent += growthStageChanged;
+            tree.stump.fieldChangeVisibleEvent += stumpChanged;
+        }
+
+        private void RemoveWildTreeStateWatch(Tree tree)
+        {
+            if (
+                TreeStateWatchers.TryGetValue(
+                    tree,
+                    out (FieldChange<NetInt, int>, FieldChange<NetBool, bool>) treeStateWatchers
+                )
+            )
+            {
+                tree.growthStage.fieldChangeVisibleEvent -= treeStateWatchers.Item1;
+                tree.stump.fieldChangeVisibleEvent -= treeStateWatchers.Item2;
+            }
         }
 
         public void Dispose()
@@ -288,16 +350,6 @@ public static class CommonPatch
         Furniture_OnMoved?.Invoke(null, new(removed, true, CreateFurniturePlacementInfo(removed)));
     }
     #endregion
-
-    private static void Flooring_OnRemoved_Prefix(Flooring __instance)
-    {
-        Flooring_OnMoved?.Invoke(null, __instance);
-    }
-
-    private static void Flooring_OnAdded_Postfix(Flooring __instance)
-    {
-        Flooring_OnMoved?.Invoke(null, __instance);
-    }
 
     internal static void GameLocation_MapTilePropChangedInvoke(GameLocation location, Point pos, string layer)
     {

@@ -48,7 +48,7 @@ internal sealed class TileDataCache<TProps>
 
         ModEntry.help.Events.World.BuildingListChanged += OnBuildingListChanged;
         CommonPatch.Furniture_OnMoved += OnFurnitureMoved;
-        CommonPatch.Flooring_OnMoved += OnFlooringMoved;
+        CommonPatch.TerrainFeature_OnMoved += OnTerrainFeatureMoved;
         CommonPatch.GameLocation_ApplyMapOverride += OnApplyMapOverride;
         CommonPatch.GameLocation_ReloadMap += OnReloadMap;
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
@@ -220,9 +220,9 @@ internal sealed class TileDataCache<TProps>
         PushNextPointsToUpdate(e.Location, e.DestPoint);
     }
 
-    private void OnFlooringMoved(object? sender, Flooring flooring)
+    private void OnTerrainFeatureMoved(object? sender, CommonPatch.OnTerrainFeatureMovedArgs args)
     {
-        PushNextPointsToUpdate(flooring.Location, flooring.Tile.ToPoint());
+        PushNextPointsToUpdate(args.Location, args.Feature.Tile.ToPoint());
     }
 
     private void OnFurnitureMoved(object? sender, CommonPatch.OnFurnitureMovedArgs e)

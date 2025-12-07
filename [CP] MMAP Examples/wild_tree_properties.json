@@ -15,6 +15,7 @@
         // format is space separated: <treeid> <growthstage> <T|F where F means flipped and T means not flipped>
         // can use quotes for treeid if it already contains space
         // can omit growthstage and flipped/not flipped if not important
+        // growthstage goes from 0 to 5, use -1 for stump
         // for vanilla trees, initialize it like this first, in case of multiple mods editing
         "1 5 T": {},
         "1 5 F": {}

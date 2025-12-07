@@ -90,7 +90,7 @@ internal static class TerrainFeatureProperties
                 }
                 else if (parts.Length == 1)
                 {
-                    for (int i = 0; i <= 5; i++)
+                    for (int i = -1; i <= 5; i++)
                     {
                         allKeys.Add(string.Concat(normalizedKey, TreePropSep, i.ToString(), TreePropSep, 'T'));
                         allKeys.Add(string.Concat(normalizedKey, TreePropSep, i.ToString(), TreePropSep, 'F'));
@@ -111,7 +111,7 @@ internal static class TerrainFeatureProperties
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_FloorPathProperties)))
             _fppData = null;
         if (e.NamesWithoutLocale.Any(an => an.IsEquivalentTo(Asset_WildTreeProperties)))
-            _fppData = null;
+            _wtpData = null;
     }
 
     private static void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
@@ -189,7 +189,7 @@ internal static class TerrainFeatureProperties
         string key = string.Concat(
             wildTree.treeType.Value,
             TreePropSep,
-            wildTree.growthStage.Value,
+            wildTree.stump.Value ? -1 : wildTree.growthStage.Value,
             TreePropSep,
             wildTree.flipped.Value ? 'F' : 'T'
         );
