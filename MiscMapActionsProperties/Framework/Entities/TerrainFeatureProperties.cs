@@ -189,7 +189,7 @@ internal static class TerrainFeatureProperties
         string key = string.Concat(
             wildTree.treeType.Value,
             TreePropSep,
-            wildTree.stump.Value ? -1 : wildTree.growthStage.Value,
+            wildTree.stump.Value ? -1 : Math.Min(wildTree.growthStage.Value, 5),
             TreePropSep,
             wildTree.flipped.Value ? 'F' : 'T'
         );
