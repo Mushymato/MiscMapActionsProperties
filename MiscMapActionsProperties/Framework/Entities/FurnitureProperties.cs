@@ -1427,7 +1427,7 @@ internal static class FurnitureProperties
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Building_draw_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in {target}-Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
@@ -1437,7 +1437,91 @@ internal static class FurnitureProperties
         ILGenerator generator
     )
     {
-        return Furniture_draw_Transpiler_Inner(instructions, generator, "Furniture.draw");
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+
+            int foundDraw = 0;
+            MethodInfo replacedDraw = AccessTools.DeclaredMethod(typeof(FurnitureProperties), nameof(DrawReplace));
+            CodeMatch callvirtDraw = new(
+                OpCodes.Callvirt,
+                AccessTools.DeclaredMethod(
+                    typeof(SpriteBatch),
+                    nameof(SpriteBatch.Draw),
+                    [
+                        typeof(Texture2D),
+                        typeof(Vector2),
+                        typeof(Rectangle?),
+                        typeof(Color),
+                        typeof(float),
+                        typeof(Vector2),
+                        typeof(float),
+                        typeof(SpriteEffects),
+                        typeof(float),
+                    ]
+                )
+            );
+            int startPos = 0;
+            int endPos = 0;
+
+            matcher.MatchStartForward([
+                new(OpCodes.Ldarg_0),
+                new(
+                    OpCodes.Ldfld,
+                    AccessTools.Field(typeof(StardewValley.Object), nameof(StardewValley.Object.heldObject))
+                ),
+            ]);
+            endPos = matcher.Pos;
+            matcher.MatchStartBackwards([
+                new(
+                    OpCodes.Ldsfld,
+                    AccessTools.DeclaredField(typeof(Furniture), nameof(Furniture.isDrawingLocationFurniture))
+                ),
+            ]);
+            startPos = matcher.Pos;
+
+            DoDrawReplacement(matcher, ref foundDraw, replacedDraw, callvirtDraw, startPos, endPos);
+
+#pragma warning disable AvoidNetField // Avoid Netcode types when possible
+            matcher.MatchStartForward([
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldfld, AccessTools.Field(typeof(StardewValley.Object), nameof(StardewValley.Object.isOn))),
+            ]);
+#pragma warning restore AvoidNetField // Avoid Netcode types when possible
+            startPos = matcher.Pos;
+            endPos = matcher.Length - 1;
+
+            DoDrawReplacement(matcher, ref foundDraw, replacedDraw, callvirtDraw, startPos, endPos);
+
+            ModEntry.Log($"Furniture.draw-Transpiler: Replaced {foundDraw} SpriteBatch.Draw calls.");
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in Furniture.draw-Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
+        }
+
+        static void DoDrawReplacement(
+            CodeMatcher matcher,
+            ref int foundDraw,
+            MethodInfo replacedDraw,
+            CodeMatch callvirtDraw,
+            int startPos,
+            int endPos
+        )
+        {
+            for (int i = startPos; i < endPos; i++)
+            {
+                matcher.Advance(1);
+                if (matcher.Opcode == callvirtDraw.opcode && matcher.Operand == callvirtDraw.operand)
+                {
+                    matcher.Opcode = OpCodes.Call;
+                    matcher.Operand = replacedDraw;
+                    foundDraw++;
+                }
+            }
+        }
     }
 
     // bed furniture draw patch
