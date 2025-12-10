@@ -1,0 +1,54 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.8.0",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}.frame",
+      "FromFile": "assets/frame.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_AbigailRock": "{{ModId}}_AbigailRock/painting/2 2/2 2/-1/5000/-1/AbigailRock/0/{{ModId}}.frame/true"
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}_AbigailRock": {
+          "DrawLayers": [
+            {
+              "Id": "Background",
+              "SourceRect": {
+                "X": 32,
+                "Y": 0,
+                "Width": 32,
+                "Height": 32
+              },
+              "FrameCount": 1,
+              "DrawInBackground": true,
+            },
+            {
+              "Id": "Abigail",
+              "Texture": "Characters/Abigail",
+              "SourceRect": {
+                "X": 0,
+                "Y": 258,
+                "Width": 16,
+                "Height": 17,
+              },
+              "DrawPosition": "8, 8",
+              "SortTileOffset": 0.01,
+            }
+          ],
+          "Metadata": {
+            "mushymato.MMAP/DrawLayer.Background.color": "115 41 181"
+          }
+        }
+      }
+    }
+  ]
+}

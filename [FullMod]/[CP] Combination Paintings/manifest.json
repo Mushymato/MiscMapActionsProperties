@@ -1,0 +1,18 @@
+{
+  "Name": "[CP] Combination Paintings",
+  "Author": "mushymato",
+  "Version": "1.0.0",
+  "Description": "Frame your beloved",
+  "UniqueID": "mushymato.CombinationPaintings",
+  "MinimumApiVersion": "4.3.0",
+  "UpdateKeys": [],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "mushymato.MMAP",
+      "IsRequired": true
+    }
+  ]
+}
