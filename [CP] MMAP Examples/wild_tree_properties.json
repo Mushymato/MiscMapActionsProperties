@@ -31,7 +31,8 @@
           "Back": {}
         },
         "1 5 F": {
-          "Back": {}
+          "Back": {},
+          "Buildings": {}
         }
       },
       "Priority": "Early"
@@ -60,6 +61,18 @@
         // property: value
         "mushymato.MMAP_Light": "1 White {{ModId}}/treelight_f 0 -160",
         "mushymato.MMAP_LightCond": "mushymato.MMAP_TIME_IS_LIGHTS_OFF"
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/WildTreeProperties",
+      "TargetField": [
+        "1 5 F",
+        "Buildings"
+      ],
+      "Entries": {
+        // property: value
+        "Action": "Message Test"
       }
     },
   ]

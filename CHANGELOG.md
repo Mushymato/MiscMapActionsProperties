@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.2]
+
+### Added
+- `BuildMenuDrawOffset` now has meaning for furniture. It is used to adjust the position of their menu icons. Most useful if the draw layers result in a highly offset icon.
+- You can now grant tile properties to wild trees via `mushymato.MMAP/WildTreeProperties`.
+
 ## [1.12.1]
 
 ### Fixed

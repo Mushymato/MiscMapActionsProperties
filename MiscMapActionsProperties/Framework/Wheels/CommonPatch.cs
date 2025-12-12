@@ -144,7 +144,7 @@ public static class CommonPatch
         }
 
         // furniture change watcher
-        GameLocation_resetLocalState += AddFurnitureMovedWatcher;
+        GameLocation_resetLocalState += AddLocationEntityWatcher;
     }
 
     #region furniture_caching
@@ -186,27 +186,27 @@ public static class CommonPatch
     private static PlacementInfo CreateFurniturePlacementInfo(Furniture furniture) =>
         new(furniture.Location, furniture.TileLocation.ToPoint());
 
-    private static readonly ConditionalWeakTable<GameLocation, LocationMovedWatcher> furniMovedWatchers = [];
+    private static readonly ConditionalWeakTable<GameLocation, LocationEntityWatcher> locationEntityWatchers = [];
 
-    private static void AddFurnitureMovedWatcher(object? sender, GameLocation location)
+    private static void AddLocationEntityWatcher(object? sender, GameLocation location)
     {
         if (location != null)
         {
             psTileToFurni.Value = null;
-            furniMovedWatchers.GetValue(location, LocationMovedWatcher.CreateLocationWatcher);
+            locationEntityWatchers.GetValue(location, LocationEntityWatcher.CreateLocationWatcher);
         }
     }
 
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
-        foreach (KeyValuePair<GameLocation, LocationMovedWatcher> kv in furniMovedWatchers)
+        foreach (KeyValuePair<GameLocation, LocationEntityWatcher> kv in locationEntityWatchers)
             kv.Value.Dispose();
-        furniMovedWatchers.Clear();
+        locationEntityWatchers.Clear();
     }
 
-    internal sealed class LocationMovedWatcher : IDisposable
+    internal sealed class LocationEntityWatcher : IDisposable
     {
-        internal static LocationMovedWatcher CreateLocationWatcher(GameLocation location)
+        internal static LocationEntityWatcher CreateLocationWatcher(GameLocation location)
         {
             return new(location);
         }
@@ -216,7 +216,7 @@ public static class CommonPatch
         private readonly Dictionary<Tree, (FieldChange<NetInt, int>, FieldChange<NetBool, bool>)> TreeStateWatchers =
         [];
 
-        internal LocationMovedWatcher(GameLocation location)
+        internal LocationEntityWatcher(GameLocation location)
         {
             Loc = location;
             Loc.furniture.OnValueAdded += OnFurnitureAdded;
@@ -232,7 +232,7 @@ public static class CommonPatch
             }
         }
 
-        ~LocationMovedWatcher() => DisposeValues();
+        ~LocationEntityWatcher() => DisposeValues();
 
         private void DisposeValues()
         {

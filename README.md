@@ -31,7 +31,7 @@ These pages document the "entry points" to various features.
 These pages document custom assets needed by some features.
 
 - [Furniture Properties](docs/furniture-properties.md)
-- [Floor Path Properties](docs/floorpath-properties.md)
+- [Floor Path Properties](docs/terrain-properties.md)
 - [Draw Layers](docs/draw-layers.md)
 - [Panorama](docs/panorama.md)
 - [Question Dialogue](docs/question-dialogue.md)
@@ -164,7 +164,7 @@ You may do this type of EditMap add prop to MapTiles in the tmx directly too.
 }
 ```
 
-#### EditData + [MMAP Furniture Properties](floorpath-properties.md)
+#### EditData + [MMAP Floor Path Properties](terrainfeature-properties.md)
 
 ```json
 {
@@ -191,6 +191,6 @@ You may do this type of EditMap add prop to MapTiles in the tmx directly too.
 
 ## Updates
 
-Because this is a framework mod, you as a mod user don't generally need to update it unless you are installing a new mod that depends on a feature only implemented in newer version of MMAP. Bugs do occur as I develop features, and generally it is not end of the world. Please [report your issue with a log](report your problem with a log), then roll back to a previous version of mod while I fix things.
+Because this is a framework mod, you as a mod user don't generally need to update it unless you are installing a new mod that depends on a feature only implemented in newer version of MMAP. Bugs do occur as I develop features, and generally it is not end of the world. Please report your issue with a log, then roll back to a previous version of mod while I fix things.
 
 I have gotten reports of performance problems and worked on improving that from versions 1.9.3 to 1.9.5, if you experiance slowness do try to update first.

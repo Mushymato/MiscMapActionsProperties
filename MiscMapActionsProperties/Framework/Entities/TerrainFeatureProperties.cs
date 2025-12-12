@@ -135,11 +135,26 @@ internal static class TerrainFeatureProperties
                     nameof(GameLocation_doesTileHaveProperty_Postfix)
                 )
             );
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(Tree), nameof(Tree.performUseAction)),
+                postfix: new HarmonyMethod(typeof(TerrainFeatureProperties), nameof(Tree_performUseAction_Postfix))
+            );
         }
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch TerrainFeatureProperties:\n{err}", LogLevel.Error);
         }
+    }
+
+    private static void Tree_performUseAction_Postfix(Tree __instance, ref bool __result, Vector2 tileLocation)
+    {
+        if (!__result)
+            return;
+        string? propVaue = null;
+        WildTreeHaveProperty("Action", "Buildings", __instance, ref propVaue!);
+        if (propVaue == null)
+            return;
+        __instance.Location.performAction(propVaue, Game1.player, new((int)tileLocation.X, (int)tileLocation.Y));
     }
 
     internal static void GameLocation_doesTileHaveProperty_Postfix(
@@ -186,6 +201,8 @@ internal static class TerrainFeatureProperties
 
     private static void WildTreeHaveProperty(string propertyName, string layerName, Tree wildTree, ref string __result)
     {
+        if (!WTPData.Any())
+            return;
         string key = string.Concat(
             wildTree.treeType.Value,
             TreePropSep,
