@@ -43,6 +43,7 @@ internal static class TASSpot
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
+        ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         CommonPatch.GameLocation_UpdateWhenCurrentLocationPrefix += GameLocation_UpdateWhenCurrentLocation_Prefix;
 
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
@@ -134,6 +135,23 @@ internal static class TASSpot
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
         EnterLocationTAS(e.NewLocation);
+    }
+
+    private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
+    {
+        if (Game1.currentLocation is not GameLocation location || locationTASDefs.Value == null)
+            return;
+        GameStateQueryContext context = new(location, null, null, null, null);
+        foreach (TASContext tileTAS in locationTASDefs.Value.Onetime.Values.SelectMany(ctx => ctx))
+        {
+            if (tileTAS.Def.Condition == null)
+                continue;
+            tileTAS.RecheckStateThenCreateOrRemove(
+                context,
+                location.TemporarySprites.Add,
+                location.TemporarySprites.Remove
+            );
+        }
     }
 
     private static void EnterLocationTAS(GameLocation location)
@@ -315,9 +333,7 @@ internal static class TASSpot
     {
         foreach (TASContext tileTAS in tileTASList)
         {
-            if (tileTAS.TryCreateDelayed(context, location.TemporarySprites.Add))
-                continue;
-            tileTAS.TryCreate(context, location.TemporarySprites.Add);
+            tileTAS.TryCreateAllowDelay(context, location.TemporarySprites.Add);
         }
     }
 
