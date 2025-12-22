@@ -36,7 +36,7 @@ internal sealed class TileDataCache<TProps>
 
     private readonly HashSet<string> buildingPropertyJustInvalidated = [];
     private readonly HashSet<string> furniturePropertyJustInvalidated = [];
-    private readonly HashSet<string> floorPathPropertyJustInvalidated = [];
+    private readonly HashSet<string> terrainPropertyJustInvalidated = [];
 
     internal TileDataCache(string[] propKeys, string[] layers, Func<string?[], TProps?> propsValueTransformer)
     {
@@ -54,33 +54,41 @@ internal sealed class TileDataCache<TProps>
         CommonPatch.GameLocation_OnBuildingEndMove += OnBuildingEndMove;
         CommonPatch.GameLocation_MapTilePropChanged += OnMapTilePropChanged;
 
-        ModEntry.help.Events.Content.AssetReady += OnAssetReady;
+        ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
     }
 
-    private void OnAssetReady(object? sender, AssetReadyEventArgs e)
+    private void OnAssetInvalidated(object? sender, AssetsInvalidatedEventArgs e)
     {
         if (!Context.IsWorldReady)
             return;
 
         HashSet<string> cachedLocations = Cache.Keys.ToHashSet();
 
-        if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
+        if (JustInvalidated(e, "Data/Buildings"))
         {
             buildingPropertyJustInvalidated.AddRange(cachedLocations);
         }
 
         if (
-            e.NameWithoutLocale.IsEquivalentTo(FurnitureProperties.Asset_FurnitureProperties)
-            || e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/FurnitureExtensionData")
+            JustInvalidated(e, FurnitureProperties.Asset_FurnitureProperties)
+            || JustInvalidated(e, "spacechase0.SpaceCore/FurnitureExtensionData")
         )
         {
             furniturePropertyJustInvalidated.AddRange(cachedLocations);
         }
 
-        if (e.NameWithoutLocale.IsEquivalentTo(TerrainFeatureProperties.Asset_FloorPathProperties))
+        if (
+            JustInvalidated(e, TerrainFeatureProperties.Asset_FloorPathProperties)
+            || JustInvalidated(e, TerrainFeatureProperties.Asset_WildTreeProperties)
+        )
         {
-            floorPathPropertyJustInvalidated.AddRange(cachedLocations);
+            terrainPropertyJustInvalidated.AddRange(cachedLocations);
         }
+    }
+
+    private static bool JustInvalidated(AssetsInvalidatedEventArgs e, string assetName)
+    {
+        return e.NamesWithoutLocale.Any(name => name.IsEquivalentTo(assetName));
     }
 
     private void ClearCache(object? sender, EventArgs e) => Cache.Clear();
@@ -320,16 +328,16 @@ internal sealed class TileDataCache<TProps>
                     }
                     furniturePropertyJustInvalidated.Remove(uniqueName);
                 }
-                if (floorPathPropertyJustInvalidated.Contains(uniqueName))
+                if (terrainPropertyJustInvalidated.Contains(uniqueName))
                 {
                     foreach (TerrainFeature feature in location.terrainFeatures.Values)
                     {
-                        if (feature is Flooring flooring)
+                        if (feature is Flooring || feature is Tree)
                         {
-                            PushNextPointsToUpdate(location, flooring.Tile.ToPoint());
+                            PushNextPointsToUpdate(location, feature.Tile.ToPoint());
                         }
                     }
-                    floorPathPropertyJustInvalidated.Remove(uniqueName);
+                    terrainPropertyJustInvalidated.Remove(uniqueName);
                 }
 
                 UpdateQueuedPoints(signalChanged: false);

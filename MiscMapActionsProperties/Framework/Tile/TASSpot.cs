@@ -44,6 +44,7 @@ internal static class TASSpot
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
         ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+        ModEntry.help.Events.GameLoop.DayEnding += OnDayEnding;
         CommonPatch.GameLocation_UpdateWhenCurrentLocationPrefix += GameLocation_UpdateWhenCurrentLocation_Prefix;
 
         CommonPatch.RegisterTileAndTouch(TileProp_TAS, TileAndTouchTAS);
@@ -134,7 +135,29 @@ internal static class TASSpot
 
     private static void OnWarped(object? sender, WarpedEventArgs e)
     {
+        CleanupLocationTAS(e.OldLocation);
         EnterLocationTAS(e.NewLocation);
+    }
+
+    private static void OnDayEnding(object? sender, DayEndingEventArgs e)
+    {
+        CleanupLocationTAS(Game1.currentLocation);
+    }
+
+    private static void CleanupLocationTAS(GameLocation oldLocation)
+    {
+        if (locationTASDefs.Value == null)
+        {
+            return;
+        }
+        foreach (TASContext ctx in locationTASDefs.Value.Onetime.Values.SelectMany(ctx => ctx))
+        {
+            ctx.RemoveAllSpawned(oldLocation.TemporarySprites.Remove);
+        }
+        foreach (TASContext ctx in locationTASDefs.Value.Respawning.Values.SelectMany(ctx => ctx))
+        {
+            ctx.RemoveAllSpawned(Game1.currentLocation.TemporarySprites.Remove);
+        }
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)

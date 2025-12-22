@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.4]
+
+### Fixed
+- TAS is now cleaned up forcifully on map change and day ending to workaround farm always active issues.
+- Improved invalidation handling on wild tree props.
+
+## [1.12.3]
+
+### Fixed
+- TAS Condition is now rechecked every time change for onetime (no respawn interval) TAS.
+
 ## [1.12.2]
 
 ### Added
