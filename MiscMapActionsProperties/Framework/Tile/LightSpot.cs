@@ -44,8 +44,9 @@ internal static class LightSpot
     internal static void Register()
     {
         ModEntry.help.Events.GameLoop.DayStarted += OnDayStarted;
-        ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
+
+        CommonPatch.GameLocation_resetLocalState += OnResetLocalState;
 
         lightSpotsCache.TileDataCacheChanged += OnCacheChanged;
     }
@@ -81,7 +82,7 @@ internal static class LightSpot
     private static void OnDayStarted(object? sender, DayStartedEventArgs e) =>
         SpawnLocationLights(Game1.currentLocation);
 
-    private static void OnWarped(object? sender, WarpedEventArgs e) => SpawnLocationLights(e.NewLocation);
+    private static void OnResetLocalState(object? sender, GameLocation e) => SpawnLocationLights(e);
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
     {
