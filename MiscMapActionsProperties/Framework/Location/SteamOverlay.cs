@@ -7,7 +7,7 @@ using StardewValley;
 namespace MiscMapActionsProperties.Framework.Location;
 
 /// <summary>
-/// Add new map property mushymato.MMAP_SteamOverlay TextureName [color]
+/// Add new map property mushymato.MMAP_SteamOverlay: texture [velocityX] [velocityY] [color] [alpha] [scale]
 /// The overlay texture should be tileable
 /// </summary>
 internal static class SteamOverlay

@@ -13,10 +13,18 @@
       }
     },
     {
+      "Action": "Load",
+      "Target": "{{ModId}}/goose, {{ModId}}/nightherondex",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
       "Action": "EditMap",
       "Target": "Maps/Farm",
       "MapProperties": {
-        "mushymato.MMAP_FarmHouseStarterBedPosition": "4 4"
+        // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose Fit
+        // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/nightherondex Fit
+        // debug action mushymato.MMAP_ScaledOverlay 1000
+        "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"
       }
     }
   ]
