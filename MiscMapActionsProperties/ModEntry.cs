@@ -43,7 +43,7 @@ public sealed class ModEntry : Mod
             ConsoleChaired
         );
 
-        TAS = new(helper, $"{ModId}/TAS");
+        TAS = TASAssetManager.Make(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Setup();
         if (config.Enable_doesTileHaveProperty_Optimization)
         {
@@ -79,6 +79,7 @@ public sealed class ModEntry : Mod
         Framework.Tile.CritterSpot.Register();
         Framework.Tile.GrassSpread.Register();
         Framework.Tile.HoleWrp.Register();
+        Framework.Tile.LaunchFireworks.Register();
         Framework.Tile.LightSpot.Register();
         Framework.Tile.PaddySpot.Register();
         Framework.Tile.PoolEntry.Register();

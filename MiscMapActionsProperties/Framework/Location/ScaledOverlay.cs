@@ -257,6 +257,7 @@ internal static class ScaledOverlay
             scaledCtx.Value = nextScaledCtx.Value;
             nextScaledCtx.Value = null;
         }
+        nextScaledCtx.Value?.Update(e.Time);
     }
 
     private static void OnRenderedStep(object? sender, RenderedStepEventArgs e)
@@ -264,6 +265,7 @@ internal static class ScaledOverlay
         if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront)
         {
             scaledCtx.Value?.Draw(e.SpriteBatch);
+            nextScaledCtx.Value?.Draw(e.SpriteBatch);
         }
     }
 }

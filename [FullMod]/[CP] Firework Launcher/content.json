@@ -1,0 +1,108 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.8.0",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}": "{{ModId}}/decor/2 1/2 1/-1/5000/-1/FireworkLauncher/0/LooseSprites\\Cursors_1_6/true",
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/FurnitureProperties",
+      "Entries": {
+        "{{ModId}}": {
+          "TileProperties": [
+            // 这是特殊action版的烟花，发射的东西和齐先生那里卖的一样，但没有点火阶段
+            // mushymato.MMAP_LaunchFireworks [type] [launchTx[:x:y:width:height]]
+            // type有 0/1/2 对应 红/紫/绿，-1为随机
+            {
+              "Id": "{{ModId}}-MMAP_LaunchFireworks",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_LaunchFireworks -1 TileSheets/Objects_2",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 0,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            },
+            // 这是TAS版的烟花，详见TAS
+            {
+              "Id": "{{ModId}}-MMAP_FireworksTAS",
+              "Name": "Action",
+              "Value": "mushymato.MMAP_TAS -1000 -1000 {{ModId}}_FireworksLaunch",
+              "Layer": "Buildings",
+              "TileArea": {
+                "X": 1,
+                "Y": 0,
+                "Width": 1,
+                "Height": 1
+              }
+            }
+          ],
+        }
+      }
+    },
+    // 这是TAS版本的烟花定义，分发射和炸开
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}_elizabeths_fireworks",
+      "FromFile": "assets/elizabeths_fireworks.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/TAS",
+      "Entries": {
+        "{{ModId}}_FireworksLaunch": {
+          "Id": "{{ModId}}_FireworksLaunch",
+          "Texture": "TileSheets/Objects_2",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 16
+          },
+          "Interval": 800,
+          "Frames": 1,
+          "Loops": 1,
+          "Scale": 1,
+          "ShakeIntensity": 0.5,
+          "shakeIntensityChange": 0.002,
+          "DelayBeforeAnimationStart": 100,
+          "Motion": "0,-0.01",
+          "StartSound": "firework",
+          "SortOffset": "64",
+          "RandMin": {
+            "Acceleration": "0,-0.36",
+          },
+          "RandMax": {
+            "Acceleration": "0,-0.46",
+          },
+          "FollowingTAS": [
+            "{{ModId}}_FireworksBurst"
+          ]
+        },
+        "{{ModId}}_FireworksBurst": {
+          "Id": "{{ModId}}_FireworksBurst",
+          "Texture": "{{ModId}}_elizabeths_fireworks",
+          "SourceRect": {
+            "X": 64,
+            "Y": 0,
+            "Width": 64,
+            "Height": 48
+          },
+          "PositionOffset": "-24,-12",
+          "Interval": 175,
+          "Frames": 7,
+          "Loops": 1,
+          "Scale": 1,
+          "LayerDepth": 1
+        },
+      }
+    }
+  ]
+}
