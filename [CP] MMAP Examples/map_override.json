@@ -46,6 +46,17 @@
             "Height": 2
           },
           "Precedence": 1
+        },
+        "{{ModId}}_Chimkins_Relative": {
+          "Id": "{{ModId}}_Chimkins_Relative",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
+          "TargetRectIsRelative": true,
+          "TargetRect": {
+            "X": 3,
+            "Y": -1,
+            "Width": 1,
+            "Height": 2
+          },
         }
       }
     }

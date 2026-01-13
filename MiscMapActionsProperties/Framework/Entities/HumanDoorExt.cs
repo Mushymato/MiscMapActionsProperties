@@ -2,8 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Tile;
 using MiscMapActionsProperties.Framework.Wheels;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.Delegates;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Entities;
 
@@ -31,7 +34,8 @@ internal static class HumanDoorExt
         CommonPatch.RegisterTileAndTouch(Action_MagicWrpOut, DoMagicWrpBuildingOut);
         CommonPatch.RegisterTileAndTouch(Action_HoleWrpOut, DoHoleWrpBuildingOut);
 
-        CommonPatch.RegisterTileAndTouch(Action_WrpHere, DoWrpHere);
+        CommonPatch.RegisterTileAndTouch(Action_WrpHere, TileWrpHere);
+        TriggerActionManager.RegisterAction(Action_WrpHere, TriggerWrpHere);
     }
 
     private static bool DoWrpBuilding(GameLocation location, string[] args, Farmer who, Point point)
@@ -94,13 +98,44 @@ internal static class HumanDoorExt
         return false;
     }
 
-    private static bool DoWrpHere(GameLocation location, string[] args, Farmer farmer, Point point)
+    private static bool TriggerWrpHere(string[] args, TriggerActionContext context, out string error)
+    {
+        if (!ArgUtility.TryGetPoint(args, 1, out Point fromPoint, out error, name: "string fromPoint"))
+        {
+            return false;
+        }
+        if (!DoWrpHere(Game1.currentLocation, args, Game1.player, fromPoint, 3, out error))
+        {
+            ModEntry.LogOnce(error);
+            return false;
+        }
+        return true;
+    }
+
+    private static bool TileWrpHere(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (!DoWrpHere(location, args, farmer, point, 1, out string error))
+        {
+            ModEntry.LogOnce(error);
+            return false;
+        }
+        return true;
+    }
+
+    private static bool DoWrpHere(
+        GameLocation location,
+        string[] args,
+        Farmer farmer,
+        Point point,
+        int startIndex,
+        out string error
+    )
     {
         if (
-            !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out string error, name: "string toPoint")
+            !ArgUtility.TryGetPoint(args, startIndex, out Point toPoint, out error, name: "string toPoint")
             || !ArgUtility.TryGetOptionalInt(
                 args,
-                3,
+                startIndex + 2,
                 out int direction,
                 out error,
                 defaultValue: -1,
@@ -108,16 +143,28 @@ internal static class HumanDoorExt
             )
             || !ArgUtility.TryGetOptionalBool(
                 args,
-                4,
+                startIndex + 3,
                 out bool fadeToBlack,
                 out error,
                 defaultValue: true,
-                name: "string fadeToBlack"
+                name: "bool fadeToBlack"
+            )
+            || !ArgUtility.TryGetOptionalBool(
+                args,
+                startIndex + 4,
+                out bool relative,
+                out error,
+                defaultValue: true,
+                name: "bool relative"
             )
         )
         {
-            ModEntry.LogOnce(error);
             return false;
+        }
+        if (relative)
+        {
+            toPoint.X += farmer.TilePoint.X;
+            toPoint.Y += farmer.TilePoint.Y;
         }
         if (fadeToBlack)
         {

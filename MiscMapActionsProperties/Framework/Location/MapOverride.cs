@@ -16,14 +16,39 @@ namespace MiscMapActionsProperties.Framework.Location;
 public sealed class MapOverrideModel
 {
     public string Id { get; set; } = null!;
-    public string SourceMap { get; set; } = "SkullCaveAltar";
+    public string SourceMap { get; set; } = "Maps/SkullCaveAltar";
     public Rectangle? SourceRect { get; set; } = null;
     public Rectangle? TargetRect { get; set; } = null;
+    public bool TargetRectIsRelative { get; set; } = false;
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
 
     private string? mapOverrideKey = null;
     internal string MapOverrideKey => mapOverrideKey ??= $"{ModEntry.ModId}+MapOverride/{Id}";
+
+    internal string StoredId { get; private set; } = string.Empty;
+
+    private Rectangle? RelTargetRect = null;
+
+    internal void UpdateRelTargetRect(Point? relPoint)
+    {
+        if (relPoint is Point relPointV && TargetRectIsRelative && TargetRect is Rectangle targetRect)
+        {
+            StoredId = string.Concat(Id, MapOverride.Ctrl_SEP_RelCoord, relPointV.X, ' ', relPointV.Y);
+            RelTargetRect = new(
+                targetRect.X + relPointV.X,
+                targetRect.Y + relPointV.Y,
+                targetRect.Width,
+                targetRect.Height
+            );
+            ModEntry.Log($"RelTargetRect {RelTargetRect}");
+        }
+        else
+        {
+            StoredId = Id;
+            RelTargetRect = null;
+        }
+    }
 
     internal bool ApplyMapOverride(GameLocation location, HashSet<string> appliedMapOverrides)
     {
@@ -35,7 +60,7 @@ public sealed class MapOverrideModel
                     Game1.game1.xTileContent.Load<Map>(SourceMap),
                     MapOverrideKey,
                     SourceRect,
-                    TargetRect,
+                    RelTargetRect ?? TargetRect,
                     perTileCustomAction: ClearTargetRectOnApply ? location.cleanUpTileForMapOverride : null
                 );
             }
@@ -56,7 +81,8 @@ internal static class MapOverride
     private const char Ctrl_SEP = ',';
     private const char Ctrl_ADD = '+';
     private const char Ctrl_RMV = '-';
-    internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_ADD, Ctrl_RMV];
+    internal const char Ctrl_SEP_RelCoord = '@';
+    internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_SEP_RelCoord, Ctrl_ADD, Ctrl_RMV];
     private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
     private const string MP_UpdateMapOverride = "UpdateMapOverride";
     private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
@@ -93,20 +119,35 @@ internal static class MapOverride
         CommonPatch.RegisterTileAndTouch(Action_UpdateMapOverride, TileUpdateMapOverride);
     }
 
-    private static bool TryGetModMapOverrides(GameLocation location, [NotNullWhen(true)] out string[]? mapOverrides)
+    private static bool TryGetModMapOverrides(
+        GameLocation location,
+        [NotNullWhen(true)] out List<(string, Point?)>? mapOverrides
+    )
     {
         mapOverrides = null;
         if (!location.modData.TryGetValue(ModData_MapOverrides, out string mapOverridesStr))
         {
             return false;
         }
-        mapOverrides = mapOverridesStr.Split(Ctrl_SEP);
+        mapOverrides = [];
+        foreach (string part in mapOverridesStr.Split(Ctrl_SEP))
+        {
+            string[] subparts = part.Split(Ctrl_SEP_RelCoord);
+            if (subparts.Length > 1 && ArgUtility.TryGetPoint(subparts[1].Split(' '), 0, out Point relPoint, out _))
+            {
+                mapOverrides.Add(new(subparts[0], relPoint));
+            }
+            else
+            {
+                mapOverrides.Add(new(subparts[0], null));
+            }
+        }
         return mapOverrides.Any();
     }
 
-    private static string UpdateModMapOverrides(GameLocation location, HashSet<string> mapOverrides)
+    private static string UpdateModMapOverrides(GameLocation location, IEnumerable<string> mapOverrides)
     {
-        if (mapOverrides.Count > 0)
+        if (mapOverrides.Any())
         {
             string joined = string.Join(Ctrl_SEP, mapOverrides);
             location.modData[ModData_MapOverrides] = joined;
@@ -127,13 +168,13 @@ internal static class MapOverride
     )
     {
         __state = null;
-        if (!TryGetModMapOverrides(__instance, out string[]? mapOverrides))
+        if (!TryGetModMapOverrides(__instance, out List<(string, Point?)>? mapOverrides))
         {
             return;
         }
         List<MapOverrideModel>? validOverrideModels = [];
         HashSet<string> validOverrideIds = [];
-        foreach (string mapOverrideId in mapOverrides)
+        foreach ((string mapOverrideId, Point? relPoint) in mapOverrides)
         {
             if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
             {
@@ -143,6 +184,7 @@ internal static class MapOverride
             {
                 continue;
             }
+            model.UpdateRelTargetRect(relPoint);
             if (validOverrideIds.Add(model.Id))
             {
                 validOverrideModels.Add(model);
@@ -171,7 +213,7 @@ internal static class MapOverride
             }
             __state = validOverrideModels;
         }
-        UpdateModMapOverrides(__instance, validOverrideIds);
+        UpdateModMapOverrides(__instance, validOverrideModels.Select(model => model.StoredId));
     }
 
     private static void GameLocation_MakeMapModifications_Postfix(
@@ -271,7 +313,7 @@ internal static class MapOverride
 
     private static bool TileUpdateMapOverride(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (DoUpdateMapOverride(Game1.currentLocation, args, who, out string error))
+        if (DoUpdateMapOverride(Game1.currentLocation, args, point, out string error))
             return true;
         ModEntry.Log(error, LogLevel.Error);
         return false;
@@ -279,11 +321,12 @@ internal static class MapOverride
 
     private static bool TriggerUpdateMapOverride(string[] args, TriggerActionContext context, out string error)
     {
-        return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player, out error);
+        return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player.TilePoint, out error);
     }
 
-    private static bool DoUpdateMapOverride(GameLocation location, string[] args, Farmer who, out string error)
+    private static bool DoUpdateMapOverride(GameLocation location, string[] args, Point point, out string error)
     {
+        ModEntry.Log($"DoUpdateMapOverride {point}");
         if (location == null || location.Map == null)
         {
             error = "Location map is null";
@@ -301,10 +344,10 @@ internal static class MapOverride
         bool needForcedReload = false;
         bool hasChanged = false;
 
-        if (TryGetModMapOverrides(location, out string[]? mapOverridesArray))
+        if (TryGetModMapOverrides(location, out List<(string, Point?)>? mapOverridesArray))
         {
             mapOverrides = [];
-            foreach (string mapOverrideId in mapOverridesArray)
+            foreach ((string mapOverrideId, Point? relPoint) in mapOverridesArray)
             {
                 if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
                 {
@@ -318,6 +361,7 @@ internal static class MapOverride
             }
         }
 
+        List<MapOverrideModel> appliedMapOverrides = [];
         HashSet<string> _appliedMapOverrides = (HashSet<string>)_appliedMapOverridesField!.GetValue(location)!;
         for (int i = 2; i < args.Length - 1; i += 2)
         {
@@ -345,6 +389,8 @@ internal static class MapOverride
                             needForcedReload
                             || maxPrecedence > model.Precedence
                             || maxPrecedence == model.Precedence && maxId.CompareTo(model.Id) > 0;
+                        model.UpdateRelTargetRect(point);
+                        appliedMapOverrides.Add(model);
                     }
                     break;
                 case Ctrl_RMV:
@@ -352,6 +398,8 @@ internal static class MapOverride
                     {
                         hasChanged = true;
                         needForcedReload = true;
+                        model.UpdateRelTargetRect(null);
+                        appliedMapOverrides.Add(model);
                         _appliedMapOverrides.Remove(model.MapOverrideKey);
                     }
                     break;
@@ -361,7 +409,7 @@ internal static class MapOverride
         if (!hasChanged)
             return true;
 
-        string updatedOverrides = UpdateModMapOverrides(location, mapOverrides);
+        string updatedOverrides = UpdateModMapOverrides(location, appliedMapOverrides.Select(model => model.StoredId));
 
         location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
         if (Game1.currentLocation == location)
