@@ -100,11 +100,7 @@ internal static class HumanDoorExt
 
     private static bool TriggerWrpHere(string[] args, TriggerActionContext context, out string error)
     {
-        if (!ArgUtility.TryGetPoint(args, 1, out Point fromPoint, out error, name: "string fromPoint"))
-        {
-            return false;
-        }
-        if (!DoWrpHere(Game1.currentLocation, args, Game1.player, fromPoint, 3, out error))
+        if (!DoWrpHere(Game1.currentLocation, args, Game1.player, Game1.player.TilePoint, out error))
         {
             ModEntry.LogOnce(error);
             return false;
@@ -114,7 +110,7 @@ internal static class HumanDoorExt
 
     private static bool TileWrpHere(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!DoWrpHere(location, args, farmer, point, 1, out string error))
+        if (!DoWrpHere(location, args, farmer, point, out string error))
         {
             ModEntry.LogOnce(error);
             return false;
@@ -122,20 +118,13 @@ internal static class HumanDoorExt
         return true;
     }
 
-    private static bool DoWrpHere(
-        GameLocation location,
-        string[] args,
-        Farmer farmer,
-        Point point,
-        int startIndex,
-        out string error
-    )
+    private static bool DoWrpHere(GameLocation location, string[] args, Farmer farmer, Point point, out string error)
     {
         if (
-            !ArgUtility.TryGetPoint(args, startIndex, out Point toPoint, out error, name: "string toPoint")
+            !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out error, name: "string toPoint")
             || !ArgUtility.TryGetOptionalInt(
                 args,
-                startIndex + 2,
+                3,
                 out int direction,
                 out error,
                 defaultValue: -1,
@@ -143,7 +132,7 @@ internal static class HumanDoorExt
             )
             || !ArgUtility.TryGetOptionalBool(
                 args,
-                startIndex + 3,
+                4,
                 out bool fadeToBlack,
                 out error,
                 defaultValue: true,
@@ -151,7 +140,7 @@ internal static class HumanDoorExt
             )
             || !ArgUtility.TryGetOptionalBool(
                 args,
-                startIndex + 4,
+                5,
                 out bool relative,
                 out error,
                 defaultValue: true,
@@ -163,8 +152,8 @@ internal static class HumanDoorExt
         }
         if (relative)
         {
-            toPoint.X += farmer.TilePoint.X;
-            toPoint.Y += farmer.TilePoint.Y;
+            toPoint.X += point.X;
+            toPoint.Y += point.Y;
         }
         if (fadeToBlack)
         {
