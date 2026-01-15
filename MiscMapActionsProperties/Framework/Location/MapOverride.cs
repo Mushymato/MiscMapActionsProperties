@@ -16,6 +16,7 @@ namespace MiscMapActionsProperties.Framework.Location;
 public sealed class MapOverrideModel
 {
     public string Id { get; set; } = null!;
+    public string? RemovedById { get; set; } = null;
     public string SourceMap { get; set; } = "Maps/SkullCaveAltar";
     public Rectangle? SourceRect { get; set; } = null;
     public Rectangle? TargetRect { get; set; } = null;
@@ -68,7 +69,7 @@ public sealed class MapOverrideModel
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to apply map override '{Id}':\n{err}");
+            ModEntry.Log($"Failed to apply map override '{Id}':\n{err}", LogLevel.Error);
             return false;
         }
     }
@@ -82,8 +83,10 @@ internal static class MapOverride
     private const char Ctrl_ADD = '+';
     private const char Ctrl_RMV = '-';
     internal const char Ctrl_SEP_RelCoord = '@';
+    private const string Ctrl_RemoveAll = "RemoveAll";
     internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_SEP_RelCoord, Ctrl_ADD, Ctrl_RMV];
     private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
+    private const string GSQ_M = $"{ModEntry.ModId}_UpdateMapOverride";
     private const string MP_UpdateMapOverride = "UpdateMapOverride";
     private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
 
@@ -150,11 +153,13 @@ internal static class MapOverride
         if (mapOverrides.Any())
         {
             string joined = string.Join(Ctrl_SEP, mapOverrides);
+            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): '{joined}'");
             location.modData[ModData_MapOverrides] = joined;
             return joined;
         }
         else
         {
+            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): ''");
             location.modData.Remove(ModData_MapOverrides);
             return "";
         }
@@ -249,6 +254,7 @@ internal static class MapOverride
         {
             _mapOverrideData ??= Game1.content.Load<Dictionary<string, MapOverrideModel>>(Asset_MapOverride);
             HashSet<string> invalid = [];
+            // pass 1 check illegal chars
             foreach ((string id, MapOverrideModel model) in _mapOverrideData)
             {
                 foreach (char illegal in ILLEGAL_CHARS)
@@ -261,6 +267,24 @@ internal static class MapOverride
                     }
                 }
                 model.Id = id;
+                if (model.RemovedById != null)
+                {
+                    if (
+                        !invalid.Contains(model.RemovedById)
+                        && _mapOverrideData.TryGetValue(model.RemovedById, out MapOverrideModel? removeModel)
+                    )
+                    {
+                        removeModel.RemovedById = model.Id;
+                    }
+                    else
+                    {
+                        ModEntry.Log(
+                            $"Override with RemovedById '{model.RemovedById}' which does not refer to valid model",
+                            LogLevel.Error
+                        );
+                        invalid.Add(id);
+                    }
+                }
             }
             _mapOverrideData.RemoveWhere(kv => invalid.Contains(kv.Key));
             return _mapOverrideData;
@@ -338,7 +362,7 @@ internal static class MapOverride
             location = GameStateQuery.Helpers.GetLocation(locationName, location);
         }
 
-        HashSet<string> mapOverrides = [];
+        Dictionary<string, (MapOverrideModel, Point?)> mapOverrides = [];
         int maxPrecedence = 0;
         string maxId = string.Empty;
         bool needForcedReload = false;
@@ -357,11 +381,31 @@ internal static class MapOverride
                 }
                 maxPrecedence = Math.Max(maxPrecedence, model.Precedence);
                 maxId = maxId.CompareTo(model.Id) > 0 ? model.Id : maxId;
-                mapOverrides.Add(mapOverrideId);
+                mapOverrides[mapOverrideId] = (model, relPoint);
             }
         }
 
-        List<MapOverrideModel> appliedMapOverrides = [];
+        List<(char, string)> ArgList = [];
+        if (
+            ArgUtility.TryGetOptional(args, 2, out string removeAll, out error, name: "string removeAll")
+            && removeAll.EqualsIgnoreCase(Ctrl_RemoveAll)
+        )
+        {
+            foreach (string key in mapOverrides.Keys)
+            {
+                ArgList.Add((Ctrl_RMV, key));
+            }
+        }
+        else
+        {
+            for (int i = 2; i < args.Length - 1; i += 2)
+            {
+                char mode = args[i][0];
+                string mapOverrideId = args[i + 1];
+                ArgList.Add((mode, mapOverrideId));
+            }
+        }
+
         HashSet<string> _appliedMapOverrides = (HashSet<string>)_appliedMapOverridesField!.GetValue(location)!;
         for (int i = 2; i < args.Length - 1; i += 2)
         {
@@ -382,7 +426,7 @@ internal static class MapOverride
             switch (mode)
             {
                 case Ctrl_ADD:
-                    if (mapOverrides.Add(model.Id))
+                    if (!mapOverrides.ContainsKey(model.Id))
                     {
                         hasChanged = true;
                         needForcedReload =
@@ -390,16 +434,43 @@ internal static class MapOverride
                             || maxPrecedence > model.Precedence
                             || maxPrecedence == model.Precedence && maxId.CompareTo(model.Id) > 0;
                         model.UpdateRelTargetRect(point);
-                        appliedMapOverrides.Add(model);
+                        if (model.RemovedById != null)
+                        {
+                            // RemovedById: need to clear the the "remove" map override
+                            // Does not actually attempt to remove it though, trusts that the map does what it says
+                            if (mapOverrides.TryGetValue(model.RemovedById, out (MapOverrideModel, Point?) prevRmvData))
+                            {
+                                mapOverrides.Remove(model.RemovedById);
+                                _appliedMapOverrides.Remove(prevRmvData.Item1.MapOverrideKey);
+                                prevRmvData.Item1.UpdateRelTargetRect(null);
+                            }
+                        }
                     }
                     break;
                 case Ctrl_RMV:
-                    if (mapOverrides.Remove(model.Id))
+                    if (mapOverrides.TryGetValue(model.Id, out (MapOverrideModel, Point?) prevData))
                     {
                         hasChanged = true;
-                        needForcedReload = true;
+                        if (
+                            model.RemovedById != null
+                            && !mapOverrides.ContainsKey(model.RemovedById)
+                            && MapOverrideData.TryGetValue(model.RemovedById, out MapOverrideModel? removeModel)
+                        )
+                        {
+                            // RemovedById: remove by applying a different model
+                            needForcedReload =
+                                needForcedReload
+                                || maxPrecedence > removeModel.Precedence
+                                || maxPrecedence == removeModel.Precedence && maxId.CompareTo(removeModel.Id) > 0;
+                            removeModel.UpdateRelTargetRect(prevData.Item2);
+                            mapOverrides[model.RemovedById] = (removeModel, prevData.Item2);
+                        }
+                        else
+                        {
+                            needForcedReload = true;
+                        }
                         model.UpdateRelTargetRect(null);
-                        appliedMapOverrides.Add(model);
+                        mapOverrides.Remove(model.Id);
                         _appliedMapOverrides.Remove(model.MapOverrideKey);
                     }
                     break;
@@ -409,7 +480,10 @@ internal static class MapOverride
         if (!hasChanged)
             return true;
 
-        string updatedOverrides = UpdateModMapOverrides(location, appliedMapOverrides.Select(model => model.StoredId));
+        string updatedOverrides = UpdateModMapOverrides(
+            location,
+            mapOverrides.Values.Select(modelData => modelData.Item1.StoredId)
+        );
 
         location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
         if (Game1.currentLocation == location)

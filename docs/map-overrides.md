@@ -49,7 +49,7 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
 }
 ```
 
-## Usage via mushymato.MMAP_UpdateMapOverride <location> [[mode] [mapOverrideId]]
+## Usage via mushymato.MMAP_UpdateMapOverride \<location\> [[mode] [mapOverrideId]]
 
 Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
 Applies the given map overrides.
@@ -58,6 +58,8 @@ The arguments are
 - `location`: Either `Here` or a location name.
 - `mode`: Either `+` for adding an override, or `-` for removing an override.
 - `mapOverrideId`: The map override id set in the data asset.
+
+Special case: if the first mode argument is `RemoveAll`, then every applied map override is removed.
 
 You can give an arbitrary number of `mode` and `mapOverride` pairs. It is recommended to use this action one time and apply all the map override changes you want, instead of calling this action many times.
 

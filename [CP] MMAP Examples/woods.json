@@ -24,7 +24,7 @@
         // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose Fill
         // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/nightherondex Fit
         // debug action mushymato.MMAP_ScaledOverlay 1000
-        "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"
+        // "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"
       }
     }
   ]
