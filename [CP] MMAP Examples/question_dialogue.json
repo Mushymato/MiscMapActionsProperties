@@ -118,6 +118,7 @@
             "Cancel": {}
           }
         },
+        // debug action mushymato.MMAP_QuestionDialogue mushymato.MMAP.Example_Paginated Horseradish1
         "{{ModId}}_Paginated": {
           "Speaker": "Trenchcoat",
           "SpeakerDisplayName": "[LocalizedText Strings\\NPCNames:Clint]",

@@ -169,7 +169,7 @@ internal static class MapOverride
         }
         else
         {
-            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): ''");
+            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): <empty>");
             location.modData.Remove(ModData_MapOverrides);
             return "";
         }
@@ -395,11 +395,14 @@ internal static class MapOverride
         }
 
         List<(char, string)> ArgList = [];
+        bool isRemoveAll = false;
         if (
             ArgUtility.TryGetOptional(args, 2, out string removeAll, out error, name: "string removeAll")
             && removeAll.EqualsIgnoreCase(Ctrl_RemoveAll)
         )
         {
+            isRemoveAll = true;
+            ModEntry.Log("Will remove all map overrides");
             foreach (string key in mapOverrides.Keys)
             {
                 ArgList.Add((Ctrl_RMV, key));
@@ -416,11 +419,8 @@ internal static class MapOverride
         }
 
         HashSet<string> _appliedMapOverrides = (HashSet<string>)_appliedMapOverridesField!.GetValue(location)!;
-        for (int i = 2; i < args.Length - 1; i += 2)
+        foreach ((char mode, string mapOverrideId) in ArgList)
         {
-            char mode = args[i][0];
-            string mapOverrideId = args[i + 1];
-
             if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
             {
                 error = $"Map override id '{mapOverrideId}' not found";
@@ -462,7 +462,8 @@ internal static class MapOverride
                     {
                         hasChanged = true;
                         if (
-                            model.RemovedById != null
+                            !isRemoveAll
+                            && model.RemovedById != null
                             && !mapOverrides.ContainsKey(model.RemovedById)
                             && MapOverrideData.TryGetValue(model.RemovedById, out MapOverrideModel? removeModel)
                         )

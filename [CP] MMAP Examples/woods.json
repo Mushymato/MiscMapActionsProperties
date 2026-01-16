@@ -17,15 +17,15 @@
       "Target": "{{ModId}}/goose, {{ModId}}/nightherondex",
       "FromFile": "assets/{{TargetWithoutPath}}.png"
     },
-    {
-      "Action": "EditMap",
-      "Target": "Maps/Farm",
-      "MapProperties": {
-        // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose Fill
-        // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/nightherondex Fit
-        // debug action mushymato.MMAP_ScaledOverlay 1000
-        // "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"
-      }
-    }
+    // {
+    //   "Action": "EditMap",
+    //   "Target": "Maps/Farm",
+    //   "MapProperties": {
+    //     // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose Fill
+    //     // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/nightherondex Fit
+    //     // debug action mushymato.MMAP_ScaledOverlay 1000
+    //     // "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"
+    //   }
+    // }
   ]
 }

@@ -107,7 +107,7 @@ internal static class QuestionDialogue
 
         GameStateQueryContext context = new(location, farmer, null, null, null, null, null);
 
-        IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context);
+        IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context, pickResponse);
         if (validEntries.Count == 0)
         {
             ModEntry.Log($"ShowQuestionDialogue({qdId}): No valid entries found");
@@ -155,15 +155,7 @@ internal static class QuestionDialogue
             };
         }
 
-        if (pickResponse != null && validEntries.TryGetValue(pickResponse, out QuestionDialogueEntry? qde))
-        {
-            ModEntry.Log(
-                $"ShowQuestionDialogue({qdId}): Got 1 valid picked entry '{pickResponse}' and will immediately perform"
-            );
-            qde.PerformQDActions(location, tilePosition, farmer);
-            return true;
-        }
-        else if (string.IsNullOrEmpty(qdData.DialogueBefore))
+        if (string.IsNullOrEmpty(qdData.DialogueBefore))
         {
             return MakeQuestion(location, farmer, tilePosition, qdId, qdData, validEntries, speaker);
         }
@@ -370,8 +362,8 @@ public sealed class QuestionDialogueData
     /// <summary>Number of entries to show before displaying a "next" button to go to next page.</summary>
     public int Pagination { get; set; } = -1;
 
-    /// <summary>If this is true and there is only one entry, immediately perform it without displaying any dialogue.</summary>
-    public bool ImmediatelyPerformSingleValidResponse { get; set; } = false;
+    /// <summary>If this is true and there is only one entry, immediately perform instead of displaying the choice.</summary>
+    public bool ImmediatelyPerformSingleValidResponse { get; set; } = true;
 
     /// <summary>List of responses</summary>
     public Dictionary<string, QuestionDialogueEntry> ResponseEntries { get; set; } = [];
@@ -379,8 +371,15 @@ public sealed class QuestionDialogueData
     /// <summary>Get all valid entries per GSQ</summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    internal IDictionary<string, QuestionDialogueEntry> ValidEntries(GameStateQueryContext context)
+    internal IDictionary<string, QuestionDialogueEntry> ValidEntries(
+        GameStateQueryContext context,
+        string? pickResponse
+    )
     {
+        if (pickResponse != null && ResponseEntries.TryGetValue(pickResponse, out QuestionDialogueEntry? qdeV))
+        {
+            return new Dictionary<string, QuestionDialogueEntry>() { [pickResponse] = qdeV };
+        }
         return ResponseEntries
             .Where((qde) => qde.Value.IsValid(context))
             .ToDictionary(qde => qde.Key, qde => qde.Value);

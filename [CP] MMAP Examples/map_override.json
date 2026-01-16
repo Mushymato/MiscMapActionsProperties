@@ -62,6 +62,7 @@
         // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_PairedA
         // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_PairedB
         // debug action mushymato.MMAP_UpdateMapOverride Here - mushymato.MMAP.Example_Chimkins_PairedA
+        // debug action mushymato.MMAP_UpdateMapOverride Here RemoveAll
         "{{ModId}}_Chimkins_PairedA": {
           "Id": "{{ModId}}_Chimkins_PairedA",
           "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
