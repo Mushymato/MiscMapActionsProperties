@@ -35,14 +35,20 @@ public sealed class MapOverrideModel
     {
         if (relPoint is Point relPointV && TargetRectIsRelative && TargetRect is Rectangle targetRect)
         {
-            StoredId = string.Concat(Id, MapOverride.Ctrl_SEP_RelCoord, relPointV.X, ' ', relPointV.Y);
+            StoredId = string.Concat(
+                Id,
+                MapOverride.Ctrl_SEP_RelCoord,
+                relPointV.X,
+                MapOverride.Ctrl_SEP_RelCoordXY,
+                relPointV.Y
+            );
             RelTargetRect = new(
                 targetRect.X + relPointV.X,
                 targetRect.Y + relPointV.Y,
                 targetRect.Width,
                 targetRect.Height
             );
-            ModEntry.Log($"RelTargetRect {RelTargetRect}");
+            ModEntry.Log($"RelTargetRect {Id}: {relPoint} {RelTargetRect}");
         }
         else
         {
@@ -83,10 +89,11 @@ internal static class MapOverride
     private const char Ctrl_ADD = '+';
     private const char Ctrl_RMV = '-';
     internal const char Ctrl_SEP_RelCoord = '@';
+    internal const char Ctrl_SEP_RelCoordXY = '.';
     private const string Ctrl_RemoveAll = "RemoveAll";
     internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_SEP_RelCoord, Ctrl_ADD, Ctrl_RMV];
     private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
-    private const string GSQ_M = $"{ModEntry.ModId}_UpdateMapOverride";
+    private const string GSQ_HAS_MAP_OVERRIDE = $"{ModEntry.ModId}_UpdateMapOverride";
     private const string MP_UpdateMapOverride = "UpdateMapOverride";
     private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
 
@@ -136,7 +143,10 @@ internal static class MapOverride
         foreach (string part in mapOverridesStr.Split(Ctrl_SEP))
         {
             string[] subparts = part.Split(Ctrl_SEP_RelCoord);
-            if (subparts.Length > 1 && ArgUtility.TryGetPoint(subparts[1].Split(' '), 0, out Point relPoint, out _))
+            if (
+                subparts.Length > 1
+                && ArgUtility.TryGetPoint(subparts[1].Split(Ctrl_SEP_RelCoordXY), 0, out Point relPoint, out _)
+            )
             {
                 mapOverrides.Add(new(subparts[0], relPoint));
             }
@@ -350,7 +360,6 @@ internal static class MapOverride
 
     private static bool DoUpdateMapOverride(GameLocation location, string[] args, Point point, out string error)
     {
-        ModEntry.Log($"DoUpdateMapOverride {point}");
         if (location == null || location.Map == null)
         {
             error = "Location map is null";
@@ -445,6 +454,7 @@ internal static class MapOverride
                                 prevRmvData.Item1.UpdateRelTargetRect(null);
                             }
                         }
+                        mapOverrides[model.Id] = (model, point);
                     }
                     break;
                 case Ctrl_RMV:

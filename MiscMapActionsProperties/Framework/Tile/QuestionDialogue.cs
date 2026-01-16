@@ -88,6 +88,12 @@ internal static class QuestionDialogue
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
+        if (!ArgUtility.TryGetOptional(args, 2, out string? pickResponse, out error, "string pickResponse"))
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+
         if (!QDData.TryGetValue(qdId, out QuestionDialogueData? qdData))
         {
             ModEntry.Log($"No entry '{qdId}' in asset {Asset_QuestionDialogue}", LogLevel.Error);
@@ -149,7 +155,15 @@ internal static class QuestionDialogue
             };
         }
 
-        if (string.IsNullOrEmpty(qdData.DialogueBefore))
+        if (pickResponse != null && validEntries.TryGetValue(pickResponse, out QuestionDialogueEntry? qde))
+        {
+            ModEntry.Log(
+                $"ShowQuestionDialogue({qdId}): Got 1 valid picked entry '{pickResponse}' and will immediately perform"
+            );
+            qde.PerformQDActions(location, tilePosition, farmer);
+            return true;
+        }
+        else if (string.IsNullOrEmpty(qdData.DialogueBefore))
         {
             return MakeQuestion(location, farmer, tilePosition, qdId, qdData, validEntries, speaker);
         }
@@ -192,18 +206,11 @@ internal static class QuestionDialogue
         NPC? speaker
     )
     {
-        if (validEntries.Count == 1)
+        if (validEntries.Count == 1 && qdData.ImmediatelyPerformSingleValidResponse)
         {
             KeyValuePair<string, QuestionDialogueEntry> qde = validEntries.First();
-            if (qde.Value.Actions == null && qde.Value.TileActions == null && qde.Value.TouchActions == null)
-            {
-                ModEntry.Log(
-                    $"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}', with no Actions/TileActions/TouchActions"
-                );
-                return false;
-            }
-            ModEntry.Log($"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}'");
-            AfterQuestionBehavior(location, tilePosition, validEntries, farmer, qde.Key);
+            ModEntry.Log($"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}' and will immediately perform");
+            qde.Value.PerformQDActions(location, tilePosition, farmer);
             return true;
         }
 
@@ -277,35 +284,7 @@ internal static class QuestionDialogue
         ModEntry.Log($"AfterQuestionBehavior: {whichAnswer}");
         if (validEntries.TryGetValue(whichAnswer, out QuestionDialogueEntry? qde))
         {
-            if (qde.Actions != null)
-            {
-                // Perform all (trigger) actions
-                foreach (string action in qde.Actions)
-                {
-                    if (!TriggerActionManager.TryRunAction(action, out string error, out Exception _))
-                    {
-                        ModEntry.Log(error, LogLevel.Error);
-                    }
-                }
-            }
-            if (qde.TileActions != null)
-            {
-                // Return after first successful tile action
-                xTile.Dimensions.Location loc = new(point.X, point.Y);
-                foreach (string action in qde.TileActions)
-                {
-                    if (location.performAction(action, who, loc) && qde.TileActionStopAtFirstSuccess)
-                        return;
-                }
-            }
-            if (qde.TouchActions != null)
-            {
-                // Perform all touch tile actions
-                foreach (string action in qde.TouchActions)
-                {
-                    location.performTouchAction(action, new(point.X, point.Y));
-                }
-            }
+            qde.PerformQDActions(location, point, who);
         }
     }
 }
@@ -329,33 +308,73 @@ public sealed class QuestionDialogueEntry
 
     /// <summary>List of touch actions</summary>
     public List<string>? TouchActions = null;
+
+    internal bool IsValid(GameStateQueryContext context) =>
+        (Actions != null || TileActions != null || TouchActions != null)
+        && GameStateQuery.CheckConditions(Condition, context);
+
+    internal void PerformQDActions(GameLocation location, Point point, Farmer who)
+    {
+        if (Actions != null)
+        {
+            // Perform all (trigger) actions
+            foreach (string action in Actions)
+            {
+                if (!TriggerActionManager.TryRunAction(action, out string error, out Exception _))
+                {
+                    ModEntry.Log(error, LogLevel.Error);
+                }
+            }
+        }
+        if (TileActions != null)
+        {
+            // Return after first successful tile action
+            xTile.Dimensions.Location loc = new(point.X, point.Y);
+            foreach (string action in TileActions)
+            {
+                if (location.performAction(action, who, loc) && TileActionStopAtFirstSuccess)
+                    return;
+            }
+        }
+        if (TouchActions != null)
+        {
+            // Perform all touch tile actions
+            foreach (string action in TouchActions)
+            {
+                location.performTouchAction(action, new(point.X, point.Y));
+            }
+        }
+    }
 }
 
 public sealed class QuestionDialogueData
 {
     /// <summary>Response GSQ condition</summary>
-    public string? Condition = null;
+    public string? Condition { get; set; } = null;
 
     /// <summary>Optional dialogue to display before raising the question</summary>
-    public string? DialogueBefore = null;
+    public string? DialogueBefore { get; set; } = null;
 
     /// <summary>Question string</summary>
-    public string? Question = null;
+    public string? Question { get; set; } = null;
 
     /// <summary>Speaking NPC</summary>
-    public string? Speaker = null;
+    public string? Speaker { get; set; } = null;
 
     /// <summary>Speaking Display Name</summary>
-    public string? SpeakerDisplayName = null;
+    public string? SpeakerDisplayName { get; set; } = null;
 
     /// <summary>Speaking NPC Portrait</summary>
-    public string? SpeakerPortrait = null;
+    public string? SpeakerPortrait { get; set; } = null;
 
     /// <summary>Number of entries to show before displaying a "next" button to go to next page.</summary>
-    public int Pagination = -1;
+    public int Pagination { get; set; } = -1;
+
+    /// <summary>If this is true and there is only one entry, immediately perform it without displaying any dialogue.</summary>
+    public bool ImmediatelyPerformSingleValidResponse { get; set; } = false;
 
     /// <summary>List of responses</summary>
-    public Dictionary<string, QuestionDialogueEntry> ResponseEntries = [];
+    public Dictionary<string, QuestionDialogueEntry> ResponseEntries { get; set; } = [];
 
     /// <summary>Get all valid entries per GSQ</summary>
     /// <param name="context"></param>
@@ -363,7 +382,7 @@ public sealed class QuestionDialogueData
     internal IDictionary<string, QuestionDialogueEntry> ValidEntries(GameStateQueryContext context)
     {
         return ResponseEntries
-            .Where((qde) => GameStateQuery.CheckConditions(qde.Value.Condition, context))
+            .Where((qde) => qde.Value.IsValid(context))
             .ToDictionary(qde => qde.Key, qde => qde.Value);
     }
 }

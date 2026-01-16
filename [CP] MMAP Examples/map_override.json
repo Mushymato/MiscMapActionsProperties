@@ -47,12 +47,40 @@
           },
           "Precedence": 1
         },
+        // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_Relative
         "{{ModId}}_Chimkins_Relative": {
           "Id": "{{ModId}}_Chimkins_Relative",
           "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
           "TargetRectIsRelative": true,
           "TargetRect": {
             "X": 3,
+            "Y": -1,
+            "Width": 1,
+            "Height": 2
+          },
+        },
+        // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_PairedA
+        // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_PairedB
+        // debug action mushymato.MMAP_UpdateMapOverride Here - mushymato.MMAP.Example_Chimkins_PairedA
+        "{{ModId}}_Chimkins_PairedA": {
+          "Id": "{{ModId}}_Chimkins_PairedA",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
+          "TargetRectIsRelative": true,
+          "RemovedById": "{{ModId}}_Chimkins_PairedB",
+          "TargetRect": {
+            "X": 2,
+            "Y": -1,
+            "Width": 1,
+            "Height": 2
+          },
+        },
+        "{{ModId}}_Chimkins_PairedB": {
+          "Id": "{{ModId}}_Chimkins_PairedB",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
+          "TargetRectIsRelative": true,
+          "RemovedById": "{{ModId}}_Chimkins_PairedA",
+          "TargetRect": {
+            "X": -2,
             "Y": -1,
             "Width": 1,
             "Height": 2
