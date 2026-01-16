@@ -212,7 +212,7 @@ internal static class MapOverride
                 {
                     if (modelA.Precedence != modelB.Precedence)
                         return modelA.Precedence.CompareTo(modelB.Precedence);
-                    return modelA.Id.CompareTo(modelB.Id);
+                    return 0;
                 }
             );
             if (force)
@@ -373,7 +373,6 @@ internal static class MapOverride
 
         Dictionary<string, (MapOverrideModel, Point?)> mapOverrides = [];
         int maxPrecedence = 0;
-        string maxId = string.Empty;
         bool needForcedReload = false;
         bool hasChanged = false;
 
@@ -389,7 +388,6 @@ internal static class MapOverride
                     continue;
                 }
                 maxPrecedence = Math.Max(maxPrecedence, model.Precedence);
-                maxId = maxId.CompareTo(model.Id) > 0 ? model.Id : maxId;
                 mapOverrides[mapOverrideId] = (model, relPoint);
             }
         }
@@ -438,10 +436,7 @@ internal static class MapOverride
                     if (!mapOverrides.ContainsKey(model.Id))
                     {
                         hasChanged = true;
-                        needForcedReload =
-                            needForcedReload
-                            || maxPrecedence > model.Precedence
-                            || maxPrecedence == model.Precedence && maxId.CompareTo(model.Id) > 0;
+                        needForcedReload = needForcedReload || maxPrecedence > model.Precedence;
                         model.UpdateRelTargetRect(point);
                         if (model.RemovedById != null)
                         {
@@ -469,10 +464,7 @@ internal static class MapOverride
                         )
                         {
                             // RemovedById: remove by applying a different model
-                            needForcedReload =
-                                needForcedReload
-                                || maxPrecedence > removeModel.Precedence
-                                || maxPrecedence == removeModel.Precedence && maxId.CompareTo(removeModel.Id) > 0;
+                            needForcedReload = needForcedReload || maxPrecedence > removeModel.Precedence;
                             removeModel.UpdateRelTargetRect(prevData.Item2);
                             mapOverrides[model.RemovedById] = (removeModel, prevData.Item2);
                         }
@@ -500,7 +492,10 @@ internal static class MapOverride
         if (Game1.currentLocation == location)
         {
             if (needForcedReload)
+            {
+                ModEntry.Log($"Require force reload for reorder");
                 location.loadMap(location.mapPath.Value, true);
+            }
             location.MakeMapModifications(needForcedReload);
         }
 
