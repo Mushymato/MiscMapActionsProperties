@@ -299,9 +299,12 @@ public sealed class QuestionDialogueEntry
     /// <summary>List of touch actions</summary>
     public List<string>? TouchActions = null;
 
-    internal bool IsValid(GameStateQueryContext context) =>
-        (Actions != null || TileActions != null || TouchActions != null)
-        && GameStateQuery.CheckConditions(Condition, context);
+    internal bool IsValid(GameStateQueryContext context)
+    {
+        bool hasAnyAction = Actions != null || TileActions != null || TouchActions != null;
+        bool isCancel = Actions == null && TileActions == null && TouchActions == null;
+        return (hasAnyAction || isCancel) && GameStateQuery.CheckConditions(Condition, context);
+    }
 
     internal void PerformQDActions(GameLocation location, Point point, Farmer who)
     {
@@ -371,11 +374,12 @@ public sealed class QuestionDialogueData
     /// <returns></returns>
     internal IDictionary<string, QuestionDialogueEntry> ValidEntries(
         GameStateQueryContext context,
-        IEnumerable<string> pickResponse
+        HashSet<string> pickResponse
     )
     {
+        bool hasPickedResponse = pickResponse.Any();
         return ResponseEntries
-            .Where((qde) => pickResponse.Contains(qde.Key) && qde.Value.IsValid(context))
+            .Where((qde) => (!hasPickedResponse || pickResponse.Contains(qde.Key)) && qde.Value.IsValid(context))
             .ToDictionary(qde => qde.Key, qde => qde.Value);
     }
 }
