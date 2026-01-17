@@ -88,11 +88,6 @@ internal static class QuestionDialogue
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        if (!ArgUtility.TryGetOptional(args, 2, out string? pickResponse, out error, "string pickResponse"))
-        {
-            ModEntry.Log(error, LogLevel.Error);
-            return false;
-        }
 
         if (!QDData.TryGetValue(qdId, out QuestionDialogueData? qdData))
         {
@@ -107,7 +102,10 @@ internal static class QuestionDialogue
 
         GameStateQueryContext context = new(location, farmer, null, null, null, null, null);
 
-        IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(context, pickResponse);
+        IDictionary<string, QuestionDialogueEntry> validEntries = qdData.ValidEntries(
+            context,
+            args.Skip(2).ToHashSet()
+        );
         if (validEntries.Count == 0)
         {
             ModEntry.Log($"ShowQuestionDialogue({qdId}): No valid entries found");
@@ -373,15 +371,11 @@ public sealed class QuestionDialogueData
     /// <returns></returns>
     internal IDictionary<string, QuestionDialogueEntry> ValidEntries(
         GameStateQueryContext context,
-        string? pickResponse
+        IEnumerable<string> pickResponse
     )
     {
-        if (pickResponse != null && ResponseEntries.TryGetValue(pickResponse, out QuestionDialogueEntry? qdeV))
-        {
-            return new Dictionary<string, QuestionDialogueEntry>() { [pickResponse] = qdeV };
-        }
         return ResponseEntries
-            .Where((qde) => qde.Value.IsValid(context))
+            .Where((qde) => pickResponse.Contains(qde.Key) && qde.Value.IsValid(context))
             .ToDictionary(qde => qde.Key, qde => qde.Value);
     }
 }

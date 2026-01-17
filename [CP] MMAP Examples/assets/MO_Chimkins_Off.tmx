@@ -77,12 +77,12 @@
   <layer id="2" name="Buildings" width="1" height="2">
     <data encoding="csv">
       0,
-      159
+      155
 </data>
   </layer>
   <layer id="3" name="Front" width="1" height="2">
     <data encoding="csv">
-      155,
+      159,
       0
 </data>
   </layer>

@@ -93,7 +93,7 @@ internal static class MapOverride
     private const string Ctrl_RemoveAll = "RemoveAll";
     internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_SEP_RelCoord, Ctrl_ADD, Ctrl_RMV];
     private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
-    private const string GSQ_HAS_MAP_OVERRIDE = $"{ModEntry.ModId}_UpdateMapOverride";
+    private const string GSQ_HAS_MAP_OVERRIDE = $"{ModEntry.ModId}_HAS_MAP_OVERRIDE";
     private const string MP_UpdateMapOverride = "UpdateMapOverride";
     private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
 
@@ -127,11 +127,30 @@ internal static class MapOverride
 
         TriggerActionManager.RegisterAction(Action_UpdateMapOverride, TriggerUpdateMapOverride);
         CommonPatch.RegisterTileAndTouch(Action_UpdateMapOverride, TileUpdateMapOverride);
+        GameStateQuery.Register(GSQ_HAS_MAP_OVERRIDE, HAS_MAP_OVERRIDE);
+    }
+
+    private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
+    {
+        if (
+            !ArgUtility.TryGet(query, 1, out string locationName, out string error, name: "string locationName")
+            || !ArgUtility.TryGet(query, 2, out string mapOverrideId, out error, name: "string mapOverrideId")
+        )
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+        GameLocation location = GameStateQuery.Helpers.GetLocation(locationName, Game1.currentLocation);
+        if (!TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverrides))
+        {
+            return false;
+        }
+        return mapOverrides.ContainsKey(mapOverrideId);
     }
 
     private static bool TryGetModMapOverrides(
         GameLocation location,
-        [NotNullWhen(true)] out List<(string, Point?)>? mapOverrides
+        [NotNullWhen(true)] out Dictionary<string, Point?>? mapOverrides
     )
     {
         mapOverrides = null;
@@ -148,11 +167,11 @@ internal static class MapOverride
                 && ArgUtility.TryGetPoint(subparts[1].Split(Ctrl_SEP_RelCoordXY), 0, out Point relPoint, out _)
             )
             {
-                mapOverrides.Add(new(subparts[0], relPoint));
+                mapOverrides[subparts[0]] = relPoint;
             }
             else
             {
-                mapOverrides.Add(new(subparts[0], null));
+                mapOverrides[subparts[0]] = null;
             }
         }
         return mapOverrides.Any();
@@ -183,7 +202,7 @@ internal static class MapOverride
     )
     {
         __state = null;
-        if (!TryGetModMapOverrides(__instance, out List<(string, Point?)>? mapOverrides))
+        if (!TryGetModMapOverrides(__instance, out Dictionary<string, Point?>? mapOverrides))
         {
             return;
         }
@@ -360,15 +379,15 @@ internal static class MapOverride
 
     private static bool DoUpdateMapOverride(GameLocation location, string[] args, Point point, out string error)
     {
+        if (ArgUtility.TryGet(args, 1, out string locationName, out error, name: "string locationName"))
+        {
+            location = GameStateQuery.Helpers.GetLocation(locationName, location);
+        }
+
         if (location == null || location.Map == null)
         {
             error = "Location map is null";
             return false;
-        }
-
-        if (ArgUtility.TryGet(args, 1, out string locationName, out error, name: "string locationName"))
-        {
-            location = GameStateQuery.Helpers.GetLocation(locationName, location);
         }
 
         Dictionary<string, (MapOverrideModel, Point?)> mapOverrides = [];
@@ -376,7 +395,7 @@ internal static class MapOverride
         bool needForcedReload = false;
         bool hasChanged = false;
 
-        if (TryGetModMapOverrides(location, out List<(string, Point?)>? mapOverridesArray))
+        if (TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverridesArray))
         {
             mapOverrides = [];
             foreach ((string mapOverrideId, Point? relPoint) in mapOverridesArray)
@@ -384,7 +403,6 @@ internal static class MapOverride
                 if (!MapOverrideData.TryGetValue(mapOverrideId, out MapOverrideModel? model))
                 {
                     hasChanged = true;
-                    needForcedReload = true;
                     continue;
                 }
                 maxPrecedence = Math.Max(maxPrecedence, model.Precedence);

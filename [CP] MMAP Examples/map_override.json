@@ -13,6 +13,11 @@
     },
     {
       "Action": "Load",
+      "Target": "Maps/{{ModId}}_MO_Chimkins_Off",
+      "FromFile": "assets/MO_Chimkins_Off.tmx"
+    },
+    {
+      "Action": "Load",
       "Target": "Maps/{{ModId}}/SewerChickens",
       "FromFile": "assets/SewerChickens.png"
     },
@@ -63,6 +68,7 @@
         // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Chimkins_PairedB
         // debug action mushymato.MMAP_UpdateMapOverride Here - mushymato.MMAP.Example_Chimkins_PairedA
         // debug action mushymato.MMAP_UpdateMapOverride Here RemoveAll
+        // debug gq mushymato.MMAP_HAS_MAP_OVERRIDE Here mushymato.MMAP.Example_Chimkins_PairedA
         "{{ModId}}_Chimkins_PairedA": {
           "Id": "{{ModId}}_Chimkins_PairedA",
           "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
@@ -77,11 +83,11 @@
         },
         "{{ModId}}_Chimkins_PairedB": {
           "Id": "{{ModId}}_Chimkins_PairedB",
-          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins_Off",
           "TargetRectIsRelative": true,
           "RemovedById": "{{ModId}}_Chimkins_PairedA",
           "TargetRect": {
-            "X": -2,
+            "X": 2,
             "Y": -1,
             "Width": 1,
             "Height": 2
