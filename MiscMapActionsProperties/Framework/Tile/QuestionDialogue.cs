@@ -281,23 +281,29 @@ internal static class QuestionDialogue
 
 public sealed class QuestionDialogueEntry
 {
+    private const string TILE_X = "<TILE_X>";
+    private const string TILE_Y = "<TILE_Y>";
+
     /// <summary>Response label</summary>
-    public string Label = "[LocalizedText Strings/UI:Cancel]";
+    public string Label { get; set; } = "[LocalizedText Strings/UI:Cancel]";
 
     /// <summary>Response GSQ condition</summary>
-    public string? Condition = null;
+    public string? Condition { get; set; } = null;
 
     /// <summary>List of (trigger) actions</summary>
-    public List<string>? Actions = null;
+    public List<string>? Actions { get; set; } = null;
 
     /// <summary>List of tile actions</summary>
-    public List<string>? TileActions = null;
-
-    /// <summary>Stop at the first successful tile action</summary>
-    public bool TileActionStopAtFirstSuccess = true;
+    public List<string>? TileActions { get; set; } = null;
 
     /// <summary>List of touch actions</summary>
-    public List<string>? TouchActions = null;
+    public List<string>? TouchActions { get; set; } = null;
+
+    /// <summary>Stop at the first successful tile action</summary>
+    public bool TileActionStopAtFirstSuccess { get; set; } = true;
+
+    /// <summary>If this is true, replace <TILE_X> and <TILE_Y> in Actions with the actual point given to the question dialogue.</summary>
+    public bool TilePointSubstitution { get; set; } = false;
 
     internal bool IsValid(GameStateQueryContext context)
     {
@@ -313,7 +319,10 @@ public sealed class QuestionDialogueEntry
             // Perform all (trigger) actions
             foreach (string action in Actions)
             {
-                if (!TriggerActionManager.TryRunAction(action, out string error, out Exception _))
+                string subbedAction = TilePointSubstitution
+                    ? action.Replace(TILE_X, point.X.ToString()).Replace(TILE_Y, point.Y.ToString())
+                    : action;
+                if (!TriggerActionManager.TryRunAction(subbedAction, out string error, out _))
                 {
                     ModEntry.Log(error, LogLevel.Error);
                 }
@@ -326,7 +335,10 @@ public sealed class QuestionDialogueEntry
             foreach (string action in TileActions)
             {
                 if (location.performAction(action, who, loc) && TileActionStopAtFirstSuccess)
+                {
+                    ModEntry.Log($"{action} is successful and TileActionStopAtFirstSuccess is true, returning");
                     return;
+                }
             }
         }
         if (TouchActions != null)

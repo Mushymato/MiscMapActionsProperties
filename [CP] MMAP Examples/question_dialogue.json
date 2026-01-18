@@ -37,6 +37,7 @@
         }
       ]
     },
+    // debug action mushymato.MMAP_QuestionDialogue mushymato.MMAP.Example_QD Horseradish
     {
       "Action": "EditData",
       "Target": "mushymato.MMAP/QuestionDialogue",
@@ -50,7 +51,8 @@
               // both actions run
               "Actions": [
                 "AddItem (O)16",
-                "AddItem (O)16"
+                // replaced with the X tile of the activation point
+                "AddItem (O)<TILE_X>"
               ],
             },
             "ShadowShop": {
