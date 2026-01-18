@@ -300,10 +300,10 @@ public sealed class QuestionDialogueEntry
     public List<string>? TouchActions { get; set; } = null;
 
     /// <summary>Stop at the first successful tile action</summary>
-    public bool TileActionStopAtFirstSuccess { get; set; } = true;
+    public bool TileActionStopAtFirstSuccess { get; set; } = false;
 
     /// <summary>If this is true, replace <TILE_X> and <TILE_Y> in Actions with the actual point given to the question dialogue.</summary>
-    public bool TilePointSubstitution { get; set; } = false;
+    public bool TilePointSubstitution { get; set; } = true;
 
     internal bool IsValid(GameStateQueryContext context)
     {
