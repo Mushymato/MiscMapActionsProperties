@@ -10,7 +10,7 @@ jobs:
            id-token: write     # for attestation
            attestations: write # for attestation
         env:
-            RELEASE_REF: refs/heads/ghwf # pushes to this branch are treated as public releases
+            RELEASE_REF: refs/heads/main # pushes to this branch are treated as public releases
         steps:
             - name: Fetch code
               uses: actions/checkout@v4
