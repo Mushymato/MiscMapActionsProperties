@@ -1,5 +1,8 @@
 name: Build releases
-on: push
+on:
+  push:
+    branches:
+      - 'ghwf'
 jobs:
     build:
         runs-on: ubuntu-latest
