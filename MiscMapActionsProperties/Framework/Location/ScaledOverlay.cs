@@ -28,8 +28,9 @@ internal static class ScaledOverlay
     {
         Stretch = 0,
         Fit = 1,
-        Fill = 2,
-        Absolute = 3,
+        Cover = 2,
+        LetterBox = 3,
+        Absolute = 4,
     }
 
     internal sealed record ScaledCtx(Texture2D Texture, ScalingMode Scaling, float Scale, Color Clr)
@@ -93,13 +94,16 @@ internal static class ScaledOverlay
             float drawScale = Scale;
             switch (Scaling)
             {
+                case ScalingMode.LetterBox:
+                    b.Draw(Game1.staminaRect, viewportRect, Color.Black);
+                    goto case ScalingMode.Fit;
                 case ScalingMode.Fit:
                     drawScale = Math.Min(
                         viewportRect.Width / (float)Texture.Bounds.Width,
                         viewportRect.Height / (float)Texture.Bounds.Height
                     );
                     goto case ScalingMode.Absolute;
-                case ScalingMode.Fill:
+                case ScalingMode.Cover:
                     drawScale = Math.Max(
                         viewportRect.Width / (float)Texture.Bounds.Width,
                         viewportRect.Height / (float)Texture.Bounds.Height
@@ -146,7 +150,7 @@ internal static class ScaledOverlay
                 return null;
             }
             Texture2D texture = Game1.content.Load<Texture2D>(textureName);
-            ScalingMode scaling = ScalingMode.Fill;
+            ScalingMode scaling = ScalingMode.Cover;
             float scale = 4f;
             if (scalingDesc != null)
             {

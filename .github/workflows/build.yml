@@ -1,8 +1,8 @@
 name: Build releases
 on:
   push:
-    branches:
-      - 'ghwf'
+    tags:
+      - '*.*.*'
 jobs:
     build:
         runs-on: ubuntu-latest

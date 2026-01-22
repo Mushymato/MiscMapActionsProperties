@@ -6,6 +6,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
+using StardewValley.Extensions;
 using StardewValley.TokenizableStrings;
 using StardewValley.Triggers;
 
@@ -196,10 +197,20 @@ internal static class QuestionDialogue
         NPC? speaker
     )
     {
-        if (validEntries.Count == 1 && qdData.ImmediatelyPerformSingleValidResponse)
+        if (validEntries.Count == 1 && qdData.ResponsePick != ResponsePickMode.AlwaysShowResponses)
         {
             KeyValuePair<string, QuestionDialogueEntry> qde = validEntries.First();
             ModEntry.Log($"ShowQuestionDialogue({qdId}): Got 1 valid entry '{qde.Key}' and will immediately perform");
+            qde.Value.PerformQDActions(location, tilePosition, farmer);
+            return true;
+        }
+
+        if (qdData.ResponsePick == ResponsePickMode.ChooseOneRandom)
+        {
+            KeyValuePair<string, QuestionDialogueEntry> qde = Random.Shared.ChooseFrom(validEntries.ToList());
+            ModEntry.Log(
+                $"ShowQuestionDialogue({qdId}): Randomly picked 1 valid entry '{qde.Key}' and will immediately perform"
+            );
             qde.Value.PerformQDActions(location, tilePosition, farmer);
             return true;
         }
@@ -352,6 +363,13 @@ public sealed class QuestionDialogueEntry
     }
 }
 
+public enum ResponsePickMode
+{
+    AlwaysShowResponses,
+    ImmediatelyPerformSingle,
+    ChooseOneRandom,
+}
+
 public sealed class QuestionDialogueData
 {
     /// <summary>Response GSQ condition</summary>
@@ -376,7 +394,7 @@ public sealed class QuestionDialogueData
     public int Pagination { get; set; } = -1;
 
     /// <summary>If this is true and there is only one entry, immediately perform instead of displaying the choice.</summary>
-    public bool ImmediatelyPerformSingleValidResponse { get; set; } = true;
+    public ResponsePickMode ResponsePick { get; set; } = ResponsePickMode.ImmediatelyPerformSingle;
 
     /// <summary>List of responses</summary>
     public Dictionary<string, QuestionDialogueEntry> ResponseEntries { get; set; } = [];

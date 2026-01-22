@@ -72,6 +72,20 @@ Thus you can use `Data/LocationContext` to set a shared value across your entire
 - If `velocityX` and/or `velocityY` are given, move the texture by that many pixels every tick to create scrolling effect.
 - By default, `color` is 80% white, `alpha` is 1 by default, and `scale` is 4 by default
 
+#### mushymato.MMAP_ScaledOverlay: \<T|texture\> [fadeDuration] [texture] [scalingMode[:scale]] [color] <a name="mushymato.MMAP_ScaledOverlay"></a>
+
+- Works just like [the actions of same name](actions#mushymato.MMAP_ScaledOverlay), except this is activated on entering the map.
+- Adds a big texture overlay that is centered on the screen.
+- `fadeDuration` controls whether this performs a linear fade in. If there is another overlay active, fade it out at the same rate.
+- `texture` is the texture asset.
+- `scalingMode` can be one of these values:
+    - `Stretch`: stretch the texture over the screen without regard to aspect ratio.
+    - `Fit`: Ensure the texture fits on the screen with aspect ratio preserved.
+    - `LetterBox`: Like `Fit`, but draws black color over any place the texture does not cover.
+    - `Cover`: Ensure the texture covers entire screen with aspect ratio preserved, with cropping done as needed.
+    - `Absolute:[scale]`: Use a particular scale, e.g. `Absolute:4` to use 4x scale.
+- `color` is the texture draw color.
+
 #### mushymato.MMAP_WaterColor: \<color\> [color|T] [color|T] [color|T]
 
 - Changes the current location's water overlay draw color, does not change the water texture.

@@ -304,6 +304,7 @@ internal static class MapOverride
                     )
                     {
                         removeModel.RemovedById = model.Id;
+                        removeModel.Precedence = model.Precedence;
                     }
                     else
                     {
@@ -313,6 +314,10 @@ internal static class MapOverride
                         );
                         invalid.Add(id);
                     }
+                }
+                if (model.SourceRect == null && model.TargetRect != null)
+                {
+                    model.SourceRect = new(0, 0, model.TargetRect.Value.Width, model.TargetRect.Value.Height);
                 }
             }
             _mapOverrideData.RemoveWhere(kv => invalid.Contains(kv.Key));
