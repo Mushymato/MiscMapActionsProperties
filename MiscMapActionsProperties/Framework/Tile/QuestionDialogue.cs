@@ -39,7 +39,7 @@ internal static class QuestionDialogue
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Failed to patch FurnitureTileData:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Failed to patch QuestionDialogue:\n{err}", LogLevel.Error);
         }
     }
 
