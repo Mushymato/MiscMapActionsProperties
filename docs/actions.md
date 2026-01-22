@@ -166,7 +166,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - Optionally allows a `else-case` Action.
 - The action provided must match the usescase, e.g. if this If is on a TileAction, both the if-case and else-case actions should also be tile actions.
 
-### mushymato.MMAP_QuestionDialogue \<question_dialog_id\>
+### mushymato.MMAP_QuestionDialogue \<question_dialog_id\> [included responses]+
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - See [question dialogue](question-dialogue.md) for more info.
