@@ -37,12 +37,12 @@ Each action will note what they can be used as:
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Adds an item to a specific MMAP global inventory bag.
 
-### mushymato.MMAP_ScaledOverlay \<T|texture\> [fadeDuration] [texture] [scalingMode[:scale]] [color] <a name="mushymato.MMAP_ScaledOverlay"></a>
+### mushymato.MMAP_ScaledOverlay \<fadeDuration\> \<texture\> [scalingMode[:scale]] [color] <a name="mushymato.MMAP_ScaledOverlay"></a>
 
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Works just like [the map property of same name](map-properties#mushymato.MMAP_ScaledOverlay), except this is activated and deactivated by actions.
 - `fadeDuration` controls whether this performs a linear fade in. If there is another overlay active, fade it out at the same rate.
-- `texture` is the texture asset.
+- `texture` is the texture asset, if not given then the current overlay is simply removed.
 - `scalingMode` can be one of these values:
     - `Stretch`: stretch the texture over the screen without regard to aspect ratio.
     - `Fit`: Ensure the texture fits on the screen with aspect ratio preserved.

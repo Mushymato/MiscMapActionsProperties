@@ -21,7 +21,7 @@
     //   "Action": "EditMap",
     //   "Target": "Maps/Farm",
     //   "MapProperties": {
-    //     // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose Cover
+    //     // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/goose LetterBox
     //     // debug action mushymato.MMAP_ScaledOverlay 1000 mushymato.MMAP.Example/nightherondex Fit
     //     // debug action mushymato.MMAP_ScaledOverlay 1000
     //     // "mushymato.MMAP_ScaledOverlay": "{{ModId}}/goose Fit Wheat"

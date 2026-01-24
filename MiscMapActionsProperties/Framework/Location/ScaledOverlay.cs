@@ -95,7 +95,7 @@ internal static class ScaledOverlay
             switch (Scaling)
             {
                 case ScalingMode.LetterBox:
-                    b.Draw(Game1.staminaRect, viewportRect, Color.Black);
+                    b.Draw(Game1.staminaRect, viewportRect, Color.Black * alpha);
                     goto case ScalingMode.Fit;
                 case ScalingMode.Fit:
                     drawScale = Math.Min(
