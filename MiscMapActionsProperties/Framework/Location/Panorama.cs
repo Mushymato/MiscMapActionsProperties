@@ -291,8 +291,8 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
             sourceRect = new(
                 (int)MathF.Ceiling(SourceRect.X + SourceRect.Width * percentX),
                 (int)MathF.Ceiling(SourceRect.Y + SourceRect.Height * percentY),
-                (int)MathF.Ceiling(SourceRect.Width * percentWidth),
-                (int)MathF.Ceiling(SourceRect.Height * percentHeight)
+                (int)Math.Clamp(SourceRect.Width * percentWidth, 1, SourceRect.Width),
+                (int)Math.Clamp(SourceRect.Width * percentHeight, 1, SourceRect.Height)
             );
         }
         b.Draw(Texture, targetRect, sourceRect, Color * colorMult, 0f, Vector2.Zero, SpriteEffects.None, 0f);
