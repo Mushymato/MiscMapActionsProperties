@@ -74,6 +74,7 @@ public sealed class ParallaxLayerData : PanoramaSharedData
     public Vector2 DrawViewportOffset = Vector2.Zero;
     public Vector2 Velocity = Vector2.Zero;
     public ShowDuringMode ShowDuring = ShowDuringMode.Any;
+    public bool DrawAboveAlwaysFront = false;
     public bool DrawInMapScreenshot = true;
 }
 
@@ -277,7 +278,24 @@ internal sealed record BackingContext(Texture2D Texture, Rectangle SourceRect, C
     {
         if (colorMult == 0f)
             return;
-        b.Draw(Texture, targetRect, SourceRect, Color * colorMult, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+        Rectangle sourceRect = SourceRect;
+        if (Game1.game1.takingMapScreenshot)
+        {
+            Rectangle viewportBounds = Game1.graphics.GraphicsDevice.Viewport.Bounds;
+            int mapDisplayWidth = Game1.currentLocation.Map.DisplayWidth;
+            int mapDisplayHeight = Game1.currentLocation.Map.DisplayHeight;
+            float percentX = (float)viewportBounds.X / mapDisplayWidth;
+            float percentY = (float)viewportBounds.Y / mapDisplayHeight;
+            float percentWidth = (float)viewportBounds.Width / mapDisplayWidth;
+            float percentHeight = (float)viewportBounds.Height / mapDisplayHeight;
+            sourceRect = new(
+                (int)MathF.Ceiling(SourceRect.X + SourceRect.Width * percentX),
+                (int)MathF.Ceiling(SourceRect.Y + SourceRect.Height * percentY),
+                (int)MathF.Ceiling(SourceRect.Width * percentWidth),
+                (int)MathF.Ceiling(SourceRect.Height * percentHeight)
+            );
+        }
+        b.Draw(Texture, targetRect, sourceRect, Color * colorMult, 0f, Vector2.Zero, SpriteEffects.None, 0f);
     }
 }
 
@@ -346,27 +364,36 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     public override void update(xTile.Dimensions.Rectangle viewport)
     {
+        if (Game1.activeClickableMenu is not null || !Game1.player.CanMove)
+            return;
         // Update Parallax
-        xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
         foreach (ParallaxContext pCtx in parallaxCtx)
         {
             pCtx.UpdatePosition(viewport);
         }
-
-        // TAS
-        for (int i = tempSprites.Count - 1; i >= 0; i--)
-        {
-            if (tempSprites[i].update(Game1.currentGameTime))
-            {
-                tempSprites.RemoveAt(i);
-            }
-        }
+        UpdateTAS(tempSprites);
+        xTile.Layers.Layer layer = Game1.currentLocation.Map.RequireLayer("Back");
         if (respawningTAS.Any())
         {
             float width = layer.LayerWidth * 64f;
             float height = layer.LayerHeight * 64f;
             foreach ((MapWideTAS, TASContext) mwTAS in respawningTAS)
                 SpawnTAS(mwTAS.Item1, mwTAS.Item2, width, height, true);
+        }
+    }
+
+    private static void UpdateTAS(TemporaryAnimatedSpriteList tasList)
+    {
+        // TAS
+        for (int i = tasList.Count - 1; i >= 0; i--)
+        {
+            if (tasList[i].update(Game1.currentGameTime))
+            {
+                TemporaryAnimatedSprite sprite = tasList[i];
+                tasList.RemoveAt(i);
+                if (sprite.Pooled)
+                    sprite.Pool();
+            }
         }
     }
 
@@ -397,6 +424,16 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     public override void draw(SpriteBatch b)
     {
+        DrawImpl(b, false);
+    }
+
+    internal void DrawAboveAlwaysFront(SpriteBatch spriteBatch)
+    {
+        DrawImpl(spriteBatch, true);
+    }
+
+    private void DrawImpl(SpriteBatch b, bool aboveAlwaysFront)
+    {
         float multDay;
         float multNight = 0f;
         float multSunset = 0f;
@@ -425,22 +462,27 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         }
 
         // backing
-        Rectangle viewportRect = Game1.graphics.GraphicsDevice.Viewport.Bounds;
-        if (Night == null)
+        if (!aboveAlwaysFront)
         {
-            Day?.Draw(b, viewportRect, 1f);
-        }
-        else
-        {
-            if (multNight < 1f)
-                Day?.Draw(b, viewportRect, multDay);
-            Night?.Draw(b, viewportRect, multNight);
-            Sunset?.Draw(b, viewportRect, multSunset);
+            Rectangle backingRect = Game1.graphics.GraphicsDevice.Viewport.Bounds;
+            if (Night == null)
+            {
+                Day?.Draw(b, backingRect, 1f);
+            }
+            else
+            {
+                if (multNight < 1f)
+                    Day?.Draw(b, backingRect, multDay);
+                Night?.Draw(b, backingRect, multNight);
+                Sunset?.Draw(b, backingRect, multSunset);
+            }
         }
 
         // parallax
         foreach (ParallaxContext bgDef in parallaxCtx)
         {
+            if (aboveAlwaysFront != bgDef.Data.DrawAboveAlwaysFront)
+                continue;
             switch (bgDef.Data.ShowDuring)
             {
                 case ShowDuringMode.Day:
@@ -459,9 +501,10 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
         }
 
         // TAS
-        for (int i = tempSprites.Count - 1; i >= 0; i--)
+        foreach (TemporaryAnimatedSprite tas in tempSprites)
         {
-            tempSprites[i].draw(b);
+            if (aboveAlwaysFront == tas.drawAboveAlwaysFront)
+                tas.draw(b);
         }
     }
 }
@@ -484,6 +527,7 @@ internal static class Panorama
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         CommonPatch.GameLocation_resetLocalState += GameLocation_resetLocalState;
+        ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
 
         ModEntry.help.ConsoleCommands.Add("mmap.reset_bg", "Reload current area background", ConsoleReloadBg);
         TriggerActionManager.RegisterAction(Action_Panorama, DoSetPanoramaT);
@@ -507,6 +551,17 @@ internal static class Panorama
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch Panorama:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static void OnRenderedStep(object? sender, RenderedStepEventArgs e)
+    {
+        if (e.Step == StardewValley.Mods.RenderSteps.World_AlwaysFront)
+        {
+            if (Game1.background is PanoramaBackground panorama)
+            {
+                panorama.DrawAboveAlwaysFront(e.SpriteBatch);
+            }
         }
     }
 

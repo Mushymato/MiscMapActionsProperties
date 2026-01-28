@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - New map prop/action mushymato.MMAP_ScaledOverlay to draw a big texture over the current screen.
+- Changes to question dialogue:
+    - You can now use additional arguments to the action as a filter for which responses are allowed.
+    - Previous implicit execute when 1 valid response behavior is formalized into field ResponsePick, also added randomization.
 
 ## [1.12.5]
 

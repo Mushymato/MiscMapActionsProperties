@@ -26,8 +26,6 @@ public static class CommonPatch
     public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPrefix;
     public static event EventHandler<UpdateWhenCurrentLocationArgs>? GameLocation_UpdateWhenCurrentLocationPostfix;
 
-    public sealed record DrawAboveAlwaysFrontLayerArgs(GameLocation Location, SpriteBatch B);
-
     public sealed record ApplyMapOverrideArgs(GameLocation Location, Rectangle DestRect);
 
     public static event EventHandler<ApplyMapOverrideArgs>? GameLocation_ApplyMapOverride;
