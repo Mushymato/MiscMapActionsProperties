@@ -21,7 +21,7 @@
             {
               "Id": "{{ModId}}-MMAP_LaunchFireworks",
               "Name": "Action",
-              "Value": "mushymato.MMAP_LaunchFireworks -1 TileSheets/Objects_2",
+              "Value": "mushymato.MMAP_LaunchFireworks -1 TileSheets/Objects_2:16:16:16:16",
               "Layer": "Buildings",
               "TileArea": {
                 "X": 0,

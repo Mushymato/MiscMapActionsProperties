@@ -117,9 +117,9 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - X and Y arguments are relative to the building's top left tile, it can be negative.
 - There's **no guarentee** that the warp out tile is not occupied, it's recommended to use `AdditionalPlacementTiles` to enforce a cleared tile.
 
-### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack]
+### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack] [relative]
 
-- Can be used as either `Action` or `TouchAction`.
+- Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - Warps the player within the current map.
 - This is primarily used to solve issues with warps within an instanced location, as a replacement to writing `X Y CurrentLocation X Y` warps.
 - `facingDirection` controls the player's facing direction after the warp
@@ -128,7 +128,8 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
     - 2: Down
     - 3: Left
     - -1: Keep original direction
-- If `fadeToBlack` is false, teleport the player without doing normal warp fade to black, this also does not trigger any on warp effects.
+- If `fadeToBlack` is false, teleport the player without doing normal warp fade to black, this also does not trigger any on warp effects.'
+- If `relative` is true, move the player relative to the originating position. For map `Action` and `TouchAction`, this is the tile that supplied the action, for `TriggerAction`, this is the player's tile.
 
 ### mushymato.MMAP_PoolEntry [facingDirection] [velocity] [soundcue]
 
@@ -179,6 +180,14 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
     - `MMAP_MountainView`: shows seasonal sky with some animated clouds, mountains, sunset, and stars at night.
     - `MMAP_ClearSky`: like `MMAP_MountainView` but without mountains and clouds.
     - `MMAP_IslandHorizon`: shows the island ocean horizon with clouds background.
+
+### mushymato.MMAP_LaunchFireworks [type] [launchTx[:x:y:width:height]]
+
+- Can be used as either `Action` or `TouchAction`.
+- Can be used as `TriggerAction` with this format: `mushymato.MMAP_LaunchFireworks [X] [Y] [type] [launchTx[:x:y:width:height]]`
+- Launch fireworks, which are visually just like the firework items.
+- There are 3 values for `type`: 0/1/2 for Red/Purple/Green, and -1 gives a random one.
+- You can define what is the "object" sprite being launched into the air with `launchTx`, and optionally the source rect, e.g. `TileSheets/Objects_2:16:16:16:16`.
 
 ### mushymato.MMAP_*DrawLayerToggle
 

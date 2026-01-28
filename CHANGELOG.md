@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
     - You can now use additional arguments to the action as a filter for which responses are allowed.
     - Previous implicit execute when 1 valid response behavior is formalized into field ResponsePick, also added randomization.
     - TileActions will now substitute `<TILE_X>` and `<TILE_Y>` for the actual tile values.
-- Add support for DrawAboveAlwaysFront TAS and parallax layers on panoramas
+- Add support for `DrawAboveAlwaysFront` TAS and parallax layers on panoramas
 - WrpHere now supports relative mode, where instead of warp to specific tile, move X/Y tiles relative to origin.
 - New action for launching fireworks that are visually just like the item ones in vanilla.
 - Map overrides now have a field RemoveById, which are paired and make MMAP not reload whole map just to remove an override.

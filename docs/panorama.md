@@ -84,6 +84,7 @@ This is the middle layers, parallax refers to how the background moves as player
 | `RepeatY` | bool | false |  If true, repeat the texture vertically. |
 | `Velocity` | Vector2 | 0,0 | Moves the layer by this many pixels every tick to create a scrolling effect, best used with `RepeatX` or `RepeatY`. |
 | `ShowDuring` | ShowDuringMode | `"Any"` | Makes this parallax layer only show during some time of day, and fade out according to same rules as the backing layers. Valid values are `"Day"`, `"Sunset"`, `"Night"`, and `"Any"` (show all day). |
+| `DrawAboveAlwaysFront` | bool | false | If true, this parallax layer will draw above the map (even though it's a background). |
 | `DrawInMapScreenshot` | bool | true | Decide whether this layer should appear during full map screenshots. |
 
 Note: When using `ShowDuring`, it's recommended to arrange your layers in the order of `"Any"`, `"Day"`, `"Night"`, `"Sunset"`, this will ensure the sunset layer is drawn over both day and night, otherwise it might be hidden.
@@ -97,6 +98,8 @@ For panorama, there are 2 lists of TAS, onetime and respawning. You can put temp
 The initial position where TAS spawn at is defined relative to the size of the map's Back layer. This is defined by 4 floats that represent percentage: `XStart`, `XEnd`, `YStart`, `YEnd`.
 
 For example if TAS is defined to be allowed to spawn from `XStart` 0.25 to `XEnd` 0.75 while `YStart` and `YEnd` are left at their default values of 0 and 1, that means the TAS can appear between 25% and 75% of the map horizontally, and anywhere on the vertical axis.
+
+Although this is primarily associated with background, TAS with `DrawAboveAlwaysFront` value of `true` will draw above the map.
 
 ### Structure
 

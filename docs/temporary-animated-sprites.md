@@ -24,7 +24,7 @@ Some temporary animated sprites are provided by default by this mod:
 | `Flip` | bool | false | Horizontally flip the sprite during draw. |
 | `LayerDepth` | float | 0 | Absolute layer depth for determining whether sprite is above or below other sprites. |
 | `SortOffset` | float | 0f | If this is set to a non-zero value, do an offset on layer depth relative to the Y position of the sprite + SortOffset, useful when using this TAS at various different positions. |
-| `DrawAboveAlwaysFront` | bool | false | If true, draw sprite above always front layer of map |
+| `DrawAboveAlwaysFront` | bool | false | If true, draw sprite above always front layer of map. |
 | `Scale` | float | 1f | Draw scale, applied on top of the default 4x scale. |
 | `ScaleChange` | float | 0f | Amount of additional scale every frame. Set this to make sprite enlarge/shrink over time. |
 | `Rotation` | float | 0f | Amount of rotation on the sprite. |
