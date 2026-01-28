@@ -4,13 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.13.0-wip]
+## [1.13.0]
 
 ### Added
 - New map prop/action mushymato.MMAP_ScaledOverlay to draw a big texture over the current screen.
 - Changes to question dialogue:
     - You can now use additional arguments to the action as a filter for which responses are allowed.
     - Previous implicit execute when 1 valid response behavior is formalized into field ResponsePick, also added randomization.
+    - TileActions will now substitute `<TILE_X>` and `<TILE_Y>` for the actual tile values.
+- Add support for DrawAboveAlwaysFront TAS and parallax layers on panoramas
+- WrpHere now supports relative mode, where instead of warp to specific tile, move X/Y tiles relative to origin.
+- New action for launching fireworks that are visually just like the item ones in vanilla.
+- Map overrides now have a field RemoveById, which are paired and make MMAP not reload whole map just to remove an override.
+
+### Fixed
+- A number of map override related bugs.
 
 ## [1.12.5]
 
