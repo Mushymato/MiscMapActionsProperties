@@ -146,9 +146,6 @@ public static class CommonPatch
     }
 
     #region furniture_caching
-    private static readonly PerScreenCache<Dictionary<Point, HashSet<Furniture>>?> psTileToFurni =
-        PerScreenCache.Make<Dictionary<Point, HashSet<Furniture>>?>();
-
     private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
     {
         Dictionary<Point, HashSet<Furniture>> tileToFurni = [];
@@ -170,13 +167,33 @@ public static class CommonPatch
         return tileToFurni;
     }
 
-    internal static bool TryGetFurnitureAtTileForLocation(
+    internal static bool TryGetLocationFurniSetAtTile(
         GameLocation location,
         Point pnt,
         [NotNullWhen(true)] out HashSet<Furniture>? furniSet
     )
     {
-        return (psTileToFurni.Value ??= CreateTileToFurniture(location)).TryGetValue(pnt, out furniSet);
+        if (TryGetLocationTileToFurni(location, out Dictionary<Point, HashSet<Furniture>>? tileToFurni))
+            return tileToFurni.TryGetValue(pnt, out furniSet);
+        furniSet = null;
+        return false;
+    }
+
+    internal static bool TryGetLocationTileToFurni(
+        GameLocation location,
+        [NotNullWhen(true)] out Dictionary<Point, HashSet<Furniture>>? tileToFurni
+    )
+    {
+        if (
+            locationEntityWatchers.GetValue(location, LocationEntityWatcher.CreateLocationWatcher)
+            is LocationEntityWatcher locationEntityWatcher
+        )
+        {
+            tileToFurni = locationEntityWatcher.TileToFurni;
+            return true;
+        }
+        tileToFurni = null;
+        return false;
     }
 
     public sealed record PlacementInfo(GameLocation Location, Point TileLocation);
@@ -190,7 +207,6 @@ public static class CommonPatch
     {
         if (location != null)
         {
-            psTileToFurni.Value = null;
             locationEntityWatchers.GetValue(location, LocationEntityWatcher.CreateLocationWatcher);
         }
     }
@@ -211,6 +227,8 @@ public static class CommonPatch
 
         private GameLocation Loc;
 
+        internal readonly Dictionary<Point, HashSet<Furniture>> TileToFurni;
+
         private readonly Dictionary<Tree, (FieldChange<NetInt, int>, FieldChange<NetBool, bool>)> TreeStateWatchers =
         [];
 
@@ -221,6 +239,7 @@ public static class CommonPatch
             Loc.furniture.OnValueRemoved += OnFurnitureRemoved;
             Loc.terrainFeatures.OnValueAdded += OnTerrainFeatureAdded;
             Loc.terrainFeatures.OnValueRemoved += OnTerrainFeatureRemoved;
+            TileToFurni = CreateTileToFurniture(Loc);
             foreach (TerrainFeature feature in Loc.terrainFeatures.Values)
             {
                 if (feature is Tree tree)
@@ -249,6 +268,46 @@ public static class CommonPatch
             }
             TreeStateWatchers.Clear();
             Loc = null!;
+        }
+
+        private void OnFurnitureAdded(Furniture added)
+        {
+            if (TryGetLocationTileToFurni(Loc, out Dictionary<Point, HashSet<Furniture>>? tileToFurni))
+            {
+                Rectangle bounds = GetFurnitureTileDataBounds(added);
+                foreach (Point pnt in IterateBounds(bounds))
+                {
+                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                    {
+                        furniSet.Add(added);
+                    }
+                    else
+                    {
+                        tileToFurni[pnt] = [added];
+                    }
+                }
+            }
+            Furniture_OnMoved?.Invoke(null, new(added, false, CreateFurniturePlacementInfo(added)));
+        }
+
+        private void OnFurnitureRemoved(Furniture removed)
+        {
+            if (TryGetLocationTileToFurni(Loc, out Dictionary<Point, HashSet<Furniture>>? tileToFurni))
+            {
+                Rectangle bounds = GetFurnitureTileDataBounds(removed);
+                foreach (Point pnt in IterateBounds(bounds))
+                {
+                    if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
+                    {
+                        furniSet.Remove(removed);
+                        if (furniSet.Count == 0)
+                        {
+                            tileToFurni.Remove(pnt);
+                        }
+                    }
+                }
+            }
+            Furniture_OnMoved?.Invoke(null, new(removed, true, CreateFurniturePlacementInfo(removed)));
         }
 
         private void OnTerrainFeatureAdded(Vector2 key, TerrainFeature value)
@@ -306,46 +365,6 @@ public static class CommonPatch
             DisposeValues();
             GC.SuppressFinalize(this);
         }
-    }
-
-    private static void OnFurnitureAdded(Furniture added)
-    {
-        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
-        {
-            Rectangle bounds = GetFurnitureTileDataBounds(added);
-            foreach (Point pnt in IterateBounds(bounds))
-            {
-                if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
-                {
-                    furniSet.Add(added);
-                }
-                else
-                {
-                    tileToFurni[pnt] = [added];
-                }
-            }
-        }
-        Furniture_OnMoved?.Invoke(null, new(added, false, CreateFurniturePlacementInfo(added)));
-    }
-
-    private static void OnFurnitureRemoved(Furniture removed)
-    {
-        if (psTileToFurni.Value is Dictionary<Point, HashSet<Furniture>> tileToFurni)
-        {
-            Rectangle bounds = GetFurnitureTileDataBounds(removed);
-            foreach (Point pnt in IterateBounds(bounds))
-            {
-                if (tileToFurni.TryGetValue(pnt, out HashSet<Furniture>? furniSet))
-                {
-                    furniSet.Remove(removed);
-                    if (furniSet.Count == 0)
-                    {
-                        tileToFurni.Remove(pnt);
-                    }
-                }
-            }
-        }
-        Furniture_OnMoved?.Invoke(null, new(removed, true, CreateFurniturePlacementInfo(removed)));
     }
     #endregion
 

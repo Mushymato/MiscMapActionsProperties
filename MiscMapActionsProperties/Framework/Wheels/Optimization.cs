@@ -40,7 +40,7 @@ internal static class Optimization
     {
         string? propertyValue = null;
 
-        if (CommonPatch.TryGetFurnitureAtTileForLocation(location, new(xTile, yTile), out HashSet<Furniture>? furniSet))
+        if (CommonPatch.TryGetLocationFurniSetAtTile(location, new(xTile, yTile), out HashSet<Furniture>? furniSet))
         {
             foreach (Furniture furni in furniSet)
             {

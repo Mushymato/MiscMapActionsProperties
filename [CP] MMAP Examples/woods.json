@@ -5,10 +5,10 @@
       "Action": "EditMap",
       "Target": "Maps/Backwoods",
       "MapProperties": {
-        "mushymato.MMAP_WoodsLighting": "#49638c Red false",
-        "mushymato.MMAP_WoodsDebris": "-2 \"RANDOM 0.5\"",
-        "mushymato.MMAP_WoodsBaubles": "0 100 \"RANDOM 0.5\""
-        // "mushymato.MMAP_LightRays": "Buildings/Junimo Hut",
+        // "mushymato.MMAP_WoodsLighting": "#49638c Red false",
+        // "mushymato.MMAP_WoodsDebris": "-2 \"RANDOM 0.5\"",
+        // "mushymato.MMAP_WoodsBaubles": "0 100 \"RANDOM 0.5\""
+        "mushymato.MMAP_LightRays": "{{ModId}}/goose",
         // "mushymato.MMAP_SteamOverlay": "T 1 0 DarkOrchid 0.4 4"
       }
     },

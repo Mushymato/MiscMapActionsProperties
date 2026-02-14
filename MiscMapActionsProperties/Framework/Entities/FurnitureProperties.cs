@@ -404,7 +404,7 @@ internal static class FurnitureProperties
     private static bool DoDrawLayerToggle(GameLocation location, string[] args, Farmer farmer, Point point)
     {
         if (
-            !CommonPatch.TryGetFurnitureAtTileForLocation(location, point, out HashSet<Furniture>? furniSet)
+            !CommonPatch.TryGetLocationFurniSetAtTile(location, point, out HashSet<Furniture>? furniSet)
             || !furniSet.Any()
         )
         {
