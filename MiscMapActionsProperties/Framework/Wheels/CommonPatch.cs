@@ -267,6 +267,7 @@ public static class CommonPatch
                 }
             }
             TreeStateWatchers.Clear();
+            TileToFurni.Clear();
             Loc = null!;
         }
 
