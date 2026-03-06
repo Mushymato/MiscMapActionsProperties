@@ -47,6 +47,7 @@ internal static class FurnitureProperties
 
         // property patches
         Patch_Properties();
+        Patch_Seats();
 
         // these should be removed in 1.6.16
         Patch_Obsolete1616();
@@ -203,6 +204,10 @@ internal static class FurnitureProperties
         {
             ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
         }
+    }
+
+    private static void Patch_Seats()
+    {
         try
         {
             // seats
