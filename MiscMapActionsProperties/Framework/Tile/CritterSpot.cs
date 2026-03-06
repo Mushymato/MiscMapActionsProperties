@@ -362,6 +362,7 @@ internal static class CritterSpot
             {
                 crab.sprite.textureName.Value = texture;
                 crabSourceRectangle.SetValue(crab, new Rectangle(0, 0, 18, 18));
+                crab.UpdateSpriteRectangle();
             }
             yield return crab;
         }
