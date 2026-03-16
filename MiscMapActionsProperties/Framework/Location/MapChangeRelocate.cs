@@ -62,6 +62,7 @@ internal static class MapChangeRelocate
         if (__instance.HasMapPropertyWithValue(MapProp_SkipMoveObjectsForHouseUpgrade))
         {
             ModEntry.Log("Skipping FarmHouse.moveObjectsForHouseUpgrade");
+            __instance.previousUpgradeLevel = __instance.upgradeLevel;
             __instance.overlayObjects.Clear();
             return false;
         }
