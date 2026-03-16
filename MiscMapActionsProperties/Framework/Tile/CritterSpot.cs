@@ -124,7 +124,7 @@ internal static class CritterSpot
             }
             if (cacheEntry.TryGetValue(pos, out string[]? props))
             {
-                List<Critter> spawned = SpawnCritter(e.Location, pos, props, 0, out string _);
+                List<Critter> spawned = SpawnCritter(e.Location, pos, props, 0, out _);
                 if (spawned.Count > 0)
                 {
                     spawnedCritters[pos] = spawned;
@@ -161,7 +161,7 @@ internal static class CritterSpot
 
         foreach ((Point pos, string[] props) in cacheEntry)
         {
-            List<Critter> spawned = SpawnCritter(location, pos, props, 0, out string _);
+            List<Critter> spawned = SpawnCritter(location, pos, props, 0, out _);
             if (spawned.Count > 0)
             {
                 spawnedCritters[pos] = spawned;
@@ -169,14 +169,14 @@ internal static class CritterSpot
         }
     }
 
-    private static bool TriggerActionCritter(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerActionCritter(string[] args, TriggerActionContext context, out string? error)
     {
         if (!ArgUtility.TryGetPoint(args, 1, out Point position, out error, "Point position"))
             return false;
         return SpawnCritter(Game1.currentLocation, position, args, 3, out error).Count > 0;
     }
 
-    private static bool TriggerActionCritterRandom(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerActionCritterRandom(string[] args, TriggerActionContext context, out string? error)
     {
         if (!ArgUtility.TryGetFloat(args, 1, out float chance, out error, "float name"))
             return false;
@@ -205,7 +205,7 @@ internal static class CritterSpot
         Point position,
         string[] args,
         int firstIdx,
-        out string error
+        out string? error
     )
     {
         error = "";
@@ -218,7 +218,7 @@ internal static class CritterSpot
                 !ArgUtility.TryGet(
                     args,
                     i,
-                    out string critterKindStr,
+                    out string? critterKindStr,
                     out error,
                     allowBlank: false,
                     name: "string critterKind"

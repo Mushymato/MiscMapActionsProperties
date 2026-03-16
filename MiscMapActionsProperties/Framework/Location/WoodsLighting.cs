@@ -70,15 +70,15 @@ internal static class WoodsLighting
                 !ArgUtility.TryGet(
                     args,
                     0,
-                    out string dayColorStr,
-                    out string error,
+                    out string? dayColorStr,
+                    out string? error,
                     allowBlank: false,
                     "string dayColorStr"
                 )
                 || !ArgUtility.TryGetOptional(
                     args,
                     1,
-                    out string nightColorStr,
+                    out string? nightColorStr,
                     out error,
                     defaultValue: "T",
                     allowBlank: true,

@@ -64,7 +64,7 @@ internal static class FridgePosition
             {
                 string[] args = ArgUtility.SplitBySpaceQuoteAware(fridgeDoorProp);
                 if (
-                    !ArgUtility.TryGet(args, 0, out string fridgeDoorTx, out string _, name: "fridgeDoorTx")
+                    !ArgUtility.TryGet(args, 0, out string? fridgeDoorTx, out _, name: "fridgeDoorTx")
                     || !Game1.content.DoesAssetExist<Texture2D>(fridgeDoorTx)
                 )
                 {
@@ -74,7 +74,7 @@ internal static class FridgePosition
                     args,
                     1,
                     out Vector2 offset,
-                    out string _,
+                    out _,
                     integerOnly: false,
                     name: "Vector2 offset"
                 );

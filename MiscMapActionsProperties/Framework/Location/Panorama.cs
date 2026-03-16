@@ -694,9 +694,9 @@ internal static class Panorama
         }
     }
 
-    private static bool DoSetPanoramaT(string[] args, TriggerActionContext context, out string error)
+    private static bool DoSetPanoramaT(string[] args, TriggerActionContext context, out string? error)
     {
-        if (!ArgUtility.TryGet(args, 1, out string bgId, out error, allowBlank: false, name: "string bgId"))
+        if (!ArgUtility.TryGet(args, 1, out string? bgId, out error, allowBlank: false, name: "string bgId"))
             return false;
         SetPanorama(Game1.currentLocation, bgId, force: true);
         return true;
@@ -704,7 +704,7 @@ internal static class Panorama
 
     private static bool DoSetPanoramaM(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!ArgUtility.TryGet(args, 1, out string bgId, out _, allowBlank: false, name: "string bgId"))
+        if (!ArgUtility.TryGet(args, 1, out string? bgId, out _, allowBlank: false, name: "string bgId"))
             return false;
         SetPanorama(location, bgId, force: true);
         return true;

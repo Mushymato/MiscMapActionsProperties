@@ -229,7 +229,7 @@ internal static class TASSpot
         }
     }
 
-    private static bool TriggerActionTAS(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerActionTAS(string[] args, TriggerActionContext context, out string? error)
     {
         return SpawnTAS(Game1.currentLocation, args, out error);
     }
@@ -239,7 +239,7 @@ internal static class TASSpot
         return SpawnTAS(location, args, out _, defaultPos: source);
     }
 
-    private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string? error)
     {
         error = null!;
         return ToggleTileTAS(Game1.currentLocation, args, Game1.player, Point.Zero);
@@ -247,10 +247,10 @@ internal static class TASSpot
 
     private static bool ToggleTileTAS(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        string error = "Not enough arguments.";
+        string? error = "Not enough arguments.";
         if (
             args.Length < 5
-            || !ArgUtility.TryGet(args, 1, out string spawnKey, out error, allowBlank: false, name: "string spawnKey")
+            || !ArgUtility.TryGet(args, 1, out string? spawnKey, out error, allowBlank: false, name: "string spawnKey")
             || !TryGetPos(args, 2, out error, point, out Point pos)
         )
         {
@@ -305,7 +305,7 @@ internal static class TASSpot
         AddRespawnTAS(location, Game1.currentGameTime, context, respawning);
     }
 
-    private static bool SpawnTAS(GameLocation location, string[] args, out string error, Point? defaultPos = null)
+    private static bool SpawnTAS(GameLocation location, string[] args, out string? error, Point? defaultPos = null)
     {
         error = "Not enough arguments.";
         if (args.Length < 4 || !TryGetPos(args, 1, out error, defaultPos, out Point pos))
@@ -327,7 +327,13 @@ internal static class TASSpot
         return true;
     }
 
-    private static bool TryGetPos(string[] args, int idx, out string error, Point? defaultPos, out Point pos)
+    private static bool TryGetPos(
+        string[] args,
+        int idx,
+        [NotNullWhen(false)] out string? error,
+        Point? defaultPos,
+        out Point pos
+    )
     {
         if (!ArgUtility.TryGetPoint(args, idx, out pos, out error, "Point spawnPos"))
         {

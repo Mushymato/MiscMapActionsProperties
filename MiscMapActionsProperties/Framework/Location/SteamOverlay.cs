@@ -76,8 +76,8 @@ internal static class SteamOverlay
                 ArgUtility.TryGet(
                     args,
                     0,
-                    out string steamTexture,
-                    out string error,
+                    out string? steamTexture,
+                    out string? error,
                     allowBlank: false,
                     name: "string steamTexture"
                 )

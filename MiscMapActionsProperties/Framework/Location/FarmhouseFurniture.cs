@@ -44,10 +44,10 @@ internal static class FarmHouseFurniture
         }
     }
 
-    private static bool DoSetWallpaper(string[] args, TriggerActionContext context, out string error)
+    private static bool DoSetWallpaper(string[] args, TriggerActionContext context, out string? error)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string wallpaper, out error, allowBlank: false, name: "string wallpaper")
+            !ArgUtility.TryGet(args, 1, out string? wallpaper, out error, allowBlank: false, name: "string wallpaper")
             || !ArgUtility.TryGetOptional(args, 2, out string wallId, out error, name: "string wallId")
         )
         {
@@ -58,10 +58,10 @@ internal static class FarmHouseFurniture
         return true;
     }
 
-    private static bool DoSetFlooring(string[] args, TriggerActionContext context, out string error)
+    private static bool DoSetFlooring(string[] args, TriggerActionContext context, out string? error)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string flooring, out error, allowBlank: false, name: "string flooring")
+            !ArgUtility.TryGet(args, 1, out string? flooring, out error, allowBlank: false, name: "string flooring")
             || !ArgUtility.TryGetOptional(args, 2, out string floorId, out error, name: "string floorId")
         )
         {
@@ -72,7 +72,7 @@ internal static class FarmHouseFurniture
         return true;
     }
 
-    private static bool DoFarmHouseUpgrade(string[] args, TriggerActionContext context, out string error)
+    private static bool DoFarmHouseUpgrade(string[] args, TriggerActionContext context, out string? error)
     {
         if (Context.IsWorldReady)
         {
@@ -123,7 +123,7 @@ internal static class FarmHouseFurniture
                             mapPropertySplitBySpaces,
                             i,
                             out Vector2 value2,
-                            out string error,
+                            out string? error,
                             integerOnly: false,
                             "Vector2 tile"
                         )
@@ -158,8 +158,8 @@ internal static class FarmHouseFurniture
                     !ArgUtility.TryGet(
                         mapPropertySplitBySpaces,
                         i,
-                        out string value,
-                        out string error,
+                        out string? value,
+                        out string? error,
                         allowBlank: false,
                         name: "string id"
                     )

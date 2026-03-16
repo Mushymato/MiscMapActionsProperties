@@ -41,11 +41,11 @@ internal static class WoodsDebris
             {
                 string[] args = ArgUtility.SplitBySpaceQuoteAware(prop);
                 if (
-                    !ArgUtility.TryGetInt(args, 0, out which, out string err, name: "int which")
+                    !ArgUtility.TryGetInt(args, 0, out which, out string? err, name: "int which")
                     || !ArgUtility.TryGetOptional(
                         args,
                         1,
-                        out string gsq,
+                        out string? gsq,
                         out err,
                         defaultValue: "TRUE",
                         allowBlank: false,

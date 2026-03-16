@@ -24,8 +24,8 @@ internal static class HoleWrp
             !ArgUtility.TryGet(
                 args,
                 1,
-                out string locationToWarp,
-                out string error,
+                out string? locationToWarp,
+                out string? error,
                 allowBlank: true,
                 "string locationToWarp"
             )
@@ -33,7 +33,7 @@ internal static class HoleWrp
             || !ArgUtility.TryGetOptional(
                 args,
                 4,
-                out string mailflag,
+                out string? mailflag,
                 out error,
                 null,
                 allowBlank: true,

@@ -79,7 +79,7 @@ internal static class PoolEntry
                 args,
                 1,
                 out int direction,
-                out string error,
+                out string? error,
                 defaultValue: -1,
                 name: "int direction"
             )

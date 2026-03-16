@@ -254,8 +254,8 @@ internal static class FurnitureProperties
                 !ArgUtility.TryGet(
                     args,
                     0,
-                    out string value,
-                    out string error,
+                    out string? value,
+                    out string? error,
                     allowBlank: false,
                     name: "string Action"
                 )
@@ -416,8 +416,8 @@ internal static class FurnitureProperties
             return false;
         }
         if (
-            !ArgUtility.TryGet(args, 1, out string furniId, out string error, allowBlank: false, "string furniId")
-            || !ArgUtility.TryGet(args, 2, out string drawLayerId, out error, allowBlank: false, "string drawLayerId")
+            !ArgUtility.TryGet(args, 1, out string? furniId, out string? error, allowBlank: false, "string furniId")
+            || !ArgUtility.TryGet(args, 2, out string? drawLayerId, out error, allowBlank: false, "string drawLayerId")
         )
         {
             return false;
@@ -611,7 +611,7 @@ internal static class FurnitureProperties
         {
             string[] args = ArgUtility.SplitBySpaceQuoteAware(tvRect);
             if (
-                !ArgUtility.TryGetVector2(args, 0, out Vector2 pos, out string error, name: "Vector2 pos")
+                !ArgUtility.TryGetVector2(args, 0, out Vector2 pos, out string? error, name: "Vector2 pos")
                 || !ArgUtility.TryGetFloat(args, 2, out float scale, out error, name: "float scale")
             )
             {
@@ -734,7 +734,14 @@ internal static class FurnitureProperties
         }
         string[] args = ArgUtility.SplitBySpaceQuoteAware(fishTankDef);
         if (
-            !ArgUtility.TryGetOptionalInt(args, 0, out int capacity, out string error, defaultValue: -2, "int capacity")
+            !ArgUtility.TryGetOptionalInt(
+                args,
+                0,
+                out int capacity,
+                out string? error,
+                defaultValue: -2,
+                "int capacity"
+            )
             || !ArgUtility.TryGetOptionalInt(args, 1, out int posX, out error, defaultValue: 0, "int posX")
             || !ArgUtility.TryGetOptionalInt(args, 2, out int posY, out error, defaultValue: 0, "int posY")
             || !ArgUtility.TryGetOptionalInt(args, 3, out int width, out error, defaultValue: 0, "int width")

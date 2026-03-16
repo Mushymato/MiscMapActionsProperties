@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -47,7 +48,7 @@ internal static class MapChangeRelocate
             string[] args = e.ReadAs<string[]>();
             if (
                 Game1.GetPlayer(e.FromPlayerID) is Farmer farmhand
-                && !MapChangeRelocateAction(args, out string error, farmhand)
+                && !MapChangeRelocateAction(args, out string? error, farmhand)
             )
             {
                 ModEntry.Log(error, LogLevel.Error);
@@ -67,7 +68,11 @@ internal static class MapChangeRelocate
         return true;
     }
 
-    private static bool MapChangeRelocateAction(string[] args, TriggerActionContext context, out string error)
+    private static bool MapChangeRelocateAction(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (
             !Context.IsMainPlayer
@@ -89,7 +94,7 @@ internal static class MapChangeRelocate
         return MapChangeRelocateAction(args, out error, Game1.player);
     }
 
-    private static bool MapChangeRelocateAction(string[] args, out string error, Farmer farmer)
+    private static bool MapChangeRelocateAction(string[] args, [NotNullWhen(false)] out string? error, Farmer farmer)
     {
         if (
             !ArgUtility.TryGetPoint(args, 1, out Point source, out error, name: "Point source")
@@ -113,7 +118,10 @@ internal static class MapChangeRelocate
         else
             gameLocation = Utility.getHomeOfFarmer(farmer);
         if (gameLocation == null)
+        {
+            error = $"Location '{locationName}' is null";
             return false;
+        }
         ModEntry.Log($"{gameLocation.NameOrUniqueName}: {source} -> {target} ({area})");
 
         Point delta = target - source;

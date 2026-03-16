@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -128,10 +129,10 @@ internal static class ScaledOverlay
             }
         }
 
-        internal static ScaledCtx? Make(string[] args, int firstIdx, out string error)
+        internal static ScaledCtx? Make(string[] args, int firstIdx, out string? error)
         {
             if (
-                !ArgUtility.TryGet(args, firstIdx, out string textureName, out error, name: "string texture")
+                !ArgUtility.TryGet(args, firstIdx, out string? textureName, out error, name: "string texture")
                 || !ArgUtility.TryGetOptional(
                     args,
                     firstIdx + 1,
@@ -190,7 +191,7 @@ internal static class ScaledOverlay
         TriggerActionManager.RegisterAction(MapProp_ScaledOverlay, ActionSetScaledOverlay);
     }
 
-    private static bool ActionSetScaledOverlay(string[] args, TriggerActionContext context, out string error)
+    private static bool ActionSetScaledOverlay(string[] args, TriggerActionContext context, out string? error)
     {
         if (!ArgUtility.TryGetFloat(args, 1, out float fadeDuration, out error, name: "float duration"))
         {
@@ -242,9 +243,9 @@ internal static class ScaledOverlay
             return;
         }
         string[] args = ArgUtility.SplitBySpaceQuoteAware(scaledOverlayProps);
-        if (ScaledCtx.Make(args, 0, out string error) is not ScaledCtx ctx)
+        if (ScaledCtx.Make(args, 0, out string? error) is not ScaledCtx ctx)
         {
-            ModEntry.Log(error, LogLevel.Error);
+            ModEntry.Log(error ?? "ScaledCtx.Make failed", LogLevel.Error);
             scaledCtx.Value = null;
             return;
         }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -21,7 +22,7 @@ internal static class LaunchFireworks
         TriggerActionManager.RegisterAction(TileAction_LaunchFireworks, TriggerLaunchFireWorks);
     }
 
-    private static bool TriggerLaunchFireWorks(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerLaunchFireWorks(string[] args, TriggerActionContext context, out string? error)
     {
         if (!ArgUtility.TryGetPoint(args, 1, out Point value, out error, "Point pnt"))
         {
@@ -32,7 +33,7 @@ internal static class LaunchFireworks
 
     private static bool TileLaunchFireworks(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (DoLaunchFireworks(location, args, farmer, point, 1, out string error))
+        if (DoLaunchFireworks(location, args, farmer, point, 1, out string? error))
             return true;
         ModEntry.Log(error, LogLevel.Error);
         return false;
@@ -44,7 +45,7 @@ internal static class LaunchFireworks
         Farmer farmer,
         Point point,
         int firstIdx,
-        out string error
+        [NotNullWhen(false)] out string? error
     )
     {
         if (

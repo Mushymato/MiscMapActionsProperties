@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <SDV>17</SDV>
+  </PropertyGroup>
   <Import
     Project="$(MSBuildUserExtensionsPath)/sdv.props"
     Condition="Exists('$(MSBuildUserExtensionsPath)/sdv.props')"
@@ -20,7 +23,7 @@
     <Description>Various map stuff for modders.</Description>
     <UniqueId>mushymato.MMAP</UniqueId>
     <UpdateKeys>Nexus:28423,GitHub:Mushymato/MiscMapActionsProperties</UpdateKeys>
-    <Version>1.13.1</Version>
+    <Version>1.13.2-periodic.0</Version>
     <BaseManifest>new</BaseManifest>
     <MinimumApiVersion_Behavior>Update</MinimumApiVersion_Behavior>
     <MinimumGameVersion_Behavior>UpdateFull</MinimumGameVersion_Behavior>

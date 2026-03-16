@@ -629,7 +629,7 @@ public static class CommonPatch
         {
             string[] args = ArgUtility.SplitBySpaceQuoteAware(propValue);
             if (
-                ArgUtility.TryGetFloat(args, 0, out float xVal, out string error, "float X")
+                ArgUtility.TryGetFloat(args, 0, out float xVal, out string? error, "float X")
                 && ArgUtility.TryGetFloat(args, 1, out float yVal, out error, "float Y")
             )
             {

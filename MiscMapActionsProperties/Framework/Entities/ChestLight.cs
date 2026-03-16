@@ -54,8 +54,7 @@ internal static class ChestLight
             return;
         foreach (Building building in location.buildings)
         {
-            BuildingData data = building.GetData();
-            if (data == null)
+            if (building.GetData() is not BuildingData data)
                 continue;
 
             foreach (Chest buildingChest in building.buildingChests)

@@ -98,7 +98,7 @@ internal static class HumanDoorExt
         return false;
     }
 
-    private static bool TriggerWrpHere(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerWrpHere(string[] args, TriggerActionContext context, out string? error)
     {
         if (!DoWrpHere(Game1.currentLocation, args, Game1.player, Game1.player.TilePoint, out error))
         {
@@ -110,7 +110,7 @@ internal static class HumanDoorExt
 
     private static bool TileWrpHere(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!DoWrpHere(location, args, farmer, point, out string error))
+        if (!DoWrpHere(location, args, farmer, point, out string? error))
         {
             ModEntry.LogOnce(error);
             return false;
@@ -118,7 +118,13 @@ internal static class HumanDoorExt
         return true;
     }
 
-    private static bool DoWrpHere(GameLocation location, string[] args, Farmer farmer, Point point, out string error)
+    private static bool DoWrpHere(
+        GameLocation location,
+        string[] args,
+        Farmer farmer,
+        Point point,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (
             !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out error, name: "string toPoint")

@@ -31,7 +31,7 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstruct,
-            (string[] args, TriggerActionContext ctx, out string err) =>
+            (string[] args, TriggerActionContext ctx, out string? err) =>
             {
                 err = "";
                 return CheckArgsThenShowConstruct(
@@ -56,7 +56,7 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstructForCurrent,
-            (string[] args, TriggerActionContext ctx, out string err) =>
+            (string[] args, TriggerActionContext ctx, out string? err) =>
             {
                 err = "";
                 return CheckArgsThenShowConstruct(
@@ -76,7 +76,14 @@ internal static class ShowConstruct
     private static bool CheckArgsThenShowConstruct(string[] args, Action<string> showMenu)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string builder, out string error, allowBlank: true, name: "string builder")
+            !ArgUtility.TryGet(
+                args,
+                1,
+                out string? builder,
+                out string? error,
+                allowBlank: true,
+                name: "string builder"
+            )
             || !ArgUtility.TryGetOptionalBool(
                 args,
                 2,

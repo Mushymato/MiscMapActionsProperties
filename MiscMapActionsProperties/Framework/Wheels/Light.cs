@@ -28,7 +28,7 @@ internal static class Light
                 args,
                 0,
                 out float radius,
-                out string error,
+                out string? error,
                 defaultValue: 2f,
                 name: "float radius"
             )

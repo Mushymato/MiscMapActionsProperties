@@ -352,8 +352,15 @@ internal static class DrawLayerExt
     private static bool DoDrawLayerToggle(GameLocation location, string[] args, Farmer farmer, Point point)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string buildingId, out string error, allowBlank: false, "string buildingId")
-            || !ArgUtility.TryGet(args, 2, out string drawLayerId, out error, allowBlank: false, "string drawLayerId")
+            !ArgUtility.TryGet(
+                args,
+                1,
+                out string? buildingId,
+                out string? error,
+                allowBlank: false,
+                "string buildingId"
+            )
+            || !ArgUtility.TryGet(args, 2, out string? drawLayerId, out error, allowBlank: false, "string drawLayerId")
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -452,8 +459,7 @@ internal static class DrawLayerExt
             return;
         foreach (Building building in location.buildings)
         {
-            BuildingData data = building.GetData();
-            if (data == null || data.DrawLayers == null)
+            if (building.GetData() is not BuildingData data || data.DrawLayers == null)
                 continue;
             foreach (BuildingDrawLayer drawLayer in data.DrawLayers)
             {
@@ -481,7 +487,7 @@ internal static class DrawLayerExt
                     args,
                     0,
                     out float randMin,
-                    out string error,
+                    out string? error,
                     defaultValue: defaultValue,
                     name: "float randMin"
                 )
@@ -545,7 +551,7 @@ internal static class DrawLayerExt
                 args,
                 0,
                 out origin,
-                out string _,
+                out _,
                 integerOnly: true,
                 name: "Vector2 origin"
             );
@@ -598,8 +604,7 @@ internal static class DrawLayerExt
     private static void CarpenterMenu_SetNewActiveBlueprint_Postfix(CarpenterMenu __instance)
     {
         Building building = __instance.currentBuilding;
-        BuildingData data = building.GetData();
-        if (data == null || data.DrawLayers == null)
+        if (building.GetData() is not BuildingData data || data.DrawLayers == null)
             return;
         foreach (BuildingDrawLayer drawLayer in data.DrawLayers)
         {
@@ -765,8 +770,7 @@ internal static class DrawLayerExt
         if (!Game1.player.isMoving())
             return;
 
-        BuildingData data = __instance.GetData();
-        if (data == null || data.DrawLayers == null)
+        if (__instance.GetData() is not BuildingData data || data.DrawLayers == null)
             return;
 
         float speed = Game1.player.getMovementSpeed();

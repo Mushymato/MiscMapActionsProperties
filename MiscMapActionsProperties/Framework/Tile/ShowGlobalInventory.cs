@@ -61,8 +61,8 @@ internal static class ShowGlobalInventory
     private static bool BAG_HAS_ITEM(string[] query, GameStateQueryContext context)
     {
         if (
-            !ArgUtility.TryGet(query, 1, out string bagInvId, out string error, allowBlank: false, "string bagInvId")
-            || !ArgUtility.TryGet(query, 2, out string itemId, out error, allowBlank: true, "string itemId")
+            !ArgUtility.TryGet(query, 1, out string? bagInvId, out string? error, allowBlank: false, "string bagInvId")
+            || !ArgUtility.TryGet(query, 2, out string? itemId, out error, allowBlank: true, "string itemId")
             || !ArgUtility.TryGetOptionalInt(query, 3, out int minCount, out error, 1, "int minCount")
             || !ArgUtility.TryGetOptionalInt(query, 4, out int maxCount, out error, int.MaxValue, "int maxCount")
         )
@@ -83,19 +83,19 @@ internal static class ShowGlobalInventory
     private static bool TileShowBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ShowBag(args, out _);
 
-    private static bool TriggerShowBag(string[] args, TriggerActionContext context, out string error) =>
+    private static bool TriggerShowBag(string[] args, TriggerActionContext context, out string? error) =>
         ShowBag(args, out error);
 
     private static bool TileAddItemToBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ModifyItemsInBag(args, AddItems, out _);
 
-    private static bool TriggerAddItemToBag(string[] args, TriggerActionContext context, out string error) =>
+    private static bool TriggerAddItemToBag(string[] args, TriggerActionContext context, out string? error) =>
         ModifyItemsInBag(args, AddItems, out error);
 
     private static bool TileRemoveItemFromBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ModifyItemsInBag(args, RemoveItems, out _);
 
-    private static bool TriggerRemoveItemFromBag(string[] args, TriggerActionContext context, out string error) =>
+    private static bool TriggerRemoveItemFromBag(string[] args, TriggerActionContext context, out string? error) =>
         ModifyItemsInBag(args, RemoveItems, out error);
 
     internal static string GetBagInventoryId(string bagInvId)
@@ -113,11 +113,11 @@ internal static class ShowGlobalInventory
         items.ReduceId(qId, amount);
     }
 
-    private static bool ModifyItemsInBag(string[] args, Action<Inventory, string, int, int> modifyBy, out string error)
+    private static bool ModifyItemsInBag(string[] args, Action<Inventory, string, int, int> modifyBy, out string? error)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string bagInvId, out error, allowBlank: false, "string bagInvId")
-            || !ArgUtility.TryGet(args, 2, out string qId, out error, allowBlank: false, "string qualifiedItemId")
+            !ArgUtility.TryGet(args, 1, out string? bagInvId, out error, allowBlank: false, "string bagInvId")
+            || !ArgUtility.TryGet(args, 2, out string? qId, out error, allowBlank: false, "string qualifiedItemId")
             || !ArgUtility.TryGetOptionalInt(args, 3, out int amount, out error, defaultValue: 1, name: "int amount")
             || !ArgUtility.TryGetOptionalInt(args, 4, out int quality, out error, defaultValue: 0, name: "int quality")
         )
@@ -136,10 +136,10 @@ internal static class ShowGlobalInventory
         return true;
     }
 
-    private static bool ShowBag(string[] args, out string error)
+    private static bool ShowBag(string[] args, out string? error)
     {
         if (
-            !ArgUtility.TryGet(args, 1, out string bagInvId, out error, allowBlank: false, "string bagInvId")
+            !ArgUtility.TryGet(args, 1, out string? bagInvId, out error, allowBlank: false, "string bagInvId")
             || !ArgUtility.TryGetOptionalEnum(
                 args,
                 2,

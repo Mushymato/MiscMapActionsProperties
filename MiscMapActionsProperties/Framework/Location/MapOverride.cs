@@ -133,8 +133,8 @@ internal static class MapOverride
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
     {
         if (
-            !ArgUtility.TryGet(query, 1, out string locationName, out string error, name: "string locationName")
-            || !ArgUtility.TryGet(query, 2, out string mapOverrideId, out error, name: "string mapOverrideId")
+            !ArgUtility.TryGet(query, 1, out string? locationName, out string? error, name: "string locationName")
+            || !ArgUtility.TryGet(query, 2, out string? mapOverrideId, out error, name: "string mapOverrideId")
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -371,20 +371,25 @@ internal static class MapOverride
 
     private static bool TileUpdateMapOverride(GameLocation location, string[] args, Farmer who, Point point)
     {
-        if (DoUpdateMapOverride(Game1.currentLocation, args, point, out string error))
+        if (DoUpdateMapOverride(Game1.currentLocation, args, point, out string? error))
             return true;
         ModEntry.Log(error, LogLevel.Error);
         return false;
     }
 
-    private static bool TriggerUpdateMapOverride(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerUpdateMapOverride(string[] args, TriggerActionContext context, out string? error)
     {
         return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player.TilePoint, out error);
     }
 
-    private static bool DoUpdateMapOverride(GameLocation location, string[] args, Point point, out string error)
+    private static bool DoUpdateMapOverride(
+        GameLocation location,
+        string[] args,
+        Point point,
+        [NotNullWhen(false)] out string? error
+    )
     {
-        if (ArgUtility.TryGet(args, 1, out string locationName, out error, name: "string locationName"))
+        if (ArgUtility.TryGet(args, 1, out string? locationName, out error, name: "string locationName"))
         {
             location = GameStateQuery.Helpers.GetLocation(locationName, location);
         }

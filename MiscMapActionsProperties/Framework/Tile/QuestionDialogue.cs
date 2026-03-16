@@ -84,7 +84,7 @@ internal static class QuestionDialogue
 
     private static bool ShowQuestionDialogue(GameLocation location, string[] args, Farmer farmer, Point tilePosition)
     {
-        if (!ArgUtility.TryGet(args, 1, out string qdId, out string error, allowBlank: false, "string qdId"))
+        if (!ArgUtility.TryGet(args, 1, out string? qdId, out string? error, allowBlank: false, "string qdId"))
         {
             ModEntry.Log(error, LogLevel.Error);
             return false;
@@ -333,7 +333,7 @@ public sealed class QuestionDialogueEntry
                 string subbedAction = TilePointSubstitution
                     ? action.Replace(TILE_X, point.X.ToString()).Replace(TILE_Y, point.Y.ToString())
                     : action;
-                if (!TriggerActionManager.TryRunAction(subbedAction, out string error, out _))
+                if (!TriggerActionManager.TryRunAction(subbedAction, out string? error, out _))
                 {
                     ModEntry.Log(error, LogLevel.Error);
                 }

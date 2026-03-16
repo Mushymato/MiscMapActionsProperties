@@ -201,7 +201,7 @@ internal static class WaterColor
         string[] args = ArgUtility.SplitBySpaceQuoteAware(waterDraw);
 
         if (
-            !ArgUtility.TryGet(args, 0, out string waterDrawTx, out string _, allowBlank: false, "string waterDrawTx")
+            !ArgUtility.TryGet(args, 0, out string? waterDrawTx, out _, allowBlank: false, "string waterDrawTx")
             || !Game1.content.DoesAssetExist<Texture2D>(waterDrawTx)
         )
         {
@@ -232,7 +232,7 @@ internal static class WaterColor
             ArgUtility.TryGet(
                 args,
                 (int)season,
-                out string seasonColor,
+                out string? seasonColor,
                 out _,
                 allowBlank: false,
                 name: "string seasonWaterColor"
@@ -248,7 +248,7 @@ internal static class WaterColor
             && ArgUtility.TryGet(
                 args,
                 0,
-                out string springColor,
+                out string? springColor,
                 out _,
                 allowBlank: false,
                 name: "string seasonWaterColor"
