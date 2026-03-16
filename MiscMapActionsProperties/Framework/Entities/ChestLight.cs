@@ -85,8 +85,6 @@ internal sealed class BuildingChestLightWatcher(Building building, Chest chest, 
     private readonly string lightProps = lightProps;
     internal bool wasDisposed = false;
 
-    ~BuildingChestLightWatcher() => DisposeValues();
-
     private void DisposeValues()
     {
         if (wasDisposed)
@@ -100,7 +98,6 @@ internal sealed class BuildingChestLightWatcher(Building building, Chest chest, 
     public void Dispose()
     {
         DisposeValues();
-        GC.SuppressFinalize(this);
     }
 
     public void Subscribe()

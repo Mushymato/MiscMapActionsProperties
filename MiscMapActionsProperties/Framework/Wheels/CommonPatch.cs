@@ -141,11 +141,12 @@ public static class CommonPatch
             );
         }
 
-        // furniture change watcher
+        // location entity watcher
         GameLocation_resetLocalState += AddLocationEntityWatcher;
+        ModEntry.help.Events.World.LocationListChanged += OnLocationListChanged;
     }
 
-    #region furniture_caching
+    #region location watcher
     private static Dictionary<Point, HashSet<Furniture>> CreateTileToFurniture(GameLocation location)
     {
         Dictionary<Point, HashSet<Furniture>> tileToFurni = [];
@@ -211,6 +212,18 @@ public static class CommonPatch
         }
     }
 
+    private static void OnLocationListChanged(object? sender, LocationListChangedEventArgs e)
+    {
+        foreach (GameLocation location in e.Removed)
+        {
+            if (locationEntityWatchers.TryGetValue(location, out LocationEntityWatcher? watcher))
+            {
+                watcher.Dispose();
+                locationEntityWatchers.Remove(location);
+            }
+        }
+    }
+
     private static void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
         foreach (KeyValuePair<GameLocation, LocationEntityWatcher> kv in locationEntityWatchers)
@@ -248,8 +261,6 @@ public static class CommonPatch
                 }
             }
         }
-
-        ~LocationEntityWatcher() => DisposeValues();
 
         private void DisposeValues()
         {
@@ -364,7 +375,6 @@ public static class CommonPatch
         public void Dispose()
         {
             DisposeValues();
-            GC.SuppressFinalize(this);
         }
     }
     #endregion
