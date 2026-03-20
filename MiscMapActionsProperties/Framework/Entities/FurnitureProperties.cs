@@ -158,10 +158,7 @@ internal static class FurnitureProperties
         {
             foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
             {
-                if (
-                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.DoesTileHaveProperty))
-                    is MethodInfo origMethod1
-                )
+                if (AccessTools.Method(furnitureType, nameof(Furniture.DoesTileHaveProperty)) is MethodInfo origMethod1)
                 {
                     ModEntry.harm.Patch(
                         original: origMethod1,
@@ -172,7 +169,7 @@ internal static class FurnitureProperties
                     );
                 }
                 if (
-                    AccessTools.DeclaredMethod(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
+                    AccessTools.Method(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
                     is MethodInfo origMethod2
                 )
                 {

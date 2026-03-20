@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -59,10 +60,11 @@ internal static class MapChangeRelocate
     private static bool FarmHouse_moveObjectsForHouseUpgrade_Prefix(FarmHouse __instance)
     {
         TriggerActionManager.Raise(Trigger_MoveObjectsForHouseUpgrade);
-        if (__instance.HasMapPropertyWithValue(MapProp_SkipMoveObjectsForHouseUpgrade))
+        if (CommonPatch.TryGetLocationalProperty(__instance, MapProp_SkipMoveObjectsForHouseUpgrade, out string? value))
         {
             ModEntry.Log("Skipping FarmHouse.moveObjectsForHouseUpgrade");
-            __instance.previousUpgradeLevel = __instance.upgradeLevel;
+            if (value != "F")
+                __instance.previousUpgradeLevel = __instance.upgradeLevel;
             __instance.overlayObjects.Clear();
             return false;
         }

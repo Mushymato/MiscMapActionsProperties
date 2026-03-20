@@ -216,6 +216,7 @@ The following features combined make it possible for content mod authors to relo
 ### Map Property mushymato.MMAP_SkipMoveObjectsForHouseUpgrade
 
 This map property disables the vanilla farmhouse object relocation logic, set it to any non empty value (e.g. `"T"`) on at least the first 2 farmhouse maps.
+Special case: if you set this to `"F"`, the beds will not be automatically upgraded.
 
 ### Trigger mushymato.MMAP_MoveObjectsForHouseUpgrade
 

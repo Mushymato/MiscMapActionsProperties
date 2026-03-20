@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.2]
+
+### Fixed
+- Crab critters now display correctly on their first tick
+- Beds will now properly upgrade to double beds even when mushymato.MMAP_SkipMoveObjectsForHouseUpgrade is used
+
 ## [1.13.1]
 
 ### Fixed
