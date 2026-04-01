@@ -69,6 +69,7 @@ public sealed class ModEntry : Mod
         Framework.Location.FarmHouseFurniture.Register();
         Framework.Location.ScaledOverlay.Register();
         Framework.Location.SteamOverlay.Register();
+        Framework.Location.UndergroundMines.Register();
         Framework.Location.WaterColor.Register();
         Framework.Location.WoodsBaubles.Register();
         Framework.Location.WoodsDebris.Register();

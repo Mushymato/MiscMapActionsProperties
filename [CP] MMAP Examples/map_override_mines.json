@@ -24,6 +24,22 @@
           }
         }
       }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/TriggerActions",
+      "Entries": {
+        "{{ModId}}_Shed2_InMines": {
+          "Id": "{{ModId}}_Shed2_InMines",
+          "Trigger": "LocationChanged",
+          // patch in the shed 50% of the time when between floor 10 and floor 20
+          "Condition": "LOCATION_MINE_LEVEL Here 10 20, RANDOM 0.5",
+          "Actions": [
+            "mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Shed2"
+          ],
+          "MarkActionApplied": false
+        },
+      },
     }
   ]
 }
