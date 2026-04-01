@@ -10,6 +10,7 @@ using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.Triggers;
 using xTile;
+using xTile.Layers;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -23,6 +24,7 @@ public sealed class MapOverrideModel
     public bool TargetRectIsRelative { get; set; } = false;
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
+    public bool ResizeMapIfNeeded { get; set; } = false;
 
     private string? mapOverrideKey = null;
     internal string MapOverrideKey => mapOverrideKey ??= $"{ModEntry.ModId}+MapOverride/{Id}";
@@ -57,17 +59,49 @@ public sealed class MapOverrideModel
         }
     }
 
+    private static void GetMapSize(Map map, out int width, out int height)
+    {
+        width = 0;
+        height = 0;
+        foreach (Layer layer in map.Layers)
+        {
+            width = Math.Max(width, layer.LayerWidth);
+            height = Math.Max(height, layer.LayerHeight);
+        }
+    }
+
+    internal FieldInfo? Layer_skipMap_Field = AccessTools.DeclaredField(typeof(Layer), "_skipMap");
+
     internal bool ApplyMapOverride(GameLocation location, HashSet<string> appliedMapOverrides)
     {
         try
         {
             if (!appliedMapOverrides.Contains(MapOverrideKey))
             {
+                Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
+                Rectangle? refRect = RelTargetRect ?? TargetRect;
+                if (ResizeMapIfNeeded && Layer_skipMap_Field != null)
+                {
+                    if (refRect == null)
+                    {
+                        GetMapSize(overrideMap, out int oWidth, out int oHeight);
+                        refRect = new(0, 0, oWidth, oHeight);
+                    }
+                    GetMapSize(location.Map, out int mWidth, out int mHeight);
+                    int newWidth = Math.Max(mWidth, refRect.Value.X + refRect.Value.Width);
+                    int newHeight = Math.Max(mHeight, refRect.Value.Y + refRect.Value.Height);
+                    xTile.Dimensions.Size size = new(newWidth, newHeight);
+                    foreach (Layer layer in location.Map.Layers)
+                    {
+                        layer.LayerSize = new(newWidth, newHeight);
+                        Layer_skipMap_Field.SetValue(layer, null);
+                    }
+                }
                 location.ApplyMapOverride(
-                    Game1.game1.xTileContent.Load<Map>(SourceMap),
+                    overrideMap,
                     MapOverrideKey,
                     SourceRect,
-                    RelTargetRect ?? TargetRect,
+                    refRect,
                     perTileCustomAction: ClearTargetRectOnApply ? location.cleanUpTileForMapOverride : null
                 );
             }

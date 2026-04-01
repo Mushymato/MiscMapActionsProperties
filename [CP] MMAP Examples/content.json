@@ -187,6 +187,10 @@
       "Action": "Include",
       "FromFile": "map_override.json"
     },
+    {
+      "Action": "Include",
+      "FromFile": "map_override_mines.json"
+    },
     // {
     //   "Action": "Include",
     //   "FromFile": "wild_tree_properties.json"

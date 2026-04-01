@@ -1,0 +1,29 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/MapOverrides",
+      "Entries": {
+        // debug action mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Shed2
+        "{{ModId}}_Shed2": {
+          "Id": "{{ModId}}_Shed2",
+          "ResizeMapIfNeeded": true,
+          "SourceMap": "Maps/{{ModId}}/Shed2",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 19,
+            "Height": 17
+          },
+          "TargetRect": {
+            "X": 10,
+            "Y": 10,
+            "Width": 19,
+            "Height": 17
+          }
+        }
+      }
+    }
+  ]
+}
