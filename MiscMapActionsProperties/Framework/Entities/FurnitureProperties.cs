@@ -46,6 +46,8 @@ internal static class FurnitureProperties
         ModEntry.help.Events.GameLoop.Saving += OnSaving;
 
         // property patches
+        Patch_Properties_Furniture_Bed();
+        Patch_Properties_Furniture_Stock();
         Patch_Properties();
         Patch_Seats();
 
@@ -152,36 +154,45 @@ internal static class FurnitureProperties
         }
     }
 
+    // attempt to separate these guys more to figure out why this part AVE so much sigh
+
+    private static void Patch_Properties_Furniture_Stock()
+    {
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
+            postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
+        );
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetAdditionalTilePropertyRadius)),
+            postfix: new HarmonyMethod(
+                typeof(FurnitureProperties),
+                nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+            )
+        );
+    }
+
+    private static void Patch_Properties_Furniture_Bed()
+    {
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(Furniture.DoesTileHaveProperty)),
+            postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
+        );
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(
+                typeof(BedFurniture),
+                nameof(Furniture.GetAdditionalTilePropertyRadius)
+            ),
+            postfix: new HarmonyMethod(
+                typeof(FurnitureProperties),
+                nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
+            )
+        );
+    }
+
     private static void Patch_Properties()
     {
         try
         {
-            foreach (Type furnitureType in new Type[] { typeof(Furniture), typeof(BedFurniture) })
-            {
-                if (AccessTools.Method(furnitureType, nameof(Furniture.DoesTileHaveProperty)) is MethodInfo origMethod1)
-                {
-                    ModEntry.harm.Patch(
-                        original: origMethod1,
-                        postfix: new HarmonyMethod(
-                            typeof(FurnitureProperties),
-                            nameof(Furniture_DoesTileHaveProperty_Postfix)
-                        )
-                    );
-                }
-                if (
-                    AccessTools.Method(furnitureType, nameof(Furniture.GetAdditionalTilePropertyRadius))
-                    is MethodInfo origMethod2
-                )
-                {
-                    ModEntry.harm.Patch(
-                        original: origMethod2,
-                        postfix: new HarmonyMethod(
-                            typeof(FurnitureProperties),
-                            nameof(Furniture_GetAdditionalTilePropertyRadius_Postfix)
-                        )
-                    );
-                }
-            }
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
                 postfix: new HarmonyMethod(
