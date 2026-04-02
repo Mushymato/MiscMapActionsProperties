@@ -7,7 +7,7 @@ jobs:
             # for attestation
             id-token: write
             attestations: write
-             # for release
+            # for release
             contents: write
         env:
             RELEASE_REF: refs/heads/main # pushes to this branch are treated as public releases
@@ -38,9 +38,10 @@ jobs:
               uses: ncipollo/release-action@v1
               if: github.ref_type == 'tag'
               with:
+                  prerelease: ${{ contains('-', github.ref_name) }}
                   artifacts: '_releases/*.zip'
-                  name: 'Mod version ${{github.ref_name}}'
+                  name: ${{github.ref_name}}
                   body: |
-                      [CHANGELOG.md]#${{github.ref_name}}
-                      [attestation](${{steps.create-artifacts.outputs.attestation-url}}).
+                      [ATTESTATION](${{steps.create-artifacts.outputs.attestation-url}}).
+
 

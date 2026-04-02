@@ -43,7 +43,9 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
       "Precedence": 0,
       // If this is true, the area is cleared before the map patch is applied
       // Any objects/furniture there will be sent to lost and found
-      "ClearTargetRectOnApply": false
+      "ClearTargetRectOnApply": false,
+      // If this is true, expand the map right and down needed when applying this map override.
+      "ResizeMapIfNeeded": false
     },
   }
 }
@@ -64,3 +66,7 @@ Special case: if the first mode argument is `RemoveAll`, then every applied map 
 You can give an arbitrary number of `mode` and `mapOverride` pairs. It is recommended to use this action one time and apply all the map override changes you want, instead of calling this action many times.
 
 The applied overrides are tracked per location on the mod data, and persist until they are removed.
+
+## Game State Query: mushymato.MMAP_HAS_MAP_OVERRIDE \<location\> [mapOverrideId]+
+
+Checks if this location has a given map override applied.
