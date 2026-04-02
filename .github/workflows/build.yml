@@ -1,14 +1,14 @@
 name: Build releases
-on:
-  push:
-    tags:
-      - '*.*.*'
+on: push
 jobs:
     build:
         runs-on: ubuntu-latest
         permissions:
-           id-token: write     # for attestation
-           attestations: write # for attestation
+            # for attestation
+            id-token: write
+            attestations: write
+             # for release
+            contents: write
         env:
             RELEASE_REF: refs/heads/main # pushes to this branch are treated as public releases
         steps:
@@ -19,16 +19,28 @@ jobs:
                   fetch-tags: false
 
             - name: Add build environment
-              uses: Pathoschild/SMAPI-ModBuildWorkflow/add-build-environment@v0
+              uses: Pathoschild/SMAPI-ModBuildWorkflow/add-build-environment@v1
 
             - name: Set prerelease versions
-              uses: Pathoschild/SMAPI-ModBuildWorkflow/set-prerelease-versions@v0
+              uses: Pathoschild/SMAPI-ModBuildWorkflow/set-prerelease-versions@v1
               if: github.ref != env.RELEASE_REF
 
             - name: Build mods
-              run: dotnet build -c Release
+              run: dotnet build --configuration Release
 
-            - name: Upload release zips
-              uses: Pathoschild/SMAPI-ModBuildWorkflow/upload-release-artifacts@v0
+            - id: create-artifacts
+              name: Upload release zips
+              uses: Pathoschild/SMAPI-ModBuildWorkflow/upload-release-artifacts@v1
               with:
                   create_attestations: ${{github.ref == env.RELEASE_REF}}
+
+            - name: Upload to GitHub
+              uses: ncipollo/release-action@v1
+              if: github.ref_type == 'tag'
+              with:
+                  artifacts: '_releases/*.zip'
+                  name: 'Mod version ${{github.ref_name}}'
+                  body: |
+                      [CHANGELOG.md]#${{github.ref_name}}
+                      [attestation](${{steps.create-artifacts.outputs.attestation-url}}).
+
