@@ -1,5 +1,8 @@
 name: Build releases
-on: push
+on:
+  push:
+    tags:
+      - '*.*.*'
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -21,10 +24,6 @@ jobs:
             - name: Add build environment
               uses: Pathoschild/SMAPI-ModBuildWorkflow/add-build-environment@v1
 
-            - name: Set prerelease versions
-              uses: Pathoschild/SMAPI-ModBuildWorkflow/set-prerelease-versions@v1
-              if: github.ref != env.RELEASE_REF
-
             - name: Build mods
               run: dotnet build --configuration Release
 
@@ -34,14 +33,23 @@ jobs:
               with:
                   create_attestations: ${{github.ref == env.RELEASE_REF}}
 
-            - name: Upload to GitHub
+            - name: Upload to GitHub Release
               uses: ncipollo/release-action@v1
               if: github.ref_type == 'tag'
               with:
-                  prerelease: ${{ contains('-', github.ref_name) }}
+                  prerelease: ${{ contains(github.ref_name, '-') }}
                   artifacts: '_releases/*.zip'
                   name: ${{github.ref_name}}
                   body: |
-                      [ATTESTATION](${{steps.create-artifacts.outputs.attestation-url}}).
+                      [CHANGELOG.md](CHANGELOG.md#${{github.ref_name}}) and [attestation](${{steps.create-artifacts.outputs.attestation-url}}).
 
-
+            - name: Upload to Nexus Mods
+              uses: Nexus-Mods/upload-action@v1.0.0-beta.3
+              if: github.ref_type == 'tag' && !contains(github.ref_name, '-')
+              with:
+                api_key: ${{secrets.NEXUS_MODS_API_KEY}}
+                file_group_id: ${{secrets.NEXUSMODS_FILE_GROUP_ID}}
+                filename: _releases/MiscMapActionsProperties ${{github.ref_name}}.zip
+                version: ${{github.ref_name}}
+                display_name: MMAP
+                description: "For SDV 1.6.15+, see changelogs."
