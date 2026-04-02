@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 - New map override field `ResizeMapIfNeeded`
+- New GSQs backported from 1.6.16 `LOCATION_MINE_DIFFICULTY` and `LOCATION_MINE_LEVEL`
+- New GSQ `mushymato.MMAP_MINE_AREA_TYPE`
 
 ## [1.13.2]
 

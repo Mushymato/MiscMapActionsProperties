@@ -45,7 +45,7 @@ jobs:
 
             - name: Upload to Nexus Mods
               uses: Nexus-Mods/upload-action@v1.0.0-beta.3
-              if: github.ref_type == 'tag' && !contains(github.ref_name, '-')
+              if: false && github.ref_type == 'tag' && !contains(github.ref_name, '-')
               with:
                 api_key: ${{secrets.NEXUS_MODS_API_KEY}}
                 file_group_id: ${{secrets.NEXUSMODS_FILE_GROUP_ID}}
