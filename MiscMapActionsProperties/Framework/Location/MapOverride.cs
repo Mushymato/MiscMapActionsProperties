@@ -8,6 +8,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
+using StardewValley.Locations;
 using StardewValley.Triggers;
 using xTile;
 using xTile.Layers;
@@ -76,34 +77,78 @@ public sealed class MapOverrideModel
     {
         try
         {
-            if (!appliedMapOverrides.Contains(MapOverrideKey))
+            if (appliedMapOverrides.Contains(MapOverrideKey))
             {
-                Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
-                Rectangle? refRect = RelTargetRect ?? TargetRect;
-                if (ResizeMapIfNeeded && Layer_skipMap_Field != null)
+                return true;
+            }
+            Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
+            Rectangle? refRect = RelTargetRect ?? TargetRect;
+            if (refRect == null)
+            {
+                GetMapSize(overrideMap, out int oWidth, out int oHeight);
+                refRect = new(0, 0, oWidth, oHeight);
+            }
+            if (ResizeMapIfNeeded && Layer_skipMap_Field != null)
+            {
+                GetMapSize(location.Map, out int mWidth, out int mHeight);
+                int newWidth = Math.Max(mWidth, refRect.Value.X + refRect.Value.Width);
+                int newHeight = Math.Max(mHeight, refRect.Value.Y + refRect.Value.Height);
+                xTile.Dimensions.Size size = new(newWidth, newHeight);
+                foreach (Layer layer in location.Map.Layers)
                 {
-                    if (refRect == null)
+                    layer.LayerSize = new(newWidth, newHeight);
+                    Layer_skipMap_Field.SetValue(layer, null);
+                }
+            }
+
+            location.ApplyMapOverride(
+                overrideMap,
+                MapOverrideKey,
+                SourceRect,
+                refRect,
+                perTileCustomAction: ClearTargetRectOnApply ? location.cleanUpTileForMapOverride : null
+            );
+
+            // water tiles recheck
+            if (
+                (
+                    location.IsOutdoors
+                    || location.HasMapPropertyWithValue("indoorWater")
+                    || (
+                        overrideMap.Properties.TryGetValue("indoorWater", out string mapOverrideIndoorWater)
+                        && !string.IsNullOrEmpty(mapOverrideIndoorWater)
+                    )
+                    || location is Sewer
+                    || location is Submarine
+                ) && location is not Desert
+            )
+            {
+                Layer backLayer = location.Map.RequireLayer("Back");
+                location.waterTiles ??= new WaterTiles(backLayer.LayerWidth, backLayer.LayerHeight);
+                for (
+                    int i = refRect.Value.X;
+                    i < Math.Min(refRect.Value.X + refRect.Value.Width, backLayer.LayerWidth);
+                    i++
+                )
+                {
+                    for (
+                        int j = refRect.Value.Y;
+                        j < Math.Min(refRect.Value.Y + refRect.Value.Height, backLayer.LayerHeight);
+                        j++
+                    )
                     {
-                        GetMapSize(overrideMap, out int oWidth, out int oHeight);
-                        refRect = new(0, 0, oWidth, oHeight);
-                    }
-                    GetMapSize(location.Map, out int mWidth, out int mHeight);
-                    int newWidth = Math.Max(mWidth, refRect.Value.X + refRect.Value.Width);
-                    int newHeight = Math.Max(mHeight, refRect.Value.Y + refRect.Value.Height);
-                    xTile.Dimensions.Size size = new(newWidth, newHeight);
-                    foreach (Layer layer in location.Map.Layers)
-                    {
-                        layer.LayerSize = new(newWidth, newHeight);
-                        Layer_skipMap_Field.SetValue(layer, null);
+                        if (location.doesTileHaveProperty(i, j, "Water", "Back") is string waterProp)
+                        {
+                            if (waterProp == "I")
+                                location.waterTiles.waterTiles[i, j] = new WaterTiles.WaterTileData(
+                                    is_water: true,
+                                    is_visible: false
+                                );
+                            else
+                                location.waterTiles[i, j] = true;
+                        }
                     }
                 }
-                location.ApplyMapOverride(
-                    overrideMap,
-                    MapOverrideKey,
-                    SourceRect,
-                    refRect,
-                    perTileCustomAction: ClearTargetRectOnApply ? location.cleanUpTileForMapOverride : null
-                );
             }
             return true;
         }

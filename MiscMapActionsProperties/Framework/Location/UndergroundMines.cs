@@ -1,3 +1,4 @@
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Locations;
@@ -12,16 +13,17 @@ namespace MiscMapActionsProperties.Framework.Location;
 internal static class UndergroundMines
 {
     internal const string GSQ_MINE_AREA_TYPE = $"{ModEntry.ModId}_MINE_AREA_TYPE";
+    internal const string GSQ_MAP_NAME = $"{ModEntry.ModId}_MAP_NAME";
 
     internal static void Register()
     {
         GameStateQuery.Register(GSQ_MINE_AREA_TYPE, MINE_AREA_TYPE);
+        GameStateQuery.Register(GSQ_MAP_NAME, MAP_NAME);
 
 #if SDV16
         GameStateQuery.Register("LOCATION_MINE_DIFFICULTY", LOCATION_MINE_DIFFICULTY);
         static bool LOCATION_MINE_DIFFICULTY(string[] query, GameStateQueryContext context)
         {
-            ModEntry.Log(string.Join(' ', query));
             GameLocation location = context.Location;
             if (
                 !Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
@@ -53,7 +55,6 @@ internal static class UndergroundMines
         GameStateQuery.Register("LOCATION_MINE_LEVEL", LOCATION_MINE_LEVEL);
         static bool LOCATION_MINE_LEVEL(string[] query, GameStateQueryContext context)
         {
-            ModEntry.Log(string.Join(' ', query));
             GameLocation location = context.Location;
             if (
                 !Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
@@ -74,6 +75,22 @@ internal static class UndergroundMines
             return false;
         }
 #endif
+    }
+
+    private static bool MAP_NAME(string[] query, GameStateQueryContext context)
+    {
+        GameLocation location = context.Location;
+        if (
+            !Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
+            || !ArgUtility.TryGet(query, 2, out string mapPath, out error)
+        )
+        {
+            ModEntry.Log(error);
+            return false;
+        }
+        if (location.mapPath.Value == null)
+            return false;
+        return ModEntry.help.GameContent.ParseAssetName(mapPath).IsEquivalentTo(location.mapPath.Value);
     }
 
     private static bool MINE_AREA_TYPE(string[] query, GameStateQueryContext context)

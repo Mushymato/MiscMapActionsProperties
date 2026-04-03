@@ -9,18 +9,18 @@
         "{{ModId}}_Shed2": {
           "Id": "{{ModId}}_Shed2",
           "ResizeMapIfNeeded": true,
-          "SourceMap": "Maps/{{ModId}}/Shed2",
+          "SourceMap": "Maps/Woods",
           "SourceRect": {
-            "X": 0,
-            "Y": 0,
-            "Width": 19,
-            "Height": 17
+            "X": 6,
+            "Y": 19,
+            "Width": 12,
+            "Height": 8
           },
           "TargetRect": {
             "X": 10,
             "Y": 10,
-            "Width": 19,
-            "Height": 17
+            "Width": 12,
+            "Height": 8
           }
         }
       }
