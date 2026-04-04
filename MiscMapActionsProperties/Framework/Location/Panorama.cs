@@ -735,6 +735,10 @@ internal static class Panorama
         {
             Game1.background = new SummitBG(location);
         }
+        else if (bgId == "CLEAR")
+        {
+            ClearPanorama();
+        }
         else if (BgData.TryGetValue(bgId, out PanoramaData? data))
         {
             if (Game1.background is not PanoramaBackground Panorama)

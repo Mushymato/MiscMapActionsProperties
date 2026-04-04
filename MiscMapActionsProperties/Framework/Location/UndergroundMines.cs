@@ -98,7 +98,7 @@ internal static class UndergroundMines
         GameLocation location = context.Location;
         if (!Helpers.TryGetLocationArg(query, 1, ref location, out string? error))
         {
-            ModEntry.Log(error);
+            ModEntry.Log(error, LogLevel.Error);
             return false;
         }
         if (location is not MineShaft mineShaft)

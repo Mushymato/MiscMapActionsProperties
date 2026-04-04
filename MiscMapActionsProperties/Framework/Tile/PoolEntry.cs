@@ -110,8 +110,8 @@ internal static class PoolEntry
         {
             if (direction == -1)
                 direction = farmer.FacingDirection;
-            else if ((direction = InvertDirection(direction)) != farmer.FacingDirection)
-                return false;
+            else
+                farmer.FacingDirection = direction = InvertDirection(direction);
             Game1.player.changeOutOfSwimSuit();
             Game1.player.jump();
             Game1.player.swimTimer = 800;
@@ -124,8 +124,8 @@ internal static class PoolEntry
         {
             if (direction == -1)
                 direction = farmer.FacingDirection;
-            else if (direction != farmer.FacingDirection)
-                return false;
+            else
+                farmer.FacingDirection = direction;
             Game1.player.changeIntoSwimsuit();
             Game1.player.swimTimer = 800;
             Game1.player.swimming.Value = true;
