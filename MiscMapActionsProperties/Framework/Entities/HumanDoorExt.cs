@@ -161,15 +161,21 @@ internal static class HumanDoorExt
             toPoint.X += point.X;
             toPoint.Y += point.Y;
         }
+
+        Vector2 farmerPos = new(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
         if (fadeToBlack)
         {
-            if (direction == -1)
-                direction = farmer.FacingDirection;
-            Game1.warpFarmer(location.NameOrUniqueName, toPoint.X, toPoint.Y, direction);
+            Game1.globalFadeToBlack(() =>
+            {
+                farmer.Position = farmerPos;
+                if (direction != -1)
+                    farmer.FacingDirection = direction;
+                Game1.globalFadeToClear();
+            });
         }
         else
         {
-            farmer.Position = new Vector2(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
+            farmer.Position = farmerPos;
             if (direction != -1)
                 farmer.FacingDirection = direction;
         }

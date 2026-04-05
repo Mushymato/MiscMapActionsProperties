@@ -42,6 +42,7 @@ public sealed class ModEntry : Mod
             "Spawn stuff at every tile in the current map for performance testing, DO NOT USE IN NORMAL GAMEPLAY",
             ConsoleChaired
         );
+        helper.ConsoleCommands.Add("mmap.mines", "Go to a specific mines floor", ConsoleMines);
 
         TAS = TASAssetManager.Make(helper, $"{ModId}/TAS");
         Framework.Wheels.CommonPatch.Setup();
@@ -89,6 +90,18 @@ public sealed class ModEntry : Mod
         Framework.Tile.ShowGlobalInventory.Register();
         Framework.Tile.ShowShipping.Register();
         Framework.Tile.TASSpot.Register();
+    }
+
+    private void ConsoleMines(string arg1, string[] arg2)
+    {
+        if (!Context.IsWorldReady)
+            return;
+        if (!ArgUtility.TryGetInt(arg2, 0, out int floor, out string? error))
+        {
+            Log(error, LogLevel.Error);
+            return;
+        }
+        Game1.enterMine(floor);
     }
 
     private void ConsoleChaired(string arg1, string[] arg2)

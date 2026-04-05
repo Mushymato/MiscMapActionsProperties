@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -111,7 +112,8 @@ public sealed class MapOverrideModel
 
             // water tiles recheck
             if (
-                (
+                refRect != null
+                && (
                     location.IsOutdoors
                     || location.HasMapPropertyWithValue("indoorWater")
                     || (
@@ -120,35 +122,11 @@ public sealed class MapOverrideModel
                     )
                     || location is Sewer
                     || location is Submarine
-                ) && location is not Desert
+                )
+                && location is not Desert
             )
             {
-                Layer backLayer = location.Map.RequireLayer("Back");
-                location.waterTiles ??= new WaterTiles(backLayer.LayerWidth, backLayer.LayerHeight);
-                for (
-                    int i = refRect.Value.X;
-                    i < Math.Min(refRect.Value.X + refRect.Value.Width, backLayer.LayerWidth);
-                    i++
-                )
-                {
-                    for (
-                        int j = refRect.Value.Y;
-                        j < Math.Min(refRect.Value.Y + refRect.Value.Height, backLayer.LayerHeight);
-                        j++
-                    )
-                    {
-                        if (location.doesTileHaveProperty(i, j, "Water", "Back") is string waterProp)
-                        {
-                            if (waterProp == "I")
-                                location.waterTiles.waterTiles[i, j] = new WaterTiles.WaterTileData(
-                                    is_water: true,
-                                    is_visible: false
-                                );
-                            else
-                                location.waterTiles[i, j] = true;
-                        }
-                    }
-                }
+                DelayedAction.functionAfterDelay(() => RecheckWaterTiles(location, refRect.Value), 0);
             }
             return true;
         }
@@ -156,6 +134,28 @@ public sealed class MapOverrideModel
         {
             ModEntry.Log($"Failed to apply map override '{Id}':\n{err}", LogLevel.Error);
             return false;
+        }
+    }
+
+    private static void RecheckWaterTiles(GameLocation location, Rectangle refRect)
+    {
+        Layer backLayer = location.Map.RequireLayer("Back");
+        location.waterTiles ??= new WaterTiles(backLayer.LayerWidth, backLayer.LayerHeight);
+        for (int i = refRect.X; i < Math.Min(refRect.X + refRect.Width, backLayer.LayerWidth); i++)
+        {
+            for (int j = refRect.Y; j < Math.Min(refRect.Y + refRect.Height, backLayer.LayerHeight); j++)
+            {
+                if (location.doesTileHaveProperty(i, j, "Water", "Back") is string waterProp)
+                {
+                    if (waterProp == "I")
+                        location.waterTiles.waterTiles[i, j] = new WaterTiles.WaterTileData(
+                            is_water: true,
+                            is_visible: false
+                        );
+                    else
+                        location.waterTiles[i, j] = true;
+                }
+            }
         }
     }
 }
@@ -256,18 +256,22 @@ internal static class MapOverride
         return mapOverrides.Any();
     }
 
-    private static string UpdateModMapOverrides(GameLocation location, IEnumerable<string> mapOverrides)
+    private static string UpdateModMapOverrides(
+        GameLocation location,
+        IEnumerable<string> mapOverrides,
+        [CallerMemberName] string? caller = null
+    )
     {
         if (mapOverrides.Any())
         {
             string joined = string.Join(Ctrl_SEP, mapOverrides);
-            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): '{joined}'");
+            ModEntry.Log($"{caller}.UpdateModMapOverrides({location.NameOrUniqueName}): '{joined}'");
             location.modData[ModData_MapOverrides] = joined;
             return joined;
         }
         else
         {
-            ModEntry.Log($"UpdateModMapOverrides({location.NameOrUniqueName}): <empty>");
+            ModEntry.Log($"{caller}.UpdateModMapOverrides({location.NameOrUniqueName}): <empty>");
             location.modData.Remove(ModData_MapOverrides);
             return "";
         }
