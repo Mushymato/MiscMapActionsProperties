@@ -209,6 +209,11 @@ internal static class MapOverride
         GameStateQuery.Register(GSQ_HAS_MAP_OVERRIDE, HAS_MAP_OVERRIDE);
     }
 
+    private static bool TriggerSetTilesheet(string[] args, TriggerActionContext context, out string error)
+    {
+        throw new NotImplementedException();
+    }
+
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
     {
         if (

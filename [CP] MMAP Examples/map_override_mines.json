@@ -9,18 +9,12 @@
         "{{ModId}}_Shed2": {
           "Id": "{{ModId}}_Shed2",
           "ResizeMapIfNeeded": true,
-          "SourceMap": "Maps/Woods",
-          "SourceRect": {
-            "X": 6,
-            "Y": 19,
-            "Width": 12,
-            "Height": 8
-          },
+          "SourceMap": "Maps/Mines/13",
           "TargetRect": {
             "X": 10,
             "Y": 10,
-            "Width": 12,
-            "Height": 8
+            "Width": 35,
+            "Height": 35
           }
         }
       }
@@ -32,10 +26,10 @@
         "{{ModId}}_Shed2_InMines": {
           "Id": "{{ModId}}_Shed2_InMines",
           "Trigger": "LocationChanged",
-          // patch in the shed 50% of the time when between floor 10 and floor 20
-          "Condition": "LOCATION_MINE_LEVEL Here 10 20",
+          "Condition": "mushymato.MMAP_TILESHEET_NAME Here mine Maps/Mines/mine",
           "Actions": [
-            "mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Shed2"
+            "mushymato.MMAP_UpdateMapOverride Here + mushymato.MMAP.Example_Shed2",
+            "mushymato.MMAP_SetTilesheet Here mine Maps/Mines/mine_slime"
           ],
           "MarkActionApplied": false
         },
