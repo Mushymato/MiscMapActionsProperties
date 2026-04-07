@@ -13,6 +13,7 @@ using StardewValley.Locations;
 using StardewValley.Triggers;
 using xTile;
 using xTile.Layers;
+using xTile.Tiles;
 
 namespace MiscMapActionsProperties.Framework.Location;
 
@@ -27,6 +28,7 @@ public sealed class MapOverrideModel
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
     public bool ResizeMapIfNeeded { get; set; } = false;
+    public bool ForceTilesheetMatch { get; set; } = false;
 
     private string? mapOverrideKey = null;
     internal string MapOverrideKey => mapOverrideKey ??= $"{ModEntry.ModId}+MapOverride/{Id}";
@@ -83,6 +85,18 @@ public sealed class MapOverrideModel
                 return true;
             }
             Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
+
+            if (ForceTilesheetMatch)
+            {
+                foreach (TileSheet sheet in overrideMap.TileSheets)
+                {
+                    if (location.Map.GetTileSheet(sheet.Id) is TileSheet existingSheet)
+                    {
+                        sheet.ImageSource = existingSheet.ImageSource;
+                    }
+                }
+            }
+
             Rectangle? refRect = RelTargetRect ?? TargetRect;
             if (refRect == null)
             {

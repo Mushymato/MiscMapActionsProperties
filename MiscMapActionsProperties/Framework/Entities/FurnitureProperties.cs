@@ -46,9 +46,17 @@ internal static class FurnitureProperties
         ModEntry.help.Events.GameLoop.Saving += OnSaving;
 
         // property patches
-        Patch_Properties_Furniture_Bed();
-        Patch_Properties_Furniture_Stock();
-        Patch_Properties();
+        try
+        {
+            Patch_Properties_IntersectsForCollision();
+            Patch_Properties_AllowPlacementOnThisTile();
+            Patch_Properties_Furniture_Stock();
+            Patch_Properties_Furniture_Bed();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
+        }
         Patch_Seats();
 
         // these should be removed in 1.6.16
@@ -189,29 +197,20 @@ internal static class FurnitureProperties
         );
     }
 
-    private static void Patch_Properties()
+    private static void Patch_Properties_IntersectsForCollision()
     {
-        try
-        {
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_IntersectsForCollision_Postfix)
-                )
-            );
-            ModEntry.harm.Patch(
-                original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.AllowPlacementOnThisTile)),
-                postfix: new HarmonyMethod(
-                    typeof(FurnitureProperties),
-                    nameof(Furniture_AllowPlacementOnThisTile_Postfix)
-                )
-            );
-        }
-        catch (Exception err)
-        {
-            ModEntry.Log($"Failed to patch FurnitureProperties Props:\n{err}", LogLevel.Error);
-        }
+        ModEntry.harm.Patch(
+            original: AccessTools.Method(typeof(Furniture), nameof(Furniture.IntersectsForCollision)),
+            postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_IntersectsForCollision_Postfix))
+        );
+    }
+
+    private static void Patch_Properties_AllowPlacementOnThisTile()
+    {
+        ModEntry.harm.Patch(
+            original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.AllowPlacementOnThisTile)),
+            postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_AllowPlacementOnThisTile_Postfix))
+        );
     }
 
     private static void Patch_Seats()
