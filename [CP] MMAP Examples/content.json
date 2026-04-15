@@ -195,5 +195,9 @@
     //   "Action": "Include",
     //   "FromFile": "wild_tree_properties.json"
     // }
+    {
+      "Action": "Include",
+      "FromFile": "play_sound.json"
+    }
   ]
 }

@@ -84,6 +84,7 @@ public sealed class ModEntry : Mod
         Framework.Tile.LaunchFireworks.Register();
         Framework.Tile.LightSpot.Register();
         Framework.Tile.PaddySpot.Register();
+        Framework.Tile.PlaySound.Register();
         Framework.Tile.PoolEntry.Register();
         Framework.Tile.QuestionDialogue.Register();
         Framework.Tile.ShowConstruct.Register();

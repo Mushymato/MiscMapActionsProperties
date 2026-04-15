@@ -97,23 +97,47 @@ internal static class DayToNightTiming
             TriggerActionManager.Raise(MapProp_NightTimeTruly);
     }
 
+    private static bool CheckPredicateOnLocation(
+        string[] query,
+        GameStateQueryContext context,
+        Func<GameLocation, bool> predicate
+    )
+    {
+        GameLocation location = context.Location;
+        if (query.Length >= 2)
+            GameStateQuery.Helpers.TryGetLocationArg(query, 1, ref location, out _);
+        else
+            location = Game1.currentLocation;
+        if (location == null)
+            return false;
+        return predicate(location);
+    }
+
     private static bool TIME_IS_DAY(string[] query, GameStateQueryContext context) =>
-        !Game1.isStartingToGetDarkOut(context.Location);
+        CheckPredicateOnLocation(query, context, static location => !Game1.isStartingToGetDarkOut(location));
 
     private static bool TIME_IS_SUNSET(string[] query, GameStateQueryContext context) =>
-        Game1.isStartingToGetDarkOut(context.Location) && !Game1.isDarkOut(context.Location);
+        CheckPredicateOnLocation(
+            query,
+            context,
+            static location => !Game1.isStartingToGetDarkOut(location) && !Game1.isDarkOut(location)
+        );
 
     private static bool TIME_IS_LIGHTS_OFF(string[] query, GameStateQueryContext context) =>
-        Game1.isTimeToTurnOffLighting(context.Location);
+        CheckPredicateOnLocation(query, context, Game1.isTimeToTurnOffLighting);
 
     private static bool TIME_IS_NIGHT(string[] query, GameStateQueryContext context) =>
-        Game1.isDarkOut(context.Location);
+        CheckPredicateOnLocation(query, context, Game1.isDarkOut);
 
     private static bool WINDOW_LIGHTS(string[] query, GameStateQueryContext context) =>
-        !Game1.IsRainingHere(context.Location) && !Game1.isTimeToTurnOffLighting(context.Location);
+        CheckPredicateOnLocation(
+            query,
+            context,
+            static location => !Game1.IsRainingHere(location) && !Game1.isTimeToTurnOffLighting(location)
+        );
 
     private static bool RAINING_HERE(string[] query, GameStateQueryContext context) =>
-        Game1.IsRainingHere(context.Location);
+        CheckPredicateOnLocation(query, context, Game1.IsRainingHere);
 
     private static void Game1_getStartingToGetDarkTime_Postfix(GameLocation location, ref int __result)
     {

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Mine",
+      "MapTiles": [
+        {
+          "Layer": "Back",
+          "Position": {
+            "X": 17,
+            "Y": 7
+          },
+          "SetProperties": {
+            "TouchAction": "mushymato.MMAP_PlaySound clam_tone 600|800|1000|1200"
+          }
+        }
+      ],
+    },
+  ]
+}
