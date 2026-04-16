@@ -519,12 +519,10 @@ public static class CommonPatch
     private static void GameLocation_reloadMap_Prefix(GameLocation __instance, ref int? __state)
     {
         __state = __instance.Map?.GetHashCode();
-        ModEntry.Log($"reloadMap PRE: {__state}");
     }
 
     private static void GameLocation_reloadMap_Postfix(GameLocation __instance, ref int? __state)
     {
-        ModEntry.Log($"reloadMap POST: {__state}");
         if (__state != __instance.Map?.GetHashCode())
             GameLocation_ReloadMap?.Invoke(null, __instance);
     }

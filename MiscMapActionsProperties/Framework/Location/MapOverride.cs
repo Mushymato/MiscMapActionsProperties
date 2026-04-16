@@ -19,6 +19,13 @@ namespace MiscMapActionsProperties.Framework.Location;
 
 public sealed record UpdateMapOverrideRequest(string LocationName, Point Pnt, string[] Args);
 
+public sealed record ApplyMapOverrideBroadcast(
+    string LocationName,
+    string MapAsset,
+    string MapOverrides,
+    bool ForceReload
+);
+
 public sealed class MapOverrideModel
 {
     public string Id { get; set; } = null!;
@@ -191,7 +198,6 @@ internal static class MapOverride
     private const string GSQ_HAS_MAP_OVERRIDE = $"{ModEntry.ModId}_HAS_MAP_OVERRIDE";
     private const string MP_UpdateMapOverride_Request = "UpdateMapOverride_Request";
     private const string MP_UpdateMapOverride_Broadcast = "UpdateMapOverride_Broadcast";
-    private const string MP_UpdateMapOverride_ReloadMap = "UpdateMapOverride_ReloadMap";
 
     private static readonly FieldInfo? _appliedMapOverridesField = AccessTools.DeclaredField(
         typeof(GameLocation),
@@ -220,15 +226,11 @@ internal static class MapOverride
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
         ModEntry.help.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
+        ModEntry.help.Events.Player.Warped += OnWarped;
 
         TriggerActionManager.RegisterAction(Action_UpdateMapOverride, TriggerUpdateMapOverride);
         CommonPatch.RegisterTileAndTouch(Action_UpdateMapOverride, TileUpdateMapOverride);
         GameStateQuery.Register(GSQ_HAS_MAP_OVERRIDE, HAS_MAP_OVERRIDE);
-    }
-
-    private static bool TriggerSetTilesheet(string[] args, TriggerActionContext context, out string error)
-    {
-        throw new NotImplementedException();
     }
 
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
@@ -442,6 +444,14 @@ internal static class MapOverride
             _mapOverrideData = null;
     }
 
+    private static void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        if (e.NewLocation.modData.TryGetValue(ModData_MapOverrides, out string mapOverrides))
+        {
+            ModEntry.Log($"{e.NewLocation.NameOrUniqueName}[{ModData_MapOverrides}]: {mapOverrides}");
+        }
+    }
+
     private static void OnModMessageReceived(object? sender, ModMessageReceivedEventArgs e)
     {
         if (e.FromModID != ModEntry.ModId || e.FromPlayerID == Game1.player.UniqueMultiplayerID)
@@ -451,6 +461,7 @@ internal static class MapOverride
 
         if (e.Type == MP_UpdateMapOverride_Request && Context.IsMainPlayer)
         {
+            ModEntry.Log($"Perform {Action_UpdateMapOverride} for {e.FromPlayerID}");
             UpdateMapOverrideRequest request = e.ReadAs<UpdateMapOverrideRequest>();
             GameLocation targetLocation = Game1.getLocationFromName(request.LocationName);
             if (!DoUpdateMapOverride(targetLocation, request.Args, request.Pnt, out string? error))
@@ -460,28 +471,29 @@ internal static class MapOverride
             return;
         }
 
-        if (
-            Game1.currentLocation is not GameLocation location
-            || location.mapPath.Value == null
-            || location.Map == null
-        )
+        if (e.Type == MP_UpdateMapOverride_Broadcast)
         {
-            return;
+            ApplyMapOverrideBroadcast broadcast = e.ReadAs<ApplyMapOverrideBroadcast>();
+            if (Game1.currentLocation is GameLocation location && location.NameOrUniqueName == broadcast.LocationName)
+            {
+                location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
+                if (broadcast.ForceReload)
+                {
+                    ModEntry.Log($"Require force reload for reorder");
+                    ModEntry.help.GameContent.InvalidateCache(location.mapPath.Value);
+                    location.loadMap(location.mapPath.Value, true);
+                }
+                location.modData[ModData_MapOverrides] = broadcast.MapOverrides;
+                location.MakeMapModifications(broadcast.ForceReload);
+                location.StoreCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
+            }
+            else if (broadcast.ForceReload)
+            {
+                ModEntry.Log($"Invalidate map {broadcast.MapAsset} for {broadcast.LocationName}");
+                ModEntry.help.GameContent.InvalidateCache(broadcast.MapAsset);
+                Game1.Multiplayer.cachedMultiplayerMaps.Remove(broadcast.LocationName);
+            }
         }
-
-        location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
-        if (e.Type == MP_UpdateMapOverride_ReloadMap)
-        {
-            location.loadMap(Game1.currentLocation.mapPath.Value, true);
-        }
-        else if (e.Type != MP_UpdateMapOverride_Request)
-        {
-            return;
-        }
-        // needed because modData updates too slow
-        location.modData[ModData_MapOverrides] = e.ReadAs<string>();
-        location.MakeMapModifications();
-        location.StoreCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
     }
 
     private static bool TileUpdateMapOverride(GameLocation location, string[] args, Farmer who, Point point)
@@ -644,32 +656,32 @@ internal static class MapOverride
         );
 
         location.InvalidateCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
-        if (Game1.currentLocation == location || Context.IsMainPlayer)
+        if (needForcedReload)
         {
-            if (needForcedReload)
-            {
-                ModEntry.Log($"Require force reload for reorder");
-                location.loadMap(location.mapPath.Value, true);
-            }
-            location.MakeMapModifications(needForcedReload);
-            location.StoreCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
+            ModEntry.Log($"Require force reload for reorder");
+            location.loadMap(location.mapPath.Value, true);
         }
+        location.MakeMapModifications(needForcedReload);
+        location.StoreCachedMultiplayerMap(Game1.Multiplayer.cachedMultiplayerMaps);
 
-        long[] playersInTargetLocation = Game1
+        long[] otherPlayers = Game1
             .getOnlineFarmers()
-            .Where(farmer =>
-                farmer.currentLocation != null && farmer.currentLocation.NameOrUniqueName == location.NameOrUniqueName
-            )
+            .Where(farmer => farmer.UniqueMultiplayerID != Game1.player.UniqueMultiplayerID)
             .Select(farmer => farmer.UniqueMultiplayerID)
             .ToArray();
-        ModEntry.Log($"playersInTargetLocation: {string.Join(',', playersInTargetLocation)}");
-        if (playersInTargetLocation.Length > 0)
+        if (otherPlayers.Length > 0)
         {
+            ModEntry.Log($"otherPlayers: {string.Join(',', otherPlayers)}");
             ModEntry.help.Multiplayer.SendMessage(
-                updatedOverrides,
-                needForcedReload ? MP_UpdateMapOverride_ReloadMap : MP_UpdateMapOverride_Request,
+                new ApplyMapOverrideBroadcast(
+                    location.NameOrUniqueName,
+                    location.mapPath.Value,
+                    updatedOverrides,
+                    needForcedReload
+                ),
+                MP_UpdateMapOverride_Broadcast,
                 [ModEntry.ModId],
-                playersInTargetLocation
+                otherPlayers
             );
         }
         return true;
