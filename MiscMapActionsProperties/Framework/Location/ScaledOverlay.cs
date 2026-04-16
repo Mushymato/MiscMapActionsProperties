@@ -34,7 +34,13 @@ internal static class ScaledOverlay
         Absolute = 4,
     }
 
-    internal sealed record ScaledCtx(Texture2D Texture, ScalingMode Scaling, float Scale, Color Clr)
+    internal sealed record ScaledCtx(
+        Texture2D Texture,
+        Rectangle SourceRect,
+        ScalingMode Scaling,
+        float Scale,
+        Color Clr
+    )
     {
         private FadeState fadeFrom = FadeState.On;
         private FadeState fadeTo = FadeState.On;
@@ -100,31 +106,31 @@ internal static class ScaledOverlay
                     goto case ScalingMode.Fit;
                 case ScalingMode.Fit:
                     drawScale = Math.Min(
-                        viewportRect.Width / (float)Texture.Bounds.Width,
-                        viewportRect.Height / (float)Texture.Bounds.Height
+                        viewportRect.Width / (float)SourceRect.Width,
+                        viewportRect.Height / (float)SourceRect.Height
                     );
                     goto case ScalingMode.Absolute;
                 case ScalingMode.Cover:
                     drawScale = Math.Max(
-                        viewportRect.Width / (float)Texture.Bounds.Width,
-                        viewportRect.Height / (float)Texture.Bounds.Height
+                        viewportRect.Width / (float)SourceRect.Width,
+                        viewportRect.Height / (float)SourceRect.Height
                     );
                     goto case ScalingMode.Absolute;
                 case ScalingMode.Absolute:
                     b.Draw(
                         Texture,
                         new Vector2(viewportRect.Width / 2f, viewportRect.Height / 2f),
-                        Texture.Bounds,
+                        SourceRect,
                         drawColor,
                         0f,
-                        new(Texture.Bounds.Width / 2f, Texture.Bounds.Height / 2f),
+                        new(SourceRect.Width / 2f, SourceRect.Height / 2f),
                         drawScale,
                         SpriteEffects.None,
                         1f
                     );
                     break;
                 case ScalingMode.Stretch:
-                    b.Draw(Texture, viewportRect, drawColor);
+                    b.Draw(Texture, viewportRect, SourceRect, drawColor);
                     break;
             }
         }
@@ -145,12 +151,21 @@ internal static class ScaledOverlay
             {
                 return null;
             }
-            if (!Game1.temporaryContent.DoesAssetExist<Texture2D>(textureName))
+            Rectangle? sourceRect = null;
+            if (textureName.Contains(':'))
+            {
+                string[] txParts = textureName.Split(':');
+                textureName = txParts[0];
+                if (ArgUtility.TryGetRectangle(txParts, 1, out Rectangle rect, out _))
+                    sourceRect = rect;
+            }
+            if (!Game1.content.DoesAssetExist<Texture2D>(textureName))
             {
                 error = $"Texture '{textureName}' does not exist";
                 return null;
             }
             Texture2D texture = Game1.content.Load<Texture2D>(textureName);
+            sourceRect ??= texture.Bounds;
             ScalingMode scaling = ScalingMode.Cover;
             float scale = 4f;
             if (scalingDesc != null)
@@ -174,7 +189,7 @@ internal static class ScaledOverlay
             {
                 color = Utility.StringToColor(colorStr) ?? color;
             }
-            return new(texture, scaling, scale, color);
+            return new(texture, sourceRect.Value, scaling, scale, color);
         }
     }
 
