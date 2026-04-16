@@ -201,13 +201,32 @@ Has 2 variants:
 - For buildings, you must supply the exact building ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
 - For furniture, you must supply the exact unqualified furniture ID, and it is possible to affect multiple draw layers with 1 action if the draw layers share a prefix for ID.
 
-## mushymato.MMAP_UpdateMapOverride <location> [[mode] [mapOverrideId]]
+## mushymato.MMAP_UpdateMapOverride \<location\> [[mode] [mapOverrideId]]
 
 - Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
 = Applies the given map overrides, see [map overrides docs](map-overrides.md) for details.
 - `location`: Either `Here` or a location name.
 - `mode`: Either `+` for adding an override, or `-` for removing an override.
 - `mapOverrideId`: The map override id set in the data asset.
+
+## mushymato.MMAP_PlaySound \<audioName\> [pitches] [isGlobal]
+
+- Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
+- Plays a given sound, optionally with pitch.
+- You can give a `|` separated list of pitches, e.g. `600|800|1000|1200`.
+- When `isGlobal` is true, the sound will be heard by all players, default `false`.
+- Pitch does not work on all sounds but they definitely work on these:
+    - `clam_tone`
+    - `telephone_buttonPush`
+    - `miniharp_note`
+    - `pig`
+    - `crystal`
+    - `Duck`
+    - `toyPiano`
+    - `dustMeep`
+    - `flute`
+```
+
 
 ## Farmhouse Upgrade Relocation Solution
 
