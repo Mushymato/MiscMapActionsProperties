@@ -25,18 +25,20 @@
       "Action": "EditData",
       "Target": "mushymato.MMAP/MapOverrides",
       "Entries": {
+        // debug action mushymato.MMAP_UpdateMapOverride BusStop + mushymato.MMAP.Example_Crib
+        // debug action mushymato.MMAP_UpdateMapOverride BusStop - mushymato.MMAP.Example_Crib
         "{{ModId}}_Crib": {
           "Id": "{{ModId}}_Crib",
           "SourceMap": "Maps/{{ModId}}_MO_Crib",
           "SourceRect": {
             "X": 0,
             "Y": 0,
-            "Width": 2,
+            "Width": 3,
             "Height": 4
           },
           "TargetRect": {
-            "X": 10,
-            "Y": 10,
+            "X": 20,
+            "Y": 20,
             "Width": 3,
             "Height": 4
           }

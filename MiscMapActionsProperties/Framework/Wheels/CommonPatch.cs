@@ -90,6 +90,10 @@ public static class CommonPatch
             );
             ModEntry.harm.Patch(
                 original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.reloadMap)),
+                prefix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Prefix))
+                {
+                    priority = Priority.Last,
+                },
                 postfix: new HarmonyMethod(typeof(CommonPatch), nameof(GameLocation_reloadMap_Postfix))
                 {
                     priority = Priority.Last,
@@ -512,9 +516,17 @@ public static class CommonPatch
         );
     }
 
-    private static void GameLocation_reloadMap_Postfix(GameLocation __instance)
+    private static void GameLocation_reloadMap_Prefix(GameLocation __instance, ref int? __state)
     {
-        GameLocation_ReloadMap?.Invoke(null, __instance);
+        __state = __instance.Map?.GetHashCode();
+        ModEntry.Log($"reloadMap PRE: {__state}");
+    }
+
+    private static void GameLocation_reloadMap_Postfix(GameLocation __instance, ref int? __state)
+    {
+        ModEntry.Log($"reloadMap POST: {__state}");
+        if (__state != __instance.Map?.GetHashCode())
+            GameLocation_ReloadMap?.Invoke(null, __instance);
     }
 
     private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
