@@ -364,8 +364,6 @@ internal sealed class PanoramaBackground(GameLocation location) : Background(loc
 
     public override void update(xTile.Dimensions.Rectangle viewport)
     {
-        if (Game1.activeClickableMenu is not null)
-            return;
         // Update Parallax
         foreach (ParallaxContext pCtx in parallaxCtx)
         {
