@@ -123,10 +123,10 @@
       "Action": "Include",
       "FromFile": "cellar_relocate.json"
     },
-    {
-      "Action": "Include",
-      "FromFile": "tas_spot.json"
-    },
+    // {
+    //   "Action": "Include",
+    //   "FromFile": "tas_spot.json"
+    // },
     {
       "Action": "Include",
       "FromFile": "woods.json"

@@ -37,6 +37,10 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
         "Width": 3,
         "Height": 4
       },
+      // If this is true, calculate the target from a reference tile
+      // - for tile actions, this would be the tile the action lives on
+      // - for trigger actions, this would be the player's current tile
+      "TargetRectIsRelative": false,
       // Value used to order the map patches, lower precedence apply first and get covered by higher precedence maps
       // If this is less than 0, the patch applies BEFORE vanilla map modifications in MakeMapModifications
       // When 2 map patches have same precedence, Id is used as tiebreaker
@@ -45,7 +49,10 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
       // Any objects/furniture there will be sent to lost and found
       "ClearTargetRectOnApply": false,
       // If this is true, expand the map right and down needed when applying this map override.
-      "ResizeMapIfNeeded": false
+      "ResizeMapIfNeeded": false,
+      // Instead of adding new tilesheet as needed, this forces your map override to use a
+      // pre-existing tileset with the same name, even if the assets are different
+      "ForceTilesheetMatch": false
     },
   }
 }
