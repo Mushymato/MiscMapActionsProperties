@@ -1,0 +1,23 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    // debug action mushymato.MMAP_EnableExplodeAction Back
+    // can also use buildings
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 10,
+            "Y": 23
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_ExplodeAction": "MagicWarp WizardHouseBasement 2 5"
+          }
+        }
+      ]
+    }
+  ]
+}

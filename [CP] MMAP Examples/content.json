@@ -198,6 +198,10 @@
     {
       "Action": "Include",
       "FromFile": "play_sound.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "explode_action.json"
     }
   ]
 }
