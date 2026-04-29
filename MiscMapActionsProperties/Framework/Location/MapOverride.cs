@@ -9,7 +9,10 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
+using StardewValley.Internal;
 using StardewValley.Locations;
+using StardewValley.Menus;
+using StardewValley.TokenizableStrings;
 using StardewValley.Triggers;
 using xTile;
 using xTile.Layers;
@@ -26,6 +29,17 @@ public sealed record ApplyMapOverrideBroadcast(
     bool ForceReload
 );
 
+public sealed class MapOverrideRenonvationData
+{
+    public string? TargetLocation { get; set; } = null;
+    public string? AddDisplayName { get; set; } = null;
+    public string? AddDescription { get; set; } = null;
+    public string? AddPlacementText { get; set; } = null;
+    public string? RemoveDisplayName { get; set; } = null;
+    public string? RemoveDescription { get; set; } = null;
+    public string? RemovePlacementText { get; set; } = null;
+}
+
 public sealed class MapOverrideModel
 {
     public string Id { get; set; } = null!;
@@ -38,6 +52,7 @@ public sealed class MapOverrideModel
     public bool ClearTargetRectOnApply { get; set; } = false;
     public bool ResizeMapIfNeeded { get; set; } = false;
     public bool ForceTilesheetMatch { get; set; } = false;
+    public MapOverrideRenonvationData? Renovation { get; set; } = null;
 
     private string? mapOverrideKey = null;
     internal string MapOverrideKey => mapOverrideKey ??= $"{ModEntry.ModId}+MapOverride/{Id}";
@@ -181,6 +196,77 @@ public sealed class MapOverrideModel
             }
         }
     }
+
+    private static readonly FieldInfo HouseRenovation_name = AccessTools.DeclaredField(
+        typeof(HouseRenovation),
+        "_name"
+    );
+    private static readonly FieldInfo HouseRenovation_displayName = AccessTools.DeclaredField(
+        typeof(HouseRenovation),
+        "_displayName"
+    );
+    private static readonly FieldInfo HouseRenovation_description = AccessTools.DeclaredField(
+        typeof(HouseRenovation),
+        "_description"
+    );
+
+    public bool TryGetHouseRenovationEntry(GameLocation location, [NotNullWhen(true)] out HouseRenovation? houseReno)
+    {
+        houseReno = null;
+        if (Renovation == null || Renovation.TargetLocation != location.Name)
+            return false;
+        if (!Game1.game1.xTileContent.DoesAssetExist<Map>(SourceMap))
+            return false;
+
+        houseReno = new() { location = location };
+        HouseRenovation_name.SetValue(houseReno, Id);
+        bool isRemove =
+            MapOverride.TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverrides)
+            && mapOverrides.ContainsKey(Id);
+        if (isRemove)
+        {
+            houseReno.animationType = HouseRenovation.AnimationType.Destroy;
+            HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDisplayName) ?? "?");
+            HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDescription) ?? "?");
+            houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
+        }
+        else
+        {
+            houseReno.animationType = HouseRenovation.AnimationType.Build;
+            HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDisplayName) ?? "?");
+            HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDescription) ?? "?");
+            houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
+        }
+        houseReno.RoomId = Id;
+        Rectangle boundRect;
+        if (TargetRect != null)
+        {
+            boundRect = TargetRect.Value;
+        }
+        else
+        {
+            Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
+            boundRect = new(0, 0, (int)(overrideMap.DisplayWidth / 64f), (int)(overrideMap.DisplayHeight / 64f));
+        }
+        houseReno.AddRenovationBound(boundRect);
+        houseReno.validate = HouseRenovation.EnsureNoObstructions;
+        houseReno.onRenovation = (reno, _) =>
+        {
+            ModEntry.Log("houseReno.onRenovation");
+            if (
+                !MapOverride.DoUpdateMapOverride(
+                    reno.location,
+                    [MapOverride.Action_UpdateMapOverride, "Here", isRemove ? "-" : "+", reno.RoomId],
+                    Point.Zero,
+                    out string? error
+                )
+            )
+            {
+                ModEntry.Log(error, LogLevel.Error);
+            }
+        };
+        return true;
+    }
 }
 
 internal static class MapOverride
@@ -194,7 +280,8 @@ internal static class MapOverride
     internal const char Ctrl_SEP_RelCoordXY = '.';
     private const string Ctrl_RemoveAll = "RemoveAll";
     internal static char[] ILLEGAL_CHARS = [Ctrl_SEP, Ctrl_SEP_RelCoord, Ctrl_ADD, Ctrl_RMV];
-    private const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
+    internal const string Action_UpdateMapOverride = $"{ModEntry.ModId}_UpdateMapOverride";
+    internal const string Action_ShowRenovations = $"{ModEntry.ModId}_ShowRenovations";
     private const string GSQ_HAS_MAP_OVERRIDE = $"{ModEntry.ModId}_HAS_MAP_OVERRIDE";
     private const string MP_UpdateMapOverride_Request = "UpdateMapOverride_Request";
     private const string MP_UpdateMapOverride_Broadcast = "UpdateMapOverride_Broadcast";
@@ -211,17 +298,24 @@ internal static class MapOverride
             ModEntry.Log($"Failed to reflect '_appliedMapOverrides', '{Asset_MapOverride}' feature disabled.");
             return;
         }
-        ModEntry.harm.Patch(
-            original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.MakeMapModifications)),
-            prefix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Prefix))
-            {
-                priority = Priority.First,
-            },
-            postfix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Postfix))
-            {
-                priority = Priority.Last,
-            }
-        );
+        try
+        {
+            ModEntry.harm.Patch(
+                original: AccessTools.DeclaredMethod(typeof(GameLocation), nameof(GameLocation.MakeMapModifications)),
+                prefix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Prefix))
+                {
+                    priority = Priority.First,
+                },
+                postfix: new HarmonyMethod(typeof(MapOverride), nameof(GameLocation_MakeMapModifications_Postfix))
+                {
+                    priority = Priority.Last,
+                }
+            );
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Failed to patch MapOverride:\n{err}", LogLevel.Error);
+        }
 
         ModEntry.help.Events.Content.AssetRequested += OnAssetRequested;
         ModEntry.help.Events.Content.AssetsInvalidated += OnAssetInvalidated;
@@ -231,6 +325,48 @@ internal static class MapOverride
         TriggerActionManager.RegisterAction(Action_UpdateMapOverride, TriggerUpdateMapOverride);
         CommonPatch.RegisterTileAndTouch(Action_UpdateMapOverride, TileUpdateMapOverride);
         GameStateQuery.Register(GSQ_HAS_MAP_OVERRIDE, HAS_MAP_OVERRIDE);
+
+        TriggerActionManager.RegisterAction(Action_ShowRenovations, TriggerShowRenovations);
+    }
+
+    private static bool TriggerShowRenovations(string[] args, TriggerActionContext context, out string? error)
+    {
+        if (!ArgUtility.TryGet(args, 1, out string? locationName, out error))
+        {
+            return false;
+        }
+        GameLocation location;
+        if (locationName == "Here")
+            location = Game1.currentLocation;
+        else
+            location = Game1.getLocationFromName(locationName);
+
+        List<ISalable> renovations = [];
+        foreach (MapOverrideModel model in MapOverrideData.Values)
+        {
+            if (model.TryGetHouseRenovationEntry(location, out HouseRenovation? houseReno))
+            {
+                renovations.Add(houseReno);
+            }
+        }
+
+        if (!renovations.Any())
+        {
+            error = $"No renovations for '{locationName}'";
+            return true;
+        }
+
+        Game1.activeClickableMenu = new ShopMenu(
+            Action_ShowRenovations,
+            renovations,
+            0,
+            null,
+            HouseRenovation.OnPurchaseRenovation
+        )
+        {
+            purchaseSound = null,
+        };
+        return true;
     }
 
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
@@ -251,7 +387,7 @@ internal static class MapOverride
         return mapOverrides.ContainsKey(mapOverrideId);
     }
 
-    private static bool TryGetModMapOverrides(
+    internal static bool TryGetModMapOverrides(
         GameLocation location,
         [NotNullWhen(true)] out Dictionary<string, Point?>? mapOverrides
     )
@@ -509,7 +645,7 @@ internal static class MapOverride
         return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player.TilePoint, out error);
     }
 
-    private static bool DoUpdateMapOverride(
+    internal static bool DoUpdateMapOverride(
         GameLocation location,
         string[] args,
         Point point,

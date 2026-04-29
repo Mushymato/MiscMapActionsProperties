@@ -191,6 +191,10 @@
       "Action": "Include",
       "FromFile": "map_override_mines.json"
     },
+    {
+      "Action": "Include",
+      "FromFile": "map_override_reno.json"
+    },
     // {
     //   "Action": "Include",
     //   "FromFile": "wild_tree_properties.json"
