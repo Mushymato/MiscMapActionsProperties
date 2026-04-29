@@ -204,9 +204,25 @@ internal static class ScaledOverlay
         ModEntry.help.Events.Display.RenderedStep += OnRenderedStep;
 
         TriggerActionManager.RegisterAction(MapProp_ScaledOverlay, ActionSetScaledOverlay);
+        CommonPatch.RegisterTileAndTouch(MapProp_ScaledOverlay, TileActionSetScaledOverlay);
+    }
+
+    private static bool TileActionSetScaledOverlay(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (!DoSetScaledOverlay(args, out string? error))
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+        return true;
     }
 
     private static bool ActionSetScaledOverlay(string[] args, TriggerActionContext context, out string? error)
+    {
+        return DoSetScaledOverlay(args, out error);
+    }
+
+    private static bool DoSetScaledOverlay(string[] args, [NotNullWhen(false)] out string? error)
     {
         if (!ArgUtility.TryGetFloat(args, 1, out float fadeDuration, out error, name: "float duration"))
         {
@@ -231,6 +247,7 @@ internal static class ScaledOverlay
         {
             if (ScaledCtx.Make(args, 2, out error) is not ScaledCtx ctx)
             {
+                error = "Could not create scaled overlay ctx";
                 return false;
             }
             if (fadeDuration > 0)
