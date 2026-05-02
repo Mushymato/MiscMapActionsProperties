@@ -11,8 +11,8 @@
           "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
           "RemovedById": "{{ModId}}_Chimkins_Remove",
           "TargetRect": {
-            "X": 2,
-            "Y": 2,
+            "X": 8,
+            "Y": 8,
             "Width": 1,
             "Height": 2
           },
@@ -29,11 +29,29 @@
           "SourceMap": "Maps/{{ModId}}_MO_Chimkins_Off",
           "RemovedById": "{{ModId}}_Chimkins",
           "TargetRect": {
-            "X": 2,
-            "Y": 2,
+            "X": 8,
+            "Y": 8,
             "Width": 1,
             "Height": 2
           },
+        },
+        "{{ModId}}_AddCoop": {
+          "Id": "{{ModId}}_AddCoop",
+          "SourceMap": "Maps/Coop",
+          "TargetRect": {
+            "X": 10,
+            "Y": 10,
+            "Width": 10,
+            "Height": 10
+          },
+          "Renovation": {
+            "TargetLocation": "Shed",
+            "AddDisplayName": "Add Coop",
+            "AddDescription": "Add the Coop",
+            "RemoveDisplayName": "Remove Coop",
+            "RemoveDescription": "Remove the Coop",
+            "Price": 500
+          }
         }
       }
     }

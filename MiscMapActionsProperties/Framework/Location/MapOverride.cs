@@ -38,6 +38,7 @@ public sealed class MapOverrideRenonvationData
     public string? RemoveDisplayName { get; set; } = null;
     public string? RemoveDescription { get; set; } = null;
     public string? RemovePlacementText { get; set; } = null;
+    public int Price { get; set; } = 0;
 }
 
 public sealed class MapOverrideModel
@@ -229,6 +230,7 @@ public sealed class MapOverrideModel
             HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDisplayName) ?? "?");
             HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDescription) ?? "?");
             houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
+            houseReno.Price = -Renovation.Price;
         }
         else
         {
@@ -236,6 +238,7 @@ public sealed class MapOverrideModel
             HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDisplayName) ?? "?");
             HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDescription) ?? "?");
             houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
+            houseReno.Price = Renovation.Price;
         }
         houseReno.RoomId = Id;
         Rectangle boundRect;
