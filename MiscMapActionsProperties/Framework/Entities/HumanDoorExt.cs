@@ -149,7 +149,7 @@ internal static class HumanDoorExt
                 5,
                 out bool relative,
                 out error,
-                defaultValue: true,
+                defaultValue: false,
                 name: "bool relative"
             )
         )
@@ -167,6 +167,7 @@ internal static class HumanDoorExt
         {
             Game1.globalFadeToBlack(() =>
             {
+                farmer.Halt();
                 farmer.Position = farmerPos;
                 if (direction != -1)
                     farmer.FacingDirection = direction;
@@ -175,6 +176,7 @@ internal static class HumanDoorExt
         }
         else
         {
+            farmer.Halt();
             farmer.Position = farmerPos;
             if (direction != -1)
                 farmer.FacingDirection = direction;

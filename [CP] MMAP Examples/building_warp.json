@@ -31,6 +31,7 @@
       "Action": "EditData",
       "Target": "Data/Buildings",
       "Entries": {
+        // mushymato.MMAP.Example.WarpyBuildy
         "{{ModId}}.WarpyBuildy": {
           "Name": "WarpyBuildy",
           "Description": "WarpyBuildy",
