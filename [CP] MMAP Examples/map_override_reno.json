@@ -20,8 +20,10 @@
             "TargetLocation": "Shed",
             "AddDisplayName": "Add Chimkins",
             "AddDescription": "Add the Chimkins",
+            "AddPlacementText": "Chimkin goes here",
             "RemoveDisplayName": "Remove Chimkins",
-            "RemoveDescription": "Remove the Chimkins"
+            "RemoveDescription": "Remove the Chimkins",
+            "RemovePlacementText": "No more chimkins here (or is it???)",
           }
         },
         "{{ModId}}_Chimkins_Remove": {
@@ -52,7 +54,24 @@
             "RemoveDescription": "Remove the Coop",
             "Price": 500
           }
-        }
+        },
+        "{{ModId}}_Chimkins_NotRemovable": {
+          "Id": "{{ModId}}_Chimkins_NotRemovable",
+          "SourceMap": "Maps/{{ModId}}_MO_Chimkins",
+          "TargetRect": {
+            "X": 6,
+            "Y": 6,
+            "Width": 1,
+            "Height": 2
+          },
+          "Renovation": {
+            "TargetLocation": "Shed",
+            "AddDisplayName": "Add Chimkins forever",
+            "AddDescription": "Add the Chimkins forever and ever",
+            "AddPlacementText": "Chimkin goes here (forever)",
+            "RemoveCondition": "FALSE"
+          }
+        },
       }
     }
   ]

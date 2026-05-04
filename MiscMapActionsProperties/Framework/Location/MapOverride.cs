@@ -9,7 +9,6 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Delegates;
 using StardewValley.Extensions;
-using StardewValley.Internal;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.TokenizableStrings;
@@ -31,14 +30,19 @@ public sealed record ApplyMapOverrideBroadcast(
 
 public sealed class MapOverrideRenonvationData
 {
+    // def
     public string? TargetLocation { get; set; } = null;
+    public int Price { get; set; } = 0;
+    public string? AddCondition { get; set; } = null;
+    public string? RemoveCondition { get; set; } = null;
+
+    // text
     public string? AddDisplayName { get; set; } = null;
     public string? AddDescription { get; set; } = null;
     public string? AddPlacementText { get; set; } = null;
     public string? RemoveDisplayName { get; set; } = null;
     public string? RemoveDescription { get; set; } = null;
     public string? RemovePlacementText { get; set; } = null;
-    public int Price { get; set; } = 0;
 }
 
 public sealed class MapOverrideModel
@@ -219,27 +223,36 @@ public sealed class MapOverrideModel
         if (!Game1.game1.xTileContent.DoesAssetExist<Map>(SourceMap))
             return false;
 
-        houseReno = new() { location = location };
-        HouseRenovation_name.SetValue(houseReno, Id);
         bool isRemove =
             MapOverride.TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverrides)
             && mapOverrides.ContainsKey(Id);
         if (isRemove)
         {
-            houseReno.animationType = HouseRenovation.AnimationType.Destroy;
+            if (!GameStateQuery.CheckConditions(Renovation.RemoveCondition, location: location))
+                return false;
+            houseReno = new()
+            {
+                placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?",
+                animationType = HouseRenovation.AnimationType.Destroy,
+            };
             HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDisplayName) ?? "?");
             HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.RemoveDescription) ?? "?");
-            houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
-            houseReno.Price = -Renovation.Price;
         }
         else
         {
-            houseReno.animationType = HouseRenovation.AnimationType.Build;
+            if (!GameStateQuery.CheckConditions(Renovation.AddCondition, location: location))
+                return false;
+            houseReno = new()
+            {
+                placementText = TokenParser.ParseText(Renovation.AddPlacementText) ?? "?",
+                animationType = HouseRenovation.AnimationType.Build,
+            };
             HouseRenovation_displayName.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDisplayName) ?? "?");
             HouseRenovation_description.SetValue(houseReno, TokenParser.ParseText(Renovation.AddDescription) ?? "?");
-            houseReno.placementText = TokenParser.ParseText(Renovation.RemovePlacementText) ?? "?";
-            houseReno.Price = Renovation.Price;
         }
+        HouseRenovation_name.SetValue(houseReno, Id);
+        houseReno.location = location;
+        houseReno.Price = Renovation.Price;
         houseReno.RoomId = Id;
         Rectangle boundRect;
         if (TargetRect != null)
@@ -330,19 +343,37 @@ internal static class MapOverride
         GameStateQuery.Register(GSQ_HAS_MAP_OVERRIDE, HAS_MAP_OVERRIDE);
 
         TriggerActionManager.RegisterAction(Action_ShowRenovations, TriggerShowRenovations);
+        CommonPatch.RegisterTileAndTouch(Action_ShowRenovations, TileShowRenovations);
+    }
+
+    private static bool TileShowRenovations(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (!ShowRenovations(args, location, out string? error))
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+        return true;
     }
 
     private static bool TriggerShowRenovations(string[] args, TriggerActionContext context, out string? error)
+    {
+        return ShowRenovations(args, Game1.currentLocation, out error);
+    }
+
+    private static bool ShowRenovations(string[] args, GameLocation location, [NotNullWhen(false)] out string? error)
     {
         if (!ArgUtility.TryGet(args, 1, out string? locationName, out error))
         {
             return false;
         }
-        GameLocation location;
-        if (locationName == "Here")
-            location = Game1.currentLocation;
-        else
+        if (locationName != "Here")
             location = Game1.getLocationFromName(locationName);
+        if (location == null)
+        {
+            error = $"'{locationName}' is not a valid location";
+            return false;
+        }
 
         List<ISalable> renovations = [];
         foreach (MapOverrideModel model in MapOverrideData.Values)
@@ -355,8 +386,8 @@ internal static class MapOverride
 
         if (!renovations.Any())
         {
-            error = $"No renovations for '{locationName}'";
-            return true;
+            error = $"No renovations for '{location.Name}' ({location.NameOrUniqueName})";
+            return false;
         }
 
         Game1.activeClickableMenu = new ShopMenu(
@@ -369,6 +400,7 @@ internal static class MapOverride
         {
             purchaseSound = null,
         };
+        error = null;
         return true;
     }
 
