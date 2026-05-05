@@ -36,6 +36,11 @@ Map properties can be set on the map or through building/furniture/floor path.
     - `MapLight`: When under woods lighting (secret woods, island east, `mushymato.MMAP_WoodsLighting`), turn off these lights at night.
     - `WindowLight`: Follows vanilla window light regarding rain and night time.
 
+#### Front or Back layer: mushymato.MMAP_LightCond \<GSQ\>
+
+- Use with `mushymato.MMAP_Light`, control whether the light is active.
+- This game state query is rechecked every 10min if there are players in the given location.
+
 #### Back Layer: mushymato.MMAP_TAS \<tasId\>+ <a name="mushymato.MMAP_TAS"></a>
 
 - Add a temporary animated sprite at this tile.
