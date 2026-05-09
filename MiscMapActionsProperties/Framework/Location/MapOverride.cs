@@ -35,6 +35,7 @@ public sealed class MapOverrideRenonvationData
     public int Price { get; set; } = 0;
     public string? AddCondition { get; set; } = null;
     public string? RemoveCondition { get; set; } = null;
+    public List<Rectangle>? DisplayRects { get; set; } = null;
 
     // text
     public string? AddDisplayName { get; set; } = null;
@@ -254,17 +255,24 @@ public sealed class MapOverrideModel
         houseReno.location = location;
         houseReno.Price = Renovation.Price;
         houseReno.RoomId = Id;
-        Rectangle boundRect;
-        if (TargetRect != null)
+        if (Renovation.DisplayRects != null)
         {
-            boundRect = TargetRect.Value;
+            houseReno.AddRenovationBound(Renovation.DisplayRects);
         }
         else
         {
-            Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
-            boundRect = new(0, 0, (int)(overrideMap.DisplayWidth / 64f), (int)(overrideMap.DisplayHeight / 64f));
+            Rectangle boundRect;
+            if (TargetRect != null)
+            {
+                boundRect = TargetRect.Value;
+            }
+            else
+            {
+                Map overrideMap = Game1.game1.xTileContent.Load<Map>(SourceMap);
+                boundRect = new(0, 0, (int)(overrideMap.DisplayWidth / 64f), (int)(overrideMap.DisplayHeight / 64f));
+            }
+            houseReno.AddRenovationBound(boundRect);
         }
-        houseReno.AddRenovationBound(boundRect);
         houseReno.validate = HouseRenovation.EnsureNoObstructions;
         houseReno.onRenovation = (reno, _) =>
         {

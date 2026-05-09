@@ -100,7 +100,7 @@ internal static class HumanDoorExt
 
     private static bool TriggerWrpHere(string[] args, TriggerActionContext context, out string? error)
     {
-        if (!DoWrpHere(Game1.currentLocation, args, Game1.player, Game1.player.TilePoint, out error))
+        if (!DoWrpHere(args, Game1.player, Game1.player.TilePoint, out error))
         {
             ModEntry.LogOnce(error);
             return false;
@@ -110,7 +110,7 @@ internal static class HumanDoorExt
 
     private static bool TileWrpHere(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!DoWrpHere(location, args, farmer, point, out string? error))
+        if (!DoWrpHere(args, farmer, point, out string? error))
         {
             ModEntry.LogOnce(error);
             return false;
@@ -118,13 +118,7 @@ internal static class HumanDoorExt
         return true;
     }
 
-    private static bool DoWrpHere(
-        GameLocation location,
-        string[] args,
-        Farmer farmer,
-        Point point,
-        [NotNullWhen(false)] out string? error
-    )
+    private static bool DoWrpHere(string[] args, Farmer farmer, Point point, [NotNullWhen(false)] out string? error)
     {
         if (
             !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out error, name: "string toPoint")
@@ -152,6 +146,14 @@ internal static class HumanDoorExt
                 defaultValue: false,
                 name: "bool relative"
             )
+            || !ArgUtility.TryGetOptional(
+                args,
+                6,
+                out string? playSound,
+                out error,
+                defaultValue: null,
+                name: "string playSound"
+            )
         )
         {
             return false;
@@ -167,19 +169,23 @@ internal static class HumanDoorExt
         {
             Game1.globalFadeToBlack(() =>
             {
-                farmer.Halt();
-                farmer.Position = farmerPos;
-                if (direction != -1)
-                    farmer.FacingDirection = direction;
+                Reposition(farmer, direction, farmerPos, playSound);
                 Game1.globalFadeToClear();
             });
         }
         else
         {
+            Reposition(farmer, direction, farmerPos, playSound);
+        }
+
+        static void Reposition(Farmer farmer, int direction, Vector2 farmerPos, string? playSound)
+        {
             farmer.Halt();
             farmer.Position = farmerPos;
             if (direction != -1)
                 farmer.FacingDirection = direction;
+            if (playSound != null)
+                Game1.playSound(playSound);
         }
         return true;
     }

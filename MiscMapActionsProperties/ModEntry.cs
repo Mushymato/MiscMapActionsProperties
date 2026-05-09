@@ -78,6 +78,7 @@ public sealed class ModEntry : Mod
 
         Framework.Tile.ActionCond.Register();
         Framework.Tile.AnimalSpot.Register();
+        Framework.Tile.CaskSpot.Register();
         Framework.Tile.CritterSpot.Register();
         Framework.Tile.ExplodeTileAction.Register();
         Framework.Tile.GrassSpread.Register();
