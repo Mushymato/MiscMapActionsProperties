@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Tile;
 using MiscMapActionsProperties.Framework.Wheels;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Delegates;
@@ -164,6 +163,10 @@ internal static class HumanDoorExt
             toPoint.Y += point.Y;
         }
 
+        farmer.Halt();
+        if (playSound != null)
+            Game1.playSound(playSound);
+
         Vector2 farmerPos = new(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
         if (fadeToBlack)
         {
@@ -180,12 +183,9 @@ internal static class HumanDoorExt
 
         static void Reposition(Farmer farmer, int direction, Vector2 farmerPos, string? playSound)
         {
-            farmer.Halt();
             farmer.Position = farmerPos;
             if (direction != -1)
                 farmer.FacingDirection = direction;
-            if (playSound != null)
-                Game1.playSound(playSound);
         }
         return true;
     }
