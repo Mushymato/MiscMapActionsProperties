@@ -28,14 +28,26 @@ public sealed record ApplyMapOverrideBroadcast(
     bool ForceReload
 );
 
+public sealed class MapOverrideRemoval
+{
+    public string Id
+    {
+        get => field ??= $"{Layer}:{TileArea}";
+        set => field = value;
+    }
+    public string? Layer { get; set; } = "Back";
+    public Rectangle TileArea { get; set; } = Rectangle.Empty;
+}
+
 public sealed class MapOverrideRenonvationData
 {
     // def
-    public string? TargetLocation { get; set; } = null;
+    public string? TargetLocationCondition { get; set; } = null;
     public int Price { get; set; } = 0;
     public string? AddCondition { get; set; } = null;
     public string? RemoveCondition { get; set; } = null;
-    public List<Rectangle>? DisplayRects { get; set; } = null;
+    public List<Rectangle>? TargetRectGroup { get; set; } = null;
+    public bool CheckForObstructions { get; set; } = true;
 
     // text
     public string? AddDisplayName { get; set; } = null;
@@ -44,6 +56,12 @@ public sealed class MapOverrideRenonvationData
     public string? RemoveDisplayName { get; set; } = null;
     public string? RemoveDescription { get; set; } = null;
     public string? RemovePlacementText { get; set; } = null;
+
+    public bool CanHaveRenovation(GameLocation location)
+    {
+        return TargetLocationCondition != null
+            && GameStateQuery.CheckConditions(TargetLocationCondition, location: location);
+    }
 }
 
 public sealed class MapOverrideModel
@@ -53,6 +71,7 @@ public sealed class MapOverrideModel
     public string SourceMap { get; set; } = "Maps/SkullCaveAltar";
     public Rectangle? SourceRect { get; set; } = null;
     public Rectangle? TargetRect { get; set; } = null;
+    public List<MapOverrideRemoval>? TileRemoveRects { get; set; } = null;
     public bool TargetRectIsRelative { get; set; } = false;
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
@@ -146,6 +165,29 @@ public sealed class MapOverrideModel
                 }
             }
 
+            if (TileRemoveRects != null)
+            {
+                foreach (MapOverrideRemoval removal in TileRemoveRects)
+                {
+                    if (location.Map.GetLayer(removal.Layer) == null)
+                        continue;
+                    Rectangle tileArea = removal.TileArea;
+                    if (RelTargetRect != null)
+                    {
+                        tileArea = new(
+                            RelTargetRect.Value.X + tileArea.X,
+                            RelTargetRect.Value.Y + tileArea.Y,
+                            tileArea.Width,
+                            tileArea.Height
+                        );
+                    }
+                    foreach (Point pnt in CommonPatch.IterateBounds(tileArea))
+                    {
+                        location.removeMapTile(pnt.X, pnt.Y, removal.Layer);
+                    }
+                }
+            }
+
             location.ApplyMapOverride(
                 overrideMap,
                 MapOverrideKey,
@@ -219,7 +261,7 @@ public sealed class MapOverrideModel
     public bool TryGetHouseRenovationEntry(GameLocation location, [NotNullWhen(true)] out HouseRenovation? houseReno)
     {
         houseReno = null;
-        if (Renovation == null || Renovation.TargetLocation != location.Name)
+        if (Renovation == null || !Renovation.CanHaveRenovation(location))
             return false;
         if (!Game1.game1.xTileContent.DoesAssetExist<Map>(SourceMap))
             return false;
@@ -255,9 +297,9 @@ public sealed class MapOverrideModel
         houseReno.location = location;
         houseReno.Price = Renovation.Price;
         houseReno.RoomId = Id;
-        if (Renovation.DisplayRects != null)
+        if (Renovation.TargetRectGroup != null && Renovation.TargetRectGroup.Any())
         {
-            houseReno.AddRenovationBound(Renovation.DisplayRects);
+            houseReno.AddRenovationBound(Renovation.TargetRectGroup);
         }
         else
         {
@@ -273,7 +315,8 @@ public sealed class MapOverrideModel
             }
             houseReno.AddRenovationBound(boundRect);
         }
-        houseReno.validate = HouseRenovation.EnsureNoObstructions;
+        if (Renovation.CheckForObstructions)
+            houseReno.validate = HouseRenovation.EnsureNoObstructions;
         houseReno.onRenovation = (reno, _) =>
         {
             ModEntry.Log("houseReno.onRenovation");
@@ -394,8 +437,7 @@ internal static class MapOverride
 
         if (!renovations.Any())
         {
-            error = $"No renovations for '{location.Name}' ({location.NameOrUniqueName})";
-            return false;
+            ModEntry.Log($"No renovations for '{location.Name}' ({location.NameOrUniqueName})");
         }
 
         Game1.activeClickableMenu = new ShopMenu(
@@ -501,6 +543,10 @@ internal static class MapOverride
                 continue;
             }
             if (!Game1.game1.xTileContent.DoesAssetExist<Map>(model.SourceMap))
+            {
+                continue;
+            }
+            if (model.Renovation != null && !model.Renovation.CanHaveRenovation(__instance))
             {
                 continue;
             }

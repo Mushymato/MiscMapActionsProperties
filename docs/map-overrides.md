@@ -41,6 +41,19 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
       // - for tile actions, this would be the tile the action lives on
       // - for trigger actions, this would be the player's current tile
       "TargetRectIsRelative": false,
+      // optional, list of tiles to remove before applying this map override
+      // this will respect the relative TargetRect if TargetRectIsRelative=true
+      "TileRemoveRects": [
+        {
+          "Layer": "Back",
+          "TileArea": {
+            "X": 7,
+            "Y": 7,
+            "Width": 3,
+            "Height": 4
+          }
+        }
+      ],
       // Value used to order the map patches, lower precedence apply first and get covered by higher precedence maps
       // If this is less than 0, the patch applies BEFORE vanilla map modifications in MakeMapModifications
       // When 2 map patches have same precedence, Id is used as tiebreaker
@@ -52,7 +65,34 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
       "ResizeMapIfNeeded": false,
       // Instead of adding new tilesheet as needed, this forces your map override to use a
       // pre-existing tileset with the same name, even if the assets are different
-      "ForceTilesheetMatch": false
+      "ForceTilesheetMatch": false,
+      // Renovation Model, null if this map override is not meant for renovations
+      "Renovation" {
+        // game state query for checking if the location can have this map override, e.g.
+        // "mushymato.MMAP_MAP_NAME Here Maps/Shed" checks if the location's map asset is "Maps/Shed"
+        // "LOCATION_NAME Here Shed" checks if the location name is Shed
+        "TargetLocationCondition": "mushymato.MMAP_MAP_NAME Here Maps/Shed",
+        // cost
+        "Price": 0,
+        // game state query required for adding this override
+        "AddCondition": null,
+        // game state query required for removing this override, FALSE means this can never be removed
+        "RemoveCondition": null,
+        // optional list of rectangles that this renovation is expected to change
+        // when not given, the TargetRect is used
+        "TargetRectGroup": null,
+        // whether to check for objects in the target rect before allowing renovation
+        "CheckForObstructions": true,
+        // These are display strings for the shop entry
+        // Adding:
+        "AddDisplayName": "Add Chimkins",
+        "AddDescription": "Add the Chimkins",
+        "AddPlacementText": "Chimkin goes here",
+        // Removal:
+        "RemoveDisplayName": "Remove Chimkins",
+        "RemoveDescription": "Remove the Chimkins",
+        "RemovePlacementText": "No more chimkins here (or is it???)",
+      }
     },
   }
 }

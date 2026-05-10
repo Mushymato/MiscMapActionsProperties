@@ -16,8 +16,19 @@
             "Width": 1,
             "Height": 2
           },
+          "TileRemoveRects": [
+            {
+              "Layer": "Back",
+              "TileArea": {
+                "X": 7,
+                "Y": 7,
+                "Width": 3,
+                "Height": 4
+              }
+            }
+          ],
           "Renovation": {
-            "TargetLocation": "Shed",
+            "TargetLocationCondition": "mushymato.MMAP_MAP_NAME Here Maps/Shed",
             "AddDisplayName": "Add Chimkins",
             "AddDescription": "Add the Chimkins",
             "AddPlacementText": "Chimkin goes here",
@@ -47,7 +58,7 @@
             "Height": 10
           },
           "Renovation": {
-            "TargetLocation": "Shed",
+            "TargetLocationCondition": "mushymato.MMAP_MAP_NAME Here Maps/Shed",
             "AddDisplayName": "Add Coop",
             "AddDescription": "Add the Coop",
             "RemoveDisplayName": "Remove Coop",
@@ -65,7 +76,7 @@
             "Height": 2
           },
           "Renovation": {
-            "TargetLocation": "Shed",
+            "TargetLocationCondition": "mushymato.MMAP_MAP_NAME Here Maps/Shed",
             "AddDisplayName": "Add Chimkins forever",
             "AddDescription": "Add the Chimkins forever and ever",
             "AddPlacementText": "Chimkin goes here (forever)",
