@@ -204,10 +204,15 @@ Has 2 variants:
 ## mushymato.MMAP_UpdateMapOverride \<location\> [[mode] [mapOverrideId]]
 
 - Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
-= Applies the given map overrides, see [map overrides docs](map-overrides.md) for details.
+- Applies the given map overrides, see [map overrides docs](map-overrides.md) for details.
 - `location`: Either `Here` or a location name.
 - `mode`: Either `+` for adding an override, or `-` for removing an override.
 - `mapOverrideId`: The map override id set in the data asset.
+
+## mushymato.MMAP_ShowRenovations \<location\>
+
+- Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
+- Displays MMAP renovations available for the given location (either `Here` or a location name), see [map overrides docs](map-overrides.md) for details.
 
 ## mushymato.MMAP_PlaySound \<audioName\> [pitches] [isGlobal]
 

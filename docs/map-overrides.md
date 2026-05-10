@@ -93,8 +93,8 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
         "RemoveDescription": "Remove the Chimkins",
         "RemovePlacementText": "No more chimkins here (or is it???)",
       }
-    },
-  }
+    }
+  },
 }
 ```
 
@@ -117,3 +117,12 @@ The applied overrides are tracked per location on the mod data, and persist unti
 ## Game State Query: mushymato.MMAP_HAS_MAP_OVERRIDE \<location\> [mapOverrideId]+
 
 Checks if this location has a given map override applied.
+
+## Renovations
+
+You can use a MMAP map override as a renovation, i.e. something the player can access through a menu.
+
+To do this, you need to provide the `"Renovation"` data which will define what location(s) can have this renovation and what text it'll display.
+Unlike vanilla renovations, 1 MMAP map override automatically covers both adding and removing entries.
+
+To open the renovation menu, use tile/touch/trigger action `mushymato.MMAP_ShowRenovations <Here|locationName>`.
