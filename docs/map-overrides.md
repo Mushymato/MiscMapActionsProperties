@@ -45,6 +45,9 @@ To define map overrides, edit `mushymato.MMAP/MapOverrides` and add data like th
       // this will respect the relative TargetRect if TargetRectIsRelative=true
       "TileRemoveRects": [
         {
+          // This field supports regex
+          // ".*" - remove all layer
+          // "Back\\d*" - remove layers whose name starts with Back
           "Layer": "Back",
           "TileArea": {
             "X": 7,

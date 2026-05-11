@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -169,21 +170,32 @@ public sealed class MapOverrideModel
             {
                 foreach (MapOverrideRemoval removal in TileRemoveRects)
                 {
-                    if (location.Map.GetLayer(removal.Layer) == null)
+                    if (string.IsNullOrEmpty(removal.Layer))
+                    {
                         continue;
-                    Rectangle tileArea = removal.TileArea;
-                    if (RelTargetRect != null)
-                    {
-                        tileArea = new(
-                            RelTargetRect.Value.X + tileArea.X,
-                            RelTargetRect.Value.Y + tileArea.Y,
-                            tileArea.Width,
-                            tileArea.Height
-                        );
                     }
-                    foreach (Point pnt in CommonPatch.IterateBounds(tileArea))
+
+                    Regex layerRE = new(removal.Layer);
+                    foreach (Layer layer in location.Map.Layers)
                     {
-                        location.removeMapTile(pnt.X, pnt.Y, removal.Layer);
+                        if (!(layerRE.Match(layer.Id)?.Success ?? false))
+                        {
+                            continue;
+                        }
+                        Rectangle tileArea = removal.TileArea;
+                        if (RelTargetRect != null)
+                        {
+                            tileArea = new(
+                                RelTargetRect.Value.X + tileArea.X,
+                                RelTargetRect.Value.Y + tileArea.Y,
+                                tileArea.Width,
+                                tileArea.Height
+                            );
+                        }
+                        foreach (Point pnt in CommonPatch.IterateBounds(tileArea))
+                        {
+                            location.removeMapTile(pnt.X, pnt.Y, layer.Id);
+                        }
                     }
                 }
             }

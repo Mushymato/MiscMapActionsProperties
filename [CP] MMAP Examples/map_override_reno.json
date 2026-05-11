@@ -12,18 +12,29 @@
           "RemovedById": "{{ModId}}_Chimkins_Remove",
           "TargetRect": {
             "X": 8,
-            "Y": 8,
+            "Y": 1,
             "Width": 1,
             "Height": 2
           },
           "TileRemoveRects": [
             {
-              "Layer": "Back",
+              // removes all layers
+              "Layer": ".*",
+              "TileArea": {
+                "X": 7,
+                "Y": 0,
+                "Width": 3,
+                "Height": 4
+              }
+            },
+            {
+              // removes all Back and Back[n] layers
+              "Layer": "Back\\d*",
               "TileArea": {
                 "X": 7,
                 "Y": 7,
                 "Width": 3,
-                "Height": 4
+                "Height": 1
               }
             }
           ],
