@@ -331,7 +331,6 @@ public sealed class MapOverrideModel
             houseReno.validate = HouseRenovation.EnsureNoObstructions;
         houseReno.onRenovation = (reno, _) =>
         {
-            ModEntry.Log("houseReno.onRenovation");
             if (
                 !MapOverride.DoUpdateMapOverride(
                     reno.location,
@@ -468,15 +467,15 @@ internal static class MapOverride
 
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
     {
+        GameLocation location = context.Location;
         if (
-            !ArgUtility.TryGet(query, 1, out string? locationName, out string? error, name: "string locationName")
+            !GameStateQuery.Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
             || !ArgUtility.TryGet(query, 2, out string? mapOverrideId, out error, name: "string mapOverrideId")
         )
         {
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        GameLocation location = GameStateQuery.Helpers.GetLocation(locationName, Game1.currentLocation);
         if (!TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverrides))
         {
             return false;
@@ -765,9 +764,9 @@ internal static class MapOverride
             return true;
         }
 
-        if (ArgUtility.TryGet(args, 1, out string? locationName, out error, name: "string locationName"))
+        if (!GameStateQuery.Helpers.TryGetLocationArg(args, 1, ref location, out error))
         {
-            location = GameStateQuery.Helpers.GetLocation(locationName, location);
+            return false;
         }
 
         if (location == null || location.Map == null)
