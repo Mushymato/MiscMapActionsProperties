@@ -106,7 +106,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuilding [X Y]` (does the biiiiu and 
 - You can override the default behaviour of the warp point from 1 tile north of the first warp to by using the optional X Y arguments, to put the player anywhere inside the building.
 - The original human door tile will still work.
 
-_See [[CP] MMAP Examples/building_Wrp.json]([CP]%20MMAP%20Examples/building_Wrp.json) for examples of adding this to building tile data_
+_See [[CP] MMAP Examples/building_warp.json](../[CP]%20MMAP%20Examples/building_warp.json) for examples of adding this to building tile data_
 
 ### mushymato.MMAP_WrpBuildingOut [X Y]
 
@@ -230,7 +230,6 @@ Has 2 variants:
     - `toyPiano`
     - `dustMeep`
     - `flute`
-```
 
 
 ## Farmhouse Upgrade Relocation Solution
