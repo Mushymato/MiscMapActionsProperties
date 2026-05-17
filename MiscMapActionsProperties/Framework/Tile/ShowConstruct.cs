@@ -31,9 +31,9 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstruct,
-            (string[] args, TriggerActionContext ctx, out string? err) =>
+            (args, ctx, out err) =>
             {
-                err = "";
+                err = null;
                 return CheckArgsThenShowConstruct(
                     args,
                     (builder) => Game1.currentLocation.ShowConstructOptions(builder)
@@ -56,9 +56,9 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstructForCurrent,
-            (string[] args, TriggerActionContext ctx, out string? err) =>
+            (args, ctx, out err) =>
             {
-                err = "";
+                err = null;
                 return CheckArgsThenShowConstruct(
                     args,
                     (builder) =>
