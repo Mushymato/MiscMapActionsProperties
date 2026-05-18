@@ -120,7 +120,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 ### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack] [relative] [audioCue]
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
-- Warps the player within the current map.
+- Warps the player within the current map. This warp will not actually trigger any player warped events, it simply repositions the player within same map.
 - This is primarily used to solve issues with warps within an instanced location, as a replacement to writing `X Y CurrentLocation X Y` warps.
 - `facingDirection` controls the player's facing direction after the warp
     - 0: Up
@@ -232,6 +232,11 @@ Has 2 variants:
     - `dustMeep`
     - `flute`
 
+## mushymato.MMAP_SetTilesheet \<location\> \<tilesetName\> \<tilesheetAsset\>
+
+- Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
+- Changes the tilesheetAsset of a given tileset in the location's loaded map.
+- This is similar to the logic used to alter the mine's tilesheet asset.
 
 ## Farmhouse Upgrade Relocation Solution
 

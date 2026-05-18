@@ -24,7 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 - Map override being inconsistently applied for non-current locations
-- Map override will now 
+- Map override will now update newly added water tiles
+- `mushymato.MMAP_PoolEntry` direction logic fixes
 
 ## [1.13.2]
 

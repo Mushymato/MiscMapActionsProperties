@@ -1,4 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Delegates;
@@ -25,6 +28,7 @@ internal static class UndergroundMines
         GameStateQuery.Register(GSQ_MINE_AREA_TYPE, MINE_AREA_TYPE);
         GameStateQuery.Register(GSQ_MAP_NAME, MAP_NAME);
         GameStateQuery.Register(GSQ_TILESHEET_NAME, TILESHEET_NAME);
+        CommonPatch.RegisterTileAndTouch(Action_SetTilesheet, TileTouchSetTilesheet);
         TriggerActionManager.RegisterAction(Action_SetTilesheet, TriggerSetTilesheet);
 
 #if SDV16
@@ -84,9 +88,27 @@ internal static class UndergroundMines
 #endif
     }
 
-    private static bool TriggerSetTilesheet(string[] args, TriggerActionContext context, out string error)
+    private static bool TileTouchSetTilesheet(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        GameLocation location = Game1.currentLocation;
+        if (!DoSetTilesheet(args, out string? error, location))
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+        return true;
+    }
+
+    private static bool TriggerSetTilesheet(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
+    {
+        return DoSetTilesheet(args, out error, Game1.currentLocation);
+    }
+
+    private static bool DoSetTilesheet(string[] args, [NotNullWhen(false)] out string? error, GameLocation location)
+    {
         if (
             !Helpers.TryGetLocationArg(args, 1, ref location, out error)
             || !ArgUtility.TryGet(args, 2, out string tileSheetId, out error)
