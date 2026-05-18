@@ -117,7 +117,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
 - X and Y arguments are relative to the building's top left tile, it can be negative.
 - There's **no guarentee** that the warp out tile is not occupied, it's recommended to use `AdditionalPlacementTiles` to enforce a cleared tile.
 
-### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack] [relative]
+### mushymato.MMAP_WrpHere [X Y] [facingDirection] [fadeToBlack] [relative] [audioCue]
 
 - Can be used as either `Action`, `TouchAction`, or `TriggerAction`.
 - Warps the player within the current map.
@@ -130,6 +130,7 @@ Also available as: `mushymato.MMAP_MagicWrpBuildingOut [X Y]` (does the biiiiu a
     - -1: Keep original direction
 - If `fadeToBlack` is false, teleport the player without doing normal warp fade to black, this also does not trigger any on warp effects.'
 - If `relative` is true, move the player relative to the originating position. For map `Action` and `TouchAction`, this is the tile that supplied the action, for `TriggerAction`, this is the player's tile.
+- If `audioCue` is given, play that sound on warp.
 
 ### mushymato.MMAP_PoolEntry [facingDirection] [velocity] [soundcue]
 

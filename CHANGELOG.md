@@ -4,12 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.13.3]<a name="1.13.3"></a>
+## [1.14.0]
 
 ### Added
-- New map override field `ResizeMapIfNeeded`
+- New map override fields `ResizeMapIfNeeded`, `ForceTilesheetMatch`, `TileRemoveRects`, and `Renovation`
 - New GSQs backported from 1.6.16 `LOCATION_MINE_DIFFICULTY` and `LOCATION_MINE_LEVEL`
-- New GSQ `mushymato.MMAP_MINE_AREA_TYPE`
+- New GSQ `mushymato.MMAP_MINE_AREA_TYPE` checks if mines are slimed or dino or quarry
+- New GSQ `mushymato.MMAP_MAP_NAME` checks location map asset name
+- New GSQ `mushymato.MMAP_TILESHEET_NAME` checks tilesheet asset name
+- New action `mushymato.MMAP_SetTilesheet`, changes the tilesheet asset of a given tileset
+- New action `mushymato.MMAP_PlaySound`, plays a sound with given pitch
+- New action `mushymato.MMAP_ShowRenovations`, displays shop menu for map overrides that have `Renovation` data. This essentially allows the use of farmhouse like renovations for any map.
+
+### Changed
+- `mushymato.MMAP_WrpHere` now uses fake fadetoblack always instead of performing a real warp. This means warped events do not trigger.
+- `mushymato.MMAP_WrpHere` now takes audio cue argument
+- Panoramas no longer pause while in a menu
+- `mushymato.MMAP_ScaledOverlay` is now usable as a tile/touch action.
+
+### Fixed
+- Map override being inconsistently applied for non-current locations
+- Map override will now 
 
 ## [1.13.2]
 
