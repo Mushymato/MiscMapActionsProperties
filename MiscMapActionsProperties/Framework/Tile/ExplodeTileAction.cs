@@ -24,10 +24,6 @@ internal static class ExplodeTileAction
 
     internal static void Register()
     {
-        CommonPatch.RegisterTileAndTouch(Action_EnableExplodeAction, TileEnableExplodeAction);
-        TriggerActionManager.RegisterAction(Action_EnableExplodeAction, TriggerEnableExplodeAction);
-        ModEntry.help.Events.GameLoop.DayStarted += static (sender, e) => ExplodeActionEnabled.Value = null;
-        ModEntry.help.Events.Player.Warped += static (sender, e) => ExplodeActionEnabled.Value = null;
         try
         {
             ModEntry.harm.Patch(
@@ -38,7 +34,12 @@ internal static class ExplodeTileAction
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch ExplodeTileAction:\n{err}", LogLevel.Error);
+            return;
         }
+        CommonPatch.RegisterTileAndTouch(Action_EnableExplodeAction, TileEnableExplodeAction);
+        TriggerActionManager.RegisterAction(Action_EnableExplodeAction, TriggerEnableExplodeAction);
+        ModEntry.help.Events.GameLoop.DayStarted += static (sender, e) => ExplodeActionEnabled.Value = null;
+        ModEntry.help.Events.Player.Warped += static (sender, e) => ExplodeActionEnabled.Value = null;
     }
 
     private static bool TileEnableExplodeAction(GameLocation location, string[] args, Farmer farmer, Point point)
@@ -53,21 +54,24 @@ internal static class ExplodeTileAction
 
     private static bool TryEnableExplodeAction(string[] args, [NotNullWhen(false)] out string? error)
     {
-        if (!ArgUtility.TryGet(args, 1, out string layer, out error, name: "string layer"))
+        if (!ArgUtility.TryGet(args, 1, out string? layer, out error, name: "string layer"))
         {
             return false;
         }
         if (layer != "Back" && layer != "Buildings")
         {
-            error = "Layer must be 'Back' or 'Buildings'";
+            error = $"Layer must be 'Back' or 'Buildings', got '{layer}'";
             return false;
         }
         ExplodeActionEnabled.Value = layer;
-        ModEntry.Log($"ExplodeActionEnable: {layer}");
         return true;
     }
 
-    private static bool TriggerEnableExplodeAction(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerEnableExplodeAction(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         return TryEnableExplodeAction(args, out error);
     }

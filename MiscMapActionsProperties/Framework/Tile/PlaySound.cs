@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
@@ -67,7 +68,11 @@ internal static class PlaySound
         return true;
     }
 
-    private static bool TriggerPlaySound(string[] args, TriggerActionContext context, out string error)
+    private static bool TriggerPlaySound(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (
             !ArgUtility.TryGet(args, 1, out string? audioName, out error, allowBlank: false, "string audioName")

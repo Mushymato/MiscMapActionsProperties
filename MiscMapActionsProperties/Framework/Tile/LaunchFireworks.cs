@@ -22,7 +22,11 @@ internal static class LaunchFireworks
         TriggerActionManager.RegisterAction(TileAction_LaunchFireworks, TriggerLaunchFireWorks);
     }
 
-    private static bool TriggerLaunchFireWorks(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerLaunchFireWorks(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (!ArgUtility.TryGetPoint(args, 1, out Point value, out error, "Point pnt"))
         {

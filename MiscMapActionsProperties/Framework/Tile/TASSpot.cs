@@ -229,7 +229,11 @@ internal static class TASSpot
         }
     }
 
-    private static bool TriggerActionTAS(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerActionTAS(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         return SpawnTAS(Game1.currentLocation, args, out error);
     }
@@ -239,7 +243,11 @@ internal static class TASSpot
         return SpawnTAS(location, args, out _, defaultPos: source);
     }
 
-    private static bool TriggerToggleTileTAS(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerToggleTileTAS(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         error = null!;
         return ToggleTileTAS(Game1.currentLocation, args, Game1.player, Point.Zero);

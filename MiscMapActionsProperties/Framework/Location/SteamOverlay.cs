@@ -83,7 +83,7 @@ internal static class SteamOverlay
                 )
                 && ArgUtility.TryGetOptionalFloat(args, 1, out float velocityX, out error, 0f, "string velocityX")
                 && ArgUtility.TryGetOptionalFloat(args, 2, out float velocityY, out error, 0f, "string velocityY")
-                && ArgUtility.TryGetOptional(args, 3, out string steamColor, out error, name: "string steamColor")
+                && ArgUtility.TryGetOptional(args, 3, out string? steamColor, out error, name: "string steamColor")
                 && ArgUtility.TryGetOptionalFloat(args, 4, out float alpha, out error, 1f, "string alpha")
                 && ArgUtility.TryGetOptionalFloat(args, 5, out float scale, out error, 4f, "string scale")
             )

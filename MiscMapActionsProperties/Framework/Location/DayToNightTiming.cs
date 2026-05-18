@@ -103,7 +103,7 @@ internal static class DayToNightTiming
         Func<GameLocation, bool> predicate
     )
     {
-        GameLocation location = context.Location;
+        GameLocation? location = context.Location;
         if (query.Length >= 2)
             GameStateQuery.Helpers.TryGetLocationArg(query, 1, ref location, out _);
         else

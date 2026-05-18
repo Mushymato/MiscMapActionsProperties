@@ -13,6 +13,12 @@ using StardewValley.GameData.Buildings;
 using StardewValley.ItemTypeDefinitions;
 using StardewValley.Objects;
 using StardewValley.TokenizableStrings;
+#if SDV17
+using StardewValley.Objects.FishTanks;
+#else
+using static StardewValley.Objects.FishTankFurniture;
+using static StardewValley.Objects.TankFish;
+#endif
 
 namespace MiscMapActionsProperties.Framework.Entities;
 
@@ -795,6 +801,22 @@ internal static class FurnitureProperties
             return;
 
         tankInfo.LastItemCount = itemCount;
+#if SDV17
+        for (int i = 0; i < __instance.decorations.Count; i++)
+        {
+            if (__instance.decorations[i] is TankDecoration tankDecoration)
+            {
+                __instance.decorations[i] = new(
+                    tankDecoration.Texture,
+                    tankDecoration.SourceRect,
+                    new(
+                        tankDecoration.Position.X + (tankInfo.BaseTankBounds.X - tankInfo.CurrentTankBounds.X) / 4,
+                        tankDecoration.Position.Y
+                    )
+                );
+            }
+        }
+#else
         for (int i = 0; i < __instance.floorDecorations.Count; i++)
         {
             if (__instance.floorDecorations[i] is KeyValuePair<Rectangle, Vector2> kv)
@@ -806,6 +828,7 @@ internal static class FurnitureProperties
                 __instance.floorDecorations[i] = new(kv.Key, newValue);
             }
         }
+#endif
     }
 
     /// <summary>Update fish tank bounds of current location</summary>
@@ -900,13 +923,13 @@ internal static class FurnitureProperties
     /// <summary>Patch number of fish allowed</summary>
     public static void FishTankFurniture_GetCapacityForCategory_Postfix(
         FishTankFurniture __instance,
-        FishTankFurniture.FishTankCategories category,
+        FishTankCategories category,
         ref int __result
     )
     {
         if (FishTankInfos.GetValue(__instance, GetFishTankInfo) is FishTankInfo tankInfo && tankInfo.Capacity != -2)
         {
-            if (category != FishTankFurniture.FishTankCategories.Decoration)
+            if (category != FishTankCategories.Decoration)
             {
                 __result = tankInfo.Capacity;
             }
@@ -935,7 +958,7 @@ internal static class FurnitureProperties
     {
         if (____tank.GetTankBounds().Width <= Game1.tileSize)
         {
-            if (__instance.fishType == TankFish.FishType.Float)
+            if (__instance.fishType == FishType.Float)
                 __instance.velocity.X = 0;
             __instance.facingLeft = false;
         }

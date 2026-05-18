@@ -107,24 +107,26 @@ internal static class UndergroundMines
         return DoSetTilesheet(args, out error, Game1.currentLocation);
     }
 
-    private static bool DoSetTilesheet(string[] args, [NotNullWhen(false)] out string? error, GameLocation location)
+    private static bool DoSetTilesheet(string[] args, [NotNullWhen(false)] out string? error, GameLocation? location)
     {
         if (
             !Helpers.TryGetLocationArg(args, 1, ref location, out error)
-            || !ArgUtility.TryGet(args, 2, out string tileSheetId, out error)
-            || !ArgUtility.TryGet(args, 3, out string assetName, out error)
+            || !ArgUtility.TryGet(args, 2, out string? tileSheetId, out error)
+            || !ArgUtility.TryGet(args, 3, out string? assetName, out error)
         )
         {
-            ModEntry.Log(error, LogLevel.Error);
             return false;
         }
         if (!Game1.content.DoesAssetExist<Texture2D>(assetName))
         {
-            ModEntry.Log($"Tilesheet asset '{assetName}' does not exist", LogLevel.Error);
+            error = $"Tilesheet asset '{assetName}' does not exist";
             return false;
         }
         if (location.Map?.GetTileSheet(tileSheetId) is not TileSheet tileSheet)
+        {
+            error = $"Tileset '{tileSheetId}' does not exist";
             return false;
+        }
         if (location is MineShaft mineShaft && tileSheetId == "mine")
         {
             mineShaft.mapImageSource.Value = assetName;
@@ -139,11 +141,11 @@ internal static class UndergroundMines
 
     private static bool TILESHEET_NAME(string[] query, GameStateQueryContext context)
     {
-        GameLocation location = context.Location;
+        GameLocation? location = context.Location;
         if (
             !Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
-            || !ArgUtility.TryGet(query, 2, out string tileSheetId, out error)
-            || !ArgUtility.TryGet(query, 3, out string assetName, out error)
+            || !ArgUtility.TryGet(query, 2, out string? tileSheetId, out error)
+            || !ArgUtility.TryGet(query, 3, out string? assetName, out error)
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -156,10 +158,10 @@ internal static class UndergroundMines
 
     private static bool MAP_NAME(string[] query, GameStateQueryContext context)
     {
-        GameLocation location = context.Location;
+        GameLocation? location = context.Location;
         if (
             !Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
-            || !ArgUtility.TryGet(query, 2, out string mapPath, out error)
+            || !ArgUtility.TryGet(query, 2, out string? mapPath, out error)
         )
         {
             ModEntry.Log(error, LogLevel.Error);
@@ -172,7 +174,7 @@ internal static class UndergroundMines
 
     private static bool MINE_AREA_TYPE(string[] query, GameStateQueryContext context)
     {
-        GameLocation location = context.Location;
+        GameLocation? location = context.Location;
         if (!Helpers.TryGetLocationArg(query, 1, ref location, out string? error))
         {
             ModEntry.Log(error, LogLevel.Error);

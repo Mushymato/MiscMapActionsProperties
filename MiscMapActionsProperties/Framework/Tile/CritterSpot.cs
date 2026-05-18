@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -169,14 +170,22 @@ internal static class CritterSpot
         }
     }
 
-    private static bool TriggerActionCritter(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerActionCritter(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (!ArgUtility.TryGetPoint(args, 1, out Point position, out error, "Point position"))
             return false;
         return SpawnCritter(Game1.currentLocation, position, args, 3, out error).Count > 0;
     }
 
-    private static bool TriggerActionCritterRandom(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerActionCritterRandom(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (!ArgUtility.TryGetFloat(args, 1, out float chance, out error, "float name"))
             return false;
@@ -235,7 +244,7 @@ internal static class CritterSpot
                     || !ArgUtility.TryGetOptional(
                         critterKindArgs,
                         1,
-                        out string gsq,
+                        out string? gsq,
                         out error,
                         name: "string critterGSQ"
                     )

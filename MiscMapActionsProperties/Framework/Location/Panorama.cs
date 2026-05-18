@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -692,7 +693,11 @@ internal static class Panorama
         }
     }
 
-    private static bool DoSetPanoramaT(string[] args, TriggerActionContext context, out string? error)
+    private static bool DoSetPanoramaT(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (!ArgUtility.TryGet(args, 1, out string? bgId, out error, allowBlank: false, name: "string bgId"))
             return false;

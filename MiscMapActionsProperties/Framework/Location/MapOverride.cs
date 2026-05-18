@@ -215,7 +215,7 @@ public sealed class MapOverrideModel
                     location.IsOutdoors
                     || location.HasMapPropertyWithValue("indoorWater")
                     || (
-                        overrideMap.Properties.TryGetValue("indoorWater", out string mapOverrideIndoorWater)
+                        overrideMap.Properties.TryGetValue("indoorWater", out string? mapOverrideIndoorWater)
                         && !string.IsNullOrEmpty(mapOverrideIndoorWater)
                     )
                     || location is Sewer
@@ -418,29 +418,27 @@ internal static class MapOverride
         return true;
     }
 
-    private static bool TriggerShowRenovations(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerShowRenovations(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         return ShowRenovations(args, Game1.currentLocation, out error);
     }
 
     private static bool ShowRenovations(string[] args, GameLocation location, [NotNullWhen(false)] out string? error)
     {
-        if (!ArgUtility.TryGet(args, 1, out string? locationName, out error))
+        GameLocation? targetLocation = location;
+        if (!GameStateQuery.Helpers.TryGetLocationArg(args, 1, ref targetLocation, out error))
         {
-            return false;
-        }
-        if (locationName != "Here")
-            location = Game1.getLocationFromName(locationName);
-        if (location == null)
-        {
-            error = $"'{locationName}' is not a valid location";
             return false;
         }
 
         List<ISalable> renovations = [];
         foreach (MapOverrideModel model in MapOverrideData.Values)
         {
-            if (model.TryGetHouseRenovationEntry(location, out HouseRenovation? houseReno))
+            if (model.TryGetHouseRenovationEntry(targetLocation, out HouseRenovation? houseReno))
             {
                 renovations.Add(houseReno);
             }
@@ -448,7 +446,7 @@ internal static class MapOverride
 
         if (!renovations.Any())
         {
-            ModEntry.Log($"No renovations for '{location.Name}' ({location.NameOrUniqueName})");
+            ModEntry.Log($"No renovations for '{targetLocation.Name}' ({targetLocation.NameOrUniqueName})");
         }
 
         Game1.activeClickableMenu = new ShopMenu(
@@ -467,16 +465,16 @@ internal static class MapOverride
 
     private static bool HAS_MAP_OVERRIDE(string[] query, GameStateQueryContext context)
     {
-        GameLocation location = context.Location;
+        GameLocation? targetLocation = context.Location;
         if (
-            !GameStateQuery.Helpers.TryGetLocationArg(query, 1, ref location, out string? error)
+            !GameStateQuery.Helpers.TryGetLocationArg(query, 1, ref targetLocation, out string? error)
             || !ArgUtility.TryGet(query, 2, out string? mapOverrideId, out error, name: "string mapOverrideId")
         )
         {
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        if (!TryGetModMapOverrides(location, out Dictionary<string, Point?>? mapOverrides))
+        if (!TryGetModMapOverrides(targetLocation, out Dictionary<string, Point?>? mapOverrides))
         {
             return false;
         }
@@ -699,8 +697,14 @@ internal static class MapOverride
         {
             ModEntry.Log($"Perform {Action_UpdateMapOverride} for {e.FromPlayerID}");
             UpdateMapOverrideRequest request = e.ReadAs<UpdateMapOverrideRequest>();
-            GameLocation targetLocation = Game1.getLocationFromName(request.LocationName);
-            if (!DoUpdateMapOverride(targetLocation, request.Args, request.Pnt, out string? error))
+            if (
+                !DoUpdateMapOverride(
+                    Game1.getLocationFromName(request.LocationName)!,
+                    request.Args,
+                    request.Pnt,
+                    out string? error
+                )
+            )
             {
                 ModEntry.Log(error, LogLevel.Error);
             }
@@ -740,7 +744,11 @@ internal static class MapOverride
         return false;
     }
 
-    private static bool TriggerUpdateMapOverride(string[] args, TriggerActionContext context, out string? error)
+    private static bool TriggerUpdateMapOverride(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         return DoUpdateMapOverride(Game1.currentLocation, args, Game1.player.TilePoint, out error);
     }
@@ -752,21 +760,22 @@ internal static class MapOverride
         [NotNullWhen(false)] out string? error
     )
     {
-        if (!Context.IsMainPlayer)
+        GameLocation? targetLocation = location;
+        if (!GameStateQuery.Helpers.TryGetLocationArg(args, 1, ref targetLocation, out error))
+        {
+            return false;
+        }
+
+        if (!Context.IsMainPlayer && targetLocation != null)
         {
             error = null;
             ModEntry.help.Multiplayer.SendMessage<UpdateMapOverrideRequest>(
-                new(location.NameOrUniqueName, point, args),
+                new(targetLocation.NameOrUniqueName, point, args),
                 MP_UpdateMapOverride_Request,
                 [ModEntry.ModId],
                 [Game1.serverHost.Value.UniqueMultiplayerID]
             );
             return true;
-        }
-
-        if (!GameStateQuery.Helpers.TryGetLocationArg(args, 1, ref location, out error))
-        {
-            return false;
         }
 
         if (location == null || location.Map == null)
@@ -798,7 +807,7 @@ internal static class MapOverride
         List<(char, string)> ArgList = [];
         bool isRemoveAll = false;
         if (
-            ArgUtility.TryGetOptional(args, 2, out string removeAll, out error, name: "string removeAll")
+            ArgUtility.TryGetOptional(args, 2, out string? removeAll, out error, name: "string removeAll")
             && removeAll.EqualsIgnoreCase(Ctrl_RemoveAll)
         )
         {

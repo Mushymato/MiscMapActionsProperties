@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -76,7 +77,11 @@ internal static class QuestionDialogue
             _qdData = null;
     }
 
-    private static bool ShowQuestionDialogueAction(string[] args, TriggerActionContext context, out string? error)
+    private static bool ShowQuestionDialogueAction(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         error = null;
         return ShowQuestionDialogue(Game1.currentLocation, args, Game1.player, Game1.player.TilePoint);

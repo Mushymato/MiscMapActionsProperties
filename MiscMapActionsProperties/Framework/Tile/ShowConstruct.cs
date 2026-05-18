@@ -1,7 +1,7 @@
-﻿using MiscMapActionsProperties.Framework.Wheels;
+﻿using System.Diagnostics.CodeAnalysis;
+using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Delegates;
 using StardewValley.Menus;
 using StardewValley.Triggers;
 
@@ -31,7 +31,7 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstruct,
-            (args, ctx, out err) =>
+            (args, ctx, [NotNullWhen(false)] out err) =>
             {
                 err = null;
                 return CheckArgsThenShowConstruct(
@@ -56,7 +56,7 @@ internal static class ShowConstruct
         );
         TriggerActionManager.RegisterAction(
             TileAction_ShowConstructForCurrent,
-            (args, ctx, out err) =>
+            (args, ctx, [NotNullWhen(false)] out err) =>
             {
                 err = null;
                 return CheckArgsThenShowConstruct(

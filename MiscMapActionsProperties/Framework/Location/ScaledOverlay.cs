@@ -217,7 +217,11 @@ internal static class ScaledOverlay
         return true;
     }
 
-    private static bool ActionSetScaledOverlay(string[] args, TriggerActionContext context, out string? error)
+    private static bool ActionSetScaledOverlay(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         return DoSetScaledOverlay(args, out error);
     }

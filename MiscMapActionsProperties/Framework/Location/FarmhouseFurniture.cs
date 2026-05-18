@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
@@ -44,11 +45,15 @@ internal static class FarmHouseFurniture
         }
     }
 
-    private static bool DoSetWallpaper(string[] args, TriggerActionContext context, out string? error)
+    private static bool DoSetWallpaper(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (
             !ArgUtility.TryGet(args, 1, out string? wallpaper, out error, allowBlank: false, name: "string wallpaper")
-            || !ArgUtility.TryGetOptional(args, 2, out string wallId, out error, name: "string wallId")
+            || !ArgUtility.TryGetOptional(args, 2, out string? wallId, out error, name: "string wallId")
         )
         {
             return false;
@@ -58,11 +63,15 @@ internal static class FarmHouseFurniture
         return true;
     }
 
-    private static bool DoSetFlooring(string[] args, TriggerActionContext context, out string? error)
+    private static bool DoSetFlooring(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (
             !ArgUtility.TryGet(args, 1, out string? flooring, out error, allowBlank: false, name: "string flooring")
-            || !ArgUtility.TryGetOptional(args, 2, out string floorId, out error, name: "string floorId")
+            || !ArgUtility.TryGetOptional(args, 2, out string? floorId, out error, name: "string floorId")
         )
         {
             return false;
@@ -72,7 +81,11 @@ internal static class FarmHouseFurniture
         return true;
     }
 
-    private static bool DoFarmHouseUpgrade(string[] args, TriggerActionContext context, out string? error)
+    private static bool DoFarmHouseUpgrade(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    )
     {
         if (Context.IsWorldReady)
         {
@@ -188,7 +201,11 @@ internal static class FarmHouseFurniture
                     __instance.Objects.Add(value2, obj);
                 }
                 else if (
-                    ItemRegistry.Create<Furniture>(string.Concat("(F)", value), allowNull: true) is Furniture furniture
+                    ItemRegistry.Create<Furniture>(string.Concat("(F)", value)
+#if !SDV17
+                        , allowNull: true
+#endif
+                    ) is Furniture furniture
                 )
                 {
                     furniture.InitializeAtTile(value2);

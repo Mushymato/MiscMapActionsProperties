@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New action `mushymato.MMAP_SetTilesheet`, changes the tilesheet asset of a given tileset
 - New action `mushymato.MMAP_PlaySound`, plays a sound with given pitch
 - New action `mushymato.MMAP_ShowRenovations`, displays shop menu for map overrides that have `Renovation` data. This essentially allows the use of farmhouse like renovations for any map.
+- New trigger action `mushymato.MMAP_EnableExplodeAction` and `mushymato.MMAP_ExplodeAction`, allow bombs to activate tile/touch actions.
 
 ### Changed
 - `mushymato.MMAP_WrpHere` now uses fake fadetoblack always instead of performing a real warp. This means warped events do not trigger.

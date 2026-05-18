@@ -261,3 +261,21 @@ This trigger action shifts things on map from one area to another area of the sa
 - `locationName`: This is the (optional) location name. It defaults to the player's farmhouse and only need to be provided if you want to use this action on a different location. There are 2 special values:
     - `Here`: use current location
     - `Cellar`: use assigned cellar (though this seems oddly unreliable)
+
+## Explode Actions
+
+You can have a explosion from a bomb activate tile (Buildings layer) or touch (Back layer) actions, but to do this you must first enable it.
+
+### Action mushymato.MMAP_EnableExplodeAction \<layer\>
+
+- Can be used as one of `Action`, `TouchAction`, or `TriggerAction`.
+- This action will make MMAP begin checking for potential tile/touch actions to activate on explosions.
+- Once an explode action triggers or if the player leaves the map, the explode action is disabled until this enabling action is used.
+- Only one layer can be active at a time, either `Back` or `Buildings`
+
+### TileData mushymato.MMAP_ExplodeAction
+
+- This is a tile data field that can hold an action.
+- When used on the `Back` layer, the allowed actions is the same as `TouchAction`.
+- when used on the `Buildings` layer, the allowed actions is the same as `Action`.
+- As mentioned, you must enable exploding actions with `mushymato.MMAP_EnableExplodeAction` before these can be used.

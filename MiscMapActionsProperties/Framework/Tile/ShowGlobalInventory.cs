@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
@@ -83,20 +84,29 @@ internal static class ShowGlobalInventory
     private static bool TileShowBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ShowBag(args, out _);
 
-    private static bool TriggerShowBag(string[] args, TriggerActionContext context, out string? error) =>
-        ShowBag(args, out error);
+    private static bool TriggerShowBag(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    ) => ShowBag(args, out error);
 
     private static bool TileAddItemToBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ModifyItemsInBag(args, AddItems, out _);
 
-    private static bool TriggerAddItemToBag(string[] args, TriggerActionContext context, out string? error) =>
-        ModifyItemsInBag(args, AddItems, out error);
+    private static bool TriggerAddItemToBag(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    ) => ModifyItemsInBag(args, AddItems, out error);
 
     private static bool TileRemoveItemFromBag(GameLocation location, string[] args, Farmer farmer, Point point) =>
         ModifyItemsInBag(args, RemoveItems, out _);
 
-    private static bool TriggerRemoveItemFromBag(string[] args, TriggerActionContext context, out string? error) =>
-        ModifyItemsInBag(args, RemoveItems, out error);
+    private static bool TriggerRemoveItemFromBag(
+        string[] args,
+        TriggerActionContext context,
+        [NotNullWhen(false)] out string? error
+    ) => ModifyItemsInBag(args, RemoveItems, out error);
 
     internal static string GetBagInventoryId(string bagInvId)
     {
