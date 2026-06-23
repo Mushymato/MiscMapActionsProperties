@@ -40,8 +40,9 @@ Each action will note what they can be used as:
 ### mushymato.MMAP_ScaledOverlay \<fadeDuration\> \<texture\> [scalingMode[:scale]] [color] <a name="mushymato.MMAP_ScaledOverlay"></a>
 
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
-- Works just like [the map property of same name](map-properties#mushymato.MMAP_ScaledOverlay), except this is activated and deactivated by actions.
+- Works just like [the map property of same name](map-properties.md#mushymato.MMAP_ScaledOverlay), except this is activated and deactivated by actions.
 - `fadeDuration` controls whether this performs a linear fade in. If there is another overlay active, fade it out at the same rate.
+- If this action is used with only one argument, then the currently displayed scaled overlay is faded out at the given duration.
 - `texture` is the texture asset, if not given then the current overlay is simply removed.
 - `scalingMode` can be one of these values:
     - `Stretch`: stretch the texture over the screen without regard to aspect ratio.
