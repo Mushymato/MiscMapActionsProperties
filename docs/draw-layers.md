@@ -45,6 +45,23 @@ These take specific strings, listed for each option.
     - `"Auto"`: draw layer anim proceeds or reverses depending on player proximity. For backwards compatibility, `"true"` is also accepted and will resolve to `"Auto"`.
     - `"Manual"`: draw layer anim proceeds depending on player interaction with tile/touch actions
 
+##### Furniture Rotations
+
+When using draw layers on furniture, you can restrict a layer to specific combination of `currentRotation` and `flipped` values on the furniture. These are fields on the furniture and you can check them with Lookup Anything (datamining on).
+This works by having a specific suffix as the draw layer's Id, the pattern is
+```
+^.+_Rotation.(\d+)(.F)?$
+```
+
+Some examples:
+- `MyLayer`: show this draw layer always
+- `MyLayer_Rotation.2`: show this draw layer when `currentRotation` is 2 and the furniture is not `flipped`
+- `MyLayer_Rotation.3.F`: show this draw layer when `currentRotation` is 2 and the furniture is `flipped`
+
+A furniture's `flipped` status has no effect on draw layers, you must use `mushymato.MMAP/DrawLayer.{DrawLayerId}.effect` to flip a draw layer.
+
+This allows you to have a layer only show up in a particular rotation.
+
 ##### Details about openAnim
 
 When using openAnim, the animation will progress across 4 states, closed -> opening -> opened -> closing (and then return to closed).
