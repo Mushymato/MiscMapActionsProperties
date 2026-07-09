@@ -54,6 +54,7 @@ Map properties can be set on the map or through building/furniture/floor path.
 - Currently supports the following critter types:
     - **Firefly** [color|T] [count]
     - **Seagull** [texture|T] [count]
+    - **Crow** [[texture|T]] [count]
     - **Crab** [texture|T] [count]
     - **Birdie** [texture|<number>|T][:YOffset] [count]
         - The number option allows you to give a start index for `TileSheet/critters` which has birdies starting at 25, 45, 125, 135, 165, and 175.
