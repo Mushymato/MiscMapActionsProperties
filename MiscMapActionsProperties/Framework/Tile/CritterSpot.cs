@@ -26,6 +26,7 @@ internal enum SupportedCritter
     Rabbit,
     Squirrel,
     Opossum,
+    Crow,
 }
 
 /// <summary>
@@ -287,6 +288,7 @@ internal static class CritterSpot
                 SupportedCritter.Rabbit => SpawnCritterRabbit(location, pnt, pntOffset, arg1, count),
                 SupportedCritter.Squirrel => SpawnCritterSquirrel(location, pnt, pntOffset, arg1, count),
                 SupportedCritter.Opossum => SpawnCritterOpossum(location, pnt, pntOffset, arg1, count),
+                SupportedCritter.Crow => SpawnCritterCrow(location, pnt, pntOffset, arg1, count),
                 _ => null,
             };
             if (spawnedThisTime != null)
@@ -599,7 +601,6 @@ internal static class CritterSpot
             }
             else if (texture != null)
             {
-                ModEntry.Log(texture);
                 rabbit.sprite.textureName.Value = texture;
                 rabbit.baseFrame = 1;
                 rabbit.sprite.CurrentFrame = 0;
@@ -653,6 +654,29 @@ internal static class CritterSpot
                 opossum.sprite.CurrentFrame = 0;
             }
             yield return opossum;
+        }
+    }
+
+    private static IEnumerable<Critter> SpawnCritterCrow(
+        GameLocation location,
+        Point position,
+        Point posOffset,
+        string? texture,
+        int count
+    )
+    {
+        if (texture == "T" || !Game1.content.DoesAssetExist<Texture2D>(texture))
+            texture = null;
+        for (int i = 0; i < count; i++)
+        {
+            Crow crow = new(position.X, position.Y);
+            crow.position += new Vector2(-Game1.tileSize / 2, -Game1.tileSize / 2) + GetPosOffset(posOffset);
+            if (texture != null)
+            {
+                crow.sprite.textureName.Value = texture;
+                crow.baseFrame = 0;
+            }
+            yield return crow;
         }
     }
 }

@@ -13,11 +13,12 @@
         {
           "Position": {
             "X": 4,
-            "Y": 5
+            "Y": 6
           },
           "Layer": "Back",
           "SetProperties": {
-            "mushymato.MMAP_Critter": "Birdie T:-128 4 Birdie {{ModId}}/critters/birdie 4"
+            // "mushymato.MMAP_Critter": "Birdie T:-128 4 Birdie {{ModId}}/critters/birdie 4"
+            "mushymato.MMAP_Critter": "Crow T 4"
           }
         },
         {
