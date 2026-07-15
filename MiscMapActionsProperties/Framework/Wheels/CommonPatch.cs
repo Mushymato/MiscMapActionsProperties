@@ -12,12 +12,14 @@ using StardewValley.Extensions;
 using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
+using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
 public static class CommonPatch
 {
-    public static string Building_PreviousBounds => $"{ModEntry.ModId}/PreviousBounds";
+    public const string Building_PreviousBounds = $"{ModEntry.ModId}/PreviousBounds";
+    public const string Trigger_ResetLocalState = $"{ModEntry.ModId}_ResetLocalState";
 
     public static event EventHandler<GameLocation>? GameLocation_resetLocalState;
 
@@ -148,6 +150,7 @@ public static class CommonPatch
         // location entity watcher
         GameLocation_resetLocalState += AddLocationEntityWatcher;
         ModEntry.help.Events.World.LocationListChanged += OnLocationListChanged;
+        TriggerActionManager.RegisterTrigger(Trigger_ResetLocalState);
     }
 
     #region location watcher
@@ -530,6 +533,7 @@ public static class CommonPatch
     private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
     {
         GameLocation_resetLocalState?.Invoke(null, __instance);
+        DelayedAction.functionAfterDelay(static () => TriggerActionManager.Raise(Trigger_ResetLocalState), 0);
     }
 
     private static void GameLocation_UpdateWhenCurrentLocation_Prefix(GameLocation __instance, GameTime time)
