@@ -307,26 +307,84 @@ internal static class CritterSpot
         return posOffset.ToVector2();
     }
 
+    private class PulsingFirefly(Vector2 position, uint pulseDelta) : Firefly(position)
+    {
+        private LightSource LightSource => field ??= (LightSource)fireflyLight.GetValue(this)!;
+        private int pulseDirection = 1;
+
+        public override bool update(GameTime time, GameLocation environment)
+        {
+            if (LightSource != null)
+            {
+                Color color = LightSource.color.Value;
+                byte alpha = color.A;
+                if (alpha == byte.MinValue)
+                {
+                    pulseDirection = 1;
+                }
+                else if (alpha == byte.MaxValue)
+                {
+                    pulseDirection = -1;
+                }
+                LightSource.color.Value = new(color.R, color.G, color.B, (int)(alpha + pulseDirection * pulseDelta));
+            }
+            return base.update(time, environment);
+        }
+    }
+
     private static IEnumerable<Critter> SpawnCritterFirefly(
         GameLocation location,
         Point position,
         Point posOffset,
-        string? color,
+        string? args,
         int count
     )
     {
         Color? c = null;
-        if (color != null && color != "T" && (c = Utility.StringToColor(color)) != null)
+        uint pulseRate = 0;
+        byte pulseAlphaInit = byte.MaxValue;
+        if (args != null)
         {
-            c = new Color(((Color)c).PackedValue ^ 0x00FFFFFF);
+            string[] argList = args.Split(":");
+            if (
+                !ArgUtility.TryGet(argList, 0, out string? color, out string error, allowBlank: false, "string color")
+                || !ArgUtility.TryGetOptionalInt(
+                    argList,
+                    1,
+                    out int argPulseRate,
+                    out error,
+                    defaultValue: 0,
+                    "int pulsingRate"
+                )
+            )
+            {
+                ModEntry.Log(error, LogLevel.Error);
+                yield break;
+            }
+            if (color != null && color != "T" && (c = Utility.StringToColor(color)) != null)
+            {
+                c = new Color(((Color)c).PackedValue ^ 0x00FFFFFF);
+            }
+            pulseRate = (uint)Math.Abs(argPulseRate);
+            pulseAlphaInit = argPulseRate < 0 ? byte.MaxValue : byte.MinValue;
         }
         for (int i = 0; i < count; i++)
         {
-            Firefly firefly = new(position.ToVector2());
+            Firefly firefly = pulseRate == 0 ? new Firefly(position.ToVector2()) : new PulsingFirefly(position.ToVector2(), pulseRate);
             firefly.position += GetPosOffset(posOffset);
             firefly.startingPosition = firefly.position;
-            if (c != null && fireflyLight.GetValue(firefly) is LightSource light)
-                light.color.Value = (Color)c;
+            if (fireflyLight.GetValue(firefly) is LightSource light)
+            {
+                if (c.HasValue)
+                {
+                    light.color.Value = c.Value;
+                }
+                if (pulseRate != 0)
+                {
+                    Color fireflyC = light.color.Value;
+                    light.color.Value = new(fireflyC.R, fireflyC.G, fireflyC.B, pulseAlphaInit);
+                }
+            }
             yield return firefly;
         }
     }
