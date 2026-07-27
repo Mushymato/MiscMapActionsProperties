@@ -370,7 +370,10 @@ internal static class CritterSpot
         }
         for (int i = 0; i < count; i++)
         {
-            Firefly firefly = pulseRate == 0 ? new Firefly(position.ToVector2()) : new PulsingFirefly(position.ToVector2(), pulseRate);
+            Firefly firefly =
+                pulseRate == 0
+                    ? new Firefly(position.ToVector2())
+                    : new PulsingFirefly(position.ToVector2(), pulseRate);
             firefly.position += GetPosOffset(posOffset);
             firefly.startingPosition = firefly.position;
             if (fireflyLight.GetValue(firefly) is LightSource light)

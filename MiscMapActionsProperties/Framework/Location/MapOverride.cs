@@ -449,6 +449,10 @@ internal static class MapOverride
             ModEntry.Log($"No renovations for '{targetLocation.Name}' ({targetLocation.NameOrUniqueName})");
         }
 
+        ModEntry.Log(
+            $"'{targetLocation.Name}' got renovations: {string.Join(',', renovations.Select(reno => (reno as HouseRenovation)?.RoomId ?? "NULL"))}"
+        );
+
         Game1.activeClickableMenu = new ShopMenu(
             Action_ShowRenovations,
             renovations,
