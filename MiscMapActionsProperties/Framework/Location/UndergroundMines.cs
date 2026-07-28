@@ -31,7 +31,7 @@ internal static class UndergroundMines
         CommonPatch.RegisterTileAndTouch(Action_SetTilesheet, TileTouchSetTilesheet);
         TriggerActionManager.RegisterAction(Action_SetTilesheet, TriggerSetTilesheet);
 
-#if SDV16
+#if !SDV17
         GameStateQuery.Register("LOCATION_MINE_DIFFICULTY", LOCATION_MINE_DIFFICULTY);
         static bool LOCATION_MINE_DIFFICULTY(string[] query, GameStateQueryContext context)
         {
