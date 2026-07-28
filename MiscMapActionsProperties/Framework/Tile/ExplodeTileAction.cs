@@ -38,8 +38,14 @@ internal static class ExplodeTileAction
         }
         CommonPatch.RegisterTileAndTouch(Action_EnableExplodeAction, TileEnableExplodeAction);
         TriggerActionManager.RegisterAction(Action_EnableExplodeAction, TriggerEnableExplodeAction);
-        ModEntry.help.Events.GameLoop.DayStarted += static (sender, e) => ExplodeActionEnabled.Value = null;
-        ModEntry.help.Events.Player.Warped += static (sender, e) => ExplodeActionEnabled.Value = null;
+        ModEntry.help.Events.GameLoop.DayStarted += ClearExplodeActionEnabled;
+        ModEntry.help.Events.Player.Warped += ClearExplodeActionEnabled;
+    }
+
+    private static void ClearExplodeActionEnabled(object? sender, EventArgs e)
+    {
+        ModEntry.Log($"DisableExplodeAction");
+        ExplodeActionEnabled.Value = null;
     }
 
     private static bool TileEnableExplodeAction(GameLocation location, string[] args, Farmer farmer, Point point)
@@ -58,11 +64,16 @@ internal static class ExplodeTileAction
         {
             return false;
         }
-        if (layer != "Back" && layer != "Buildings")
+        if (layer == "OFF")
+        {
+            layer = null;
+        }
+        else if (layer != "Back" && layer != "Buildings")
         {
             error = $"Layer must be 'Back' or 'Buildings', got '{layer}'";
             return false;
         }
+        ModEntry.Log($"EnableExplodeAction '{layer}'");
         ExplodeActionEnabled.Value = layer;
         return true;
     }
