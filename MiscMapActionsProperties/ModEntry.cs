@@ -54,9 +54,10 @@ public sealed class ModEntry : Mod
         Framework.Entities.ChestLight.Register();
         Framework.Entities.ConnectedTextures.Register();
         Framework.Entities.DrawLayerExt.Register();
-        Framework.Entities.TerrainFeatureProperties.Register();
         Framework.Entities.FurnitureProperties.Register();
         Framework.Entities.HumanDoorExt.Register();
+        Framework.Entities.InteriorDoorExt.Register();
+        Framework.Entities.TerrainFeatureProperties.Register();
 
         Framework.Location.CribPosition.Register();
         Framework.Location.DayToNightTiming.Register();

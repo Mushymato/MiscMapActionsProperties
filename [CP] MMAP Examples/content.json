@@ -206,6 +206,10 @@
     {
       "Action": "Include",
       "FromFile": "explode_action.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "interior_door.json"
     }
   ]
 }

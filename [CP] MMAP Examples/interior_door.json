@@ -1,0 +1,58 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapProperties": {
+        // this is required if
+        // - it's an outside map
+        // - you don't want to add your door to Doors map prop
+        // because doors are intrinsically a map thing this can only come from map prop
+        "mushymato.MMAP_HasDoors": "T"
+      },
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 23,
+            "Y": 16
+          },
+          "Layer": "Buildings",
+          "SetTilesheet": "outdoors",
+          // unlike vanilla doors, these doors do not set front tiles on close
+          // so only the building tile matters
+          "SetIndex": 167,
+          "SetProperties": {
+            // this is needed
+            "Action": "Door",
+            // this is what marks this door for MMAP
+            "mushymato.MMAP_Door": "{{ModId}}_inverted_door XDX"
+          },
+        }
+      ]
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/TAS",
+      "Entries": {
+        // this TAS has some special considerations
+        // - no Spawn* fields are supported since there is only ever one of this TAS
+        // - the TAS is paused until player opens the door
+        // - if LayerDepth not set it gets default layer depthfrom the original door TAS
+        "{{ModId}}_inverted_door": {
+          "Id": "{{ModId}}_inverted_door",
+          "Texture": "{{InternalAssetKey: assets/door.png}}",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 48
+          },
+          "RotationChange": 0.05,
+          "Interval": 100,
+          "Frames": 4
+        },
+      }
+    }
+  ]
+}

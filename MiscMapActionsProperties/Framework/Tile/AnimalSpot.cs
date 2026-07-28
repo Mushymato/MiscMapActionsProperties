@@ -14,11 +14,11 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class AnimalSpot
 {
     internal const string TileProp_AnimalSpot = $"{ModEntry.ModId}_AnimalSpot";
-    private static readonly ConditionalWeakTable<xTile.Map, List<Vector2>> animalSpotsCache = [];
+    private static readonly ConditionalWeakTable<xTile.Map, IReadOnlyList<Vector2>> animalSpotsCache = [];
 
     internal static void Register()
     {
-        ModEntry.help.Events.GameLoop.ReturnedToTitle += ClearAnimalSpotsCache;
+        ModEntry.help.Events.GameLoop.ReturnedToTitle += static (sender, e) => animalSpotsCache.Clear();
         try
         {
             ModEntry.harm.Patch(
@@ -30,11 +30,6 @@ internal static class AnimalSpot
         {
             ModEntry.Log($"Failed to patch AnimalSpot:\n{err}", LogLevel.Error);
         }
-    }
-
-    private static void ClearAnimalSpotsCache(object? sender, EventArgs e)
-    {
-        animalSpotsCache.Clear();
     }
 
     private static List<Vector2> GetAnimalSpots(xTile.Map map)
@@ -67,7 +62,7 @@ internal static class AnimalSpot
         try
         {
             __instance.StopAllActions();
-            List<Vector2> animalSpots = animalSpotsCache.GetValue(location.Map, GetAnimalSpots);
+            IReadOnlyList<Vector2> animalSpots = animalSpotsCache.GetValue(location.Map, GetAnimalSpots);
             Character _base = __instance;
             foreach (Vector2 pos in animalSpots)
             {
