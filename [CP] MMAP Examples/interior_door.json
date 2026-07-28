@@ -26,7 +26,27 @@
             // this is needed
             "Action": "Door",
             // this is what marks this door for MMAP
-            "mushymato.MMAP_Door": "{{ModId}}_inverted_door XDX"
+            // first arg: TAS id
+            // second arg (optional): collision map where D marks the door itself
+            // third arg (optional): door sound
+            "mushymato.MMAP_Door": "{{ModId}}_inverted_door OXOXO\nXXDXX yoba",
+            // link this door with other door(s) so that they open together
+            "mushymato.MMAP_LinkedDoors": "23 14"
+          },
+        },
+        {
+          "Position": {
+            "X": 23,
+            "Y": 14
+          },
+          "Layer": "Buildings",
+          "SetTilesheet": "outdoors",
+          "SetIndex": 167,
+          "SetProperties": {
+            "Action": "Door",
+            "mushymato.MMAP_Door": "{{ModId}}_inverted_door",
+            // link this door with other door(s) so that they open together
+            "mushymato.MMAP_LinkedDoors": "23 16"
           },
         }
       ]

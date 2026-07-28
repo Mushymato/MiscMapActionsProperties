@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewValley;
@@ -17,8 +16,14 @@ internal static class InteriorDoorExt
 {
     internal const string TileProp_HasDoors = $"{ModEntry.ModId}_HasDoors";
     internal const string TileProp_Door = $"{ModEntry.ModId}_Door";
+    internal const string TileProp_LinkedDoors = $"{ModEntry.ModId}_LinkedDoors";
 
-    internal record InteriorDoorCtx(string DoorTAS, IReadOnlyList<Point> AdditionalDoorTiles)
+    internal record InteriorDoorCtx(
+        string DoorTAS,
+        string DoorSound,
+        IReadOnlyList<Point> AdditionalCollision,
+        IReadOnlyList<Point> LinkedDoors
+    )
     {
         internal static InteriorDoorCtx? Make(InteriorDoor door)
         {
@@ -45,6 +50,15 @@ internal static class InteriorDoorExt
                     allowBlank: false,
                     name: "string doorFootprint"
                 )
+                || !ArgUtility.TryGetOptional(
+                    doorArgs,
+                    2,
+                    out string? doorSound,
+                    out error,
+                    defaultValue: "doorOpen",
+                    allowBlank: false,
+                    name: "string doorSound"
+                )
             )
             {
                 ModEntry.Log(error, LogLevel.Error);
@@ -52,6 +66,8 @@ internal static class InteriorDoorExt
             }
 
             List<Point> additionalDoorTiles = [];
+            List<Point> linkedDoorTiles = [];
+
             if (doorFootprintStr != null)
             {
                 Point? doorFootprintPos = null;
@@ -88,10 +104,21 @@ internal static class InteriorDoorExt
                     if (backlayer.Tiles[pnt.X, pnt.Y] != null)
                         additionalDoorTiles.Add(pnt);
                 }
-                ModEntry.Log(string.Join(',', additionalDoorTiles));
             }
 
-            return new InteriorDoorCtx(doorTAS, additionalDoorTiles);
+            if (door.Tile.Properties.TryGetValue(TileProp_LinkedDoors, out string? linkedDoorsString))
+            {
+                string[] linkedDoors = ArgUtility.SplitBySpaceQuoteAware(linkedDoorsString);
+                for (int i = 0; i < linkedDoors.Length; i += 2)
+                {
+                    if (ArgUtility.TryGetPoint(linkedDoors, i, out Point pnt, out _))
+                    {
+                        linkedDoorTiles.Add(pnt);
+                    }
+                }
+            }
+
+            return new InteriorDoorCtx(doorTAS, doorSound, additionalDoorTiles, linkedDoorTiles);
         }
 
         internal void ResetLocalState(InteriorDoor door)
@@ -118,7 +145,7 @@ internal static class InteriorDoorExt
         internal void OpenDoorTiles(InteriorDoor door)
         {
             GameLocation location = door.Location;
-            foreach (Point pnt in AdditionalDoorTiles)
+            foreach (Point pnt in AdditionalCollision)
             {
                 location.removeTileProperty(pnt.X, pnt.Y, "Back", "Passable");
                 location.setTileProperty(pnt.X, pnt.Y, "Back", "TemporaryBarrier", "T");
@@ -126,7 +153,7 @@ internal static class InteriorDoorExt
             DelayedAction.functionAfterDelay(
                 delegate
                 {
-                    foreach (Point pnt in AdditionalDoorTiles)
+                    foreach (Point pnt in AdditionalCollision)
                     {
                         location.removeTileProperty(pnt.X, pnt.Y, "Back", "TemporaryBarrier");
                     }
@@ -143,7 +170,7 @@ internal static class InteriorDoorExt
             location.removeTile(pos0.X, pos0.Y - 1, "Front");
             location.removeTile(pos0.X, pos0.Y - 2, "Front");
             // custom door points
-            foreach (Point pnt in AdditionalDoorTiles)
+            foreach (Point pnt in AdditionalCollision)
             {
                 location.removeTileProperty(pnt.X, pnt.Y, "Back", "TemporaryBarrier");
                 location.setTileProperty(pnt.X, pnt.Y, "Back", "Passable", "F");
@@ -196,6 +223,11 @@ internal static class InteriorDoorExt
                     nameof(InteriorDoorDictionary_ResetLocalState_Postfix)
                 )
             );
+
+            ModEntry.harm.Patch(
+                original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.openDoor)),
+                postfix: new HarmonyMethod(typeof(InteriorDoorExt), nameof(GameLocation_openDoor_Prefix))
+            );
         }
         catch (Exception err)
         {
@@ -232,9 +264,9 @@ internal static class InteriorDoorExt
                 if (layer.Tiles[x, y] is not MapTile tile || !tile.Properties.ContainsKey(TileProp_Door))
                     continue;
                 doorPoints.Add(pnt);
-                ModEntry.Log($"Door {pnt}");
             }
         }
+        ModEntry.Log($"Doors: {string.Join(',', doorPoints)}");
         return doorPoints;
     }
 
@@ -272,6 +304,35 @@ internal static class InteriorDoorExt
                 interiorDoor.Position = pnt;
                 interiorDoor.ResetLocalState();
             }
+        }
+    }
+
+    private static void GameLocation_openDoor_Prefix(
+        GameLocation __instance,
+        xTile.Dimensions.Location tileLocation,
+        ref bool playSound
+    )
+    {
+        Point key = new(tileLocation.X, tileLocation.Y);
+        if (!__instance.interiorDoors.ContainsKey(key))
+            return;
+        if (
+            interiorDoorCtxCache.GetValue(__instance.interiorDoors.FieldDict[key], InteriorDoorCtx.Make)
+            is not InteriorDoorCtx ctx
+        )
+            return;
+        if (playSound)
+        {
+            __instance.playSound(ctx.DoorSound, key.ToVector2());
+            playSound = false;
+        }
+        foreach (Point linked in ctx.LinkedDoors)
+        {
+            if (!__instance.interiorDoors.ContainsKey(key) || __instance.interiorDoors[linked])
+            {
+                continue;
+            }
+            __instance.interiorDoors[linked] = true;
         }
     }
 }
