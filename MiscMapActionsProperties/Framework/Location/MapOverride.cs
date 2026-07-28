@@ -76,7 +76,7 @@ public sealed class MapOverrideModel
     public bool TargetRectIsRelative { get; set; } = false;
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
-    public bool? LoadWaterTilesOnApply { get; set; } = true;
+    public bool? LoadWaterTilesOnApply { get; set; } = null;
     public bool LoadPathObjectsOnApply { get; set; } = false;
     public bool ResizeMapIfNeeded { get; set; } = false;
     public bool ForceTilesheetMatch { get; set; } = false;
