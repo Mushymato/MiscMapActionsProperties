@@ -76,6 +76,8 @@ public sealed class MapOverrideModel
     public bool TargetRectIsRelative { get; set; } = false;
     public int Precedence { get; set; } = 0;
     public bool ClearTargetRectOnApply { get; set; } = false;
+    public bool? LoadWaterTilesOnApply { get; set; } = true;
+    public bool LoadPathObjectsOnApply { get; set; } = false;
     public bool ResizeMapIfNeeded { get; set; } = false;
     public bool ForceTilesheetMatch { get; set; } = false;
     public MapOverrideRenonvationData? Renovation { get; set; } = null;
@@ -208,24 +210,31 @@ public sealed class MapOverrideModel
                 perTileCustomAction: ClearTargetRectOnApply ? location.cleanUpTileForMapOverride : null
             );
 
-            // water tiles recheck
-            if (
-                refRect != null
-                && (
-                    location.IsOutdoors
-                    || location.HasMapPropertyWithValue("indoorWater")
-                    || (
-                        overrideMap.Properties.TryGetValue("indoorWater", out string? mapOverrideIndoorWater)
-                        && !string.IsNullOrEmpty(mapOverrideIndoorWater)
-                    )
-                    || location is Sewer
-                    || location is Submarine
-                )
-                && location is not Desert
-            )
+            if (refRect is Rectangle refRectV)
             {
-                DelayedAction.functionAfterDelay(() => RecheckWaterTiles(location, refRect.Value), 0);
+                // water tiles recheck
+                if (
+                    LoadWaterTilesOnApply
+                    ?? (
+                        (
+                            location.IsOutdoors
+                            || location.HasMapPropertyWithValue("indoorWater")
+                            || location is Sewer
+                            || location is Submarine
+                        ) && location is not Desert
+                    )
+                )
+                {
+                    DelayedAction.functionAfterDelay(() => RecheckWaterTiles(location, refRectV), 0);
+                }
+
+                if (LoadPathObjectsOnApply && location.Map.GetLayer("Paths") is not null)
+                {
+                    location.loadPathsLayerObjectsInArea(refRectV.X, refRectV.Y, refRectV.Width, refRectV.Height);
+                }
             }
+
+            // path objects recheck
             return true;
         }
         catch (Exception err)
