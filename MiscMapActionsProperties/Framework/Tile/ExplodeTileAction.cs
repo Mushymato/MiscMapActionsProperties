@@ -44,8 +44,11 @@ internal static class ExplodeTileAction
 
     private static void ClearExplodeActionEnabled(object? sender, EventArgs e)
     {
-        ModEntry.Log($"DisableExplodeAction");
-        ExplodeActionEnabled.Value = null;
+        if (ExplodeActionEnabled.Value != null)
+        {
+            ModEntry.Log($"DisableExplodeAction");
+            ExplodeActionEnabled.Value = null;
+        }
     }
 
     private static bool TileEnableExplodeAction(GameLocation location, string[] args, Farmer farmer, Point point)
