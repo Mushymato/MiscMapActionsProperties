@@ -707,8 +707,11 @@ internal static class Panorama
 
     private static bool DoSetPanoramaM(GameLocation location, string[] args, Farmer farmer, Point point)
     {
-        if (!ArgUtility.TryGet(args, 1, out string? bgId, out _, allowBlank: false, name: "string bgId"))
+        if (!ArgUtility.TryGet(args, 1, out string? bgId, out string error, allowBlank: false, name: "string bgId"))
+        {
+            ModEntry.Log(error);
             return false;
+        }
         SetPanorama(location, bgId, force: true);
         return true;
     }
@@ -731,19 +734,23 @@ internal static class Panorama
     {
         if (location == null)
         {
+            ModEntry.Log($"SetPanorama: Null location");
             ClearPanorama();
-            return;
         }
-        if (bgId == "SUMMIT" && (force || IsNullOrCustomBG))
+        else if (bgId == "SUMMIT" && (force || IsNullOrCustomBG))
         {
+            ModEntry.Log($"SetPanorama: SUMMIT panorama");
             Game1.background = new SummitBG(location);
         }
         else if (bgId == "CLEAR")
         {
+            ModEntry.Log($"SetPanorama: CLEAR panorama");
             ClearPanorama();
         }
         else if (BgData.TryGetValue(bgId, out PanoramaData? data))
         {
+            ModEntry.Log($"SetPanorama: '{bgId}' panorama");
+
             if (Game1.background is not PanoramaBackground Panorama)
             {
                 if (!force && !IsNullOrCustomBG)
