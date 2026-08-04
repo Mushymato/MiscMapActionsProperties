@@ -4,42 +4,6 @@
   "Changes": [
     {
       "Action": "EditMap",
-      "Target": "Maps/Coop",
-      "MapTiles": [
-        {
-          "Position": {
-            "X": 2,
-            "Y": 4
-          },
-          "Layer": "Back",
-          "SetProperties": {
-            "mushymato.MMAP_AnimalSpot": "T"
-          }
-        },
-        {
-          "Position": {
-            "X": 6,
-            "Y": 4
-          },
-          "Layer": "Back",
-          "SetProperties": {
-            "mushymato.MMAP_AnimalSpot": "T"
-          }
-        },
-        {
-          "Position": {
-            "X": 2,
-            "Y": 5
-          },
-          "Layer": "Back",
-          "SetProperties": {
-            "TouchAction": "mushymato.MMAP_WarpHere 6 5 -1 false"
-          }
-        }
-      ]
-    },
-    {
-      "Action": "EditMap",
       "Target": "Maps/Barn3",
       "MapTiles": [
         {
@@ -210,6 +174,10 @@
     {
       "Action": "Include",
       "FromFile": "interior_door.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "hole_warp.json"
     }
   ]
 }

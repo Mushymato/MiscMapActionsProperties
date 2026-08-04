@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Entities;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;
@@ -15,8 +16,13 @@ namespace MiscMapActionsProperties.Framework.Tile;
 internal static class HoleWrp
 {
     internal const string TileAction_HoleWrp = $"{ModEntry.ModId}_HoleWrp";
+    internal const string TileAction_HoleWrpHere = $"{ModEntry.ModId}_HoleWrpHere";
 
-    internal static void Register() => CommonPatch.RegisterTileAndTouch(TileAction_HoleWrp, DoHoleWarp);
+    internal static void Register()
+    {
+        CommonPatch.RegisterTileAndTouch(TileAction_HoleWrp, DoHoleWarp);
+        CommonPatch.RegisterTileAndTouch(TileAction_HoleWrpHere, DoHoleWarpHere);
+    }
 
     private static bool DoHoleWarp(GameLocation location, string[] args, Farmer farmer, Point source)
     {
@@ -29,7 +35,7 @@ internal static class HoleWrp
                 allowBlank: true,
                 "string locationToWarp"
             )
-            || !ArgUtility.TryGetPoint(args, 2, out Point tile, out error, "Point tile")
+            || !ArgUtility.TryGetPoint(args, 2, out Point targetPosition, out error, "Point tile")
             || !ArgUtility.TryGetOptional(
                 args,
                 4,
@@ -44,32 +50,74 @@ internal static class HoleWrp
             ModEntry.Log(error, LogLevel.Error);
             return false;
         }
-        else if (mailflag != null && Game1.player.mailReceived.Contains(mailflag))
+        else if (mailflag != null && farmer.mailReceived.Contains(mailflag))
         {
             return false;
         }
+        return DoHoleWarpImpl(location, farmer, targetPosition, locationToWarp);
+    }
 
+    private static bool DoHoleWarpHere(GameLocation location, string[] args, Farmer farmer, Point point)
+    {
+        if (
+            !HumanDoorExt.TryGetWrpHereArgs(
+                args,
+                point,
+                out string? error,
+                out Point toPoint,
+                out int direction,
+                out _,
+                out _
+            )
+        )
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+
+        return DoHoleWarpImpl(location, farmer, toPoint, direction: direction == -1 ? 2 : direction);
+    }
+
+    private static bool DoHoleWarpImpl(
+        GameLocation location,
+        Farmer farmer,
+        Point targetPosition,
+        string? locationToWarp = null,
+        int direction = 2
+    )
+    {
         DelayedAction.playSoundAfterDelay("fallDown", 200, location);
         DelayedAction.playSoundAfterDelay("clubSmash", 900);
         Game1.globalFadeToBlack(
             () =>
             {
                 Game1.messagePause = true;
-                Game1.warpFarmer(locationToWarp, tile.X, tile.Y, flip: false);
+                if (locationToWarp != null)
+                {
+                    Game1.warpFarmer(locationToWarp, targetPosition.X, targetPosition.Y, flip: false);
+                }
+                else
+                {
+                    Vector2 farmerPos = new(
+                        targetPosition.X * 64,
+                        targetPosition.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16
+                    );
+                    HumanDoorExt.WrpHereReposition(farmer, direction, farmerPos);
+                }
                 Game1.messagePause = false;
                 Game1.fadeToBlackAlpha = 1f;
                 // Game1.displayFarmer = true;
-                Game1.player.CanMove = true;
+                farmer.CanMove = true;
                 Game1.freezeControls = false;
-                Game1.player.faceDirection(2);
-                Game1.player.showFrame(5);
+                farmer.faceDirection(direction);
+                // farmer.showFrame(5);
             },
             0.1f
         );
         Game1.freezeControls = true;
         // Game1.displayFarmer = false;
-        Game1.player.CanMove = false;
-        Game1.player.jump();
+        farmer.CanMove = false;
+        farmer.jump();
         // Game1.player.temporarilyInvincible = true;
         // Game1.player.temporaryInvincibilityTimer = 0;
         // Game1.player.flashDuringThisTemporaryInvincibility = false;

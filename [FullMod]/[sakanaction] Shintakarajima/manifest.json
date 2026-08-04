@@ -1,0 +1,14 @@
+{
+  "Name": "[sakanaction] Shintakarajima",
+  "Author": "mushymato",
+  "Version": "1.0.0",
+  "Description": "https://www.youtube.com/watch?v=LIlZCmETvsY",
+  "UniqueID": "mushymato.Shintakarajima",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [
+    "Nexus:???"
+  ],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.8.0",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}\\layer0_neontext,{{ModId}}\\layer1_sakanaction,{{ModId}}\\layer2_cheerleaders,{{ModId}}\\layerN_full",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Furniture",
+      "Entries": {
+        "{{ModId}}_layer0_neontext_top": "{{ModId}}_layer0_neontext_top/painting/10 3/1 3/2/2000/-1/{{i18n:_layer0_neontext_top}}/0/{{ModId}}\\layer0_neontext",
+        "{{ModId}}_layer0_neontext_bot": "{{ModId}}_layer0_neontext_top/rug/10 3/1 3/2/2000/-1/{{i18n:_layer0_neontext_bot}}/30/{{ModId}}\\layer0_neontext",
+        "{{ModId}}_layer1_sakanaction": "{{ModId}}_layer1_sakanaction/decor/10 6/1 1/2/2000/-1/{{i18n:_layer1_sakanaction}}/0/{{ModId}}\\layer1_sakanaction",
+        "{{ModId}}_layer2_cheerleaders": "{{ModId}}_layer2_cheerleaders/decor/10 4/1 1/2/2000/-1/{{i18n:_layer2_cheerleaders}}/30/{{ModId}}\\layer2_cheerleaders",
+        "{{ModId}}_layerN_full": "{{ModId}}_layerN_full/painting/10 6/1 3/2/2000/-1/{{i18n:_layerN_full}}/0/{{ModId}}\\layerN_full",
+      }
+    }
+  ]
+}

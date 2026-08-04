@@ -119,19 +119,60 @@ internal static class HumanDoorExt
     private static bool DoWrpHere(string[] args, Farmer farmer, Point point, [NotNullWhen(false)] out string? error)
     {
         if (
-            !ArgUtility.TryGetPoint(args, 1, out Point toPoint, out error, name: "string toPoint")
-            || !ArgUtility.TryGetOptionalInt(
+            !TryGetWrpHereArgs(
                 args,
-                3,
-                out int direction,
+                point,
                 out error,
-                defaultValue: -1,
-                name: "int direction"
+                out Point toPoint,
+                out int direction,
+                out bool fadeToBlack,
+                out string? playSound
             )
+        )
+        {
+            return false;
+        }
+
+        farmer.Halt();
+        if (playSound != null)
+            Game1.playSound(playSound);
+
+        Vector2 farmerPos = new(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
+        if (fadeToBlack)
+        {
+            Game1.globalFadeToBlack(() =>
+            {
+                WrpHereReposition(farmer, direction, farmerPos);
+                Game1.globalFadeToClear();
+            });
+        }
+        else
+        {
+            WrpHereReposition(farmer, direction, farmerPos);
+        }
+        return true;
+    }
+
+    internal static bool TryGetWrpHereArgs(
+        string[] args,
+        Point point,
+        [NotNullWhen(false)] out string? error,
+        out Point toPoint,
+        out int direction,
+        out bool fadeToBlack,
+        out string? playSound
+    )
+    {
+        direction = default;
+        fadeToBlack = default;
+        playSound = default;
+        if (
+            !ArgUtility.TryGetPoint(args, 1, out toPoint, out error, name: "string toPoint")
+            || !ArgUtility.TryGetOptionalInt(args, 3, out direction, out error, defaultValue: -1, name: "int direction")
             || !ArgUtility.TryGetOptionalBool(
                 args,
                 4,
-                out bool fadeToBlack,
+                out fadeToBlack,
                 out error,
                 defaultValue: true,
                 name: "bool fadeToBlack"
@@ -147,7 +188,7 @@ internal static class HumanDoorExt
             || !ArgUtility.TryGetOptional(
                 args,
                 6,
-                out string? playSound,
+                out playSound,
                 out error,
                 defaultValue: null,
                 name: "string playSound"
@@ -156,37 +197,21 @@ internal static class HumanDoorExt
         {
             return false;
         }
+
         if (relative)
         {
             toPoint.X += point.X;
             toPoint.Y += point.Y;
         }
 
-        farmer.Halt();
-        if (playSound != null)
-            Game1.playSound(playSound);
-
-        Vector2 farmerPos = new(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
-        if (fadeToBlack)
-        {
-            Game1.globalFadeToBlack(() =>
-            {
-                Reposition(farmer, direction, farmerPos, playSound);
-                Game1.globalFadeToClear();
-            });
-        }
-        else
-        {
-            Reposition(farmer, direction, farmerPos, playSound);
-        }
-
-        static void Reposition(Farmer farmer, int direction, Vector2 farmerPos, string? playSound)
-        {
-            farmer.Position = farmerPos;
-            if (direction != -1)
-                farmer.FacingDirection = direction;
-        }
         return true;
+    }
+
+    internal static void WrpHereReposition(Farmer farmer, int direction, Vector2 farmerPos)
+    {
+        farmer.Position = farmerPos;
+        if (direction != -1)
+            farmer.FacingDirection = direction;
     }
 
     private static bool TryGetWrpArgs(

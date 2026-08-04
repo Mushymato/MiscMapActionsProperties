@@ -1,0 +1,33 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Changes": [
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Coop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 2,
+            "Y": 5
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            // "TouchAction": "mushymato.MMAP_WrpHere 6 5 -1 false"
+            "TouchAction": "mushymato.MMAP_HoleWrpHere 6 5"
+          }
+        },
+        {
+          "Position": {
+            "X": 4,
+            "Y": 5
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            // "TouchAction": "mushymato.MMAP_WrpHere 6 5 -1 false"
+            "TouchAction": "mushymato.MMAP_HoleWrp Town 33 33"
+          }
+        }
+      ]
+    },
+  ]
+}
