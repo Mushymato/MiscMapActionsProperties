@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -318,14 +319,30 @@ public sealed class QuestionDialogueEntry
     /// <summary>Stop at the first successful tile action</summary>
     public bool TileActionStopAtFirstSuccess { get; set; } = false;
 
-    /// <summary>If this is true, replace <TILE_X> and <TILE_Y> in Actions with the actual point given to the question dialogue.</summary>
+    /// <summary>If this is true, replace <TILE_X> and <TILE_Y> in actions with the actual point given to the question dialogue. </summary>
     public bool TilePointSubstitution { get; set; } = true;
+
+    /// <summary>If this is true, parse tokenizable text in actions via <see cref="TokenParser.ParseText"/>.</summary>
+    public bool ParseTextTokens { get; set; } = false;
 
     internal bool IsValid(GameStateQueryContext context)
     {
         bool hasAnyAction = Actions != null || TileActions != null || TouchActions != null;
         bool isCancel = Actions == null && TileActions == null && TouchActions == null;
         return (hasAnyAction || isCancel) && GameStateQuery.CheckConditions(Condition, context);
+    }
+
+    internal string ProcessAction(string action, Point point)
+    {
+        if (ParseTextTokens)
+        {
+            action = TokenParser.ParseText(action) ?? action;
+        }
+        if (TilePointSubstitution)
+        {
+            return action.Replace(TILE_X, point.X.ToString()).Replace(TILE_Y, point.Y.ToString());
+        }
+        return action;
     }
 
     internal void PerformQDActions(GameLocation location, Point point, Farmer who)
@@ -335,10 +352,7 @@ public sealed class QuestionDialogueEntry
             // Perform all (trigger) actions
             foreach (string action in Actions)
             {
-                string subbedAction = TilePointSubstitution
-                    ? action.Replace(TILE_X, point.X.ToString()).Replace(TILE_Y, point.Y.ToString())
-                    : action;
-                if (!TriggerActionManager.TryRunAction(subbedAction, out string? error, out _))
+                if (!TriggerActionManager.TryRunAction(ProcessAction(action, point), out string? error, out _))
                 {
                     ModEntry.Log(error, LogLevel.Error);
                 }
@@ -350,7 +364,7 @@ public sealed class QuestionDialogueEntry
             xTile.Dimensions.Location loc = new(point.X, point.Y);
             foreach (string action in TileActions)
             {
-                if (location.performAction(action, who, loc) && TileActionStopAtFirstSuccess)
+                if (location.performAction(ProcessAction(action, point), who, loc) && TileActionStopAtFirstSuccess)
                 {
                     ModEntry.Log($"{action} is successful and TileActionStopAtFirstSuccess is true, returning");
                     return;
@@ -362,7 +376,7 @@ public sealed class QuestionDialogueEntry
             // Perform all touch tile actions
             foreach (string action in TouchActions)
             {
-                location.performTouchAction(action, new(point.X, point.Y));
+                location.performTouchAction(ProcessAction(action, point), new(point.X, point.Y));
             }
         }
     }
