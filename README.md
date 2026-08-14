@@ -135,7 +135,7 @@ You may do this type of EditMap add prop to MapTiles in the tmx directly too.
 }
 ```
 
-#### EditData + [MMAP Furniture Properties](furniture-properties.md)
+#### EditData + [MMAP Furniture Properties](docs/furniture-properties.md)
 
 ```json
 {
@@ -164,7 +164,7 @@ You may do this type of EditMap add prop to MapTiles in the tmx directly too.
 }
 ```
 
-#### EditData + [MMAP Floor Path Properties](terrainfeature-properties.md)
+#### EditData + [MMAP Floor Path Properties](docs/terrainfeature-properties.md)
 
 ```json
 {
