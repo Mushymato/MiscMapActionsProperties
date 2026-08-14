@@ -1,18 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
-using MiscMapActionsProperties.Framework.Tile;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Delegates;
 using StardewValley.Triggers;
 
-namespace MiscMapActionsProperties.Framework.Entities;
+namespace MiscMapActionsProperties.Framework.Tile;
 
 /// <summary>
 /// Adds a number of Wrps for use in building and instanced locations
 /// </summary>
-internal static class HumanDoorExt
+internal static class WarpExt
 {
     internal const string Action_Wrp = $"{ModEntry.ModId}_WrpBuilding";
     internal const string Action_MagicWrp = $"{ModEntry.ModId}_MagicWrpBuilding";

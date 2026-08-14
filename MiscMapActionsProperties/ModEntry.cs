@@ -55,7 +55,6 @@ public sealed class ModEntry : Mod
         Framework.Entities.ConnectedTextures.Register();
         Framework.Entities.DrawLayerExt.Register();
         Framework.Entities.FurnitureProperties.Register();
-        Framework.Entities.HumanDoorExt.Register();
         Framework.Entities.InteriorDoorExt.Register();
         Framework.Entities.TerrainFeatureProperties.Register();
 
@@ -94,6 +93,7 @@ public sealed class ModEntry : Mod
         Framework.Tile.ShowGlobalInventory.Register();
         Framework.Tile.ShowShipping.Register();
         Framework.Tile.TASSpot.Register();
+        Framework.Tile.WarpExt.Register();
     }
 
     private void ConsoleMines(string arg1, string[] arg2)

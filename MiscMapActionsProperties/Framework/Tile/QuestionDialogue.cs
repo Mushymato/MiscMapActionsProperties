@@ -334,7 +334,7 @@ public sealed class QuestionDialogueEntry
 
     internal string ProcessAction(string action, Point point)
     {
-        if (ParseTextTokens)
+        if (ParseTextTokens && !action.StartsWith("Spiderbuttons.BETAS_"))
         {
             action = TokenParser.ParseText(action) ?? action;
         }

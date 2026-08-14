@@ -60,7 +60,7 @@ internal static class HoleWrp
     private static bool DoHoleWarpHere(GameLocation location, string[] args, Farmer farmer, Point point)
     {
         if (
-            !HumanDoorExt.TryGetWrpHereArgs(
+            !WarpExt.TryGetWrpHereArgs(
                 args,
                 point,
                 out string? error,
@@ -102,7 +102,7 @@ internal static class HoleWrp
                         targetPosition.X * 64,
                         targetPosition.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16
                     );
-                    HumanDoorExt.WrpHereReposition(farmer, direction, farmerPos);
+                    WarpExt.WrpHereReposition(farmer, direction, farmerPos);
                 }
                 Game1.messagePause = false;
                 Game1.fadeToBlackAlpha = 1f;
