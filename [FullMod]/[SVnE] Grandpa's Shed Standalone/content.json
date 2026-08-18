@@ -1,0 +1,147 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.9.0",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Priority": "Low-100",
+      "Target": "Maps/spring_z_extras,Maps/summer_z_extras,Maps/fall_z_extras,Maps/winter_z_extras,Maps/z_SVEbuildingShadow",
+      "FromFile": "assets/tilesheets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}_GrandpaShedInterior",
+      "FromFile": "assets/grandpa_shed_interior.tmx"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "Entries": {
+        // debug build SVnE.GrandpaShed_Building
+        // debug action mushymato.MMAP_ShowConstruct Robin
+        "{{ModId}}_Building": {
+          "Name": "[LocalizedText Strings\\SpecialOrderStrings:Robin3_Name]",
+          "Texture": "Maps/{{season}}_z_extras", // :(
+          "Builder": "Robin",
+          "Size": {
+            "X": 10,
+            "Y": 4
+          },
+          "SourceRect": {
+            "X": 0,
+            "Y": 1344,
+            "Width": 144,
+            "Height": 176
+          },
+          "IndoorMap": "{{ModId}}_GrandpaShedInterior",
+          "IndoorMapType": "StardewValley.Locations.DecoratableLocation",
+          "BuildDays": 2,
+          "BuildCost": 0,
+          "BuildMaterials": [
+            {
+              "ItemId": "(O)709",
+              "Amount": 150
+            },
+            {
+              "ItemId": "(O)390",
+              "Amount": 600
+            },
+            {
+              "ItemId": "(O)335",
+              "Amount": 50
+            },
+            {
+              "ItemId": "(O)787",
+              "Amount": 20
+            }
+          ],
+          "HumanDoor": {
+            "X": 4,
+            "Y": 3
+          },
+          "ActionTiles": [
+            {
+              "Id": "RightDoor",
+              "Tile": {
+                "X": 5,
+                "Y": 3
+              },
+              "Action": "mushymato.MMAP_WrpBuilding 21 38"
+            }
+          ],
+          "DrawLayers": [
+            {
+              // need this to dodge a tile bleh
+              "Id": "RightSideSlice",
+              "SourceRect": {
+                "X": 144,
+                "Y": 1360,
+                "Width": 16,
+                "Height": 160
+              },
+              "DrawPosition": "144,16"
+            },
+            {
+              "Id": "Shadow",
+              "Texture": "Maps/z_SVEbuildingShadow",
+              "DrawInBackground": true,
+              "SourceRect": {
+                "X": 208,
+                "Y": 192,
+                "Width": 176,
+                "Height": 80
+              },
+              "DrawPosition": "-16,112"
+            },
+          ],
+          "DrawShadow": false,
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Strings/StringsFromMaps",
+      "Entries": {
+        "GrandpasShed.1": "{{i18n:String.850}}",
+        "GrandpasShed.2": "{{i18n:String.851}}",
+        "GrandpasShed.3": "{{i18n:String.852}}",
+        "GrandpasShed.4": "{{i18n:String.853}}",
+        "GrandpasShed.6": "{{i18n:String.854}}",
+        "GrandpasShed.7": "{{i18n:String.855}}",
+        "GrandpasShed.8": "{{i18n:String.856}}",
+        "GrandpasShed.9": "{{i18n:String.857}}",
+        "GrandpasShed.10": "{{i18n:String.858}}",
+      },
+      "When": {
+        "HasMod |contains=FlashShifter.StardewValleyExpandedCP": false
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Strings/SpecialOrderStrings",
+      "Entries": {
+        "Robin3_Name": "{{i18n:GrandpasShedQuest.01}}",
+        "Robin3_Text": "{{i18n:GrandpasShedQuest.02}}",
+      },
+      "When": {
+        "HasMod |contains=FlashShifter.StardewValleyExpandedCP": false
+      }
+    }
+    // {
+    //   "Action": "Load",
+    //   "Target": "Maps/GrandpasShedGreenhouseWip",
+    //   "FromFile": "assets/GrandpasShedGreenhouse.tbin"
+    // },
+    // {
+    //   "Action": "EditMap",
+    //   "Target": "Maps/GrandpasShedGreenhouseWip",
+    //   "ToArea": {
+    //     "X": 5,
+    //     "Y": 22,
+    //     "Width": 32,
+    //     "Height": 18
+    //   },
+    //   "FromFile": "assets/GrandpasShed.tbin"
+    // }
+  ]
+}

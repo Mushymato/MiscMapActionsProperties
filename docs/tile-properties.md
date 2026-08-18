@@ -23,6 +23,10 @@ Map properties can be set on the map or through building/furniture/floor path.
 - Ideally this is set on the tile sheet, rather than on a per tile data basis.
 - Using `I` allows this tile to work on indoor pots on this tile as well.
 
+#### Back layer: mushymato.MMAP_CaskSpot T
+
+- If set, make this
+
 #### Front or Back layer: mushymato.MMAP_Light [radius] [color] [type|texture] [offsetX] [offsetY] [lightContext] <a name="mushymato.MMAP_Light"></a>
 
 - Add a light source at the center of this tile.

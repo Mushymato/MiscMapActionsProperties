@@ -1,0 +1,20 @@
+{
+  "Name": "Grandpa's Shed Standalone",
+  "Author": "SVnE",
+  "Version": "1.0.0",
+  "Description": "Shed Building",
+  "UniqueID": "SVnE.GrandpaShed",
+  "MinimumApiVersion": "4.4.0",
+  "UpdateKeys": [
+    "Nexus:???"
+  ],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  },
+  "Dependencies": [
+    {
+      "UniqueID": "mushymato.MMAP",
+      "MinimumVersion": "1.14.0"
+    }
+  ]
+}
