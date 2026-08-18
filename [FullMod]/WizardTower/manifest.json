@@ -1,0 +1,14 @@
+{
+  "Name": "WizardTower",
+  "Author": "mushymato",
+  "Version": "1.0.0",
+  "Description": "magical",
+  "UniqueID": "mushymato.WizardTower",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [
+    "Nexus:???"
+  ],
+  "ContentPackFor": {
+    "UniqueID": "Pathoschild.ContentPatcher"
+  }
+}

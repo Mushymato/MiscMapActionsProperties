@@ -1,0 +1,42 @@
+{
+  "$schema": "https://smapi.io/schemas/content-patcher.json",
+  "Format": "2.8.0",
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "Entries": {
+        "{{ModId}}": {
+          "Name": "[LocalizedText Strings\\Furniture:WizardTower]",
+          "Description": "[LocalizedText Strings\\Furniture:WizardTower]",
+          "Texture": "Maps/{{season}}_outdoorsTileSheet",
+          "Builder": "Wizard",
+          "Size": {
+            "X": 4,
+            "Y": 2
+          },
+          "SourceRect": {
+            "X": 0,
+            "Y": 432,
+            "Width": 64,
+            "Height": 160
+          },
+          "BuildCost": 25000,
+          "DrawLayers": [
+            {
+              "Id": "Top",
+              "SourceRect": {
+                "X": 16,
+                "Y": 400,
+                "Width": 32,
+                "Height": 32
+              },
+              "DrawPosition": "16, -32"
+            },
+          ],
+          "DrawShadow": false,
+        }
+      }
+    }
+  ]
+}
