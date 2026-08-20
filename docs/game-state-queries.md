@@ -27,3 +27,7 @@ When `location` is optional, it defaults to `Here` (current location).
 
 - `mushymato.MMAP_MAP_NAME` \<location\> \<map asset name\>: Checks the location's map asset name.
 - `mushymato.MMAP_TILESHEET_NAME` \<location\> \<tilesheet id\> \<tilesheet asset name\>: Checks the location's tilesheet asset name.
+
+## Bag / Global Inventory
+
+- ``mushymato.MMAP_BAG_HAS_ITEM` \<bagInventoryId\> \<qualifiedItemId\> [minCount] [maxCount]: Checks if a particular mmap global inventory has this amount of a given item.

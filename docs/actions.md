@@ -37,6 +37,11 @@ Each action will note what they can be used as:
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
 - Adds an item to a specific MMAP global inventory bag.
 
+## mushymato.MMAP_RemoveItemFromBag \<bagInventoryId\> \<qualifiedItemId\> [amount]
+
+- Can be used as either `Action` or `TouchAction` or `TriggerAction`.
+- Removes an item from a specific MMAP global inventory bag.
+
 ### mushymato.MMAP_ScaledOverlay \<fadeDuration\> \<texture\> [scalingMode[:scale]] [color] <a name="mushymato.MMAP_ScaledOverlay"></a>
 
 - Can be used as either `Action` or `TouchAction` or `TriggerAction`.
