@@ -22,6 +22,7 @@ public enum MapOverrideSpawnKind
     None = 0,
     Grass = 1,
     Object = 2,
+    Forage = 3,
 }
 
 public sealed class MapOverrideRemoval
@@ -294,7 +295,8 @@ public sealed class MapOverrideModel
                             DoSpawnGrass(location, targetTile, args);
                             break;
                         case MapOverrideSpawnKind.Object:
-                            DoSpawnObject(location, targetTile, args);
+                        case MapOverrideSpawnKind.Forage:
+                            DoSpawnObject(location, targetTile, args, spawnKind == MapOverrideSpawnKind.Forage);
                             break;
                     }
                 }
@@ -319,7 +321,7 @@ public sealed class MapOverrideModel
                 location.terrainFeatures.Add(targetTile, new Grass((int)grassId, 3));
         }
 
-        static void DoSpawnObject(GameLocation location, Vector2 targetTile, string[] args)
+        static void DoSpawnObject(GameLocation location, Vector2 targetTile, string[] args, bool isForage)
         {
             if (!ArgUtility.TryGet(args, 1, out string itemId, out string error))
             {
@@ -335,7 +337,15 @@ public sealed class MapOverrideModel
                 ModEntry.Log($"{itemId} is not a valid object", LogLevel.Error);
                 return;
             }
-            location.tryPlaceObject(targetTile, obj);
+            if (isForage)
+            {
+                obj.IsSpawnedObject = true;
+                location.dropObject(obj, targetTile * 64f, Game1.viewport, initialPlacement: true);
+            }
+            else
+            {
+                location.tryPlaceObject(targetTile, obj);
+            }
         }
     }
 

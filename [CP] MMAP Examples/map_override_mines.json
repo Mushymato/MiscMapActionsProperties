@@ -40,6 +40,26 @@
             "mushymato.MMAP_MapOverrideSpawn": "Grass cobweb"
           },
         },
+        {
+          "Position": {
+            "X": 8,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_MapOverrideSpawn": "Forage (O)16"
+          },
+        },
+        {
+          "Position": {
+            "X": 9,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_MapOverrideSpawn": "Object (O)6"
+          },
+        },
       ]
     },
     {
