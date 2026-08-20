@@ -273,7 +273,7 @@ public sealed class MapOverrideModel
                     if (!ArgUtility.TryGet(args, 0, out string spawnSettings, out string error))
                     {
                         ModEntry.Log(error, LogLevel.Error);
-                        return;
+                        continue;
                     }
                     string[] settings = spawnSettings.Split(":", 2);
                     if (
@@ -282,11 +282,11 @@ public sealed class MapOverrideModel
                     )
                     {
                         ModEntry.Log(error, LogLevel.Error);
-                        return;
+                        continue;
                     }
                     if (!GameStateQuery.CheckConditions(spawnGSQ, gsqContext))
                     {
-                        return;
+                        continue;
                     }
                     Vector2 targetTile = new(i, j);
                     switch (spawnKind)
