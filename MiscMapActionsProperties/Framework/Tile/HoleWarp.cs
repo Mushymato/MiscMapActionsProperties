@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using MiscMapActionsProperties.Framework.Entities;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
 using StardewValley;

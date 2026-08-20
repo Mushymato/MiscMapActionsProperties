@@ -14,7 +14,7 @@ namespace MiscMapActionsProperties.Framework.Entities;
 /// </summary>
 internal static class InteriorDoorExt
 {
-    internal const string TileProp_HasDoors = $"{ModEntry.ModId}_HasDoors";
+    internal const string MapProp_HasDoors = $"{ModEntry.ModId}_HasDoors";
     internal const string TileProp_Door = $"{ModEntry.ModId}_Door";
     internal const string TileProp_LinkedDoors = $"{ModEntry.ModId}_LinkedDoors";
 
@@ -275,7 +275,7 @@ internal static class InteriorDoorExt
         GameLocation ___location
     )
     {
-        if (!___location.HasMapPropertyWithValue(TileProp_HasDoors))
+        if (!___location.HasMapPropertyWithValue(MapProp_HasDoors))
         {
             return;
         }
@@ -290,7 +290,7 @@ internal static class InteriorDoorExt
         GameLocation ___location
     )
     {
-        if (!___location.HasMapPropertyWithValue(TileProp_HasDoors))
+        if (!___location.HasMapPropertyWithValue(MapProp_HasDoors))
         {
             return;
         }

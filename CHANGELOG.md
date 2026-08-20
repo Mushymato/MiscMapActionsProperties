@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0]
+
+### Added
+- New trigger `mushymato.MMAP_ResetLocalState`, this is a slightly different timing than LocationChanged and sometimes needed for map overrides
+- New map property `mushymato.MMAP_HasDoors`, enable the following for this map:
+    - New tile property `mushymato.MMAP_Door`, add door with custom mmap TAS appearance.
+    - New tile property `mushymato.MMAP_LinkedDoors`, link a door with other doors.
+- New action `mushymato.MMAP_HoleWrpHere`, same map variant of hole warp.
+- New tile property `mushymato.MMAP_MapOverrideSpawn` for simple spawning logic on map override apply (requires the `MapOverrideSpawnOnApply` field)
+
+### Changed
+- `mushymato.MMAP_EnableExplodeAction OFF` explicitly disables explode action without location change.
+- Map override LoadWaterTilesOnApply is now null by default for follow location rules.
+- Critter fireflies now have the option to pulse
+- Text tokens like `[LocalizedText asset:key]` in question dialogue will be parsed if the field `ParseTextTokens` is true
+    - Unless the action is provided by Spiderbuttons.BETAS, which has their own parsing
+
 ## [1.14.1]
 
 ### Added
