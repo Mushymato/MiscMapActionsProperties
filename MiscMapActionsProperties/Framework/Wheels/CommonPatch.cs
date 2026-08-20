@@ -519,15 +519,24 @@ public static class CommonPatch
         );
     }
 
-    private static void GameLocation_reloadMap_Prefix(GameLocation __instance, ref int? __state)
+    private static void GameLocation_reloadMap_Prefix(GameLocation __instance, ref xTile.Map __state)
     {
-        __state = __instance.Map?.GetHashCode();
+        // gotta use the backing field map here
+        __state = __instance.map;
     }
 
-    private static void GameLocation_reloadMap_Postfix(GameLocation __instance, ref int? __state)
+    private static void GameLocation_reloadMap_Postfix(GameLocation __instance, ref xTile.Map __state)
     {
-        if (__state != __instance.Map?.GetHashCode())
+        // gotta use the backing field map here
+        if (__state != __instance.map)
+        {
+            ModEntry.Log($"GameLocation.reloadMap Y {__instance.NameOrUniqueName}");
             GameLocation_ReloadMap?.Invoke(null, __instance);
+        }
+        else
+        {
+            ModEntry.Log($"GameLocation.reloadMap N {__instance.NameOrUniqueName}");
+        }
     }
 
     private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
