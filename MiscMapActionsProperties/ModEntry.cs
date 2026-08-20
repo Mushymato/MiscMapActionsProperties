@@ -1,4 +1,5 @@
 ﻿global using MapTile = xTile.Tiles.Tile;
+global using SObject = StardewValley.Object;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Mushymato.ExtendedTAS;

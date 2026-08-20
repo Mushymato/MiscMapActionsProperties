@@ -239,7 +239,7 @@ internal static class CritterSpot
             }
             if (!Enum.TryParse(critterKindStr, true, out SupportedCritter critterKind))
             {
-                string[] critterKindArgs = critterKindStr.Split(":");
+                string[] critterKindArgs = critterKindStr.Split(":", 2);
                 if (
                     !ArgUtility.TryGetEnum(critterKindArgs, 0, out critterKind, out error, name: "enum critterKind")
                     || !ArgUtility.TryGetOptional(

@@ -2,6 +2,47 @@
   "$schema": "https://smapi.io/schemas/content-patcher.json",
   "Changes": [
     {
+      "Action": "Load",
+      "Target": "Maps/{{ModId}}/Shed22",
+      "FromFile": "assets/Shed2.tmx"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/{{ModId}}/Shed22",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 5,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_MapOverrideSpawn": "Grass frostGrass"
+          },
+        },
+        {
+          "Position": {
+            "X": 6,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_MapOverrideSpawn": "Object (BC)149"
+          },
+        },
+        {
+          "Position": {
+            "X": 7,
+            "Y": 6
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_MapOverrideSpawn": "Grass cobweb"
+          },
+        },
+      ]
+    },
+    {
       "Action": "EditData",
       "Target": "mushymato.MMAP/MapOverrides",
       "Entries": {
@@ -9,7 +50,8 @@
         "{{ModId}}_Shed2": {
           "Id": "{{ModId}}_Shed2",
           "ResizeMapIfNeeded": true,
-          "SourceMap": "Maps/Mines/13",
+          "SourceMap": "Maps/{{ModId}}/Shed22",
+          "MapOverrideSpawnOnApply": true,
           "TargetRect": {
             "X": 10,
             "Y": 10,
