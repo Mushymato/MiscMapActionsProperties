@@ -454,7 +454,8 @@ public static class CommonPatch
         if (!copyProperties)
         {
             if (__instance.map?.GetLayer(layer) is Layer layerV)
-                __state = layerV.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
+                __state =
+                    layerV.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
         }
     }
 
@@ -524,14 +525,7 @@ public static class CommonPatch
     {
         // gotta use the backing field map here
         if (__state != __instance.map)
-        {
-            ModEntry.Log($"GameLocation.reloadMap Y {__instance.NameOrUniqueName}");
             GameLocation_ReloadMap?.Invoke(null, __instance);
-        }
-        else
-        {
-            ModEntry.Log($"GameLocation.reloadMap N {__instance.NameOrUniqueName}");
-        }
     }
 
     private static void GameLocation_resetLocalState_Postfix(GameLocation __instance)
