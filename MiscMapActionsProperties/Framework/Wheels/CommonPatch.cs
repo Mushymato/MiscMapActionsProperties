@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -13,6 +12,7 @@ using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using StardewValley.Triggers;
+using xTile.Layers;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -386,11 +386,6 @@ public static class CommonPatch
     }
     #endregion
 
-    internal static void GameLocation_MapTilePropChangedInvoke(GameLocation location, Point pos, string layer)
-    {
-        GameLocation_MapTilePropChanged?.Invoke(null, new(location, pos, layer));
-    }
-
     private static void GameLocation_setTileProperty_Postfix(
         GameLocation __instance,
         int tileX,
@@ -413,8 +408,8 @@ public static class CommonPatch
         ref bool __state
     )
     {
-        xTile.Layers.Layer layer2 = __instance.map.RequireLayer(layer);
-        __state = layer2.Tiles[tileX, tileY] != null;
+        if (__instance.map?.GetLayer(layer) is Layer layerV)
+            __state = layerV.Tiles[tileX, tileY] != null;
     }
 
     private static void GameLocation_removeMapTile_Postfix(
@@ -458,8 +453,8 @@ public static class CommonPatch
         __state = false;
         if (!copyProperties)
         {
-            xTile.Layers.Layer layer2 = __instance.map.RequireLayer(layer);
-            __state = layer2.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
+            if (__instance.map?.GetLayer(layer) is Layer layerV)
+                __state = layerV.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
         }
     }
 
