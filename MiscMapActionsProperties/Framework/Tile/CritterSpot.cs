@@ -345,7 +345,7 @@ internal static class CritterSpot
         byte pulseAlphaInit = byte.MaxValue;
         if (args != null)
         {
-            string[] argList = args.Split(":");
+            string[] argList = args.Split(":", 2);
             if (
                 !ArgUtility.TryGet(argList, 0, out string? color, out string error, allowBlank: false, "string color")
                 || !ArgUtility.TryGetOptionalInt(
@@ -452,7 +452,7 @@ internal static class CritterSpot
         int yOffset = 0;
         if (texture != null)
         {
-            string[] parts = texture.Split(":");
+            string[] parts = texture.Split(":", 2);
             if (parts.Length >= 2)
             {
                 texture = parts[0];
@@ -609,7 +609,7 @@ internal static class CritterSpot
             return;
         }
 
-        string[] parts = texture.Split(":");
+        string[] parts = texture.Split(":", 2);
         if (parts.Length >= 2)
         {
             texture = parts[0];
