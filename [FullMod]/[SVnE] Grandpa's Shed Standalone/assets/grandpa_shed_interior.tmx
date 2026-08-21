@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="37" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="19" nextobjectid="380">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="37" height="40" tilewidth="16" tileheight="16" infinite="0" nextlayerid="19" nextobjectid="403">
  <properties>
   <property name="AmbientLight" value="90 90 90"/>
-  <property name="DayTiles" value="Front 8 2 256 Front 8 3 288 Front 10 2 256 Front 10 3 288 Front 12 2 256 Front 12 3 288 Front 14 2 256 Front 14 3 288 Front 16 2 256 Front 16 3 288 Front 18 2 256 Front 18 3 288 Front 20 2 256 Front 20 3 288 Front 22 2 256 Front 22 3 288 Front 24 2 256 Front 24 3 288 Front 4 9 256 Front 4 10 288 Front 9 23 256 Front 9 24 288 Front 13 23 256 Front 13 24 288 Front 18 23 256 Front 18 24 288 Front 23 23 256 Front 23 24 288 Front 28 23 256 Front 28 24 288 Front 32 23 256 Front 32 24 288"/>
+  <property name="FloorIDs" value="F1_1 F1_2 F2_1 F2_2"/>
   <property name="ForceAllowTreePlanting" value="T"/>
   <property name="IsGreenhouse" value="T"/>
-  <property name="NightTiles" value="Front 8 2 1253 Front 8 3 1285 Front 10 2 1253 Front 10 3 1285 Front 12 2 1253 Front 12 3 1285 Front 14 2 1253 Front 14 3 1285 Front 16 2 1253 Front 16 3 1285 Front 18 2 1253 Front 18 3 1285 Front 20 2 1253 Front 20 3 1285 Front 22 2 1253 Front 22 3 1285 Front 24 2 1253 Front 24 3 1285 Front 4 9 1253 Front 4 10 1285 Front 9 23 1253 Front 9 24 1285 Front 13 23 1253 Front 13 24 1285 Front 13 24 1285 Front 18 23 1253 Front 18 24 1285 Front 23 23 1253 Front 23 24 1285 Front 28 23 1253 Front 28 24 1285 Front 32 23 1253 Front 32 24 1285"/>
+  <property name="WallIDs" value="F1_1 F1_2 F1_3 F1_4 F2_1 F2_2 F2_3 F2_4"/>
   <property name="Warp" value="20 39 Farm -1 -1 21 39 Farm -1 -1"/>
  </properties>
  <tileset firstgid="1" name="paths" tilewidth="16" tileheight="16" tilecount="64" columns="4">
@@ -29,7 +29,7 @@
  <tileset firstgid="3515" name="townInterior_2" tilewidth="16" tileheight="16" tilecount="1312" columns="32">
   <image source="townInterior_2" width="512" height="656"/>
  </tileset>
- <tileset firstgid="4827" name="untitled tile sheet" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
+ <tileset firstgid="4827" name="townInterior" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
   <image source="townInterior" width="512" height="1088"/>
   <tile id="1885">
    <properties>
@@ -109,7 +109,7 @@
  <tileset firstgid="7823" name="VanillaFurniture" tilewidth="16" tileheight="16" tilecount="2976" columns="32">
   <image source="../TileSheets/furniture" width="512" height="1488"/>
  </tileset>
- <tileset firstgid="10799" name="VanillaWallsAndFloors" tilewidth="16" tileheight="16" tilecount="688" columns="16">
+ <tileset firstgid="10799" name="walls_and_floors" tilewidth="16" tileheight="16" tilecount="688" columns="16">
   <image source="walls_and_floors" width="256" height="688"/>
  </tileset>
  <tileset firstgid="11487" name="z_1" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
@@ -121,9 +121,222 @@
  <tileset firstgid="14263" name="Z_Tilesheet" tilewidth="16" tileheight="16" tilecount="1975" columns="25">
   <image source="spring_outdoorsTileSheet" width="400" height="1264"/>
  </tileset>
+ <tileset firstgid="16238" name="townInterior" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
+  <image source="townInterior" width="512" height="1088"/>
+  <tile id="1885">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="1887">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1945">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1946">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2075">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2076">
+   <properties>
+    <property name="Diggable" type="bool" value="true"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2078">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2079">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2106">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2107">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2108">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2109">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="18414" name="townInterior" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
+  <image source="townInterior" width="512" height="1088"/>
+  <tile id="1885">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="1887">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1945">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1946">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2075">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2076">
+   <properties>
+    <property name="Diggable" type="bool" value="true"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2078">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2079">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2106">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2107">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2108">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2109">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="20590" name="townInterior" tilewidth="16" tileheight="16" tilecount="2176" columns="32">
+  <image source="townInterior" width="512" height="1088"/>
+  <tile id="1885">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="1887">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1945">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+  <tile id="1946">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2075">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2076">
+   <properties>
+    <property name="Diggable" type="bool" value="true"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2078">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2079">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2106">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </tile>
+  <tile id="2107">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2108">
+   <properties>
+    <property name="Diggable" value="T"/>
+    <property name="Type" value="Dirt"/>
+   </properties>
+  </tile>
+  <tile id="2109">
+   <properties>
+    <property name="Type" value="Stone"/>
+    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+   </properties>
+  </tile>
+ </tileset>
  <layer id="1" name="Back" width="37" height="40">
   <data encoding="base64" compression="zlib">
-   eAHVmE1uE0EQhesCsICQ4ACRgAuwNQogQIi/CxALcQ4CJ+AIWeKcAlbEnAKyQCIXCIpESCQE7xMuqWR1d2Y8PXFo6ana7e7Xb96Uq2e8e8FsVzhLDT05Tb/1XS20ueacpqsXza5VxJq4mracpnVx3KmIuxU0vWzB0eT6X7Xgy/n0XhzbwrhS3KmgaSKOwxWzR0vd8Us88DVtOZ/g+CCuJ2tmTzvgmdZ+FM/nCpquXzH7Iq574vy5Oh8OtY71X8Wz10JT9DPWovvShE8Pxbms/jxY0TrWt/Upaor16LuuC59qaOriU6xH5GVNn8Zz3rtPy2YO/D4LPu1IkwNNNX2Kv7uYtzF3Un3XQyQHavvkWmLepnTkxo4r+0Q+uZaYt7n9U+N9/O5cyw89AzlSe6fGOOceTOvT4471ifXk5jfpgHdL/X31Han9U2Pko/tU42whN+EE/G5cDzHVSufdkdb/EY/jps5j+h593OPsuH8mN9HTtOU04dOeANekY3Suppr+l3nuHfG0GrWr1E5Lk9dQj6X3CDTVfm/xelmKJ2nivQVtzxVBX835OftL7zZoeas5Y2nx54RUfDcof8+aOGdwyQxELp5nt7UPe5XeI9DEOczaeC6n+m3m7J8zG0pT5OF51nWVaphrimtr9NGET5GL2oWuk2pYn5rWtX/UNJGmGxrjPFyUT6OET5z3i/Tp9owm9wy/6Odan/du1ievl+R5qZb3qQmfXAfRayh5Tj/X+tSET66D6DWT/yUWde9m6xO1YVXwWPJpS/M2hZrx1nmzjbD/QH3Xs6QzgfvK51Tj3rF2JBxc/heH6jNGjH3GmMPYCz1PbkwxIibmMg+wP5E57OOR8VRzTcxrg9fSsTnFm6mm3Pqow/V4TGnqMgbvMHOtTXn/Ar5MNDw=
+   eAHdlz1OAzEQhecMIBIlSBwACnoklIKCnyY1nARBAS0VnIGTgDhGSu4ALfOkPPG08qyS3XHYYGn0jB3Pfn72TsJix2zhMaQGnhLT8aFZdqy674hp5kzZ8R+Z5u5TdvT16eHI7NEjU/syPTvPi0em9mWiPxcHZpc94srX0u++TPRn5jm/pt3i29dhPf1elUk/p/WIPp15ztF+txj7Oqxf1ydl0npEnzKY+vik7/5QfAIHWYbiE3l4/tCMs2M+3hO9txyLlN7w/KEZTMxHFr23EUtpnJ5lMNEnspzumjFKz47G6FkGE30ih97b6Pmlcfp03rM+YT19Yk4qxtdp9Cnju4U+MScV46UW/abjXrK1xNAci5i4l2xtPn+b/6Z30KE0sLC+1VDdZzO/zmkfTKxvNVSf1cyvc9oHU/b7pvn0WfPG/yI6p30w3Y/MXv074M01iqdJPMc1+hnWTs5BlbWthoLpfckCbQvkbZvXPKyd+vlmrVFvtE8mXZvRp0+aS5k+/VyiVoup5JOe3ccfMG2LTzxH+IV+1GqdXckn1kzcK/SjVouJ94kcUNZM+IR+1Gox0SdyQOfLgE/oR60WE30iB3SyZzb1ABM0amDSd5T724RGXGDSWsb9bUJPAq/AdO1z68bt+NffO++3rb9Z5i9pdH5dx+lv1/VY9wNZKEh1
   </data>
  </layer>
  <layer id="2" name="Back2" width="37" height="40">
@@ -131,35 +344,7 @@
    <property name="Draw" value="Back"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eAFjYBgFoyEwGgKDJQQmSFDXJf1UNo+6rhs1bTQERkNgNARGQ2A0BEZDYDQERkNgNAQGVwg4mjEw5NEII/t0NR8DwxogHkzgNNA9Z4h0UzgwjGgBQtHMfQ10z5tB5iZS/E2vcBp1E/YQQE9P2FVhFx2NO+zhgi46ksIJ3e+j/OEVAgDHCB5F
-  </data>
- </layer>
- <layer id="3" name="Buildings" width="37" height="40">
-  <data encoding="base64" compression="zlib">
-   eAHNlz1v1EAQhgdRo4R8Qi4ICUITUlEhHaIBCQko+AP8AUiZpKE7SmihAiGBBB1d0lJQwH8I4StAR81HgPA+skfZ+GzHF6/jG2m8t7Prmdfvzs7tro+ZrefoO9k2MjrX6bf5nKIxt7/PiZEXt8i2pff/SGPKP/nbroGrM242K40tJ+WziIe97Je0RvN6/2xEXZCvy/K7V+yicXi6Kr0WUa/LVx2ewHRLOjpnNnPBbHPW7O4ZszH1702YHVf7S7af0t/SD6eTVZ6UHelp7mfZjqp/X/PfnjJbrImJtRtJ/SdR6j9fCFdVnjxauI7w9Cn9dh+v207oGwfJJ+J90T6l1lBPHgtTE1KVJ+cHblxWgt9uq9tuiPf9YPK9/7ABTBfF/34w+d5fE6Yb3brM9L8/SD6xfuy150fMlqTL0tgypRyHpzBvyd9vUs+fbBvmU2w8+GPtHglTdv+UrWe3gRwKvw1My4rB/vG8pS3DFPLWFGcPhIH943lLWzXHwDQduY7D2ar8sn9eizOEtm2eEiS7n4NgGm+Ap91okt5N8RbmTdFv6kJsWThffZ2IncV2R9hnxBN7BfmRnkuSXmJnbGXaLWYf0/9szjaHpMiizinI7bTtVeQki2eY+3n3Fr+j1G29dntNd39ld5st1XvuLX8bUt9r1JwwRtndhrmx7wh5tZs4oZ17hOPN5hBzY98RwtrtcYnTm9RZX8p42T2CudwRrlSoCVXnzB8TJ9Jz0hDTU+F5JsVP2T0CTE0JNSTE5PXk8AmzztTOWN7aNYUJvyGmMM6wYHqS1lOwDQOmrnLk+8gOU12tXdH/X5P5BAJfO6+ZfvbkHOr19KDzidjUbsfC2RPhHOp4DxoTsRE/B3P2RDiHtoWJ2NRvsLxUjq+pRVbVtoWJ2NRtsLwaNXsjRTaFry1MCYL+59cSTOzRtqSoFmRzvmo//JbYvqtiyJvn/OaNVbX9Bxv9Wvc=
-  </data>
- </layer>
- <layer id="4" name="Buildings2" width="37" height="40">
-  <properties>
-   <property name="Draw" value="Buildings"/>
-  </properties>
-  <data encoding="base64" compression="zlib">
-   eAFjYBgFoyEweENgo/Dgdduoy0ZDYDQERkNgqISAnPTgd6mHxOBzY8YgdNPgC6VRF42GwGgIjIYAZSFgZ8bAQAtMmauor3sw1sWhwLAfBaMhMBoCoyEACwFs7fHDIjDZgaFH2+MDE+4j0VYAsLgOUQ==
-  </data>
- </layer>
- <layer id="5" name="Paths" width="37" height="40">
-  <data encoding="base64" compression="zlib">
-   eAHtU9sKBSEI7HX//4cXYQdEKmutMJgDB8vxMo5tKfxRgXMKPF+rqD3HmJ2gAHaGu7bAYDWGcw9DDO1+BWp7GPVF2NV6ROrtyI1yjObLTLaGvc/OHc2f7ZchvjbzqC8D/1s4aE31eZZ/L1cw/Ft1e/mtHPqpABXIqYD9nu1dWP/11fJyqnAfK09bD2/tVSsxUkPH80wFVirgvT8PFy5ejIevnIe17lJA3gbfx5mdvUuiAbE=
-  </data>
- </layer>
- <layer id="6" name="Front" width="37" height="40">
-  <data encoding="base64" compression="zlib">
-   eAHtVksvBEEQLlfiEY9E4nGwkXCWcMDNgXATVwcufgSLE3HhF1gXIRIX141wkfgP+wfc9uEV9qI+01+mbWbN2umxY6OS2uqq/qbm6+qunRb5W3I6KuJKXa481+Nlg71vF7F9zNTib4y4ZCRSNpxgH5ST7eNN8DOp4Djn9x1yKui7ILlBkXXdx5Lx39QWNVZQLanemPizsWuKhRSNf+6IU97k87JH/91zxCs6Ez/Dk+M1+pmba3QdoU4502euKzI8UH9G9vrUdP05XD95qP9BR6qu5SXC3rnmwnxR9o45XNuWGT+j/Q31o8GjjJ7vlJ7FrZjOObkEvz08+hrD/l+ZtWZND9KGs0ku4jGGOiVxtWndux1zZmGhP5F3rRP7N2/uJXwecc4xdhtQ16Veb3bRWGLrtZu6hhPVY1X0Y9TxruZoVhk3Pfvd+n4TAx4LhlPlXcH2q2HwPHHE2DGMIcAcdHvvmlAbJmOGU7niLNh+NQxyE0cMY3NW/YG5UC7ALNfAKYwz5uet/NXwwLT2i7Spzk5+RW33iaRVgcmqbYSsVHAih7L+3+QaxIkcgmxSOA3pflLKCanTZScZJcfiG8H7Gr6H/xJcgdWO4Hgjo+mEcOIdGLXIdImcqX6OE9J3Hhvv987RPcvOGfcY91Le4zC2ffQvFRjOs6fBjfdczONeSAx9Pg+LGOfjWFecuePgW2vODw3Dj3U=
-  </data>
- </layer>
- <layer id="7" name="AlwaysFront" width="37" height="40">
-  <data encoding="base64" compression="zlib">
-   eAFjYBgFoyEw9EIgXWnouXnUxZAQmKs8PENCznp4+mvUV6MhMBoCoyEwGEJgAY66Q0uEgUEbiHWAeBSMhgAoBFSksYcDLnGYakLyMHWj9NALAWe0NPGJl4HBBU0M5it0tTBxWtMyYrS2gXTzZQehm0j3BW101ImimosrPaGqoj6PHHvpmcYHU7k6mNxC/ZQwcCbSMz2h+5Kc9I9uBr341sIMDA1ATCqoRdJTh8Qm1pz5QD2xOPTdFmJgAGFSAcgvIHOVgfUoLrPxmUmuvfjMBMlRw1wABgYTqQ==
+   eAFjYBgFoyEwGgKDJQQmSFDXJf1UNo+6rhs1bTQERkNgNARGQ2A0BEZDYDQERkNgNARoHwLewgwMIHxAjIHBDkjjA45mDAx5NMLI9q7mY2BYA8SDCZwGuucMkW4KB4YRLUAomrmvge55M8jcRIq/6RVOo27CHgLo6Qm7Kuyio3GHPVzQRUdSOKH7fZQ/vEIAACa5ICg=
   </data>
  </layer>
  <layer id="8" name="Back3" width="37" height="40">
@@ -170,2025 +355,79 @@
    eAHt1TsOgCAQBUBOZYceg1MA9+/UjlBJQbIxQ7LlfjLFIyWPAAECBAgQIECAAAECBAgQuI54BiXgTfGUXESAAIG9AvXJ4jZV/5jPb46fizX+R3mxd9y1V+U/02+AGRIY
   </data>
  </layer>
+ <layer id="3" name="Buildings" width="37" height="40">
+  <data encoding="base64" compression="zlib">
+   eAHNl79KQzEUxgOKmyj+HYq4OKlv0MFBwUHBJ/AFxLHt4lafQUVQBAVHN10dfYiqi+LmE3TQ76Mee4jJbepNehOISXOvJ797zpeTpDNjTMdRnzH2YtWV2t8xecf3TMZfHXO45vWNdfH/ZxsmajmHva8SXLXZqDi/xpZh1+eHQeObiFGKsgW7g+b2Paef9lbj1zJ+ItNB5Pgdwl4ZplSxC2US3eg4ptL4MHoi1/tPLmI+uYwcN/nuUD+Jf7RvWhkynWbEpNe/+DtmO4yeGD+utdtJYxqoTdQUhXrSuuVe+VGw32g9peChzQsw2eunSPf1RBrS39fEHPb6KWKS9cc2lc9OwMT1o3UbqrFUTNpn0q/aT8Kh2xyZ9hFLrRtfP4c92GY7AnuK0g70ic2T82/XvUXuKGVbyd2S08Ve0d2mixw1nih+1ISsNTvnTGBO393Gfje2tjTTGjikrqMvz2wNkUnn2th9mZfztOeNOUbdQX93ABPvCNsBd6r/vKOZrsFzg0o7RfeIUcautdhTxtgS9tmF4tjF1pC2p/2kx3NhuprrU+XAVIdmP6f6THXEzrf/jUpPkjPl7MlzqORTVy7o08fvcW7mbmGRsyfPoaK1UTNxbhZh4dmThefQqpg4N3M3We6g8Qe0LPdoq2LS+8LjtDFPqCxv4KuKqUfg/utj4hqtqvhyga350N/6W2LbDmVwvSf+dT0LHfsGhRMZKg==
+  </data>
+ </layer>
+ <layer id="4" name="Buildings2" width="37" height="40">
+  <properties>
+   <property name="Draw" value="Buildings"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eAFjYBgFwy0EtIQZGLSpiHWAZlEKvIBmeFMR+1DBTZT6aVT/aAgMxhCA5f3B5LZ79gwMIOzpMJhcNeqWwRQC+wIYGGB4sLgrzoOBAYYH2k1bgXXettF6b6CjYdT+0RAY8iFA7T4CrM0BoskF1O4jIPc3yHXTSNIXajaSfDvq19EQGJwhQEkZSg8fHRahhy3Y7QC1gUHl+mg7GHv4jIpSNwQA6dUoSg==
+  </data>
+ </layer>
  <layer id="9" name="Buildings3" width="37" height="40">
   <properties>
    <property name="Draw" value="Buildings"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eAHt0LENABAUBFAziEJiD6Xa/q1ljCBCaN6v798lLwRHgAABAgQIECBAgAABAgTeC/RyfzPms85W1/+7mZHWnRIECBAgQIDAH4EJkIEC2Q==
+   eAHt1rEJACAMBEDHENzD0tpR3H8CFxBsRCNcyhD456qkZAgQIECAAAECbwV6fpu/Sh8BO6162hEgQOBngV7itW913+nUzT7JBQECBO4I+MfvOEuJKTAB2vcDgA==
+  </data>
+ </layer>
+ <layer id="5" name="Paths" width="37" height="40">
+  <data encoding="base64" compression="zlib">
+   eAHtlNEKgCAMRXvt/3849iCITq8jraQTRLW7retxeBxcEIAABDSBs5OStPT0Unual09sDQFvH0Zjaxx9p6vHIeLubr39q+xRfkf8eP2i9Tvme8xGYzuu9y3POdP8PeqnV2tault9e/WtGuIQgAAEIDCPgDqHlW5OVI7S562GThCoCaj5U7p1VDlKr10R+QsBmw3m45ndvgBwOwEh
+  </data>
+ </layer>
+ <layer id="6" name="Front" width="37" height="40">
+  <data encoding="base64" compression="zlib">
+   eAHtlr0KwjAQx+8F/EARBHUSQWfBzc1BZ3H1SbTq6qJPYF1EEFxcfRQfpYv3Rw9rKTRUYxPJwfXS5HL95do0R2SXHFpE31K7Vu5oXQZcBlwG7M3AJke0ZXWSfQbCZ2gSjV8mataI5mx1iLDoiJ025kXTWtPyuHnqGfD43S2f3yws1HaZ8Rr2rDtW7MdP2yuO8a/S4X9VkvzSBywjBaZv+KxLj2d12SZJW4Epjc8gEvfELIgzVmBKYsb4MBI/bk7Yp99791hUiDxW+FzZZiGTCJMwBHWiW0ZMwhBnTWFqVF90gSF5OhdeTKa0cEZIvYbz0El8Bqb5+P4sez1DmMI1sF8kOrJCfEP23YPG3ivqUqnj0A7fY/+KwkfGZU9j1VLnYhx1ofjIvcyHRZ+M68iYztg6eFVj3gGgAE9F
+  </data>
+ </layer>
+ <layer id="7" name="AlwaysFront" width="37" height="40">
+  <data encoding="base64" compression="zlib">
+   eAFjYBgFoyEwGgKjITAaAqMhMBoCoyEwGgKjITAaAqMhMPRDQEUaux9wicNUE5KHqRulh14IOKOliU+8DAwuaGIwX6GrhYnTmpYRo7UNpJsvOwjdRLovaKOjThTVXFzpCVUV9Xnk2EvPND6YytXB5Bbqp4SBM5Ge6Qndl+Skf3Qz6MW3FmZgaABiUkEtkp46JDax5swH6onFoe+2EAMDCJMKQH4BmasMrEdxmY3PTHLtxWcmSI4a5gIAUU8Qhw==
   </data>
  </layer>
  <objectgroup id="10" name="Back">
-  <object id="1" name="TileData" x="288" y="80" width="16" height="16">
+  <object id="3" name="TileData" x="96" y="80" width="48" height="256">
    <properties>
-    <property name="Type" value="Wood"/>
+    <property name="FloorID" value="F2_2"/>
+    <property name="Type" value="Stone"/>
    </properties>
   </object>
-  <object id="2" name="TileData" x="320" y="80" width="16" height="16">
+  <object id="44" name="TileData" x="144" y="80" width="240" height="48">
    <properties>
-    <property name="Type" value="Wood"/>
+    <property name="FloorID" value="F2_2"/>
+    <property name="Type" value="Stone"/>
    </properties>
   </object>
-  <object id="3" name="TileData" x="112" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="4" name="TileData" x="128" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="5" name="TileData" x="144" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="6" name="TileData" x="160" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="7" name="TileData" x="176" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="8" name="TileData" x="192" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="9" name="TileData" x="208" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="10" name="TileData" x="224" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="11" name="TileData" x="240" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="12" name="TileData" x="256" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="13" name="TileData" x="272" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="14" name="TileData" x="288" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="15" name="TileData" x="304" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="16" name="TileData" x="320" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="17" name="TileData" x="336" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="18" name="TileData" x="352" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="19" name="TileData" x="368" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="20" name="TileData" x="384" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="21" name="TileData" x="400" y="96" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="22" name="TileData" x="112" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="23" name="TileData" x="128" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="24" name="TileData" x="144" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="25" name="TileData" x="160" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="26" name="TileData" x="176" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="27" name="TileData" x="192" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="28" name="TileData" x="208" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="29" name="TileData" x="224" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="30" name="TileData" x="240" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="31" name="TileData" x="256" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="32" name="TileData" x="272" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="33" name="TileData" x="288" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="34" name="TileData" x="304" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="35" name="TileData" x="320" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="36" name="TileData" x="336" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="37" name="TileData" x="352" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="38" name="TileData" x="368" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="39" name="TileData" x="384" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="40" name="TileData" x="400" y="112" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="41" name="TileData" x="96" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="42" name="TileData" x="112" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="43" name="TileData" x="128" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="44" name="TileData" x="384" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="45" name="TileData" x="400" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="46" name="TileData" x="416" y="128" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="47" name="TileData" x="96" y="144" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="48" name="TileData" x="112" y="144" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="49" name="TileData" x="128" y="144" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="50" name="TileData" x="384" y="144" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="51" name="TileData" x="400" y="144" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="52" name="TileData" x="112" y="160" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="53" name="TileData" x="128" y="160" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="54" name="TileData" x="384" y="160" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="55" name="TileData" x="400" y="160" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="56" name="TileData" x="96" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="57" name="TileData" x="112" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="58" name="TileData" x="128" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="59" name="TileData" x="384" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="60" name="TileData" x="400" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="61" name="TileData" x="416" y="176" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="62" name="TileData" x="64" y="192" width="16" height="16">
+  <object id="62" name="TileData" x="64" y="192" width="32" height="16">
    <properties>
     <property name="WaterSource" value="T"/>
    </properties>
   </object>
-  <object id="63" name="TileData" x="80" y="192" width="16" height="16">
+  <object id="110" name="TileData" x="384" y="80" width="48" height="256">
    <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="64" name="TileData" x="96" y="192" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="65" name="TileData" x="112" y="192" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="66" name="TileData" x="128" y="192" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="67" name="TileData" x="384" y="192" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="68" name="TileData" x="400" y="192" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="69" name="TileData" x="48" y="208" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="70" name="TileData" x="64" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="71" name="TileData" x="80" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="72" name="TileData" x="96" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="73" name="TileData" x="112" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="74" name="TileData" x="128" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="75" name="TileData" x="384" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="76" name="TileData" x="400" y="208" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="77" name="TileData" x="48" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="78" name="TileData" x="64" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="79" name="TileData" x="80" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="80" name="TileData" x="112" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="81" name="TileData" x="128" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="82" name="TileData" x="384" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="83" name="TileData" x="400" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="84" name="TileData" x="416" y="224" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="85" name="TileData" x="96" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="86" name="TileData" x="112" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="87" name="TileData" x="128" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="88" name="TileData" x="384" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="89" name="TileData" x="400" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="90" name="TileData" x="416" y="240" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="91" name="TileData" x="112" y="256" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="92" name="TileData" x="128" y="256" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="93" name="TileData" x="384" y="256" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="94" name="TileData" x="400" y="256" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="95" name="TileData" x="416" y="256" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="96" name="TileData" x="480" y="256" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="97" name="TileData" x="96" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="98" name="TileData" x="112" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="99" name="TileData" x="128" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="100" name="TileData" x="384" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="101" name="TileData" x="400" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="102" name="TileData" x="416" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="103" name="TileData" x="432" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="104" name="TileData" x="448" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="105" name="TileData" x="464" y="272" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="106" name="TileData" x="480" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="107" name="TileData" x="496" y="272" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="108" name="TileData" x="112" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="109" name="TileData" x="128" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="110" name="TileData" x="144" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="111" name="TileData" x="160" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="112" name="TileData" x="176" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="113" name="TileData" x="192" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="114" name="TileData" x="208" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="115" name="TileData" x="224" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="116" name="TileData" x="240" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="117" name="TileData" x="256" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="118" name="TileData" x="272" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="119" name="TileData" x="288" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="120" name="TileData" x="304" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="121" name="TileData" x="320" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="122" name="TileData" x="336" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="123" name="TileData" x="352" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="124" name="TileData" x="368" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="125" name="TileData" x="384" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="126" name="TileData" x="400" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="127" name="TileData" x="416" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="128" name="TileData" x="432" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="129" name="TileData" x="448" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="130" name="TileData" x="464" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="131" name="TileData" x="480" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="132" name="TileData" x="496" y="288" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="133" name="TileData" x="96" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="134" name="TileData" x="112" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="135" name="TileData" x="128" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="136" name="TileData" x="144" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="137" name="TileData" x="160" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="138" name="TileData" x="176" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="139" name="TileData" x="192" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="140" name="TileData" x="208" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="141" name="TileData" x="224" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="142" name="TileData" x="240" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="143" name="TileData" x="256" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="144" name="TileData" x="272" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="145" name="TileData" x="288" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="146" name="TileData" x="304" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="147" name="TileData" x="320" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="148" name="TileData" x="336" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="149" name="TileData" x="352" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="150" name="TileData" x="368" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="151" name="TileData" x="384" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="152" name="TileData" x="400" y="304" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="153" name="TileData" x="128" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="154" name="TileData" x="176" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="155" name="TileData" x="192" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="156" name="TileData" x="256" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="157" name="TileData" x="272" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="158" name="TileData" x="288" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="159" name="TileData" x="304" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="160" name="TileData" x="352" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="161" name="TileData" x="384" y="320" width="16" height="16">
-   <properties>
-    <property name="Type" value="Wood"/>
-   </properties>
-  </object>
-  <object id="162" name="TileData" x="128" y="416" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="163" name="TileData" x="144" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="164" name="TileData" x="160" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="165" name="TileData" x="176" y="416" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="166" name="TileData" x="192" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="167" name="TileData" x="208" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="168" name="TileData" x="224" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="169" name="TileData" x="240" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="170" name="TileData" x="272" y="416" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="171" name="TileData" x="288" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="172" name="TileData" x="304" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="173" name="TileData" x="320" y="416" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="174" name="TileData" x="336" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="175" name="TileData" x="352" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="176" name="TileData" x="368" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="177" name="TileData" x="384" y="416" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="178" name="TileData" x="96" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="179" name="TileData" x="112" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="180" name="TileData" x="128" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="181" name="TileData" x="144" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="182" name="TileData" x="160" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="183" name="TileData" x="176" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="184" name="TileData" x="192" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="185" name="TileData" x="208" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="186" name="TileData" x="224" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="187" name="TileData" x="240" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="188" name="TileData" x="256" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="189" name="TileData" x="272" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="190" name="TileData" x="288" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="191" name="TileData" x="304" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="192" name="TileData" x="320" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="193" name="TileData" x="336" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="194" name="TileData" x="352" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="195" name="TileData" x="368" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="196" name="TileData" x="384" y="432" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="197" name="TileData" x="400" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="198" name="TileData" x="416" y="432" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="199" name="TileData" x="96" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="200" name="TileData" x="112" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="201" name="TileData" x="128" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="202" name="TileData" x="144" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="203" name="TileData" x="160" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="204" name="TileData" x="176" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="205" name="TileData" x="192" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="206" name="TileData" x="208" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="207" name="TileData" x="224" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="208" name="TileData" x="240" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="209" name="TileData" x="256" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="210" name="TileData" x="272" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="211" name="TileData" x="288" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="212" name="TileData" x="304" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="213" name="TileData" x="320" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="214" name="TileData" x="336" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="215" name="TileData" x="352" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="216" name="TileData" x="368" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="217" name="TileData" x="384" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="218" name="TileData" x="400" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="219" name="TileData" x="416" y="448" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="220" name="TileData" x="96" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="221" name="TileData" x="112" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="222" name="TileData" x="128" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="223" name="TileData" x="144" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="224" name="TileData" x="160" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="225" name="TileData" x="176" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="226" name="TileData" x="192" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="227" name="TileData" x="208" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="228" name="TileData" x="224" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="229" name="TileData" x="240" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="230" name="TileData" x="256" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="231" name="TileData" x="272" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="232" name="TileData" x="288" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="233" name="TileData" x="304" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="234" name="TileData" x="320" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="235" name="TileData" x="336" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="236" name="TileData" x="352" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="237" name="TileData" x="368" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="238" name="TileData" x="384" y="464" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="239" name="TileData" x="400" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="240" name="TileData" x="416" y="464" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="241" name="TileData" x="96" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="242" name="TileData" x="112" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="243" name="TileData" x="128" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="244" name="TileData" x="144" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="245" name="TileData" x="160" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="246" name="TileData" x="176" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="247" name="TileData" x="192" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="248" name="TileData" x="208" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="249" name="TileData" x="224" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="250" name="TileData" x="240" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="251" name="TileData" x="256" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="252" name="TileData" x="272" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="253" name="TileData" x="288" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="254" name="TileData" x="304" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="255" name="TileData" x="320" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="256" name="TileData" x="336" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="257" name="TileData" x="352" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="258" name="TileData" x="368" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="259" name="TileData" x="384" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="260" name="TileData" x="400" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="261" name="TileData" x="416" y="480" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="262" name="TileData" x="96" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="263" name="TileData" x="112" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="264" name="TileData" x="128" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="265" name="TileData" x="144" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="266" name="TileData" x="160" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="267" name="TileData" x="176" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="268" name="TileData" x="192" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="269" name="TileData" x="208" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="270" name="TileData" x="224" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="271" name="TileData" x="240" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="272" name="TileData" x="256" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="273" name="TileData" x="272" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="274" name="TileData" x="288" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="275" name="TileData" x="304" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="276" name="TileData" x="320" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="277" name="TileData" x="336" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="278" name="TileData" x="352" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="279" name="TileData" x="368" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="280" name="TileData" x="384" y="496" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="281" name="TileData" x="400" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="282" name="TileData" x="416" y="496" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="283" name="TileData" x="96" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="284" name="TileData" x="112" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="285" name="TileData" x="128" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="286" name="TileData" x="144" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="287" name="TileData" x="160" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="288" name="TileData" x="176" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="289" name="TileData" x="192" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="290" name="TileData" x="208" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="291" name="TileData" x="224" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="292" name="TileData" x="240" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="293" name="TileData" x="256" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="294" name="TileData" x="272" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="295" name="TileData" x="288" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="296" name="TileData" x="304" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="297" name="TileData" x="320" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="298" name="TileData" x="336" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="299" name="TileData" x="352" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="300" name="TileData" x="368" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="301" name="TileData" x="384" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="302" name="TileData" x="400" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="303" name="TileData" x="416" y="512" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="304" name="TileData" x="96" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="305" name="TileData" x="112" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="306" name="TileData" x="128" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="307" name="TileData" x="144" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="308" name="TileData" x="160" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="309" name="TileData" x="176" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="310" name="TileData" x="192" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="311" name="TileData" x="208" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="312" name="TileData" x="224" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="313" name="TileData" x="240" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="314" name="TileData" x="256" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="315" name="TileData" x="272" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="316" name="TileData" x="288" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="317" name="TileData" x="304" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="318" name="TileData" x="320" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="319" name="TileData" x="336" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="320" name="TileData" x="352" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="321" name="TileData" x="368" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="322" name="TileData" x="384" y="528" width="16" height="16">
-   <properties>
-    <property name="WaterSource" value="T"/>
-   </properties>
-  </object>
-  <object id="323" name="TileData" x="400" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="324" name="TileData" x="416" y="528" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="325" name="TileData" x="96" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="326" name="TileData" x="112" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="327" name="TileData" x="128" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="328" name="TileData" x="144" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="329" name="TileData" x="160" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="330" name="TileData" x="176" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="331" name="TileData" x="192" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="332" name="TileData" x="208" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="333" name="TileData" x="224" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="334" name="TileData" x="240" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="335" name="TileData" x="256" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="336" name="TileData" x="272" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="337" name="TileData" x="288" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="338" name="TileData" x="304" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="339" name="TileData" x="320" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="340" name="TileData" x="336" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="341" name="TileData" x="352" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="342" name="TileData" x="368" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="343" name="TileData" x="384" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="344" name="TileData" x="400" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="345" name="TileData" x="416" y="544" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="346" name="TileData" x="96" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="347" name="TileData" x="112" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="348" name="TileData" x="128" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="349" name="TileData" x="144" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="350" name="TileData" x="160" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="351" name="TileData" x="176" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="352" name="TileData" x="192" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="353" name="TileData" x="208" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="354" name="TileData" x="224" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="355" name="TileData" x="240" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="356" name="TileData" x="256" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="357" name="TileData" x="272" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="358" name="TileData" x="288" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="359" name="TileData" x="304" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="360" name="TileData" x="320" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="361" name="TileData" x="336" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="362" name="TileData" x="352" y="560" width="16" height="16">
-   <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
-   </properties>
-  </object>
-  <object id="363" name="TileData" x="368" y="560" width="16" height="16">
-   <properties>
+    <property name="FloorID" value="F2_2"/>
     <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
    </properties>
   </object>
-  <object id="364" name="TileData" x="384" y="560" width="16" height="16">
+  <object id="123" name="TileData" x="432" y="272" width="32" height="32">
    <properties>
-    <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
+    <property name="FloorID" value="F2_3"/>
    </properties>
   </object>
-  <object id="365" name="TileData" x="400" y="560" width="16" height="16">
+  <object id="136" name="TileData" x="144" y="288" width="240" height="48">
    <properties>
+    <property name="FloorID" value="F2_2"/>
     <property name="Type" value="Stone"/>
-    <property name="mushymato.MMAP_CaskSpot" value="T"/>
    </properties>
   </object>
-  <object id="366" name="TileData" x="416" y="560" width="16" height="16">
+  <object id="163" name="TileData" x="96" y="416" width="336" height="160">
    <properties>
-    <property name="Type" value="Stone"/>
     <property name="mushymato.MMAP_CaskSpot" value="T"/>
    </properties>
   </object>
@@ -2197,11 +436,101 @@
     <property name="TouchAction" value="mushymato.MMAP_WrpBuildingOut 5 3"/>
    </properties>
   </object>
+  <object id="380" name="TileData" x="96" y="368" width="368" height="16">
+   <properties>
+    <property name="WallID" value="F1_1"/>
+   </properties>
+  </object>
+  <object id="383" name="TileData" x="96" y="576" width="480" height="32">
+   <properties>
+    <property name="FloorID" value="F1_1"/>
+   </properties>
+  </object>
+  <object id="384" name="TileData" x="432" y="416" width="32" height="160">
+   <properties>
+    <property name="FloorID" value="F1_1"/>
+   </properties>
+  </object>
+  <object id="385" name="TileData" x="512" y="416" width="64" height="80">
+   <properties>
+    <property name="FloorID" value="F1_2"/>
+   </properties>
+  </object>
+  <object id="386" name="TileData" x="544" y="496" width="16" height="48">
+   <properties>
+    <property name="FloorID" value="F1_2"/>
+   </properties>
+  </object>
+  <object id="387" name="TileData" x="464" y="528" width="48" height="16">
+   <properties>
+    <property name="WallID" value="F1_2"/>
+   </properties>
+  </object>
+  <object id="388" name="TileData" x="512" y="512" width="32" height="16">
+   <properties>
+    <property name="WallID" value="F1_3"/>
+   </properties>
+  </object>
+  <object id="389" name="TileData" x="560" y="512" width="16" height="16">
+   <properties>
+    <property name="WallID" value="F1_3"/>
+   </properties>
+  </object>
+  <object id="391" name="TileData" x="512" y="368" width="64" height="16">
+   <properties>
+    <property name="WallID" value="F1_4"/>
+   </properties>
+  </object>
+  <object id="392" name="TileData" x="48" y="144" width="48" height="16">
+   <properties>
+    <property name="WallID" value="F2_1"/>
+   </properties>
+  </object>
+  <object id="393" name="TileData" x="96" y="16" width="336" height="32">
+   <properties>
+    <property name="WallID" value="F2_2"/>
+   </properties>
+  </object>
+  <object id="394" name="TileData" x="432" y="224" width="32" height="16">
+   <properties>
+    <property name="WallID" value="F2_3"/>
+   </properties>
+  </object>
+  <object id="395" name="TileData" x="464" y="208" width="48" height="16">
+   <properties>
+    <property name="WallID" value="F2_4"/>
+   </properties>
+  </object>
+  <object id="397" name="TileData" x="320" y="608" width="32" height="16">
+   <properties>
+    <property name="FloorID" value="F1_1"/>
+   </properties>
+  </object>
+  <object id="399" name="TileData" x="560" y="560" width="16" height="16">
+   <properties>
+    <property name="Type" value="Wood"/>
+   </properties>
+  </object>
+  <object id="400" name="TileData" x="544" y="544" width="16" height="32">
+   <properties>
+    <property name="FloorID" value="F1_1"/>
+   </properties>
+  </object>
+  <object id="401" name="TileData" x="48" y="192" width="48" height="48">
+   <properties>
+    <property name="FloorID" value="F2_1"/>
+   </properties>
+  </object>
+  <object id="402" name="TileData" x="464" y="256" width="48" height="48">
+   <properties>
+    <property name="FloorID" value="F2_3"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="12" name="Buildings">
   <object id="369" name="TileData" x="480" y="240" width="16" height="16">
    <properties>
-    <property name="Action" value="mushymato.MMAP_WrpHere 30 35"/>
+    <property name="Action" value="mushymato.MMAP_WrpHere 30 36 2 true false doorOpen"/>
    </properties>
   </object>
   <object id="370" name="TileData" x="544" y="432" width="16" height="16">
@@ -2231,15 +560,10 @@
   </object>
   <object id="375" name="TileData" x="480" y="560" width="16" height="16">
    <properties>
-    <property name="Action" value="mushymato.MMAP_WrpHere 30 16"/>
+    <property name="Action" value="mushymato.MMAP_WrpHere 30 16 2 true false doorOpen"/>
    </properties>
   </object>
-  <object id="376" name="TileData" x="512" y="560" width="16" height="16">
-   <properties>
-    <property name="Action" value="kitchen"/>
-   </properties>
-  </object>
-  <object id="377" name="TileData" x="528" y="560" width="16" height="16">
+  <object id="376" name="TileData" x="512" y="560" width="32" height="16">
    <properties>
     <property name="Action" value="kitchen"/>
    </properties>
@@ -2252,5 +576,5 @@
  </objectgroup>
  <objectgroup id="14" name="Paths"/>
  <objectgroup id="15" name="Front"/>
- <objectgroup id="16" name="AlwaysFront" visible="0"/>
+ <objectgroup id="16" name="AlwaysFront"/>
 </map>
