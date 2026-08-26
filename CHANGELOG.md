@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New action `mushymato.MMAP_HoleWrpHere`, same map variant of hole warp.
 - New tile property `mushymato.MMAP_MapOverrideSpawn` for simple spawning logic on map override apply (requires the `MapOverrideSpawnOnApply` field)
 
+### Fixed
+- Disabled TAS pooling again (why is it like this).
+- Use map in reloadMap prefix/postfix to avoid some NRE edge cases.
+
 ### Changed
 - `mushymato.MMAP_EnableExplodeAction OFF` explicitly disables explode action without location change.
 - Map override LoadWaterTilesOnApply is now null by default for follow location rules.
