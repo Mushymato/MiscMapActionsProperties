@@ -68,10 +68,10 @@
       "Action": "Include",
       "FromFile": "question_dialogue.json"
     },
-    {
-      "Action": "Include",
-      "FromFile": "light.json"
-    },
+    // {
+    //   "Action": "Include",
+    //   "FromFile": "light.json"
+    // },
     {
       "Action": "Include",
       "FromFile": "draw_layers.json"
@@ -87,10 +87,10 @@
       "Action": "Include",
       "FromFile": "cellar_relocate.json"
     },
-    // {
-    //   "Action": "Include",
-    //   "FromFile": "tas_spot.json"
-    // },
+    {
+      "Action": "Include",
+      "FromFile": "tas_spot.json"
+    },
     {
       "Action": "Include",
       "FromFile": "woods.json"

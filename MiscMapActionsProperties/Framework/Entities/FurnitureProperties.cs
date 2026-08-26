@@ -56,8 +56,10 @@ internal static class FurnitureProperties
         {
             Patch_Properties_IntersectsForCollision();
             Patch_Properties_AllowPlacementOnThisTile();
-            Patch_Properties_Furniture_Stock();
-            Patch_Properties_Furniture_Bed();
+            Patch_Properties_Furniture_Bed_DoesTileHaveProperty();
+            Patch_Properties_Furniture_Bed_GetAdditionalTilePropertyRadius();
+            Patch_Properties_Furniture_DoesTileHaveProperty();
+            Patch_Properties_Furniture_GetAdditionalTilePropertyRadius();
         }
         catch (Exception err)
         {
@@ -170,12 +172,16 @@ internal static class FurnitureProperties
 
     // attempt to separate these guys more to figure out why this part AVE so much sigh
 
-    private static void Patch_Properties_Furniture_Stock()
+    private static void Patch_Properties_Furniture_DoesTileHaveProperty()
     {
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.DoesTileHaveProperty)),
             postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
         );
+    }
+
+    private static void Patch_Properties_Furniture_GetAdditionalTilePropertyRadius()
+    {
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(typeof(Furniture), nameof(Furniture.GetAdditionalTilePropertyRadius)),
             postfix: new HarmonyMethod(
@@ -185,12 +191,16 @@ internal static class FurnitureProperties
         );
     }
 
-    private static void Patch_Properties_Furniture_Bed()
+    private static void Patch_Properties_Furniture_Bed_DoesTileHaveProperty()
     {
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(typeof(BedFurniture), nameof(Furniture.DoesTileHaveProperty)),
             postfix: new HarmonyMethod(typeof(FurnitureProperties), nameof(Furniture_DoesTileHaveProperty_Postfix))
         );
+    }
+
+    private static void Patch_Properties_Furniture_Bed_GetAdditionalTilePropertyRadius()
+    {
         ModEntry.harm.Patch(
             original: AccessTools.DeclaredMethod(
                 typeof(BedFurniture),
