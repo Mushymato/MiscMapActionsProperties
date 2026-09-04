@@ -10,7 +10,7 @@ To use these, you need to have a `mushymato.MMAP/QuestionDialogue` entry and an 
 - Opens a question dialog, as defined by the custom asset `mushymato.MMAP/QuestionDialogue`, string -> QuestionDialogueData. Each response triggers additional `Actions`/`TileActions`/`TouchActions` on selection, all 3 kinds can be used together and they are checked/executed in that order. You are allowed to call more `mushymato.MMAP_QuestionDialogue`, and essentially chain as many QuestionDialogue as desired.
 - To make a "Cancel" option, have a `ResponseEntries` entry with blank `Actions`/`TileActions`/`TouchActions`. Putting an empty `{}` serves this purpose as `Label` is set to localized `"Cancel"` by default.
 - Similar to game, pressing ESC selects the final item in `ResponseEntries`.
-- The argus after `question_dialog_id` act as a filter for valid question dialogue entries, helpful if you wish to reuse same question dialogue with different set of responses.
+- The args after `question_dialog_id` act as a filter for valid question dialogue entries, helpful if you wish to reuse same question dialogue with different set of responses.
 
 #### QuestionDialogueData
 
