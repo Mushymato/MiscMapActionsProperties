@@ -46,6 +46,62 @@ internal static class MapOverride
         "_appliedMapOverrides"
     );
 
+    private static readonly Func<List<ISalable>, ShopMenu> ShopMenuCtor = MakeShopMenuCtor();
+
+    private static Func<List<ISalable>, ShopMenu> MakeShopMenuCtor()
+    {
+        ConstructorInfo shopCtorInfo;
+        Func<List<ISalable>, ShopMenu> shopCtorDelegate;
+        ShopMenu.OnPurchaseDelegate onPurchase = HouseRenovation.OnPurchaseRenovation;
+        if (Constants.TargetPlatform == GamePlatform.Android)
+        {
+            // ShopMenu(string shopId, List<ISalable> itemsForSale, int currency = 0, string who = null, OnPurchaseDelegate on_purchase = null, Func<ISalable, bool> on_sell = null, string context = null)
+            shopCtorInfo = AccessTools.Constructor(
+                typeof(ShopMenu),
+                [
+                    typeof(string),
+                    typeof(List<ISalable>),
+                    typeof(int),
+                    typeof(string),
+                    typeof(ShopMenu.OnPurchaseDelegate),
+                    typeof(Func<ISalable, bool>),
+                    typeof(string),
+                ]
+            );
+            shopCtorDelegate = (salables) =>
+            {
+                ShopMenu shopMenu = (ShopMenu)
+                    shopCtorInfo.Invoke([Action_ShowRenovations, salables, 0, null, onPurchase, null, null]);
+                shopMenu.purchaseSound = null;
+                return shopMenu;
+            };
+        }
+        else
+        {
+            // ShopMenu(string shopId, List<ISalable> itemsForSale, int currency = 0, string who = null, OnPurchaseDelegate on_purchase = null, Func<ISalable, bool> on_sell = null, bool playOpenSound = true)
+            shopCtorInfo = AccessTools.Constructor(
+                typeof(ShopMenu),
+                [
+                    typeof(string),
+                    typeof(List<ISalable>),
+                    typeof(int),
+                    typeof(string),
+                    typeof(ShopMenu.OnPurchaseDelegate),
+                    typeof(Func<ISalable, bool>),
+                    typeof(bool),
+                ]
+            );
+            shopCtorDelegate = (salables) =>
+            {
+                ShopMenu shopMenu = (ShopMenu)
+                    shopCtorInfo.Invoke([Action_ShowRenovations, salables, 0, null, onPurchase, null, true]);
+                shopMenu.purchaseSound = null;
+                return shopMenu;
+            };
+        }
+        return shopCtorDelegate;
+    }
+
     internal static void Register()
     {
         if (_appliedMapOverridesField == null)
@@ -130,16 +186,7 @@ internal static class MapOverride
             $"'{targetLocation.Name}' got renovations: {string.Join(',', renovations.Select(reno => (reno as HouseRenovation)?.RoomId ?? "NULL"))}"
         );
 
-        Game1.activeClickableMenu = new ShopMenu(
-            Action_ShowRenovations,
-            renovations,
-            0,
-            null,
-            HouseRenovation.OnPurchaseRenovation
-        )
-        {
-            purchaseSound = null,
-        };
+        Game1.activeClickableMenu = ShopMenuCtor(renovations);
         error = null;
         return true;
     }
