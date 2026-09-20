@@ -8,6 +8,46 @@
     },
     {
       "Action": "EditMap",
+      "Target": "Maps/Town",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 42,
+            "Y": 60
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_Critter": "Firefly T 4"
+          }
+        }
+      ],
+      "When": {
+        "Time": "{{Range: 0600, 1800}}"
+      },
+      "Update": "OnTimeChange"
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/Town",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 42,
+            "Y": 60
+          },
+          "Layer": "Back",
+          "SetProperties": {
+            "mushymato.MMAP_Critter": "Firefly T 8"
+          }
+        }
+      ],
+      "When": {
+        "Time": "{{Range: 1800, 2600}}"
+      },
+      "Update": "OnTimeChange"
+    },
+    {
+      "Action": "EditMap",
       "Target": "Maps/FarmCave",
       "MapTiles": [
         {

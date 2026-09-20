@@ -266,6 +266,8 @@ internal sealed class TileDataCache<TProps>
         {
             Cache.Remove(uniqueName);
             ClearNextPointsToUpdate(location);
+            if (location == Game1.currentLocation)
+                TileDataCacheChanged?.Invoke(this, new(Game1.currentLocation, null));
         }
     }
 

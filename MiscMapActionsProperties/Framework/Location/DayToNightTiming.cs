@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MiscMapActionsProperties.Framework.Wheels;
 using StardewModdingAPI;
@@ -31,7 +30,7 @@ internal static class DayToNightTiming
     internal const string GSQ_WINDOW_LIGHTS = $"{ModEntry.ModId}_WINDOW_LIGHTS";
     internal const string GSQ_RAINING_HERE = $"{ModEntry.ModId}_RAINING_HERE";
 
-    private static readonly ConditionalWeakTable<GameLocation, DayToNightCtx?> dayToNightCache = [];
+    private static readonly PerScreenCache<DayToNightCtx?> dayToNight = PerScreenCache.Make<DayToNightCtx?>();
 
     private static DayToNightCtx? GetDayToNightCtx(GameLocation location)
     {
@@ -53,6 +52,7 @@ internal static class DayToNightTiming
 
     internal static void Register()
     {
+        ModEntry.help.Events.Player.Warped += OnWarped;
         ModEntry.help.Events.GameLoop.TimeChanged += OnTimeChanged;
         TriggerActionManager.RegisterTrigger(MapProp_NightTimeStarting);
         TriggerActionManager.RegisterTrigger(MapProp_NightTimeModerate);
@@ -83,6 +83,11 @@ internal static class DayToNightTiming
         {
             ModEntry.Log($"Failed to patch DayToNightTiming:\n{err}", LogLevel.Error);
         }
+    }
+
+    private static void OnWarped(object? sender, WarpedEventArgs e)
+    {
+        dayToNight.Value = null;
     }
 
     private static void OnTimeChanged(object? sender, TimeChangedEventArgs e)
@@ -143,7 +148,7 @@ internal static class DayToNightTiming
     {
         if (
             location != null
-            && dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx
+            && ((dayToNight.Value ??= GetDayToNightCtx(location)) is DayToNightCtx ctx)
             && ctx.Starting > 0
         )
         {
@@ -153,11 +158,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getModeratelyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (
-            location != null
-            && dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx
-            && ctx.Moderate > 0
-        )
+        if (location != null && dayToNight.Value is DayToNightCtx ctx && ctx.Moderate > 0)
         {
             __result = ctx.Moderate;
         }
@@ -165,11 +166,7 @@ internal static class DayToNightTiming
 
     private static void Game1_getTrulyDarkTime_Postfix(GameLocation location, ref int __result)
     {
-        if (
-            location != null
-            && dayToNightCache.GetValue(location, GetDayToNightCtx) is DayToNightCtx ctx
-            && ctx.Truly > 0
-        )
+        if (location != null && dayToNight.Value is DayToNightCtx ctx && ctx.Truly > 0)
         {
             __result = ctx.Truly;
         }

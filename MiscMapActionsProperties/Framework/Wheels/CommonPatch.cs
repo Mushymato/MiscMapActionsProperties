@@ -12,7 +12,6 @@ using StardewValley.Locations;
 using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 using StardewValley.Triggers;
-using xTile.Layers;
 
 namespace MiscMapActionsProperties.Framework.Wheels;
 
@@ -408,7 +407,7 @@ public static class CommonPatch
         ref bool __state
     )
     {
-        if (__instance.map?.GetLayer(layer) is Layer layerV)
+        if (__instance.map?.GetLayer(layer) is xTile.Layers.Layer layerV)
             __state = layerV.Tiles[tileX, tileY] != null;
     }
 
@@ -453,7 +452,7 @@ public static class CommonPatch
         __state = false;
         if (!copyProperties)
         {
-            if (__instance.map?.GetLayer(layer) is Layer layerV)
+            if (__instance.map?.GetLayer(layer) is xTile.Layers.Layer layerV)
                 __state =
                     layerV.Tiles[tileX, tileY] is xTile.Tiles.StaticTile stile && stile.TileSheet.Id == tileSheetId;
         }

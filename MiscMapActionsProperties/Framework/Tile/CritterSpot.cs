@@ -97,7 +97,7 @@ internal static class CritterSpot
     private static void OnCacheChanged(object? sender, TileDataCacheChangedArgs e)
     {
         string pnts = e.Points != null ? string.Join(',', e.Points) : "NULL";
-        ModEntry.Log($"CritterSpot.OnCacheChanged: {e.Location.NameOrUniqueName}, {pnts}");
+        ModEntry.Log($"{Game1.ticks} CritterSpot.OnCacheChanged: {e.Location.NameOrUniqueName}, {pnts}");
         if (e.Location != Game1.currentLocation)
             return;
         if (e.Location.critters == null)
