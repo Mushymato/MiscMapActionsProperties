@@ -84,7 +84,7 @@ internal static class ConnectedTextures
         // do not allow modified sprite index/source rect go into the save
         Utility.ForEachLocation(where =>
         {
-            foreach (StardewValley.Object obj in where.Objects.Values)
+            foreach (SObject obj in where.Objects.Values)
             {
                 Object_ResetParentSheetIndex(obj);
             }
