@@ -1,0 +1,61 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "Data/Objects",
+      "Entries": {
+        "{{ModId}}_bombo": {
+          "Name": "Bombo",
+          "DisplayName": "Bombo",
+          "Description": "Bombo",
+          "Type": "Crafting",
+          "Category": -8,
+          "Price": 50,
+          "Texture": "Animals/Void Chicken",
+          "SpriteIndex": 0,
+          "ColorOverlayFromNextIndex": false,
+          "Edibility": -300,
+          "IsDrink": false,
+          "Buffs": null,
+          "GeodeDropsDefaultItems": false,
+          "GeodeDrops": null,
+          "ArtifactSpotChances": null,
+          "CanBeGivenAsGift": true,
+          "CanBeTrashed": true,
+          "ExcludeFromFishingCollection": false,
+          "ExcludeFromShippingCollection": false,
+          "ExcludeFromRandomSale": false,
+          "ContextTags": [
+            "bomb_item",
+            "color_red"
+          ],
+          "CustomFields": {
+            "mushymato.MMAP/Bomb": "{{ModId}}_bombo_tas XXX\nOBO\nXXX"
+          }
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "mushymato.MMAP/TAS",
+      "Entries": {
+        "{{ModId}}_bombo_tas": {
+          "Id": "{{ModId}}_bombo_tas",
+          "Texture": "Animals/Blue Chicken",
+          "SourceRect": {
+            "X": 0,
+            "Y": 0,
+            "Width": 16,
+            "Height": 16
+          },
+          "Interval": 175,
+          "Frames": 4,
+          "Loops": 4,
+          "EndActions": [
+            "AddMoney 10"
+          ]
+        }
+      }
+    }
+  ]
+}

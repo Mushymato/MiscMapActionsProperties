@@ -178,6 +178,10 @@
     {
       "Action": "Include",
       "FromFile": "hole_warp.json"
+    },
+    {
+      "Action": "Include",
+      "FromFile": "bomb.json"
     }
   ]
 }
