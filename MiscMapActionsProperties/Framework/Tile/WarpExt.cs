@@ -4,6 +4,7 @@ using MiscMapActionsProperties.Framework.Wheels;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.Delegates;
+using StardewValley.Extensions;
 using StardewValley.Triggers;
 
 namespace MiscMapActionsProperties.Framework.Tile;
@@ -124,7 +125,7 @@ internal static class WarpExt
                 out error,
                 out Point toPoint,
                 out int direction,
-                out bool fadeToBlack,
+                out float fadeToBlack,
                 out string? playSound
             )
         )
@@ -137,13 +138,16 @@ internal static class WarpExt
             Game1.playSound(playSound);
 
         Vector2 farmerPos = new(toPoint.X * 64, toPoint.Y * 64 - (farmer.Sprite.getHeight() - 32) + 16);
-        if (fadeToBlack)
+        if (fadeToBlack > 0 && fadeToBlack < 1)
         {
-            Game1.globalFadeToBlack(() =>
-            {
-                WrpHereReposition(farmer, direction, farmerPos);
-                Game1.globalFadeToClear();
-            });
+            Game1.globalFadeToBlack(
+                () =>
+                {
+                    WrpHereReposition(farmer, direction, farmerPos);
+                    Game1.globalFadeToClear(fadeSpeed: fadeToBlack);
+                },
+                fadeToBlack
+            );
         }
         else
         {
@@ -158,24 +162,17 @@ internal static class WarpExt
         [NotNullWhen(false)] out string? error,
         out Point toPoint,
         out int direction,
-        out bool fadeToBlack,
+        out float fadeToBlack,
         out string? playSound
     )
     {
         direction = default;
-        fadeToBlack = default;
+        fadeToBlack = 0;
         playSound = default;
         if (
             !ArgUtility.TryGetPoint(args, 1, out toPoint, out error, name: "string toPoint")
             || !ArgUtility.TryGetOptionalInt(args, 3, out direction, out error, defaultValue: -1, name: "int direction")
-            || !ArgUtility.TryGetOptionalBool(
-                args,
-                4,
-                out fadeToBlack,
-                out error,
-                defaultValue: true,
-                name: "bool fadeToBlack"
-            )
+            || !ArgUtility.TryGetOptional(args, 4, out string fadeToBlackStr, out error, name: "bool|float fadeToBlack")
             || !ArgUtility.TryGetOptionalBool(
                 args,
                 5,
@@ -195,6 +192,19 @@ internal static class WarpExt
         )
         {
             return false;
+        }
+
+        if (fadeToBlackStr.EqualsIgnoreCase("true"))
+        {
+            fadeToBlack = 0.02f;
+        }
+        else if (
+            float.TryParse(fadeToBlackStr, out float fadeToBlackSpeed)
+            && fadeToBlackSpeed > 0
+            && fadeToBlackSpeed < 1
+        )
+        {
+            fadeToBlack = fadeToBlackSpeed;
         }
 
         if (relative)
