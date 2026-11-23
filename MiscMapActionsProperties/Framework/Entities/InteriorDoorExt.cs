@@ -266,7 +266,8 @@ internal static class InteriorDoorExt
                 doorPoints.Add(pnt);
             }
         }
-        ModEntry.Log($"Doors: {string.Join(',', doorPoints)}");
+        if (doorPoints.Any())
+            ModEntry.Log($"Custom doors: {string.Join(',', doorPoints)}", LogLevel.Trace);
         return doorPoints;
     }
 

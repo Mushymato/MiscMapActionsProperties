@@ -56,6 +56,22 @@
           ]
         }
       }
-    }
+    },
+    {
+      "Action": "EditMap",
+      "Target": "Maps/BusStop",
+      "MapTiles": [
+        {
+          "Position": {
+            "X": 14,
+            "Y": 26
+          },
+          "Layer": "Buildings",
+          "SetProperties": {
+            "Action": "mushymato.MMAP_BombAtTile 3 -3 true {{ModId}}_bombo_tas XXX\nOBO\nXXX 3"
+          },
+        }
+      ]
+    },
   ]
 }

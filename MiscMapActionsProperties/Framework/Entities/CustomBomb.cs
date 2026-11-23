@@ -1,5 +1,6 @@
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using MiscMapActionsProperties.Framework.Wheels;
 using Mushymato.ExtendedTAS;
 using StardewModdingAPI;
 using StardewValley;
@@ -10,6 +11,8 @@ namespace MiscMapActionsProperties.Framework.Entities;
 
 internal static class CustomBomb
 {
+    private const string Action_Bomb = $"{ModEntry.ModId}_Bomb";
+    private const string Action_BombAtTile = $"{ModEntry.ModId}_BombAtTile";
     private const string CustomField_Bomb = $"{ModEntry.ModId}/Bomb";
 
     internal static void Register()
@@ -18,6 +21,37 @@ internal static class CustomBomb
             original: AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
             prefix: new HarmonyMethod(typeof(CustomBomb), nameof(SObject_placementAction_Prefix))
         );
+        CommonPatch.RegisterTileAndTouch(Action_Bomb, TileActionBomb);
+        CommonPatch.RegisterTileAndTouch(Action_BombAtTile, TileActionBombAtTile);
+    }
+
+    private static bool TileActionBomb(GameLocation location, string[] bombFieldParts, Farmer who, Point point)
+    {
+        return DoPlaceBomb(location, bombFieldParts, 1, who, point.X, point.Y);
+    }
+
+    private static bool TileActionBombAtTile(GameLocation location, string[] bombFieldParts, Farmer who, Point point)
+    {
+        if (
+            !ArgUtility.TryGetPoint(bombFieldParts, 1, out Point atTile, out string error)
+            || !ArgUtility.TryGetOptionalBool(
+                bombFieldParts,
+                3,
+                out bool relative,
+                out error,
+                defaultValue: false,
+                name: "bool relative"
+            )
+        )
+        {
+            ModEntry.Log(error, LogLevel.Error);
+            return false;
+        }
+        if (relative)
+        {
+            atTile = point + atTile;
+        }
+        return DoPlaceBomb(location, bombFieldParts, 4, who, atTile.X, atTile.Y);
     }
 
     private static bool SObject_placementAction_Prefix(
@@ -28,16 +62,6 @@ internal static class CustomBomb
         Farmer? who
     )
     {
-        Vector2 tile = new(x / 64, y / 64);
-        Vector2 pos = new(tile.X * Game1.tileSize, tile.Y * Game1.tileSize);
-        foreach (TemporaryAnimatedSprite temporarySprite in location.temporarySprites)
-        {
-            if (temporarySprite.position.Equals(pos))
-            {
-                return true;
-            }
-        }
-
         if (
             __instance.ItemId == null
             || __instance.TypeDefinitionId != "(O)"
@@ -50,19 +74,48 @@ internal static class CustomBomb
         }
 
         string[] bombFieldParts = ArgUtility.SplitBySpaceQuoteAware(bombField);
+
+        return !DoPlaceBomb(location, bombFieldParts, 0, who, x / 64, y / 64);
+    }
+
+    private static bool DoPlaceBomb(
+        GameLocation location,
+        string[] bombFieldParts,
+        int firstIdx,
+        Farmer? who,
+        int x,
+        int y
+    )
+    {
+        Vector2 tile = new(x, y);
+        Vector2 pos = new(tile.X * Game1.tileSize, tile.Y * Game1.tileSize);
+        foreach (TemporaryAnimatedSprite temporarySprite in location.temporarySprites)
+        {
+            if (temporarySprite.position.Equals(pos))
+            {
+                return false;
+            }
+        }
+
         if (
-            !ArgUtility.TryGet(bombFieldParts, 0, out string tasId, out string error)
-            || !ArgUtility.TryGet(bombFieldParts, 1, out string explodeMap, out error)
-            || !ArgUtility.TryGetOptionalInt(bombFieldParts, 2, out int bombDamage, out error, defaultValue: -1)
+            !ArgUtility.TryGet(bombFieldParts, firstIdx, out string tasId, out string error)
+            || !ArgUtility.TryGet(bombFieldParts, firstIdx + 1, out string explodeMap, out error)
+            || !ArgUtility.TryGetOptionalInt(
+                bombFieldParts,
+                firstIdx + 2,
+                out int bombDamage,
+                out error,
+                defaultValue: -1
+            )
         )
         {
             ModEntry.Log(error, LogLevel.Error);
-            return true;
+            return false;
         }
 
         if (!ModEntry.TAS.TryGetTASExt(tasId, out TASExt? def))
         {
-            return true;
+            return false;
         }
 
         TASContext ctx = new(def) { Pos = pos };
@@ -72,6 +125,8 @@ internal static class CustomBomb
             {
                 tas.Parent = location;
                 tas.owner = who;
+                if (bombDamage > 0)
+                    tas.bombDamage = bombDamage;
                 if (int.TryParse(explodeMap, out int radius))
                 {
                     tas.bombRadius = radius;
@@ -92,7 +147,7 @@ internal static class CustomBomb
                 location.netAudio.StartPlaying("fuse");
             }
         );
-        return false;
+        return true;
     }
 
     private static IList<Vector2>? ParseExplodeMap(Vector2 tile, string explodeMap)
